@@ -11,7 +11,7 @@ const corsHeaders = {
 // Override via the COLLECTR_API_BASE secret if `api.getcollectr.com` is wrong.
 const API_BASE =
   Deno.env.get("COLLECTR_API_BASE")?.replace(/\/$/, "") ||
-  "https://api.getcollectr.com";
+  "https://api-v2.getcollectr.com";
 
 // Convenience map: human-readable category -> base64 ID used by Collectr.
 const CATEGORY_IDS: Record<string, string> = {
@@ -150,13 +150,12 @@ serve(async (req) => {
 
     console.log(`[collectr] ${action} -> ${endpoint}`);
 
-    // Collectr Partner API uses an API key header. Send it via both common
-    // header names so we cover whichever the gateway expects.
+    // Collectr Partner API expects the raw API key in the Authorization
+    // header (no `Bearer` prefix).
     const resp = await fetch(endpoint, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey.trim()}`,
-        "x-api-key": apiKey.trim(),
+        Authorization: apiKey.trim(),
         "Content-Type": "application/json",
       },
     });
