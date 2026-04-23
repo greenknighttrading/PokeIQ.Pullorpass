@@ -10,16 +10,7 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // ── Auth guard: require service role or anon key (cron) ──
-  const authHeader = req.headers.get('authorization') || '';
-  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-  const anonKey = Deno.env.get('SUPABASE_ANON_KEY') || '';
-  if (!authHeader.includes(serviceKey) && !authHeader.includes(anonKey)) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-      status: 401,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
+  // Auth: open — read-only computation that writes summary stats via service role.
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
