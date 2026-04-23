@@ -6,7 +6,37 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const API_BASE = "https://api.getcollectr.com";
+// NOTE: The official Swagger spec only lists a mock server. The real production
+// base URL is provided privately by Collectr when you receive your API key.
+// Override via the COLLECTR_API_BASE secret if `api.getcollectr.com` is wrong.
+const API_BASE =
+  Deno.env.get("COLLECTR_API_BASE")?.replace(/\/$/, "") ||
+  "https://api.getcollectr.com";
+
+// Convenience map: human-readable category -> base64 ID used by Collectr.
+const CATEGORY_IDS: Record<string, string> = {
+  magic: "MzQ3",
+  yugioh: "Njk0",
+  pokemon: "MTA0MQ==",
+  "cardfight vanguard": "NTU1Mg==",
+  "force of will": "NTg5OQ==",
+  "weiss schwarz": "Njk0MA==",
+  "final fantasy tcg": "ODMyOA==",
+  universus: "ODY3NQ==",
+  "star wars destiny": "OTAyMg==",
+  "star wars unlimited": "Mjc0MTM=",
+  "dragon ball super ccg": "OTM2OQ==",
+  funko: "MTAwNjM=",
+  "transformers tcg": "MTk3Nzk=",
+  "flesh and blood tcg": "MjE1MTQ=",
+  "digimon card game": "MjE4NjE=",
+  "gate ruler": "MjI1NTU=",
+  metazoo: "MjI5MDI=",
+  wixoss: "MjMyNDk=",
+  "one piece card game": "MjM1OTY=",
+  lorcana: "MjQ2Mzc=",
+  "dragon ball super fusion world": "Mjc3NjA=",
+};
 
 // ── Simple in-memory rate limiter (per IP) ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -72,12 +102,28 @@ serve(async (req) => {
         break;
       }
       case "search": {
-        const qs = new URLSearchParams();
-        if (params) {
-          for (const [k, v] of Object.entries(params)) {
-            if (v !== undefined && v !== null && v !== "") qs.set(k, String(v));
-          }
+        // Accept either { searchString } or { query } from callers.
+        const searchString =
+          (params?.searchString as string | undefined) ??
+          (params?.query as string | undefined);
+        if (!searchString) {
+          return new Response(
+            JSON.stringify({ error: "Missing 'params.searchString' (or 'query')" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
+
+        const qs = new URLSearchParams();
+        qs.set("searchString", String(searchString));
+
+        // Optional category — accept either a raw base64 ID or a friendly name.
+        const rawCat = params?.categories ?? params?.category;
+        if (rawCat) {
+          const key = String(rawCat).toLowerCase().trim();
+          const mapped = CATEGORY_IDS[key] ?? String(rawCat);
+          qs.set("categories", mapped);
+        }
+
         endpoint = `${API_BASE}/partners/catalog/search?${qs.toString()}`;
         break;
       }
@@ -89,7 +135,10 @@ serve(async (req) => {
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-        endpoint = `${API_BASE}/partners/catalog/product/${encodeURIComponent(String(productId))}`;
+        const qs = new URLSearchParams();
+        if (params?.gradingData) qs.set("gradingData", "true");
+        const q = qs.toString();
+        endpoint = `${API_BASE}/partners/catalog/product/${encodeURIComponent(String(productId))}${q ? `?${q}` : ""}`;
         break;
       }
       default:
