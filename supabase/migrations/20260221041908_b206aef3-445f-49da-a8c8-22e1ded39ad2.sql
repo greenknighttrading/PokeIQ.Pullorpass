@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS user_asset_mappings_fingerprint_unique ON public.user_asset_mappings (user_id, upload_fingerprint);

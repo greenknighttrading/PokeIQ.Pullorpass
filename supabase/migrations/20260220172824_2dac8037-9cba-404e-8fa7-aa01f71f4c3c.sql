@@ -1,0 +1,1 @@
+ALTER TABLE public.market_snapshots ADD COLUMN IF NOT EXISTS price_change_24h numeric;
