@@ -11,7 +11,7 @@ const corsHeaders = {
 // Override via the COLLECTR_API_BASE secret if `api.getcollectr.com` is wrong.
 const API_BASE =
   Deno.env.get("COLLECTR_API_BASE")?.replace(/\/$/, "") ||
-  "https://api.getcollectr.com";
+  "https://api-v2.getcollectr.com";
 
 // Convenience map: human-readable category -> base64 ID used by Collectr.
 const CATEGORY_IDS: Record<string, string> = {
