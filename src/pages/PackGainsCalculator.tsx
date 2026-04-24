@@ -97,20 +97,24 @@ export default function PackGainsCalculator() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('market_snapshots')
-        .select('rarity, price')
+        .select('rarity, price, synced_at')
         .eq('set_name', selectedSet)
         .eq('product_type', 'card')
         .gt('price', 0);
       if (error) throw error;
       const byRarity = new Map<string, { sum: number; count: number }>();
+      let latestSync: string | null = null;
       for (const row of data ?? []) {
         if (!row.rarity || !row.price) continue;
         const cur = byRarity.get(row.rarity) ?? { sum: 0, count: 0 };
         cur.sum += Number(row.price);
         cur.count += 1;
         byRarity.set(row.rarity, cur);
+        if (row.synced_at && (!latestSync || row.synced_at > latestSync)) {
+          latestSync = row.synced_at as string;
+        }
       }
-      return byRarity;
+      return { byRarity, latestSync };
     },
     staleTime: 1000 * 60 * 30,
   });
@@ -153,7 +157,8 @@ export default function PackGainsCalculator() {
   });
 
   // 3) Merge — prefer JustTCG for completeness (full set), fall back to DB
-  const dbBy = dbQuery.data;
+  const dbBy = dbQuery.data?.byRarity;
+  const latestSync = dbQuery.data?.latestSync ?? null;
   const priceMap = useMemo(() => {
     const out = new Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>();
     if (liveQuery.data) {
@@ -187,6 +192,21 @@ export default function PackGainsCalculator() {
   const dbCount = stats.rows.filter(r => r.source === 'db').length;
   const liveCount = stats.rows.filter(r => r.source === 'justtcg').length;
   const missingCount = stats.rows.filter(r => r.source === 'none').length;
+
+  // Data source + freshness label for the set summary
+  const dataSourceLabel = liveCount >= dbCount ? 'JustTCG' : 'PokeIQ market data';
+  const freshnessLabel = (() => {
+    if (liveCount >= dbCount) return 'Updated live';
+    if (!latestSync) return null;
+    const ms = Date.now() - new Date(latestSync).getTime();
+    if (!Number.isFinite(ms) || ms < 0) return null;
+    const mins = Math.floor(ms / 60000);
+    if (mins < 60) return `Updated ${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `Updated ${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `Updated ${days}d ago`;
+  })();
 
   const handleRoll = () => {
     // Roll one rare slot per pack using weighted pull rates
@@ -234,6 +254,41 @@ export default function PackGainsCalculator() {
     return Array.from(m.values()).sort((a, b) => Number(b.isHit) - Number(a.isHit) || b.value - a.value);
   }, [rollResult]);
 
+  // Hit-rate benchmark for the pulls panel
+  const expectedHitRate = useMemo(() => {
+    // Sum chance % of every "hit" rarity (anything not the No Hit / basic Rare baseline)
+    const hitChancePct = stats.rows
+      .filter(r => !/no hit/i.test(r.rarity))
+      .reduce((s, r) => s + r.chancePct, 0);
+    if (hitChancePct <= 0) return null;
+    const oneInN = 100 / hitChancePct;
+    return { oneInN, perPack: hitChancePct / 100 };
+  }, [stats.rows]);
+
+  // Session summary banner — actual vs expected P&L delta
+  const summaryBanner = useMemo(() => {
+    if (sessionTotals.rolls === 0) return null;
+    const actualPnL = sessionTotals.value - sessionTotals.cost;
+    const expectedPnL = stats.evPerPack * sessionTotals.packs - sessionTotals.cost;
+    const delta = actualPnL - expectedPnL;
+    const absDelta = Math.abs(delta);
+    let tone: 'lucky' | 'avg' | 'unlucky';
+    if (absDelta < 5) tone = 'avg';
+    else if (delta > 0) tone = 'lucky';
+    else tone = 'unlucky';
+    const headline = tone === 'lucky'
+      ? `You got lucky — pulled ${fmtMoney(absDelta)} more than the average session.`
+      : tone === 'unlucky'
+        ? `You ran cold — pulled ${fmtMoney(absDelta)} less than the average session.`
+        : `Right on average — within ${fmtMoney(absDelta)} of expected.`;
+    const tail = actualPnL < 0 && stats.evPerPack < costPerPack
+      ? ` You still lost money because this set has negative EV at ${fmtMoney(costPerPack)}/pack.`
+      : actualPnL > 0
+        ? ` Net session P&L: +${fmtMoney(actualPnL)}.`
+        : ` Net session P&L: ${fmtMoney(actualPnL)}.`;
+    return { tone, headline: headline + tail, delta };
+  }, [sessionTotals, stats.evPerPack, costPerPack]);
+
   return (
     <div className="min-h-screen bg-background">
       <Seo
@@ -266,6 +321,24 @@ export default function PackGainsCalculator() {
             )}
           </div>
         </header>
+
+        {summaryBanner && (
+          <Card className={cn(
+            'border-l-4',
+            summaryBanner.tone === 'lucky' && 'border-l-success bg-success/5',
+            summaryBanner.tone === 'avg' && 'border-l-warning bg-warning/5',
+            summaryBanner.tone === 'unlucky' && 'border-l-destructive bg-destructive/5',
+          )}>
+            <CardContent className="p-4 flex items-start gap-3">
+              {summaryBanner.tone === 'lucky'
+                ? <TrendingUp className="w-5 h-5 text-success shrink-0 mt-0.5" />
+                : summaryBanner.tone === 'unlucky'
+                  ? <TrendingDown className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                  : <Target className="w-5 h-5 text-warning shrink-0 mt-0.5" />}
+              <p className="text-sm text-foreground leading-relaxed">{summaryBanner.headline}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Controls + pulls */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
