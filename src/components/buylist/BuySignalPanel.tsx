@@ -215,7 +215,7 @@ function getWhySentence(trend: { label: string }, momentum: { label: string }, p
 
 // ─── Graded Pricing Section ─────────────────────────────────────────────────
 
-interface GradeEntry { company: string; grade: string; price: number; }
+interface GradeEntry { company: string; grade: string; price: number; population?: number | null; }
 
 function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { cardName: string | null; cardNumber: string | null; setName: string | null; rawPrice: number | null }) {
   const [grades, setGrades] = useState<GradeEntry[]>([]);
@@ -233,40 +233,82 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
     (async () => {
       try {
-        // Pass name, set, and number for precise matching
-        const { data, error: fnErr } = await supabase.functions.invoke('justtcg', {
-          body: { 
-            action: 'getGradedCard', 
-            query: cardName,
-            set: setName || undefined,
-            condition: cardNumber || undefined, // reused param for card number
-          },
-        });
-        if (cancelled) return;
-        if (fnErr) throw new Error(fnErr.message);
-        if (data?.error) throw new Error(data.error);
+        // ── Use Collectr API for graded pricing ──
+        // Collectr search returns [] for verbose queries; try simpler ones too.
+        const candidates = [
+          cardNumber ? `${cardName} ${cardNumber}` : null,
+          cardName,
+        ].filter(Boolean) as string[];
 
-        const card = data?.data;
-        if (!card) { setGrades([]); setFetched(true); return; }
-
-        setMatchedName(card.name_numbered || card.name || null);
-
-        const graded = card?.prices?.cardmarket?.graded;
-        if (!graded || typeof graded !== 'object') {
-          setGrades([]);
-          setFetched(true);
-          return;
+        let hits: any[] = [];
+        for (const q of candidates) {
+          const { data: searchData, error: searchErr } = await supabase.functions.invoke('collectr', {
+            body: { action: 'search', params: { searchString: q, categories: 'pokemon' } },
+          });
+          if (cancelled) return;
+          if (searchErr) throw new Error(searchErr.message);
+          const arr: any[] = Array.isArray(searchData)
+            ? searchData
+            : (searchData?.results || searchData?.data || searchData?.products || []);
+          if (arr.length > 0) { hits = arr; break; }
         }
 
+        if (setName && hits.length > 1) {
+          const wanted = setName.toLowerCase();
+          const filt = hits.filter(r => {
+            const s = String(r.setName || r.set_name || '').toLowerCase();
+            return s && (s.includes(wanted) || wanted.includes(s));
+          });
+          if (filt.length > 0) hits = filt;
+        }
+
+        const top = hits[0];
+        const productId = top?.id || top?.productId || top?.product_id || top?.uuid;
+        if (!productId) { setGrades([]); setFetched(true); return; }
+
+        const { data: prodResp, error: prodErr } = await supabase.functions.invoke('collectr', {
+          body: { action: 'getProduct', params: { productId, gradingData: true } },
+        });
+        if (cancelled) return;
+        if (prodErr) throw new Error(prodErr.message);
+        if (prodResp?.error) throw new Error(prodResp.error);
+
+        const product: any = prodResp?.data || prodResp;
+        setMatchedName(product?.name || top?.name || null);
+
+        const gradedRaw = product?.gradingData || product?.graded || product?.grades || product?.gradedPricing;
         const entries: GradeEntry[] = [];
-        for (const [company, gs] of Object.entries(graded)) {
-          if (!gs || typeof gs !== 'object') continue;
-          for (const [grade, price] of Object.entries(gs as Record<string, number>)) {
-            if (typeof price === 'number' && price > 0) {
-              entries.push({ company, grade, price });
+
+        const pushEntry = (company: string, grade: string | number, info: any) => {
+          const inf = (info && typeof info === 'object' && !Array.isArray(info)) ? info : { price: info };
+          const priceRaw = inf.price ?? inf.marketPrice ?? inf.market ?? inf.value ?? inf.lastSale;
+          const price = typeof priceRaw === 'string' ? parseFloat(priceRaw) : Number(priceRaw);
+          if (!Number.isFinite(price) || price <= 0) return;
+          const pop = inf.population ?? inf.pop ?? inf.count ?? null;
+          entries.push({
+            company: String(company),
+            grade: String(grade),
+            price,
+            population: pop != null ? Number(pop) : null,
+          });
+        };
+
+        if (Array.isArray(gradedRaw)) {
+          for (const row of gradedRaw as any[]) {
+            const company = row.grader || row.company || row.gradingCompany || '';
+            const grade = row.grade ?? row.gradeLabel ?? '';
+            if (company) pushEntry(company, grade, row);
+          }
+        } else if (gradedRaw && typeof gradedRaw === 'object') {
+          for (const [company, val] of Object.entries(gradedRaw as Record<string, any>)) {
+            if (val && typeof val === 'object' && !Array.isArray(val)) {
+              for (const [grade, info] of Object.entries(val as Record<string, any>)) {
+                pushEntry(company, grade, info);
+              }
             }
           }
         }
+
         entries.sort((a, b) => b.price - a.price);
         setGrades(entries);
         setFetched(true);
@@ -279,15 +321,15 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     })();
 
     return () => { cancelled = true; };
-  }, [cardName, cardNumber]);
+  }, [cardName, cardNumber, setName]);
 
   if (!cardName || (!loading && fetched && grades.length === 0 && !error)) return null;
 
-  const byCompany: Record<string, { grade: string; price: number }[]> = {};
+  const byCompany: Record<string, { grade: string; price: number; population?: number | null }[]> = {};
   for (const g of grades) {
     const key = g.company.toUpperCase();
     if (!byCompany[key]) byCompany[key] = [];
-    byCompany[key].push({ grade: g.grade, price: g.price });
+    byCompany[key].push({ grade: g.grade, price: g.price, population: g.population });
   }
 
   // Find PSA 10 specifically for the hero display
@@ -309,6 +351,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
         <Award className="w-5 h-5 text-primary" />
         <h2 className="text-base font-bold text-foreground">Graded Pricing</h2>
         <Badge variant="secondary" className="text-[10px]">PSA / BGS / CGC</Badge>
+        <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Collectr</Badge>
       </div>
 
       {loading ? (
@@ -379,6 +422,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                                     premium > 0 ? 'text-success' : 'text-warning'
                                   )}>
                                     {premium > 0 ? '+' : ''}{premium.toFixed(0)}% vs raw
+                                  </p>
+                                )}
+                                {g.population != null && g.population > 0 && (
+                                  <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5 text-right">
+                                    Pop {g.population.toLocaleString()}
                                   </p>
                                 )}
                               </div>
