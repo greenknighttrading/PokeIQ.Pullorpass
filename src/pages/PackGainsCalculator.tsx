@@ -680,11 +680,6 @@ export default function PackGainsCalculator() {
                           </div>
                         )}
 
-                        {/* Gambler's fallacy caveat */}
-                        <p className="text-[10px] text-muted-foreground/80 leading-relaxed pt-1 border-t border-border/30 italic">
-                          Each session is independent. Past unlucky runs don't make future hits more likely —
-                          but over enough packs, results naturally trend toward expected value.
-                        </p>
                       </div>
                     );
                   })()}
