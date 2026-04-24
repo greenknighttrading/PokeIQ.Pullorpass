@@ -24,7 +24,8 @@ interface RarityRow {
   shortLabel: string;
   oneIn: number;
   chancePct: number;        // 100 / oneIn
-  avgRawPrice: number;      // mean price for this rarity in DB
+  avgRawPrice: number;      // mean price for this rarity
+  totalRarityValue: number; // sum of all card prices in this rarity
   cardCount: number;        // # of cards we found for this rarity
   evPerPack: number;        // chancePct/100 * avgRawPrice
   source: 'db' | 'justtcg' | 'none';
@@ -33,6 +34,7 @@ interface RarityRow {
 interface PackStats {
   rows: RarityRow[];
   evPerPack: number;        // total expected value per pack
+  totalSetValue: number;    // grand total of all rarity totals
 }
 
 const fmtMoney = (n: number) =>
@@ -40,7 +42,7 @@ const fmtMoney = (n: number) =>
 
 function buildStats(
   config: PackOddsConfig,
-  priceByRarity: Map<string, { avg: number; count: number; source: 'db' | 'justtcg' }>
+  priceByRarity: Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>
 ): PackStats {
   const rows: RarityRow[] = config.rarities.map(r => {
     const rec = priceByRarity.get(r.rarity);
@@ -52,13 +54,15 @@ function buildStats(
       oneIn: r.oneIn,
       chancePct,
       avgRawPrice: avg,
+      totalRarityValue: rec?.sum ?? 0,
       cardCount: rec?.count ?? 0,
       evPerPack: (chancePct / 100) * avg,
       source: rec ? rec.source : 'none',
     };
   });
   const evPerPack = rows.reduce((s, r) => s + r.evPerPack, 0);
-  return { rows, evPerPack };
+  const totalSetValue = rows.reduce((s, r) => s + r.totalRarityValue, 0);
+  return { rows, evPerPack, totalSetValue };
 }
 
 
@@ -69,7 +73,7 @@ export default function PackGainsCalculator() {
 
   const config = getPackOddsBySetName(selectedSet)!;
 
-  // 1) Pull what we have from market_snapshots
+  // 1) Pull what we have from market_snapshots (sum + count by rarity)
   const dbQuery = useQuery({
     queryKey: ['pack-gains-db', selectedSet],
     queryFn: async () => {
@@ -93,21 +97,13 @@ export default function PackGainsCalculator() {
     staleTime: 1000 * 60 * 30,
   });
 
-  // 2) Determine which rarities are still missing and live-fetch from JustTCG
-  const dbBy = dbQuery.data;
-  const missingRarities = useMemo(() => {
-    if (!dbBy) return [];
-    return config.rarities.filter(r => !dbBy.has(r.rarity)).map(r => r.rarity);
-  }, [config.rarities, dbBy]);
-
+  // 2) Always fetch full JustTCG set so we can total every rarity (including ones missing from DB)
   const liveQuery = useQuery({
-    queryKey: ['pack-gains-live', selectedSet, missingRarities.join('|')],
-    enabled: !!dbBy && missingRarities.length > 0,
+    queryKey: ['pack-gains-live', selectedSet],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const setParam = config.justTcgSetName ?? config.setName;
       const acc = new Map<string, { sum: number; count: number }>();
-      // Page through up to 4 pages (400 cards) to be safe
       for (let page = 0; page < 4; page++) {
         const { data, error } = await supabase.functions.invoke('justtcg', {
           body: {
@@ -123,7 +119,7 @@ export default function PackGainsCalculator() {
         if (items.length === 0) break;
         for (const card of items) {
           const rarity = card?.rarity;
-          if (!rarity || !missingRarities.includes(rarity)) continue;
+          if (!rarity) continue;
           const nm = card?.variants?.find((v: any) => v.condition === 'Near Mint') ?? card?.variants?.[0];
           const price = Number(nm?.price);
           if (!Number.isFinite(price) || price <= 0) continue;
@@ -138,13 +134,20 @@ export default function PackGainsCalculator() {
     },
   });
 
-  // 3) Merge DB + live into one map with source tracking
+  // 3) Merge — prefer JustTCG for completeness (full set), fall back to DB
+  const dbBy = dbQuery.data;
   const priceMap = useMemo(() => {
-    const out = new Map<string, { avg: number; count: number; source: 'db' | 'justtcg' }>();
-    if (dbBy) dbBy.forEach((v, k) => out.set(k, { avg: v.sum / v.count, count: v.count, source: 'db' }));
+    const out = new Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>();
     if (liveQuery.data) {
       liveQuery.data.forEach((v, k) => {
-        if (!out.has(k) && v.count > 0) out.set(k, { avg: v.sum / v.count, count: v.count, source: 'justtcg' });
+        if (v.count > 0) out.set(k, { avg: v.sum / v.count, sum: v.sum, count: v.count, source: 'justtcg' });
+      });
+    }
+    if (dbBy) {
+      dbBy.forEach((v, k) => {
+        if (!out.has(k) && v.count > 0) {
+          out.set(k, { avg: v.sum / v.count, sum: v.sum, count: v.count, source: 'db' });
+        }
       });
     }
     return out;
@@ -275,6 +278,7 @@ export default function PackGainsCalculator() {
             <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} each</p>
           </CardHeader>
           <CardContent className="space-y-3">
+            <SummaryRow label="Total set value (all rarities, NM)" value={fmtMoney(stats.totalSetValue)} sub="sum of every card price" />
             <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
             <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
             <div className="border-t border-border/60 pt-3 space-y-2">
@@ -313,6 +317,7 @@ export default function PackGainsCalculator() {
                     <th className="text-center px-4 py-2 font-medium">Odds</th>
                     <th className="text-center px-4 py-2 font-medium">% Chance</th>
                     <th className="text-center px-4 py-2 font-medium">Avg Raw</th>
+                    <th className="text-center px-4 py-2 font-medium">Total Value</th>
                     <th className="text-center px-4 py-2 font-medium">EV Raw / Pack</th>
                     <th className="text-center px-4 py-2 font-medium">Sample</th>
                     <th className="text-center px-4 py-2 font-medium">Source</th>
@@ -327,6 +332,9 @@ export default function PackGainsCalculator() {
                       <td className="px-4 py-3 text-center tabular-nums">
                         {r.avgRawPrice > 0 ? fmtMoney(r.avgRawPrice) : <span className="text-muted-foreground">—</span>}
                       </td>
+                      <td className="px-4 py-3 text-center tabular-nums font-medium">
+                        {r.totalRarityValue > 0 ? fmtMoney(r.totalRarityValue) : <span className="text-muted-foreground">—</span>}
+                      </td>
                       <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(r.evPerPack)}</td>
                       <td className="px-4 py-3 text-center tabular-nums text-muted-foreground">{r.cardCount}</td>
                       <td className="px-4 py-3 text-center">
@@ -334,6 +342,18 @@ export default function PackGainsCalculator() {
                       </td>
                     </tr>
                   ))}
+                  <tr className="border-t-2 border-border bg-muted/20 font-semibold">
+                    <td className="px-4 py-3">Total</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(stats.totalSetValue)}</td>
+                    <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(stats.evPerPack)}</td>
+                    <td className="px-4 py-3 text-center tabular-nums text-muted-foreground">
+                      {stats.rows.reduce((s, r) => s + r.cardCount, 0)}
+                    </td>
+                    <td className="px-4 py-3"></td>
+                  </tr>
                 </tbody>
               </table>
             )}
