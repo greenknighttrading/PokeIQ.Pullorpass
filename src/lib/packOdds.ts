@@ -22,6 +22,8 @@ export interface PackOddsConfig {
   setCode: string;         // short tag, e.g. ASC
   cardsPerPack: number;
   rarities: RarityOdd[];
+  /** Optional override for the JustTCG `set` query parameter. Defaults to setName. */
+  justTcgSetName?: string;
 }
 
 /**
