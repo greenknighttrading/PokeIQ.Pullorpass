@@ -75,9 +75,19 @@ export default function PackGainsCalculator() {
     totalValue: number;
     totalCost: number;
   } | null>(null);
+  const [sessionTotals, setSessionTotals] = useState<{
+    packs: number;
+    value: number;
+    cost: number;
+    rolls: number;
+  }>({ packs: 0, value: 0, cost: 0, rolls: 0 });
 
-  // Reset sim when inputs change
-  useEffect(() => { setRollResult(null); }, [selectedSet, packsOpened, costPerPack]);
+  // Reset sim + session when set changes (cost/pack count can change mid-session)
+  useEffect(() => {
+    setRollResult(null);
+    setSessionTotals({ packs: 0, value: 0, cost: 0, rolls: 0 });
+  }, [selectedSet]);
+  useEffect(() => { setRollResult(null); }, [packsOpened, costPerPack]);
 
   const config = getPackOddsBySetName(selectedSet)!;
 
@@ -198,6 +208,14 @@ export default function PackGainsCalculator() {
       totalValue: pulls.reduce((s, p) => s + p.value, 0),
       totalCost: costPerPack * packsOpened,
     });
+    const rollValue = pulls.reduce((s, p) => s + p.value, 0);
+    const rollCost = costPerPack * packsOpened;
+    setSessionTotals(prev => ({
+      packs: prev.packs + packsOpened,
+      value: prev.value + rollValue,
+      cost: prev.cost + rollCost,
+      rolls: prev.rolls + 1,
+    }));
   };
 
   // Aggregated tally for the pulls panel
