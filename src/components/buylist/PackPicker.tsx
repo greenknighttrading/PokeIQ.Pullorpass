@@ -80,13 +80,20 @@ export default function PackPicker() {
         .not('price', 'is', null)
         .not('set_name', 'is', null)
         .order('price', { ascending: true })
-        .limit(800);
+        .limit(2000);
 
       if (!cancelled && data) {
         const bySet = new Map<string, PackRow>();
+        // Reject anything that isn't a single individual booster pack.
+        // Common offenders: "3-Pack Blister", "4-Pack", "Booster Bundle (6 packs)",
+        // "Triple Pack", "Booster Box", "Build & Battle Box", "ETB", "Tin",
+        // "Collection", "Premium Collection", "Sleeved Booster Pack" (re-sleeved multi listings vary).
+        const MULTI_OR_NON_SINGLE = /(\d+\s*[-x]?\s*pack|\bpacks\b|bundle|blister|triple|double|two[\s-]?pack|booster\s+box|build\s*&\s*battle|elite\s+trainer|\betb\b|tin|collection|deck|battle\s+deck|theme\s+deck|case\b|display\b|gift\s+set|premium)/i;
         for (const d of data) {
           if (!d.set_name || !mainSets.has(d.set_name)) continue;
-          if (/sleeved/i.test(d.name)) continue;
+          // Must explicitly contain "Booster Pack" but NOT any multi-pack/box markers.
+          if (!/booster\s+pack/i.test(d.name)) continue;
+          if (MULTI_OR_NON_SINGLE.test(d.name)) continue;
 
           const rarityAgg = rarityMap.get(d.set_name);
           const rarityPrices: RarityPrice[] = rarityAgg
