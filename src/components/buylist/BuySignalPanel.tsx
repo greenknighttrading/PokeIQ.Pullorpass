@@ -497,6 +497,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                       {heroPremium > 0 ? '+' : ''}{heroPremium.toFixed(0)}% gain on grading
                     </p>
                   )}
+                  {heroGrade.population != null && heroGrade.population > 0 && (
+                    <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                      Pop {heroGrade.population.toLocaleString()}
+                    </p>
+                  )}
                 </div>
               </div>
 
