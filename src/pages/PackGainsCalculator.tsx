@@ -334,111 +334,54 @@ export default function PackGainsCalculator() {
           </div>
         </header>
 
-        {/* Controls + pulls */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <Card className="lg:col-span-3">
-            <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-              <div className="md:col-span-2">
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
-                <Select value={selectedSet} onValueChange={setSelectedSet}>
-                  <SelectTrigger className="mt-1.5 h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PACK_ODDS_REGISTRY.map(p => (
-                      <SelectItem key={p.setName} value={p.setName}>
-                        {p.displayName} ({p.setCode})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
-                <Input
-                  type="number" min={0} value={packsOpened}
-                  onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
-                  className="mt-1.5 h-11"
-                />
-              </div>
-              <div>
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
-                <Input
-                  type="number" min={0} step="0.01" value={costPerPack}
-                  onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
-                  className="mt-1.5 h-11"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Button
-                  onClick={handleRoll}
-                  disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0) || packsOpened <= 0}
-                  className="h-11 w-full gap-2"
-                >
-                  <Dices className="w-4 h-4" />
-                  {rollResult ? `Re-roll ${packsOpened} packs` : `Simulate ${packsOpened} packs`}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pull tally */}
-          <Card className={cn('lg:col-span-2', rollResult && 'border-primary/40 bg-primary/5')}>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Your pulls</CardTitle>
-                <p className="text-[11px] text-muted-foreground">
-                  {rollResult
-                    ? (() => {
-                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
-                        const packs = rollResult.pulls.length;
-                        const expected = expectedHitRate
-                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
-                          : '';
-                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
-                      })()
-                    : 'Hit Simulate to roll the rare slot for every pack.'}
-                </p>
-              </div>
-              {rollResult && (
-                <Button variant="ghost" size="icon" onClick={() => setRollResult(null)} className="shrink-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent className="pt-1">
-              {!rollResult ? (
-                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
-                  No simulation yet
-                </div>
-              ) : (
-                <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
-                  {pullTally.map(t => (
-                    <div
-                      key={t.rarity}
-                      className={cn(
-                        'flex items-center justify-between text-xs px-2.5 py-1.5 rounded-md',
-                        t.isHit ? 'bg-success/10 text-foreground' : 'bg-muted/40 text-muted-foreground'
-                      )}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{t.shortLabel}</Badge>
-                        <span className="truncate">{t.rarity}</span>
-                      </div>
-                      <div className="flex items-center gap-3 tabular-nums shrink-0">
-                        <span className="text-muted-foreground">×{t.count}</span>
-                        <span className="font-semibold">{fmtMoney(t.value)}</span>
-                      </div>
-                    </div>
+        {/* Select Set — single full-width bar */}
+        <Card>
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-end gap-3">
+            <div className="flex-1 min-w-0">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
+              <Select value={selectedSet} onValueChange={setSelectedSet}>
+                <SelectTrigger className="mt-1.5 h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PACK_ODDS_REGISTRY.map(p => (
+                    <SelectItem key={p.setName} value={p.setName}>
+                      {p.displayName} ({p.setCode})
+                    </SelectItem>
                   ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full sm:w-32">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
+              <Input
+                type="number" min={0} value={packsOpened}
+                onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
+                className="mt-1.5 h-11"
+              />
+            </div>
+            <div className="w-full sm:w-36">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
+              <Input
+                type="number" min={0} step="0.01" value={costPerPack}
+                onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
+                className="mt-1.5 h-11"
+              />
+            </div>
+            <Button
+              onClick={handleRoll}
+              disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0) || packsOpened <= 0}
+              className="h-11 w-full sm:w-auto gap-2 sm:px-6"
+            >
+              <Dices className="w-4 h-4" />
+              {rollResult ? `Re-roll ${packsOpened} packs` : `Simulate ${packsOpened} packs`}
+            </Button>
+          </CardContent>
+        </Card>
 
-        {/* Set summary (left) + Actual vs Expected (right) */}
+        {/* Set summary + pulls (left) + Actual vs Expected (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          <div className="space-y-4">
           {(() => {
           const sessionPacks = sessionTotals.packs;
           const avgCostPerPackLive = sessionPacks > 0
@@ -502,11 +445,70 @@ export default function PackGainsCalculator() {
                   <p className="text-[11px] text-muted-foreground mt-2 pl-6 leading-relaxed">
                     Expected = {Math.max(0, packsOpened)} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
                   </p>
+                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
+                    Each session is independent. Past unlucky runs don't make future hits more likely —
+                    but over enough packs, results naturally trend toward expected value.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           );
           })()}
+
+          {/* Your pulls — stacked under Pack Cost */}
+          <Card className={cn(rollResult && 'border-primary/40 bg-primary/5')}>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Your pulls</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  {rollResult
+                    ? (() => {
+                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
+                        const packs = rollResult.pulls.length;
+                        const expected = expectedHitRate
+                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
+                          : '';
+                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
+                      })()
+                    : 'Hit Simulate to roll the rare slot for every pack.'}
+                </p>
+              </div>
+              {rollResult && (
+                <Button variant="ghost" size="icon" onClick={() => setRollResult(null)} className="shrink-0">
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="pt-1">
+              {!rollResult ? (
+                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
+                  No simulation yet
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                  {pullTally.map(t => (
+                    <div
+                      key={t.rarity}
+                      className={cn(
+                        'flex items-center justify-between text-xs px-2.5 py-1.5 rounded-md',
+                        t.isHit ? 'bg-success/10 text-foreground' : 'bg-muted/40 text-muted-foreground'
+                      )}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{t.shortLabel}</Badge>
+                        <span className="truncate">{t.rarity}</span>
+                      </div>
+                      <div className="flex items-center gap-3 tabular-nums shrink-0">
+                        <span className="text-muted-foreground">×{t.count}</span>
+                        <span className="font-semibold">{fmtMoney(t.value)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          </div>
 
           {(() => {
             const sessSpend = sessionTotals.cost;
@@ -678,11 +680,6 @@ export default function PackGainsCalculator() {
                           </div>
                         )}
 
-                        {/* Gambler's fallacy caveat */}
-                        <p className="text-[10px] text-muted-foreground/80 leading-relaxed pt-1 border-t border-border/30 italic">
-                          Each session is independent. Past unlucky runs don't make future hits more likely —
-                          but over enough packs, results naturally trend toward expected value.
-                        </p>
                       </div>
                     );
                   })()}
@@ -819,9 +816,9 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
  */
 function BellCurve({ z }: { z: number }) {
   const W = 280;
-  const H = 56;
+  const H = 64;
   const padX = 8;
-  const padY = 6;
+  const padY = 14; // extra top room so the "Your session" label is never clipped
   const minZ = -3;
   const maxZ = 3;
   const clampedZ = Math.max(minZ, Math.min(maxZ, z));
@@ -842,10 +839,24 @@ function BellCurve({ z }: { z: number }) {
   const linePath = 'M' + points.join(' L');
   const dotX = xFor(clampedZ);
   const dotY = yFor(clampedZ);
-  const labelLeft = dotX > W / 2;
+  // Pick anchor based on space; if too close to either edge, fall back to middle.
+  const labelText = 'Your session';
+  const approxLabelWidth = labelText.length * 5; // ~5px per char at fontSize 9
+  const spaceRight = W - padX - dotX;
+  const spaceLeft = dotX - padX;
+  let anchor: 'start' | 'end' | 'middle' = 'start';
+  let labelX = dotX + 6;
+  if (spaceRight < approxLabelWidth && spaceLeft >= approxLabelWidth) {
+    anchor = 'end';
+    labelX = dotX - 6;
+  } else if (spaceRight < approxLabelWidth && spaceLeft < approxLabelWidth) {
+    anchor = 'middle';
+    labelX = Math.max(padX + approxLabelWidth / 2, Math.min(W - padX - approxLabelWidth / 2, dotX));
+  }
+  const labelY = Math.max(padY - 2, dotY - 8);
   return (
     <div className="w-full">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
         {/* baseline */}
         <line x1={padX} y1={H - padY} x2={W - padX} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" />
         {/* mean line */}
@@ -858,14 +869,14 @@ function BellCurve({ z }: { z: number }) {
         <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
         {/* user label */}
         <text
-          x={labelLeft ? dotX - 6 : dotX + 6}
-          y={dotY - 6}
-          textAnchor={labelLeft ? 'end' : 'start'}
+          x={labelX}
+          y={labelY}
+          textAnchor={anchor}
           fontSize="9"
           fill="hsl(var(--foreground))"
           className="font-medium"
         >
-          Your session
+          {labelText}
         </text>
       </svg>
     </div>
