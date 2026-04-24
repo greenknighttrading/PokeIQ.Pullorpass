@@ -380,8 +380,8 @@ export default function PackGainsCalculator() {
         </Card>
 
         {/* Set summary + pulls (left) + Actual vs Expected (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          <div className="flex flex-col gap-4 h-full">
           {(() => {
           const sessionPacks = sessionTotals.packs;
           const avgCostPerPackLive = sessionPacks > 0
@@ -389,8 +389,8 @@ export default function PackGainsCalculator() {
             : costPerPack;
           const setGraphic = SET_GRAPHICS[config.setName];
           return (
-            <Card>
-              <CardContent className="p-6">
+            <Card className="flex-1 flex flex-col">
+              <CardContent className="p-6 flex-1 flex flex-col">
                 <div className="flex items-center gap-4 pb-5 border-b border-border/40">
                   <div className="w-20 h-20 rounded-md bg-muted/30 flex items-center justify-center shrink-0 overflow-hidden">
                     {setGraphic ? (
@@ -411,7 +411,7 @@ export default function PackGainsCalculator() {
                     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
                   </div>
                 </div>
-                <div className="pt-5 space-y-3">
+                <div className="pt-5 space-y-3 flex-1">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -442,9 +442,6 @@ export default function PackGainsCalculator() {
                       hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
                     </p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-2 pl-6 leading-relaxed">
-                    Expected = {Math.max(0, packsOpened)} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
-                  </p>
                   <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
                     Each session is independent. Past unlucky runs don't make future hits more likely —
                     but over enough packs, results naturally trend toward expected value.
@@ -456,10 +453,10 @@ export default function PackGainsCalculator() {
           })()}
 
           {/* Your pulls — stacked under Pack Cost */}
-          <Card className={cn(rollResult && 'border-primary/40 bg-primary/5')}>
+          <Card className={cn('flex-1 flex flex-col', rollResult && 'border-primary/40 bg-primary/5')}>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base">Your pulls</CardTitle>
+                <CardTitle className="text-base">Your simulated Pulls</CardTitle>
                 <p className="text-[11px] text-muted-foreground">
                   {rollResult
                     ? (() => {
@@ -479,13 +476,13 @@ export default function PackGainsCalculator() {
                 </Button>
               )}
             </CardHeader>
-            <CardContent className="pt-1">
+            <CardContent className="pt-1 flex-1 flex flex-col">
               {!rollResult ? (
-                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
+                <div className="flex-1 min-h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
                   No simulation yet
                 </div>
               ) : (
-                <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                <div className="space-y-1.5 flex-1 overflow-y-auto pr-1">
                   {pullTally.map(t => (
                     <div
                       key={t.rarity}
@@ -528,11 +525,11 @@ export default function PackGainsCalculator() {
               )}>{value}</td>
             );
             return (
-              <Card className={cn(hasSession && 'border-primary/40')}>
+              <Card className={cn('h-full flex flex-col', hasSession && 'border-primary/40')}>
                 <CardHeader className="pb-2 flex flex-row items-start justify-between">
                   <div>
                     <CardTitle className="text-base">Actual vs Expected</CardTitle>
-                    <p className="text-[11px] text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {hasSession
                         ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
                         : `Run a simulation to populate actuals`}
@@ -549,33 +546,33 @@ export default function PackGainsCalculator() {
                     </Button>
                   )}
                 </CardHeader>
-                <CardContent className="p-0">
-                  <table className="w-full text-sm">
+                <CardContent className="p-0 flex-1 flex flex-col">
+                  <table className="w-full text-base">
                     <thead>
-                      <tr className="text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border/40">
-                        <th className="text-left px-3 py-2 font-medium">Metric</th>
-                        <th className="text-right px-3 py-2 font-medium">Actual</th>
-                        <th className="text-right px-3 py-2 font-medium">Expected</th>
+                      <tr className="text-xs uppercase tracking-wide text-muted-foreground border-b border-border/40">
+                        <th className="text-left px-3 py-2.5 font-medium">Metric</th>
+                        <th className="text-right px-3 py-2.5 font-medium">Actual</th>
+                        <th className="text-right px-3 py-2.5 font-medium">Expected</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-2.5"># of packs ripped</td>
+                        <td className="px-3 py-3 text-sm"># of packs ripped</td>
                         {hasSession ? <Cell value={String(sessionTotals.packs)} /> : <Cell value="—" muted />}
                         <Cell value={String(expPacks)} />
                       </tr>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-2.5">Total spend</td>
+                        <td className="px-3 py-3 text-sm">Total spend</td>
                         {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expSpend)} />
                       </tr>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-2.5">Total pulled value</td>
+                        <td className="px-3 py-3 text-sm">Total pulled value</td>
                         {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expReturn)} />
                       </tr>
                       <tr>
-                        <td className="px-3 py-2.5 font-medium">P&L</td>
+                        <td className="px-3 py-3 text-sm font-medium">P&L</td>
                         {hasSession
                           ? <Cell value={`${sessPnL >= 0 ? '+' : ''}${fmtMoney(sessPnL)}`} tone={sessPnL >= 0 ? 'pos' : 'neg'} />
                           : <Cell value="—" muted />}
@@ -587,9 +584,9 @@ export default function PackGainsCalculator() {
                         const arrow = delta >= 0 ? '↑' : '↓';
                         return (
                           <tr className="border-t border-border/30 bg-muted/20">
-                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                            <td className="px-3 py-3 text-sm text-muted-foreground">vs. expected</td>
                             <td colSpan={2} className={cn(
-                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                              'px-3 py-3 text-right tabular-nums text-base font-semibold',
                               tone === 'pos' && 'text-success',
                               tone === 'neg' && 'text-destructive',
                             )}>
@@ -634,18 +631,18 @@ export default function PackGainsCalculator() {
                     }
 
                     return (
-                      <div className="border-t border-border/40 px-3 py-3 space-y-3">
+                      <div className="border-t border-border/40 px-3 py-4 space-y-4 flex-1">
                         {/* Percentile sentence + mini bell curve */}
                         <div className="space-y-2">
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
                             {percentileSentence}
                           </p>
                           <BellCurve z={z} />
                         </div>
 
                         {/* Convergence + variance */}
-                        <div className="space-y-1.5 pt-2 border-t border-border/30">
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        <div className="space-y-2 pt-3 border-t border-border/30">
+                          <p className="text-sm text-muted-foreground leading-relaxed">
                             After <span className="text-foreground font-medium">{sessionTotals.packs}</span> packs,
                             your cumulative return is{' '}
                             <span className={cn(
@@ -655,7 +652,7 @@ export default function PackGainsCalculator() {
                             <span className="text-foreground font-medium">{fmtMoney(stats.evPerPack)}</span>/pack.
                           </p>
                           {sigma > 0 && (
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
                               At {sessionTotals.packs} packs, a ±{fmtMoney(swing)} swing is completely normal.
                               At {sessionTotals.packs * 10} packs, that band tightens to ±{fmtMoney(swing10x / 3)}.
                             </p>
@@ -665,13 +662,13 @@ export default function PackGainsCalculator() {
                         {/* Milestone badge */}
                         {milestone && (
                           <div className={cn(
-                            'flex items-start gap-2 rounded-md px-2.5 py-2 text-[11px] leading-relaxed',
+                            'flex items-start gap-2 rounded-md px-3 py-2.5 text-sm leading-relaxed',
                             milestone.tone === 'good' && 'bg-success/10 text-success-foreground',
                             milestone.tone === 'info' && 'bg-primary/10 text-foreground',
                             milestone.tone === 'warn' && 'bg-warning/10 text-foreground',
                           )}>
                             <Target className={cn(
-                              'w-3.5 h-3.5 shrink-0 mt-0.5',
+                              'w-4 h-4 shrink-0 mt-0.5',
                               milestone.tone === 'good' && 'text-success',
                               milestone.tone === 'info' && 'text-primary',
                               milestone.tone === 'warn' && 'text-warning',
@@ -816,9 +813,11 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
  */
 function BellCurve({ z }: { z: number }) {
   const W = 280;
-  const H = 64;
+  const H = 84;
   const padX = 8;
   const padY = 14; // extra top room so the "Your session" label is never clipped
+  const axisY = H - padY; // baseline y
+  const labelBandY = H - 2; // x-axis label baseline
   const minZ = -3;
   const maxZ = 3;
   const clampedZ = Math.max(minZ, Math.min(maxZ, z));
@@ -826,16 +825,16 @@ function BellCurve({ z }: { z: number }) {
   const phi = (t: number) => Math.exp(-(t * t) / 2) / Math.sqrt(2 * Math.PI);
   const peak = phi(0);
   const xFor = (zVal: number) => padX + ((zVal - minZ) / (maxZ - minZ)) * (W - padX * 2);
-  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (H - padY * 2);
+  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (axisY - padY);
   const points: string[] = [];
   const steps = 60;
   for (let i = 0; i <= steps; i++) {
     const zVal = minZ + (i / steps) * (maxZ - minZ);
     points.push(`${xFor(zVal).toFixed(1)},${yFor(zVal).toFixed(1)}`);
   }
-  const areaPath = `M${xFor(minZ).toFixed(1)},${(H - padY).toFixed(1)} L` +
+  const areaPath = `M${xFor(minZ).toFixed(1)},${axisY.toFixed(1)} L` +
     points.join(' L') +
-    ` L${xFor(maxZ).toFixed(1)},${(H - padY).toFixed(1)} Z`;
+    ` L${xFor(maxZ).toFixed(1)},${axisY.toFixed(1)} Z`;
   const linePath = 'M' + points.join(' L');
   const dotX = xFor(clampedZ);
   const dotY = yFor(clampedZ);
@@ -854,17 +853,51 @@ function BellCurve({ z }: { z: number }) {
     labelX = Math.max(padX + approxLabelWidth / 2, Math.min(W - padX - approxLabelWidth / 2, dotX));
   }
   const labelY = Math.max(padY - 2, dotY - 8);
+  const xTicks: { z: number; label: string }[] = [
+    { z: -3, label: 'Much worse' },
+    { z: -1, label: '−1σ' },
+    { z: 0, label: 'Expected' },
+    { z: 1, label: '+1σ' },
+    { z: 3, label: 'Much better' },
+  ];
   return (
     <div className="w-full">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
         {/* baseline */}
-        <line x1={padX} y1={H - padY} x2={W - padX} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" />
+        <line x1={padX} y1={axisY} x2={W - padX} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" />
         {/* mean line */}
-        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
+        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
         {/* curve fill */}
         <path d={areaPath} fill="hsl(var(--muted-foreground) / 0.15)" />
         {/* curve line */}
         <path d={linePath} fill="none" stroke="hsl(var(--muted-foreground) / 0.6)" strokeWidth="1.25" />
+        {/* x-axis ticks + labels */}
+        {xTicks.map((t) => {
+          const tx = xFor(t.z);
+          const anchorT: 'start' | 'middle' | 'end' =
+            t.z <= -3 ? 'start' : t.z >= 3 ? 'end' : 'middle';
+          return (
+            <g key={t.z}>
+              <line
+                x1={tx}
+                x2={tx}
+                y1={axisY}
+                y2={axisY + 3}
+                stroke="hsl(var(--border))"
+                strokeWidth="1"
+              />
+              <text
+                x={tx}
+                y={labelBandY}
+                textAnchor={anchorT}
+                fontSize="8"
+                fill="hsl(var(--muted-foreground))"
+              >
+                {t.label}
+              </text>
+            </g>
+          );
+        })}
         {/* user dot */}
         <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
         {/* user label */}
