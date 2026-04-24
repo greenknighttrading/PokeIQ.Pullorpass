@@ -75,9 +75,19 @@ export default function PackGainsCalculator() {
     totalValue: number;
     totalCost: number;
   } | null>(null);
+  const [sessionTotals, setSessionTotals] = useState<{
+    packs: number;
+    value: number;
+    cost: number;
+    rolls: number;
+  }>({ packs: 0, value: 0, cost: 0, rolls: 0 });
 
-  // Reset sim when inputs change
-  useEffect(() => { setRollResult(null); }, [selectedSet, packsOpened, costPerPack]);
+  // Reset sim + session when set changes (cost/pack count can change mid-session)
+  useEffect(() => {
+    setRollResult(null);
+    setSessionTotals({ packs: 0, value: 0, cost: 0, rolls: 0 });
+  }, [selectedSet]);
+  useEffect(() => { setRollResult(null); }, [packsOpened, costPerPack]);
 
   const config = getPackOddsBySetName(selectedSet)!;
 
@@ -198,6 +208,14 @@ export default function PackGainsCalculator() {
       totalValue: pulls.reduce((s, p) => s + p.value, 0),
       totalCost: costPerPack * packsOpened,
     });
+    const rollValue = pulls.reduce((s, p) => s + p.value, 0);
+    const rollCost = costPerPack * packsOpened;
+    setSessionTotals(prev => ({
+      packs: prev.packs + packsOpened,
+      value: prev.value + rollValue,
+      cost: prev.cost + rollCost,
+      rolls: prev.rolls + 1,
+    }));
   };
 
   // Aggregated tally for the pulls panel
@@ -377,7 +395,7 @@ export default function PackGainsCalculator() {
         </div>
 
         {/* Expected vs Simulated */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Expected run</CardTitle>
@@ -438,6 +456,56 @@ export default function PackGainsCalculator() {
                     {(rollResult.totalValue - expectedValueTotal) >= 0 ? '+' : ''}
                     {fmtMoney(rollResult.totalValue - expectedValueTotal)}
                   </span>
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className={cn(sessionTotals.rolls > 0 && 'border-primary/40')}>
+            <CardHeader className="pb-2 flex flex-row items-start justify-between">
+              <div>
+                <CardTitle className="text-base">Total session</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  {sessionTotals.rolls > 0
+                    ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
+                    : 'Cumulative across every roll this session'}
+                </p>
+              </div>
+              {sessionTotals.rolls > 0 && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSessionTotals({ packs: 0, value: 0, cost: 0, rolls: 0 })}
+                  className="shrink-0 -mt-1 -mr-1"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <SummaryRow label="Total spend" value={fmtMoney(sessionTotals.cost)} />
+              <SummaryRow label="Total pulled value" value={sessionTotals.rolls > 0 ? fmtMoney(sessionTotals.value) : '—'} />
+              <div className="border-t border-border/60 pt-3 flex items-center justify-between">
+                <span className="text-sm">Session P&L</span>
+                {sessionTotals.rolls > 0 ? (
+                  <span className={cn(
+                    'text-base font-bold tabular-nums',
+                    (sessionTotals.value - sessionTotals.cost) >= 0 ? 'text-success' : 'text-destructive'
+                  )}>
+                    {(sessionTotals.value - sessionTotals.cost) >= 0 ? '+' : ''}
+                    {fmtMoney(sessionTotals.value - sessionTotals.cost)}
+                  </span>
+                ) : (
+                  <span className="text-base font-bold text-muted-foreground">—</span>
+                )}
+              </div>
+              {sessionTotals.rolls > 0 && sessionTotals.packs > 0 && (
+                <p className="text-[11px] text-muted-foreground pt-1">
+                  Avg per pack:{' '}
+                  <span className="font-semibold tabular-nums text-foreground">
+                    {fmtMoney(sessionTotals.value / sessionTotals.packs)}
+                  </span>
+                  {' '}vs {fmtMoney(stats.evPerPack)} expected
                 </p>
               )}
             </CardContent>
