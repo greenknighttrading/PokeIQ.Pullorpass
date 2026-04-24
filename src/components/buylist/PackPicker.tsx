@@ -28,7 +28,7 @@ export default function PackPicker() {
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
-    const cacheKey = 'pack-picker-v6-cache';
+    const cacheKey = 'pack-picker-v7-singles-cache';
     let cancelled = false;
 
     try {
