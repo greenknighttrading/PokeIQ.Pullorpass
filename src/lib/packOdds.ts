@@ -35,6 +35,7 @@ export const ASCENDED_HEROES: PackOddsConfig = {
   displayName: 'Pokémon Ascended Heroes',
   setCode: 'ASC',
   cardsPerPack: 10,
+  justTcgSetName: 'me-ascended-heroes-pokemon',
   rarities: [
     { rarity: 'Special Illustration Rare', shortLabel: 'SIR', oneIn: 70 },
     { rarity: 'Illustration Rare',         shortLabel: 'IR',  oneIn: 9  },
