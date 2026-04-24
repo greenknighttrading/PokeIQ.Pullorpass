@@ -323,7 +323,9 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     return () => { cancelled = true; };
   }, [cardName, cardNumber, setName]);
 
-  if (!cardName || (!loading && fetched && grades.length === 0 && !error)) return null;
+  if (!cardName) return null;
+
+  const isEmpty = !loading && fetched && grades.length === 0 && !error;
 
   const byCompany: Record<string, { grade: string; price: number; population?: number | null }[]> = {};
   for (const g of grades) {
@@ -388,6 +390,15 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
         </div>
       ) : error ? (
         <p className="text-sm text-muted-foreground py-4">{error}</p>
+      ) : isEmpty ? (
+        <div className="rounded-xl border border-dashed border-border/50 bg-muted/10 p-6 text-center">
+          <p className="text-sm text-muted-foreground">
+            No graded pricing data available for this card yet.
+          </p>
+          <p className="text-[11px] text-muted-foreground/70 mt-1">
+            Collectr does not currently track PSA / BGS / CGC sales for this exact product.
+          </p>
+        </div>
       ) : (
         <div className="space-y-5">
           {/* ─── Hero: Raw vs PSA 10 side-by-side comparison ─── */}
