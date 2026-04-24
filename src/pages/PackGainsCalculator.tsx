@@ -70,7 +70,14 @@ export default function PackGainsCalculator() {
   const [selectedSet, setSelectedSet] = useState<string>(PACK_ODDS_REGISTRY[0].setName);
   const [packsOpened, setPacksOpened] = useState<number>(10);
   const [costPerPack, setCostPerPack] = useState<number>(10);
-  const [rollResult, setRollResult] = useState<{ rarity: string; value: number; profit: number } | null>(null);
+  const [rollResult, setRollResult] = useState<{
+    pulls: { rarity: string; shortLabel: string; value: number }[];
+    totalValue: number;
+    totalCost: number;
+  } | null>(null);
+
+  // Reset sim when inputs change
+  useEffect(() => { setRollResult(null); }, [selectedSet, packsOpened, costPerPack]);
 
   const config = getPackOddsBySetName(selectedSet)!;
 
@@ -172,22 +179,42 @@ export default function PackGainsCalculator() {
   const missingCount = stats.rows.filter(r => r.source === 'none').length;
 
   const handleRoll = () => {
-    // Weighted random pick by chance %
+    // Roll one rare slot per pack using weighted pull rates
     const eligible = stats.rows.filter(r => r.avgRawPrice > 0);
-    if (eligible.length === 0) return;
+    if (eligible.length === 0 || packsOpened <= 0) return;
     const totalWeight = eligible.reduce((s, r) => s + r.chancePct, 0);
-    let pick = Math.random() * totalWeight;
-    let chosen = eligible[0];
-    for (const r of eligible) {
-      pick -= r.chancePct;
-      if (pick <= 0) { chosen = r; break; }
+    const pulls: { rarity: string; shortLabel: string; value: number }[] = [];
+    for (let i = 0; i < packsOpened; i++) {
+      let pick = Math.random() * totalWeight;
+      let chosen = eligible[0];
+      for (const r of eligible) {
+        pick -= r.chancePct;
+        if (pick <= 0) { chosen = r; break; }
+      }
+      pulls.push({ rarity: chosen.rarity, shortLabel: chosen.shortLabel, value: chosen.avgRawPrice });
     }
     setRollResult({
-      rarity: chosen.rarity,
-      value: chosen.avgRawPrice,
-      profit: chosen.avgRawPrice - costPerPack,
+      pulls,
+      totalValue: pulls.reduce((s, p) => s + p.value, 0),
+      totalCost: costPerPack * packsOpened,
     });
   };
+
+  // Aggregated tally for the pulls panel
+  const pullTally = useMemo(() => {
+    if (!rollResult) return [] as { shortLabel: string; rarity: string; count: number; value: number; isHit: boolean }[];
+    const m = new Map<string, { shortLabel: string; rarity: string; count: number; value: number; isHit: boolean }>();
+    for (const p of rollResult.pulls) {
+      const cur = m.get(p.rarity) ?? {
+        shortLabel: p.shortLabel, rarity: p.rarity, count: 0, value: 0,
+        isHit: !/no hit/i.test(p.rarity),
+      };
+      cur.count += 1;
+      cur.value += p.value;
+      m.set(p.rarity, cur);
+    }
+    return Array.from(m.values()).sort((a, b) => Number(b.isHit) - Number(a.isHit) || b.value - a.value);
+  }, [rollResult]);
 
   return (
     <div className="min-h-screen bg-background">
