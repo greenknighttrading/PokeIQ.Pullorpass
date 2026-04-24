@@ -47,6 +47,16 @@ interface PackStats {
 const fmtMoney = (n: number) =>
   n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
 
+// Standard normal CDF using Abramowitz & Stegun approximation 7.1.26.
+// Returns Φ(z) — the probability a standard normal draw falls at or below z.
+function normalCdf(z: number): number {
+  const sign = z < 0 ? -1 : 1;
+  const x = Math.abs(z) / Math.sqrt(2);
+  const t = 1 / (1 + 0.3275911 * x);
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * y);
+}
+
 function buildStats(
   config: PackOddsConfig,
   priceByRarity: Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>
@@ -189,6 +199,25 @@ export default function PackGainsCalculator() {
     () => buildStats(config, priceMap),
     [config, priceMap]
   );
+
+  // Per-pack standard deviation of pulled value, derived from the rare-slot
+  // distribution: Var(X) = Σ p_i * x_i^2 − (Σ p_i * x_i)^2.
+  // Used to approximate session outcome percentiles via a normal distribution.
+  const perPackStdDev = useMemo(() => {
+    const eligible = stats.rows.filter(r => r.avgRawPrice > 0);
+    if (eligible.length === 0) return 0;
+    const totalWeight = eligible.reduce((s, r) => s + r.chancePct, 0);
+    if (totalWeight <= 0) return 0;
+    let mean = 0;
+    let meanSq = 0;
+    for (const r of eligible) {
+      const p = r.chancePct / totalWeight;
+      mean += p * r.avgRawPrice;
+      meanSq += p * r.avgRawPrice * r.avgRawPrice;
+    }
+    const variance = Math.max(0, meanSq - mean * mean);
+    return Math.sqrt(variance);
+  }, [stats.rows]);
 
   const expectedValueTotal = stats.evPerPack * Math.max(0, packsOpened);
   const totalCost = costPerPack * Math.max(0, packsOpened);
@@ -412,9 +441,6 @@ export default function PackGainsCalculator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           {(() => {
           const sessionPacks = sessionTotals.packs;
-          const avgGainLossLive = sessionPacks > 0
-            ? (sessionTotals.value - sessionTotals.cost) / sessionPacks
-            : avgGainPerPack;
           const avgCostPerPackLive = sessionPacks > 0
             ? sessionTotals.cost / sessionPacks
             : costPerPack;
@@ -455,12 +481,12 @@ export default function PackGainsCalculator() {
                     <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Current avg gain/loss from ripping</span>
+                    <span className="text-sm">Expected gain/loss from ripping</span>
                     <span className={cn(
                       'text-sm font-semibold tabular-nums',
-                      avgGainLossLive >= 0 ? 'text-success' : 'text-destructive'
+                      avgGainPerPack >= 0 ? 'text-success' : 'text-destructive'
                     )}>
-                      {avgGainLossLive >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainLossLive))}
+                      {avgGainPerPack >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainPerPack))}
                     </span>
                   </div>
                   <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
@@ -554,18 +580,44 @@ export default function PackGainsCalculator() {
                         const delta = sessPnL - expPnL;
                         const tone = delta >= 0 ? 'pos' : 'neg';
                         const arrow = delta >= 0 ? '↑' : '↓';
+                        // Percentile via normal approximation: mean = EV*packs (on the value side),
+                        // sigma = sqrt(packs) * per-pack stddev. Compare actual pulled value to that
+                        // distribution. A higher pulled value = a higher percentile rank.
+                        let percentileSentence: string | null = null;
+                        if (perPackStdDev > 0 && sessionTotals.packs > 0) {
+                          const sigma = perPackStdDev * Math.sqrt(sessionTotals.packs);
+                          const meanValue = stats.evPerPack * sessionTotals.packs;
+                          const z = (sessValue - meanValue) / sigma;
+                          const pctBelow = normalCdf(z) * 100; // % of sessions you beat
+                          if (delta >= 0) {
+                            const topPct = Math.max(1, Math.min(99, Math.round(100 - pctBelow)));
+                            percentileSentence = `This session landed in the top ${topPct}% of outcomes for ${sessionTotals.packs} packs.`;
+                          } else {
+                            const bottomPct = Math.max(1, Math.min(99, Math.round(pctBelow)));
+                            percentileSentence = `This session landed in the bottom ${bottomPct}% of outcomes for ${sessionTotals.packs} packs.`;
+                          }
+                        }
                         return (
-                          <tr className="border-t border-border/30 bg-muted/20">
-                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
-                            <td colSpan={2} className={cn(
-                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
-                              tone === 'pos' && 'text-success',
-                              tone === 'neg' && 'text-destructive',
-                            )}>
-                              {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
-                              {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
-                            </td>
-                          </tr>
+                          <>
+                            <tr className="border-t border-border/30 bg-muted/20">
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                              <td colSpan={2} className={cn(
+                                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                                tone === 'pos' && 'text-success',
+                                tone === 'neg' && 'text-destructive',
+                              )}>
+                                {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
+                                {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
+                              </td>
+                            </tr>
+                            {percentileSentence && (
+                              <tr className="bg-muted/20">
+                                <td colSpan={3} className="px-3 pb-2.5 text-[11px] text-muted-foreground leading-relaxed">
+                                  {percentileSentence}
+                                </td>
+                              </tr>
+                            )}
+                          </>
                         );
                       })()}
                     </tbody>
