@@ -51,6 +51,7 @@ const BuyListScanner = lazy(() => import("./pages/buylist/BuyListScanner"));
 const DailyReport = lazy(() => import("./pages/DailyReport"));
 const BuyListPicks = lazy(() => import("./pages/BuyListPicks"));
 const SealedVsCards = lazy(() => import("./pages/tools/SealedVsCards"));
+const PackGainsCalculator = lazy(() => import("./pages/PackGainsCalculator"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
@@ -109,6 +110,7 @@ function AppRoutes() {
 
         {/* Tools */}
         <Route path="/tools/sealed-vs-cards" element={<SealedVsCards />} />
+        <Route path="/pack-gains" element={<PackGainsCalculator />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
