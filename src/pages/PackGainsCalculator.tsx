@@ -432,8 +432,77 @@ export default function PackGainsCalculator() {
           </Card>
         </div>
 
-        {/* Session vs Expected (left) + Set summary (right) */}
+        {/* Set summary (left) + Actual vs Expected (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          {(() => {
+          const sessionPacks = sessionTotals.packs;
+          const avgGainLossLive = sessionPacks > 0
+            ? (sessionTotals.value - sessionTotals.cost) / sessionPacks
+            : avgGainPerPack;
+          const avgCostPerPackLive = sessionPacks > 0
+            ? sessionTotals.cost / sessionPacks
+            : costPerPack;
+          const setGraphic = SET_GRAPHICS[config.setName];
+          return (
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 pb-5 border-b border-border/40">
+                  <div className="w-20 h-20 rounded-md bg-muted/30 flex items-center justify-center shrink-0 overflow-hidden">
+                    {setGraphic ? (
+                      <img
+                        src={setGraphic}
+                        alt={`${config.displayName} set logo`}
+                        loading="lazy"
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-contain"
+                      />
+                    ) : (
+                      <Dices className="w-7 h-7 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-lg font-semibold text-foreground truncate">{config.displayName}</div>
+                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
+                  </div>
+                </div>
+                <div className="pt-5 space-y-3">
+                  <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm">Expected value</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Prices via {dataSourceLabel}
+                        {freshnessLabel ? ` · ${freshnessLabel}` : ''}
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Current avg gain/loss from ripping</span>
+                    <span className={cn(
+                      'text-sm font-semibold tabular-nums',
+                      avgGainLossLive >= 0 ? 'text-success' : 'text-destructive'
+                    )}>
+                      {avgGainLossLive >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainLossLive))}
+                    </span>
+                  </div>
+                  <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
+                </div>
+                <div className="mt-5 pt-4 border-t border-border/40">
+                  <div className="flex items-start gap-2">
+                    <Target className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      You need <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span> in
+                      hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+          })()}
+
           {(() => {
             const sessSpend = sessionTotals.cost;
             const sessValue = sessionTotals.value;
@@ -533,62 +602,6 @@ export default function PackGainsCalculator() {
             );
           })()}
 
-          {(() => {
-          const sessionPacks = sessionTotals.packs;
-          const avgGainLossLive = sessionPacks > 0
-            ? (sessionTotals.value - sessionTotals.cost) / sessionPacks
-            : avgGainPerPack;
-          const avgCostPerPackLive = sessionPacks > 0
-            ? sessionTotals.cost / sessionPacks
-            : costPerPack;
-          return (
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 pb-5 border-b border-border/40">
-                  <div className="w-16 h-16 rounded-md bg-muted/40 flex items-center justify-center shrink-0">
-                    <Dices className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold text-foreground truncate">{config.displayName}</div>
-                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
-                  </div>
-                </div>
-                <div className="pt-5 space-y-3">
-                  <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm">Expected value</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">
-                        Prices via {dataSourceLabel}
-                        {freshnessLabel ? ` · ${freshnessLabel}` : ''}
-                      </div>
-                    </div>
-                    <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm">Current avg gain/loss from ripping</span>
-                    <span className={cn(
-                      'text-sm font-semibold tabular-nums',
-                      avgGainLossLive >= 0 ? 'text-success' : 'text-destructive'
-                    )}>
-                      {avgGainLossLive >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainLossLive))}
-                    </span>
-                  </div>
-                  <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
-                </div>
-                <div className="mt-5 pt-4 border-t border-border/40">
-                  <div className="flex items-start gap-2">
-                    <Target className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      You need <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span> in
-                      hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-          })()}
         </div>
 
         {/* Rarity breakdown */}
