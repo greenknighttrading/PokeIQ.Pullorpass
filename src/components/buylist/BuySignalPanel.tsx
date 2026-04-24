@@ -224,6 +224,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   const [expanded, setExpanded] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [matchedName, setMatchedName] = useState<string | null>(null);
+  const [collectrRawPrice, setCollectrRawPrice] = useState<number | null>(null);
 
   useEffect(() => {
     if (!cardName) return;
@@ -275,6 +276,20 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
         const product: any = prodResp?.data || prodResp;
         setMatchedName(product?.productName || product?.name || top?.productName || top?.name || null);
+
+        // ── Raw market price comes from Collectr's `marketPrice[0].price` ──
+        const mp = product?.marketPrice;
+        let rawFromCollectr: number | null = null;
+        if (Array.isArray(mp) && mp.length > 0) {
+          // Prefer Holofoil if multiple types are present, else first entry.
+          const preferred = mp.find((m: any) => String(m?.type ?? '').toLowerCase().includes('holo')) || mp[0];
+          const v = typeof preferred?.price === 'string' ? parseFloat(preferred.price) : Number(preferred?.price);
+          if (Number.isFinite(v) && v > 0) rawFromCollectr = v;
+        } else if (mp && typeof mp === 'object') {
+          const v = typeof (mp as any).price === 'string' ? parseFloat((mp as any).price) : Number((mp as any).price);
+          if (Number.isFinite(v) && v > 0) rawFromCollectr = v;
+        }
+        if (!cancelled) setCollectrRawPrice(rawFromCollectr);
 
         // Collectr returns a flat `gradedPrices` array. Each row looks like:
         //   { grade: "PSA 9.0 (MINT)", population: "86", price: "843.0000", type: "Holofoil" }
@@ -359,6 +374,12 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
   const isEmpty = !loading && fetched && grades.length === 0 && !error;
 
+  // Prefer Collectr's marketPrice as the raw baseline (it's the source of truth
+  // matching the graded prices). Fall back to the upstream price prop if missing.
+  const effectiveRaw = collectrRawPrice ?? rawPrice;
+  const rawSource: 'collectr' | 'market' | null =
+    collectrRawPrice != null ? 'collectr' : (rawPrice != null && rawPrice > 0 ? 'market' : null);
+
   const byCompany: Record<string, { grade: string; price: number; population?: number | null }[]> = {};
   for (const g of grades) {
     const key = g.company.toUpperCase();
@@ -369,8 +390,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   // Find PSA 10 specifically for the hero display
   const psa10 = grades.find(g => g.company.toLowerCase() === 'psa' && g.grade.toLowerCase().includes('10'));
   const heroGrade = psa10 || grades[0] || null;
-  const heroPremium = heroGrade && rawPrice && rawPrice > 0
-    ? ((heroGrade.price / rawPrice - 1) * 100)
+  const heroPremium = heroGrade && effectiveRaw && effectiveRaw > 0
+    ? ((heroGrade.price / effectiveRaw - 1) * 100)
     : null;
 
   // Sort helper: extract numeric grade value, higher first
@@ -380,8 +401,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   };
 
   // Multiplier (e.g. 4.2× the raw)
-  const heroMultiple = heroGrade && rawPrice && rawPrice > 0
-    ? heroGrade.price / rawPrice
+  const heroMultiple = heroGrade && effectiveRaw && effectiveRaw > 0
+    ? heroGrade.price / effectiveRaw
     : null;
 
   // Build a "best price per grade across all companies" comparison table.
@@ -401,8 +422,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     .map(([n, v]) => ({
       gradeNum: n,
       ...v,
-      premium: rawPrice && rawPrice > 0 ? (v.price / rawPrice - 1) * 100 : null,
-      multiple: rawPrice && rawPrice > 0 ? v.price / rawPrice : null,
+      premium: effectiveRaw && effectiveRaw > 0 ? (v.price / effectiveRaw - 1) * 100 : null,
+      multiple: effectiveRaw && effectiveRaw > 0 ? v.price / effectiveRaw : null,
     }));
   const maxGradePrice = gradeProgression.reduce((m, r) => Math.max(m, r.price), 0);
 
@@ -441,11 +462,13 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                 <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Raw / Ungraded</p>
                   <p className="text-2xl md:text-3xl font-black tabular-nums text-foreground mt-2">
-                    {rawPrice != null && rawPrice > 0
-                      ? `$${rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    {effectiveRaw != null && effectiveRaw > 0
+                      ? `$${effectiveRaw.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : '—'}
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">market price</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {rawSource === 'collectr' ? 'Collectr market price' : 'market price'}
+                  </p>
                 </div>
 
                 {/* Arrow + multiple */}
@@ -478,11 +501,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
               </div>
 
               {/* Plain-language summary */}
-              {rawPrice != null && rawPrice > 0 && heroPremium != null && (
+              {effectiveRaw != null && effectiveRaw > 0 && heroPremium != null && (
                 <p className="text-xs text-muted-foreground text-center mt-3">
                   A {heroGrade.company.toUpperCase()} {heroGrade.grade} sells for{' '}
                   <span className="font-bold text-foreground">
-                    ${(heroGrade.price - rawPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    ${(heroGrade.price - effectiveRaw).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </span>{' '}
                   more than a raw copy
                   {heroMultiple != null && <> — that&apos;s <span className="font-bold text-primary">{heroMultiple.toFixed(1)}×</span> the raw price.</>}
@@ -513,16 +536,16 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                   </thead>
                   <tbody>
                     {/* Raw row first as baseline */}
-                    {rawPrice != null && rawPrice > 0 && (
+                    {effectiveRaw != null && effectiveRaw > 0 && (
                       <tr className="border-t border-border/30 bg-muted/10">
                         <td className="px-3 py-2 font-bold text-foreground">Raw</td>
                         <td className="px-3 py-2 text-right tabular-nums font-bold text-foreground">
-                          ${rawPrice.toFixed(2)}
+                          ${effectiveRaw.toFixed(2)}
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">—</td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">1.0×</td>
                         <td className="px-3 py-2">
-                          <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (rawPrice / maxGradePrice) * 100 : 0}%` }} />
+                          <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (effectiveRaw / maxGradePrice) * 100 : 0}%` }} />
                         </td>
                       </tr>
                     )}
@@ -593,7 +616,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                         {gs
                           .sort((a, b) => gradeOrder(b.grade) - gradeOrder(a.grade))
                           .map((g) => {
-                            const premium = rawPrice && rawPrice > 0 ? ((g.price / rawPrice - 1) * 100) : null;
+                            const premium = effectiveRaw && effectiveRaw > 0 ? ((g.price / effectiveRaw - 1) * 100) : null;
                             return (
                               <div key={`${company}-${g.grade}`} className="rounded-lg border border-border/40 bg-muted/30 px-3 py-2">
                                 <div className="flex items-center justify-between gap-2">
