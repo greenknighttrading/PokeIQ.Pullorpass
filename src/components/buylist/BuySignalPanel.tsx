@@ -351,6 +351,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
         <Award className="w-5 h-5 text-primary" />
         <h2 className="text-base font-bold text-foreground">Graded Pricing</h2>
         <Badge variant="secondary" className="text-[10px]">PSA / BGS / CGC</Badge>
+        <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Collectr</Badge>
       </div>
 
       {loading ? (
