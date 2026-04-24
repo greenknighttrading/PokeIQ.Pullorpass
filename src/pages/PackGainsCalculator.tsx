@@ -12,7 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Loader2, TrendingDown, TrendingUp, Target, Wallet, Zap, Database, Cloud,
+  Loader2, TrendingDown, TrendingUp, Target, Wallet, Zap, Database, Cloud, Dices, X,
 } from 'lucide-react';
 import {
   PACK_ODDS_REGISTRY, getPackOddsBySetName, type PackOddsConfig,
@@ -70,6 +70,7 @@ export default function PackGainsCalculator() {
   const [selectedSet, setSelectedSet] = useState<string>(PACK_ODDS_REGISTRY[0].setName);
   const [packsOpened, setPacksOpened] = useState<number>(10);
   const [costPerPack, setCostPerPack] = useState<number>(10);
+  const [rollResult, setRollResult] = useState<{ rarity: string; value: number; profit: number } | null>(null);
 
   const config = getPackOddsBySetName(selectedSet)!;
 
@@ -170,6 +171,24 @@ export default function PackGainsCalculator() {
   const liveCount = stats.rows.filter(r => r.source === 'justtcg').length;
   const missingCount = stats.rows.filter(r => r.source === 'none').length;
 
+  const handleRoll = () => {
+    // Weighted random pick by chance %
+    const eligible = stats.rows.filter(r => r.avgRawPrice > 0);
+    if (eligible.length === 0) return;
+    const totalWeight = eligible.reduce((s, r) => s + r.chancePct, 0);
+    let pick = Math.random() * totalWeight;
+    let chosen = eligible[0];
+    for (const r of eligible) {
+      pick -= r.chancePct;
+      if (pick <= 0) { chosen = r; break; }
+    }
+    setRollResult({
+      rarity: chosen.rarity,
+      value: chosen.avgRawPrice,
+      profit: chosen.avgRawPrice - costPerPack,
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Seo
@@ -205,7 +224,7 @@ export default function PackGainsCalculator() {
 
         {/* Controls */}
         <Card>
-          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
               <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
               <Select value={selectedSet} onValueChange={setSelectedSet}>
@@ -237,8 +256,59 @@ export default function PackGainsCalculator() {
                 className="mt-1.5 h-11"
               />
             </div>
+            <div>
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Simulate</Label>
+              <Button
+                onClick={handleRoll}
+                disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0)}
+                className="mt-1.5 h-11 w-full gap-2"
+              >
+                <Dices className="w-4 h-4" />
+                Roll Pack
+              </Button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Roll result */}
+        {rollResult && (
+          <Card className="border-primary/40 bg-primary/5">
+            <CardContent className="p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Dices className="w-5 h-5 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">You pulled</div>
+                  <div className="text-base font-semibold truncate">{rollResult.rarity}</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">Avg value</div>
+                  <div className="text-base font-bold tabular-nums">{fmtMoney(rollResult.value)}</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground">P&L</div>
+                  <div className={cn(
+                    'text-base font-bold tabular-nums',
+                    rollResult.profit >= 0 ? 'text-success' : 'text-destructive'
+                  )}>
+                    {rollResult.profit >= 0 ? '+' : ''}{fmtMoney(rollResult.profit)}
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setRollResult(null)}
+                  className="shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Hero KPI strip */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
