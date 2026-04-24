@@ -376,18 +376,17 @@ export default function PackGainsCalculator() {
           />
         </div>
 
-        {/* Run summary */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Run summary</CardTitle>
-            <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} each</p>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <SummaryRow label="Total set value (all rarities, NM)" value={fmtMoney(stats.totalSetValue)} sub="sum of every card price" />
-            <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
-            <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
-            <div className="border-t border-border/60 pt-3 space-y-2">
-              <div className="flex items-center justify-between">
+        {/* Expected vs Simulated */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Expected run</CardTitle>
+              <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} — pure math</p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
+              <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
+              <div className="border-t border-border/60 pt-3 flex items-center justify-between">
                 <span className="text-sm">Expected P&L</span>
                 <span className={cn(
                   'text-base font-bold tabular-nums',
@@ -396,12 +395,54 @@ export default function PackGainsCalculator() {
                   {expectedGainLoss >= 0 ? '+' : ''}{fmtMoney(expectedGainLoss)}
                 </span>
               </div>
-            </div>
-            <p className="text-[11px] text-muted-foreground pt-1">
-              Expected uses statistical odds (packs × pull rate × avg raw price).
-            </p>
-          </CardContent>
-        </Card>
+              <p className="text-[11px] text-muted-foreground pt-1">
+                Statistical EV: packs × pull rate × avg raw price.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className={cn(rollResult && 'border-primary/40')}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Simulated run</CardTitle>
+              <p className="text-[11px] text-muted-foreground">
+                {rollResult ? `Random roll — variance is real` : 'Run a simulation to see your luck'}
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <SummaryRow label="Spend" value={fmtMoney(rollResult?.totalCost ?? totalCost)} />
+              <SummaryRow
+                label="Actual return"
+                value={rollResult ? fmtMoney(rollResult.totalValue) : '—'}
+              />
+              <div className="border-t border-border/60 pt-3 flex items-center justify-between">
+                <span className="text-sm">Actual P&L</span>
+                {rollResult ? (
+                  <span className={cn(
+                    'text-base font-bold tabular-nums',
+                    (rollResult.totalValue - rollResult.totalCost) >= 0 ? 'text-success' : 'text-destructive'
+                  )}>
+                    {(rollResult.totalValue - rollResult.totalCost) >= 0 ? '+' : ''}
+                    {fmtMoney(rollResult.totalValue - rollResult.totalCost)}
+                  </span>
+                ) : (
+                  <span className="text-base font-bold text-muted-foreground">—</span>
+                )}
+              </div>
+              {rollResult && (
+                <p className="text-[11px] text-muted-foreground pt-1">
+                  Variance vs expected:{' '}
+                  <span className={cn(
+                    'font-semibold tabular-nums',
+                    (rollResult.totalValue - expectedValueTotal) >= 0 ? 'text-success' : 'text-destructive'
+                  )}>
+                    {(rollResult.totalValue - expectedValueTotal) >= 0 ? '+' : ''}
+                    {fmtMoney(rollResult.totalValue - expectedValueTotal)}
+                  </span>
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Rarity breakdown */}
         <Card>
