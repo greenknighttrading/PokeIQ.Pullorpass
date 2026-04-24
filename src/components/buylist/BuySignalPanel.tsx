@@ -616,7 +616,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                         {gs
                           .sort((a, b) => gradeOrder(b.grade) - gradeOrder(a.grade))
                           .map((g) => {
-                            const premium = rawPrice && rawPrice > 0 ? ((g.price / rawPrice - 1) * 100) : null;
+                            const premium = effectiveRaw && effectiveRaw > 0 ? ((g.price / effectiveRaw - 1) * 100) : null;
                             return (
                               <div key={`${company}-${g.grade}`} className="rounded-lg border border-border/40 bg-muted/30 px-3 py-2">
                                 <div className="flex items-center justify-between gap-2">
