@@ -583,18 +583,44 @@ export default function PackGainsCalculator() {
                         const delta = sessPnL - expPnL;
                         const tone = delta >= 0 ? 'pos' : 'neg';
                         const arrow = delta >= 0 ? '↑' : '↓';
+                        // Percentile via normal approximation: mean = EV*packs (on the value side),
+                        // sigma = sqrt(packs) * per-pack stddev. Compare actual pulled value to that
+                        // distribution. A higher pulled value = a higher percentile rank.
+                        let percentileSentence: string | null = null;
+                        if (perPackStdDev > 0 && sessionTotals.packs > 0) {
+                          const sigma = perPackStdDev * Math.sqrt(sessionTotals.packs);
+                          const meanValue = stats.evPerPack * sessionTotals.packs;
+                          const z = (sessValue - meanValue) / sigma;
+                          const pctBelow = normalCdf(z) * 100; // % of sessions you beat
+                          if (delta >= 0) {
+                            const topPct = Math.max(1, Math.min(99, Math.round(100 - pctBelow)));
+                            percentileSentence = `This session landed in the top ${topPct}% of outcomes for ${sessionTotals.packs} packs.`;
+                          } else {
+                            const bottomPct = Math.max(1, Math.min(99, Math.round(pctBelow)));
+                            percentileSentence = `This session landed in the bottom ${bottomPct}% of outcomes for ${sessionTotals.packs} packs.`;
+                          }
+                        }
                         return (
-                          <tr className="border-t border-border/30 bg-muted/20">
-                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
-                            <td colSpan={2} className={cn(
-                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
-                              tone === 'pos' && 'text-success',
-                              tone === 'neg' && 'text-destructive',
-                            )}>
-                              {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
-                              {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
-                            </td>
-                          </tr>
+                          <>
+                            <tr className="border-t border-border/30 bg-muted/20">
+                              <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                              <td colSpan={2} className={cn(
+                                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                                tone === 'pos' && 'text-success',
+                                tone === 'neg' && 'text-destructive',
+                              )}>
+                                {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
+                                {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
+                              </td>
+                            </tr>
+                            {percentileSentence && (
+                              <tr className="bg-muted/20">
+                                <td colSpan={3} className="px-3 pb-2.5 text-[11px] text-muted-foreground leading-relaxed">
+                                  {percentileSentence}
+                                </td>
+                              </tr>
+                            )}
+                          </>
                         );
                       })()}
                     </tbody>
