@@ -12,7 +12,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
-  Loader2, Dice5, RefreshCw, TrendingDown, TrendingUp, Target, Wallet, Zap, Database, Cloud,
+  Loader2, TrendingDown, TrendingUp, Target, Wallet, Zap, Database, Cloud,
 } from 'lucide-react';
 import {
   PACK_ODDS_REGISTRY, getPackOddsBySetName, type PackOddsConfig,
