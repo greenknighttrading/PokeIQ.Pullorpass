@@ -157,36 +157,15 @@ export default function PackGainsCalculator() {
     [config, priceMap]
   );
 
-  // Simulated rip — re-rolled when simSeed or inputs change
-  const sim = useMemo(() => {
-    const totals: Record<string, number> = {};
-    config.rarities.forEach(r => { totals[r.rarity] = 0; });
-    for (let i = 0; i < Math.max(0, Math.floor(packsOpened)); i++) {
-      const pack = simulatePack(config);
-      for (const k of Object.keys(pack)) totals[k] += pack[k];
-    }
-    let simValue = 0;
-    for (const r of stats.rows) simValue += totals[r.rarity] * r.avgRawPrice;
-    return { hits: totals, totalValue: simValue };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [simSeed, packsOpened, stats.rows]);
-
   const expectedValueTotal = stats.evPerPack * Math.max(0, packsOpened);
   const totalCost = costPerPack * Math.max(0, packsOpened);
   const expectedGainLoss = expectedValueTotal - totalCost;
-  const simGainLoss = sim.totalValue - totalCost;
   const breakEvenPack = stats.evPerPack;
   const avgGainPerPack = stats.evPerPack - costPerPack;
   const evRoiPct = costPerPack > 0 ? (avgGainPerPack / costPerPack) * 100 : 0;
   const dbCount = stats.rows.filter(r => r.source === 'db').length;
   const liveCount = stats.rows.filter(r => r.source === 'justtcg').length;
   const missingCount = stats.rows.filter(r => r.source === 'none').length;
-  // Sort rarities by EV contribution (most valuable first) for the visual breakdown
-  const rarityRanked = useMemo(
-    () => [...stats.rows].sort((a, b) => b.evPerPack - a.evPerPack),
-    [stats.rows]
-  );
-  const maxEv = Math.max(...rarityRanked.map(r => r.evPerPack), 0.0001);
 
   return (
     <div className="min-h-screen bg-background">
