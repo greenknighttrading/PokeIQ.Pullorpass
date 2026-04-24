@@ -329,24 +329,6 @@ export default function PackGainsCalculator() {
           </div>
         </header>
 
-        {summaryBanner && (
-          <Card className={cn(
-            'border-l-4',
-            summaryBanner.tone === 'lucky' && 'border-l-success bg-success/5',
-            summaryBanner.tone === 'avg' && 'border-l-warning bg-warning/5',
-            summaryBanner.tone === 'unlucky' && 'border-l-destructive bg-destructive/5',
-          )}>
-            <CardContent className="p-4 flex items-start gap-3">
-              {summaryBanner.tone === 'lucky'
-                ? <TrendingUp className="w-5 h-5 text-success shrink-0 mt-0.5" />
-                : summaryBanner.tone === 'unlucky'
-                  ? <TrendingDown className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
-                  : <Target className="w-5 h-5 text-warning shrink-0 mt-0.5" />}
-              <p className="text-sm text-foreground leading-relaxed">{summaryBanner.headline}</p>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Controls + pulls */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           <Card className="lg:col-span-3">
