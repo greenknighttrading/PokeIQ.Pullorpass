@@ -397,7 +397,9 @@ export default function PackGainsCalculator() {
                   {stats.rows.map(r => (
                     <tr key={r.rarity} className="border-t border-border/40">
                       <td className="px-4 py-3">{r.rarity}</td>
-                      <td className="px-4 py-3 text-center tabular-nums">1 / {r.oneIn}</td>
+                      <td className="px-4 py-3 text-center tabular-nums">
+                        1 / {r.oneIn < 2 ? r.oneIn.toFixed(2) : r.oneIn}
+                      </td>
                       <td className="px-4 py-3 text-center tabular-nums">{r.chancePct.toFixed(2)}%</td>
                       <td className="px-4 py-3 text-center tabular-nums">
                         {r.avgRawPrice > 0 ? fmtMoney(r.avgRawPrice) : <span className="text-muted-foreground">—</span>}
