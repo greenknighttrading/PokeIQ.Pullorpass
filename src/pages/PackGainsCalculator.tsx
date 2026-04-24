@@ -531,7 +531,7 @@ export default function PackGainsCalculator() {
                     <CardTitle className="text-base">Actual vs Expected</CardTitle>
                     <p className="text-xs text-muted-foreground">
                       {hasSession
-                        ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
+                        ? <span><span className="text-base font-bold text-foreground">{sessionTotals.rolls}</span> <span className="text-muted-foreground">{sessionTotals.rolls === 1 ? 'run' : 'runs'}</span> · <span className="text-base font-bold text-foreground">{sessionTotals.packs}</span> <span className="text-muted-foreground">packs ripped</span></span>
                         : `Run a simulation to populate actuals`}
                     </p>
                   </div>
