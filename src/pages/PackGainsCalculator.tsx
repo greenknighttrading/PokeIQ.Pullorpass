@@ -402,6 +402,7 @@ export default function PackGainsCalculator() {
               <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} — pure math</p>
             </CardHeader>
             <CardContent className="space-y-3">
+              <SummaryRow label="Packs ripped" value={String(Math.max(0, packsOpened))} />
               <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
               <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
               <div className="border-t border-border/60 pt-3 flex items-center justify-between">
