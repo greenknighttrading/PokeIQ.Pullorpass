@@ -424,6 +424,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                                     {premium > 0 ? '+' : ''}{premium.toFixed(0)}% vs raw
                                   </p>
                                 )}
+                                {g.population != null && g.population > 0 && (
+                                  <p className="text-[10px] text-muted-foreground tabular-nums mt-0.5 text-right">
+                                    Pop {g.population.toLocaleString()}
+                                  </p>
+                                )}
                               </div>
                             );
                           })}
