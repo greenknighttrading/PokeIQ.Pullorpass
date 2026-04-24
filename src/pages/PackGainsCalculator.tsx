@@ -334,108 +334,50 @@ export default function PackGainsCalculator() {
           </div>
         </header>
 
-        {/* Controls + pulls */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-          <Card className="lg:col-span-3">
-            <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-              <div className="md:col-span-2">
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
-                <Select value={selectedSet} onValueChange={setSelectedSet}>
-                  <SelectTrigger className="mt-1.5 h-11">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PACK_ODDS_REGISTRY.map(p => (
-                      <SelectItem key={p.setName} value={p.setName}>
-                        {p.displayName} ({p.setCode})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
-                <Input
-                  type="number" min={0} value={packsOpened}
-                  onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
-                  className="mt-1.5 h-11"
-                />
-              </div>
-              <div>
-                <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
-                <Input
-                  type="number" min={0} step="0.01" value={costPerPack}
-                  onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
-                  className="mt-1.5 h-11"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <Button
-                  onClick={handleRoll}
-                  disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0) || packsOpened <= 0}
-                  className="h-11 w-full gap-2"
-                >
-                  <Dices className="w-4 h-4" />
-                  {rollResult ? `Re-roll ${packsOpened} packs` : `Simulate ${packsOpened} packs`}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Pull tally */}
-          <Card className={cn('lg:col-span-2', rollResult && 'border-primary/40 bg-primary/5')}>
-            <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-base">Your pulls</CardTitle>
-                <p className="text-[11px] text-muted-foreground">
-                  {rollResult
-                    ? (() => {
-                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
-                        const packs = rollResult.pulls.length;
-                        const expected = expectedHitRate
-                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
-                          : '';
-                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
-                      })()
-                    : 'Hit Simulate to roll the rare slot for every pack.'}
-                </p>
-              </div>
-              {rollResult && (
-                <Button variant="ghost" size="icon" onClick={() => setRollResult(null)} className="shrink-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-            </CardHeader>
-            <CardContent className="pt-1">
-              {!rollResult ? (
-                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
-                  No simulation yet
-                </div>
-              ) : (
-                <div className="space-y-1.5 max-h-[180px] overflow-y-auto pr-1">
-                  {pullTally.map(t => (
-                    <div
-                      key={t.rarity}
-                      className={cn(
-                        'flex items-center justify-between text-xs px-2.5 py-1.5 rounded-md',
-                        t.isHit ? 'bg-success/10 text-foreground' : 'bg-muted/40 text-muted-foreground'
-                      )}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{t.shortLabel}</Badge>
-                        <span className="truncate">{t.rarity}</span>
-                      </div>
-                      <div className="flex items-center gap-3 tabular-nums shrink-0">
-                        <span className="text-muted-foreground">×{t.count}</span>
-                        <span className="font-semibold">{fmtMoney(t.value)}</span>
-                      </div>
-                    </div>
+        {/* Select Set — single full-width bar */}
+        <Card>
+          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-end gap-3">
+            <div className="flex-1 min-w-0">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
+              <Select value={selectedSet} onValueChange={setSelectedSet}>
+                <SelectTrigger className="mt-1.5 h-11">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PACK_ODDS_REGISTRY.map(p => (
+                    <SelectItem key={p.setName} value={p.setName}>
+                      {p.displayName} ({p.setCode})
+                    </SelectItem>
                   ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full sm:w-32">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
+              <Input
+                type="number" min={0} value={packsOpened}
+                onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
+                className="mt-1.5 h-11"
+              />
+            </div>
+            <div className="w-full sm:w-36">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
+              <Input
+                type="number" min={0} step="0.01" value={costPerPack}
+                onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
+                className="mt-1.5 h-11"
+              />
+            </div>
+            <Button
+              onClick={handleRoll}
+              disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0) || packsOpened <= 0}
+              className="h-11 w-full sm:w-auto gap-2 sm:px-6"
+            >
+              <Dices className="w-4 h-4" />
+              {rollResult ? `Re-roll ${packsOpened} packs` : `Simulate ${packsOpened} packs`}
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Set summary (left) + Actual vs Expected (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
