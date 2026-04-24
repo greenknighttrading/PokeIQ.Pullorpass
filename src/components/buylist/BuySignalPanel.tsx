@@ -408,6 +408,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   // Build a "best price per grade across all companies" comparison table.
   // For each numeric grade (10, 9.5, 9, 8.5, …) we pick the highest price
   // available across PSA / BGS / CGC so we can show how value scales by grade.
+  // We also carry over the population count from the winning entry.
   const bestByGrade = new Map<number, { grade: string; price: number; company: string; population?: number | null }>();
   for (const g of grades) {
     const n = parseFloat(g.grade.replace(/[^0-9.]/g, ''));
@@ -497,6 +498,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                       {heroPremium > 0 ? '+' : ''}{heroPremium.toFixed(0)}% gain on grading
                     </p>
                   )}
+                  {heroGrade.population != null && heroGrade.population > 0 && (
+                    <p className="text-[10px] text-muted-foreground mt-1 tabular-nums">
+                      Pop {heroGrade.population.toLocaleString()}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -531,7 +537,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                       <th className="text-right px-3 py-2 font-semibold">Price</th>
                       <th className="text-right px-3 py-2 font-semibold hidden sm:table-cell">vs Raw</th>
                       <th className="text-right px-3 py-2 font-semibold hidden md:table-cell">Multiple</th>
-                      <th className="px-3 py-2 font-semibold w-[35%]">Relative</th>
+                      <th className="text-right px-3 py-2 font-semibold hidden lg:table-cell">Pop</th>
+                      <th className="px-3 py-2 font-semibold w-[30%]">Relative</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -544,6 +551,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">—</td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">1.0×</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden lg:table-cell">—</td>
                         <td className="px-3 py-2">
                           <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (effectiveRaw / maxGradePrice) * 100 : 0}%` }} />
                         </td>
@@ -576,6 +584,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                           </td>
                           <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">
                             {row.multiple != null ? `${row.multiple.toFixed(1)}×` : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden lg:table-cell">
+                            {row.population != null && row.population > 0
+                              ? row.population.toLocaleString()
+                              : '—'}
                           </td>
                           <td className="px-3 py-2">
                             <div
