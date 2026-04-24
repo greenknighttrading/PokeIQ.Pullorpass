@@ -24,7 +24,8 @@ interface RarityRow {
   shortLabel: string;
   oneIn: number;
   chancePct: number;        // 100 / oneIn
-  avgRawPrice: number;      // mean price for this rarity in DB
+  avgRawPrice: number;      // mean price for this rarity
+  totalRarityValue: number; // sum of all card prices in this rarity
   cardCount: number;        // # of cards we found for this rarity
   evPerPack: number;        // chancePct/100 * avgRawPrice
   source: 'db' | 'justtcg' | 'none';
@@ -33,6 +34,7 @@ interface RarityRow {
 interface PackStats {
   rows: RarityRow[];
   evPerPack: number;        // total expected value per pack
+  totalSetValue: number;    // grand total of all rarity totals
 }
 
 const fmtMoney = (n: number) =>
@@ -40,7 +42,7 @@ const fmtMoney = (n: number) =>
 
 function buildStats(
   config: PackOddsConfig,
-  priceByRarity: Map<string, { avg: number; count: number; source: 'db' | 'justtcg' }>
+  priceByRarity: Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>
 ): PackStats {
   const rows: RarityRow[] = config.rarities.map(r => {
     const rec = priceByRarity.get(r.rarity);
@@ -52,13 +54,15 @@ function buildStats(
       oneIn: r.oneIn,
       chancePct,
       avgRawPrice: avg,
+      totalRarityValue: rec?.sum ?? 0,
       cardCount: rec?.count ?? 0,
       evPerPack: (chancePct / 100) * avg,
       source: rec ? rec.source : 'none',
     };
   });
   const evPerPack = rows.reduce((s, r) => s + r.evPerPack, 0);
-  return { rows, evPerPack };
+  const totalSetValue = rows.reduce((s, r) => s + r.totalRarityValue, 0);
+  return { rows, evPerPack, totalSetValue };
 }
 
 
