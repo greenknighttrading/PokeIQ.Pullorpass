@@ -583,51 +583,109 @@ export default function PackGainsCalculator() {
                         const delta = sessPnL - expPnL;
                         const tone = delta >= 0 ? 'pos' : 'neg';
                         const arrow = delta >= 0 ? '↑' : '↓';
-                        // Percentile via normal approximation: mean = EV*packs (on the value side),
-                        // sigma = sqrt(packs) * per-pack stddev. Compare actual pulled value to that
-                        // distribution. A higher pulled value = a higher percentile rank.
-                        let percentileSentence: string | null = null;
-                        if (perPackStdDev > 0 && sessionTotals.packs > 0) {
-                          const sigma = perPackStdDev * Math.sqrt(sessionTotals.packs);
-                          const meanValue = stats.evPerPack * sessionTotals.packs;
-                          const z = (sessValue - meanValue) / sigma;
-                          const pctBelow = normalCdf(z) * 100; // % of sessions you beat
-                          if (delta >= 0) {
-                            const topPct = Math.max(1, Math.min(99, Math.round(100 - pctBelow)));
-                            percentileSentence = `This session landed in the top ${topPct}% of outcomes for ${sessionTotals.packs} packs.`;
-                          } else {
-                            const bottomPct = Math.max(1, Math.min(99, Math.round(pctBelow)));
-                            percentileSentence = `This session landed in the bottom ${bottomPct}% of outcomes for ${sessionTotals.packs} packs.`;
-                          }
-                        }
                         return (
-                          <>
-                            <tr className="border-t border-border/30 bg-muted/20">
-                              <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
-                              <td colSpan={2} className={cn(
-                                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
-                                tone === 'pos' && 'text-success',
-                                tone === 'neg' && 'text-destructive',
-                              )}>
-                                {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
-                                {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
-                              </td>
-                            </tr>
-                            {percentileSentence && (
-                              <tr className="bg-muted/20">
-                                <td colSpan={3} className="px-3 pb-2.5 text-[11px] text-muted-foreground leading-relaxed">
-                                  {percentileSentence}
-                                </td>
-                              </tr>
-                            )}
-                          </>
+                          <tr className="border-t border-border/30 bg-muted/20">
+                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                            <td colSpan={2} className={cn(
+                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                              tone === 'pos' && 'text-success',
+                              tone === 'neg' && 'text-destructive',
+                            )}>
+                              {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
+                              {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
+                            </td>
+                          </tr>
                         );
                       })()}
                     </tbody>
                   </table>
-                  <p className="px-3 py-2.5 text-[11px] text-muted-foreground border-t border-border/40">
-                    Expected = {expPacks} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
-                  </p>
+                  {hasSession && (() => {
+                    // Distribution math
+                    const sigma = perPackStdDev > 0 ? perPackStdDev * Math.sqrt(sessionTotals.packs) : 0;
+                    const meanValue = stats.evPerPack * sessionTotals.packs;
+                    const z = sigma > 0 ? (sessValue - meanValue) / sigma : 0;
+                    const pctBelow = sigma > 0 ? normalCdf(z) * 100 : 50;
+                    const beatPct = sessPnL - expPnL >= 0;
+                    const percentile = beatPct
+                      ? Math.max(1, Math.min(99, Math.round(100 - pctBelow)))
+                      : Math.max(1, Math.min(99, Math.round(pctBelow)));
+                    const percentileSentence = beatPct
+                      ? `These total sessions landed in the top ${percentile}% of outcomes for ${sessionTotals.packs} packs.`
+                      : `These total sessions landed in the bottom ${percentile}% of outcomes for ${sessionTotals.packs} packs.`;
+
+                    // Convergence note
+                    const cumReturnPct = expReturn > 0 ? ((sessValue - expReturn) / expReturn) * 100 : 0;
+                    const fromExpected = `${cumReturnPct >= 0 ? '+' : ''}${cumReturnPct.toFixed(1)}%`;
+
+                    // Variance shrink
+                    const swing = sigma; // 1σ in $ at current pack count
+                    const swing10x = perPackStdDev * Math.sqrt(sessionTotals.packs * 10);
+
+                    // Milestone
+                    let milestone: { label: string; tone: 'warn' | 'info' | 'good' } | null = null;
+                    if (sessionTotals.packs >= 1000) {
+                      milestone = { label: 'Strong sample — 90% of collectors are within 8% of expected at this volume.', tone: 'good' };
+                    } else if (sessionTotals.packs >= 500) {
+                      milestone = { label: 'Solid sample. Results are starting to stabilize.', tone: 'info' };
+                    } else if (sessionTotals.packs >= 180) {
+                      milestone = { label: 'Early sample — variance is still high at this volume.', tone: 'warn' };
+                    }
+
+                    return (
+                      <div className="border-t border-border/40 px-3 py-3 space-y-3">
+                        {/* Percentile sentence + mini bell curve */}
+                        <div className="space-y-2">
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            {percentileSentence}
+                          </p>
+                          <BellCurve z={z} />
+                        </div>
+
+                        {/* Convergence + variance */}
+                        <div className="space-y-1.5 pt-2 border-t border-border/30">
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            After <span className="text-foreground font-medium">{sessionTotals.packs}</span> packs,
+                            your cumulative return is{' '}
+                            <span className={cn(
+                              'font-medium',
+                              cumReturnPct >= 0 ? 'text-success' : 'text-destructive'
+                            )}>{fromExpected}</span> from expected. The more you rip, the closer this trends toward{' '}
+                            <span className="text-foreground font-medium">{fmtMoney(stats.evPerPack)}</span>/pack.
+                          </p>
+                          {sigma > 0 && (
+                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                              At {sessionTotals.packs} packs, a ±{fmtMoney(swing)} swing is completely normal.
+                              At {sessionTotals.packs * 10} packs, that band tightens to ±{fmtMoney(swing10x / 3)}.
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Milestone badge */}
+                        {milestone && (
+                          <div className={cn(
+                            'flex items-start gap-2 rounded-md px-2.5 py-2 text-[11px] leading-relaxed',
+                            milestone.tone === 'good' && 'bg-success/10 text-success-foreground',
+                            milestone.tone === 'info' && 'bg-primary/10 text-foreground',
+                            milestone.tone === 'warn' && 'bg-warning/10 text-foreground',
+                          )}>
+                            <Target className={cn(
+                              'w-3.5 h-3.5 shrink-0 mt-0.5',
+                              milestone.tone === 'good' && 'text-success',
+                              milestone.tone === 'info' && 'text-primary',
+                              milestone.tone === 'warn' && 'text-warning',
+                            )} />
+                            <span>{milestone.label}</span>
+                          </div>
+                        )}
+
+                        {/* Gambler's fallacy caveat */}
+                        <p className="text-[10px] text-muted-foreground/80 leading-relaxed pt-1 border-t border-border/30 italic">
+                          Each session is independent. Past unlucky runs don't make future hits more likely —
+                          but over enough packs, results naturally trend toward expected value.
+                        </p>
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             );
