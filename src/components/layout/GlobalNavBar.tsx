@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale } from 'lucide-react';
+import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
@@ -62,6 +62,7 @@ export function GlobalNavBar({
   const navItems = [
     { label: 'The Pulse', href: '/pokeiq-daily', icon: FileText, requiresAuth: false },
     { label: 'My Portfolio', href: '/home', icon: TrendingUp, requiresAuth: false },
+    { label: 'Pack Gains', href: '/pack-gains', icon: Package, requiresAuth: false },
     { label: 'Personality Test', href: '/test', icon: Sparkles, requiresAuth: false },
   ];
 
