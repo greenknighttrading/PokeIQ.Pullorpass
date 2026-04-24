@@ -441,9 +441,6 @@ export default function PackGainsCalculator() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           {(() => {
           const sessionPacks = sessionTotals.packs;
-          const avgGainLossLive = sessionPacks > 0
-            ? (sessionTotals.value - sessionTotals.cost) / sessionPacks
-            : avgGainPerPack;
           const avgCostPerPackLive = sessionPacks > 0
             ? sessionTotals.cost / sessionPacks
             : costPerPack;
@@ -484,12 +481,12 @@ export default function PackGainsCalculator() {
                     <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Current avg gain/loss from ripping</span>
+                    <span className="text-sm">Expected gain/loss from ripping</span>
                     <span className={cn(
                       'text-sm font-semibold tabular-nums',
-                      avgGainLossLive >= 0 ? 'text-success' : 'text-destructive'
+                      avgGainPerPack >= 0 ? 'text-success' : 'text-destructive'
                     )}>
-                      {avgGainLossLive >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainLossLive))}
+                      {avgGainPerPack >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainPerPack))}
                     </span>
                   </div>
                   <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
