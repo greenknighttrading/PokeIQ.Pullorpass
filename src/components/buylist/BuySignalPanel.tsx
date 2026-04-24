@@ -462,11 +462,13 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                 <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Raw / Ungraded</p>
                   <p className="text-2xl md:text-3xl font-black tabular-nums text-foreground mt-2">
-                    {rawPrice != null && rawPrice > 0
-                      ? `$${rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    {effectiveRaw != null && effectiveRaw > 0
+                      ? `$${effectiveRaw.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : '—'}
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-1">market price</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    {rawSource === 'collectr' ? 'Collectr market price' : 'market price'}
+                  </p>
                 </div>
 
                 {/* Arrow + multiple */}
@@ -499,11 +501,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
               </div>
 
               {/* Plain-language summary */}
-              {rawPrice != null && rawPrice > 0 && heroPremium != null && (
+              {effectiveRaw != null && effectiveRaw > 0 && heroPremium != null && (
                 <p className="text-xs text-muted-foreground text-center mt-3">
                   A {heroGrade.company.toUpperCase()} {heroGrade.grade} sells for{' '}
                   <span className="font-bold text-foreground">
-                    ${(heroGrade.price - rawPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    ${(heroGrade.price - effectiveRaw).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                   </span>{' '}
                   more than a raw copy
                   {heroMultiple != null && <> — that&apos;s <span className="font-bold text-primary">{heroMultiple.toFixed(1)}×</span> the raw price.</>}
@@ -534,16 +536,16 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                   </thead>
                   <tbody>
                     {/* Raw row first as baseline */}
-                    {rawPrice != null && rawPrice > 0 && (
+                    {effectiveRaw != null && effectiveRaw > 0 && (
                       <tr className="border-t border-border/30 bg-muted/10">
                         <td className="px-3 py-2 font-bold text-foreground">Raw</td>
                         <td className="px-3 py-2 text-right tabular-nums font-bold text-foreground">
-                          ${rawPrice.toFixed(2)}
+                          ${effectiveRaw.toFixed(2)}
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">—</td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">1.0×</td>
                         <td className="px-3 py-2">
-                          <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (rawPrice / maxGradePrice) * 100 : 0}%` }} />
+                          <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (effectiveRaw / maxGradePrice) * 100 : 0}%` }} />
                         </td>
                       </tr>
                     )}
