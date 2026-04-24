@@ -55,13 +55,16 @@ export const PRISMATIC_EVOLUTIONS: PackOddsConfig = {
   displayName: 'Pokémon Prismatic Evolutions',
   setCode: 'PRE',
   cardsPerPack: 10,
-  justTcgSetName: 'prismatic-evolutions',
+  justTcgSetName: 'sv-prismatic-evolutions-pokemon',
+  // Pull rates from community data (2700+ packs, compiled by @yprize).
+  // Note: "Full Art Trainer" and "Master Ball Holo" are visual variants — JustTCG
+  // categorizes them under "Special Illustration Rare" / "Ultra Rare" buckets.
   rarities: [
-    { rarity: 'Full Art Trainer',          shortLabel: 'FAT', oneIn: 16 },
-    { rarity: 'Master Ball Holo',          shortLabel: 'MBH', oneIn: 19 },
-    { rarity: 'ACE SPEC Rare',             shortLabel: 'ACE', oneIn: 29 },
-    { rarity: 'Alternate Art Special Illustration Rare', shortLabel: 'AA SIR', oneIn: 53 },
-    { rarity: 'Hyper Rare',                shortLabel: 'HR',  oneIn: 152 },
+    { rarity: 'Special Illustration Rare', shortLabel: 'SIR',     oneIn: 53 },  // Alt Art SIR — 1/53
+    { rarity: 'Ultra Rare',                shortLabel: 'UR',      oneIn: 16 },  // Full Art Trainer — 1/16
+    { rarity: 'ACE SPEC Rare',             shortLabel: 'ACE',     oneIn: 29 },
+    { rarity: 'Hyper Rare',                shortLabel: 'HR Gold', oneIn: 152 },
+    { rarity: 'Double Rare',               shortLabel: 'DR ex',   oneIn: 5  },
   ],
 };
 
