@@ -598,6 +598,32 @@ export default function PackGainsCalculator() {
                       })()}
                     </tbody>
                   </table>
+                  {!hasSession && (
+                    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 border-t border-border/40">
+                      <svg viewBox="0 0 280 100" className="w-full max-w-[320px] h-auto opacity-40" preserveAspectRatio="xMidYMid meet">
+                        {/* Ghost bell curve */}
+                        <path
+                          d="M20,82 Q70,82 100,55 T140,18 T180,55 T260,82"
+                          fill="none"
+                          stroke="hsl(var(--muted-foreground))"
+                          strokeWidth="1.5"
+                          strokeDasharray="4 4"
+                        />
+                        <line x1="20" y1="82" x2="260" y2="82" stroke="hsl(var(--border))" strokeWidth="1" />
+                        {/* Ghost bars */}
+                        <rect x="55" y="65" width="10" height="17" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="80" y="50" width="10" height="32" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="105" y="35" width="10" height="47" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="130" y="28" width="10" height="54" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="155" y="35" width="10" height="47" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="180" y="50" width="10" height="32" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                        <rect x="205" y="65" width="10" height="17" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
+                      </svg>
+                      <p className="text-sm text-muted-foreground mt-5 text-center max-w-[260px] leading-relaxed">
+                        Simulate packs to see how your session compares to expected value.
+                      </p>
+                    </div>
+                  )}
                   {hasSession && (() => {
                     // Distribution math
                     const sigma = perPackStdDev > 0 ? perPackStdDev * Math.sqrt(sessionTotals.packs) : 0;
