@@ -816,9 +816,9 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
  */
 function BellCurve({ z }: { z: number }) {
   const W = 280;
-  const H = 56;
+  const H = 64;
   const padX = 8;
-  const padY = 6;
+  const padY = 14; // extra top room so the "Your session" label is never clipped
   const minZ = -3;
   const maxZ = 3;
   const clampedZ = Math.max(minZ, Math.min(maxZ, z));
@@ -839,10 +839,24 @@ function BellCurve({ z }: { z: number }) {
   const linePath = 'M' + points.join(' L');
   const dotX = xFor(clampedZ);
   const dotY = yFor(clampedZ);
-  const labelLeft = dotX > W / 2;
+  // Pick anchor based on space; if too close to either edge, fall back to middle.
+  const labelText = 'Your session';
+  const approxLabelWidth = labelText.length * 5; // ~5px per char at fontSize 9
+  const spaceRight = W - padX - dotX;
+  const spaceLeft = dotX - padX;
+  let anchor: 'start' | 'end' | 'middle' = 'start';
+  let labelX = dotX + 6;
+  if (spaceRight < approxLabelWidth && spaceLeft >= approxLabelWidth) {
+    anchor = 'end';
+    labelX = dotX - 6;
+  } else if (spaceRight < approxLabelWidth && spaceLeft < approxLabelWidth) {
+    anchor = 'middle';
+    labelX = Math.max(padX + approxLabelWidth / 2, Math.min(W - padX - approxLabelWidth / 2, dotX));
+  }
+  const labelY = Math.max(padY - 2, dotY - 8);
   return (
     <div className="w-full">
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
         {/* baseline */}
         <line x1={padX} y1={H - padY} x2={W - padX} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" />
         {/* mean line */}
@@ -855,14 +869,14 @@ function BellCurve({ z }: { z: number }) {
         <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
         {/* user label */}
         <text
-          x={labelLeft ? dotX - 6 : dotX + 6}
-          y={dotY - 6}
-          textAnchor={labelLeft ? 'end' : 'start'}
+          x={labelX}
+          y={labelY}
+          textAnchor={anchor}
           fontSize="9"
           fill="hsl(var(--foreground))"
           className="font-medium"
         >
-          Your session
+          {labelText}
         </text>
       </svg>
     </div>
