@@ -61,16 +61,6 @@ function buildStats(
   return { rows, evPerPack };
 }
 
-/** Simulate one pack rip — returns a per-rarity hit count. */
-function simulatePack(config: PackOddsConfig): Record<string, number> {
-  const hits: Record<string, number> = {};
-  for (const r of config.rarities) {
-    // Each rarity is treated as an independent Bernoulli trial per pack.
-    // (Matches the reference calculator's "expected vs sim" comparison style.)
-    hits[r.rarity] = Math.random() < 1 / r.oneIn ? 1 : 0;
-  }
-  return hits;
-}
 
 export default function PackGainsCalculator() {
   const [selectedSet, setSelectedSet] = useState<string>(PACK_ODDS_REGISTRY[0].setName);
