@@ -408,6 +408,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   // Build a "best price per grade across all companies" comparison table.
   // For each numeric grade (10, 9.5, 9, 8.5, …) we pick the highest price
   // available across PSA / BGS / CGC so we can show how value scales by grade.
+  // We also carry over the population count from the winning entry.
   const bestByGrade = new Map<number, { grade: string; price: number; company: string; population?: number | null }>();
   for (const g of grades) {
     const n = parseFloat(g.grade.replace(/[^0-9.]/g, ''));
