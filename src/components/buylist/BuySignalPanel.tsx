@@ -537,7 +537,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                       <th className="text-right px-3 py-2 font-semibold">Price</th>
                       <th className="text-right px-3 py-2 font-semibold hidden sm:table-cell">vs Raw</th>
                       <th className="text-right px-3 py-2 font-semibold hidden md:table-cell">Multiple</th>
-                      <th className="px-3 py-2 font-semibold w-[35%]">Relative</th>
+                      <th className="text-right px-3 py-2 font-semibold hidden lg:table-cell">Pop</th>
+                      <th className="px-3 py-2 font-semibold w-[30%]">Relative</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -550,6 +551,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">—</td>
                         <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">1.0×</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden lg:table-cell">—</td>
                         <td className="px-3 py-2">
                           <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (effectiveRaw / maxGradePrice) * 100 : 0}%` }} />
                         </td>
@@ -582,6 +584,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                           </td>
                           <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">
                             {row.multiple != null ? `${row.multiple.toFixed(1)}×` : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden lg:table-cell">
+                            {row.population != null && row.population > 0
+                              ? row.population.toLocaleString()
+                              : '—'}
                           </td>
                           <td className="px-3 py-2">
                             <div
