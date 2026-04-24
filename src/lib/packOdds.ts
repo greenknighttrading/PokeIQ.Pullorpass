@@ -14,6 +14,8 @@ export interface RarityOdd {
   rarity: string;          // canonical rarity label (matches DB)
   shortLabel: string;      // compact label for UI (SIR, IR, UR…)
   oneIn: number;           // pull rate: 1 card in N
+  /** If set, skip price lookup and use this fixed value (e.g. $0.40 for a basic Rare "no-hit"). */
+  fixedValue?: number;
 }
 
 export interface PackOddsConfig {
@@ -43,6 +45,8 @@ export const ASCENDED_HEROES: PackOddsConfig = {
     { rarity: 'Double Rare',               shortLabel: 'DR',  oneIn: 5  },
     { rarity: 'Mega Attack Rare',          shortLabel: 'MAR', oneIn: 29 },
     { rarity: 'Mega Hyper Rare',           shortLabel: 'MHR', oneIn: 540 },
+    // No-hit baseline: rare slot lands on a basic Rare (~$0.40). Fills remaining ~59% of packs.
+    { rarity: 'No Hit (Basic Rare)',       shortLabel: 'NH',  oneIn: 1.69, fixedValue: 0.40 },
   ],
 };
 
@@ -65,6 +69,8 @@ export const PRISMATIC_EVOLUTIONS: PackOddsConfig = {
     { rarity: 'ACE SPEC Rare',             shortLabel: 'ACE',     oneIn: 29 },
     { rarity: 'Hyper Rare',                shortLabel: 'HR Gold', oneIn: 152 },
     { rarity: 'Double Rare',               shortLabel: 'DR ex',   oneIn: 5  },
+    // No-hit baseline: rare slot lands on a basic Rare (~$0.40). Fills remaining ~68% of packs.
+    { rarity: 'No Hit (Basic Rare)',       shortLabel: 'NH',      oneIn: 1.48, fixedValue: 0.40 },
   ],
 };
 
