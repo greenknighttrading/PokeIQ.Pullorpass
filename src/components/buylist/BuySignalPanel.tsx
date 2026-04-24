@@ -374,6 +374,12 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
   const isEmpty = !loading && fetched && grades.length === 0 && !error;
 
+  // Prefer Collectr's marketPrice as the raw baseline (it's the source of truth
+  // matching the graded prices). Fall back to the upstream price prop if missing.
+  const effectiveRaw = collectrRawPrice ?? rawPrice;
+  const rawSource: 'collectr' | 'market' | null =
+    collectrRawPrice != null ? 'collectr' : (rawPrice != null && rawPrice > 0 ? 'market' : null);
+
   const byCompany: Record<string, { grade: string; price: number; population?: number | null }[]> = {};
   for (const g of grades) {
     const key = g.company.toUpperCase();
@@ -384,8 +390,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   // Find PSA 10 specifically for the hero display
   const psa10 = grades.find(g => g.company.toLowerCase() === 'psa' && g.grade.toLowerCase().includes('10'));
   const heroGrade = psa10 || grades[0] || null;
-  const heroPremium = heroGrade && rawPrice && rawPrice > 0
-    ? ((heroGrade.price / rawPrice - 1) * 100)
+  const heroPremium = heroGrade && effectiveRaw && effectiveRaw > 0
+    ? ((heroGrade.price / effectiveRaw - 1) * 100)
     : null;
 
   // Sort helper: extract numeric grade value, higher first
@@ -395,8 +401,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   };
 
   // Multiplier (e.g. 4.2× the raw)
-  const heroMultiple = heroGrade && rawPrice && rawPrice > 0
-    ? heroGrade.price / rawPrice
+  const heroMultiple = heroGrade && effectiveRaw && effectiveRaw > 0
+    ? heroGrade.price / effectiveRaw
     : null;
 
   // Build a "best price per grade across all companies" comparison table.
@@ -416,8 +422,8 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     .map(([n, v]) => ({
       gradeNum: n,
       ...v,
-      premium: rawPrice && rawPrice > 0 ? (v.price / rawPrice - 1) * 100 : null,
-      multiple: rawPrice && rawPrice > 0 ? v.price / rawPrice : null,
+      premium: effectiveRaw && effectiveRaw > 0 ? (v.price / effectiveRaw - 1) * 100 : null,
+      multiple: effectiveRaw && effectiveRaw > 0 ? v.price / effectiveRaw : null,
     }));
   const maxGradePrice = gradeProgression.reduce((m, r) => Math.max(m, r.price), 0);
 
