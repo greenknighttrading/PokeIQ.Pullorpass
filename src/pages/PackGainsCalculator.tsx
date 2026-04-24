@@ -46,7 +46,7 @@ function buildStats(
 ): PackStats {
   const rows: RarityRow[] = config.rarities.map(r => {
     const rec = priceByRarity.get(r.rarity);
-    const avg = rec?.avg ?? 0;
+    const avg = r.fixedValue ?? rec?.avg ?? 0;
     const chancePct = 100 / r.oneIn;
     return {
       rarity: r.rarity,
@@ -54,10 +54,10 @@ function buildStats(
       oneIn: r.oneIn,
       chancePct,
       avgRawPrice: avg,
-      totalRarityValue: rec?.sum ?? 0,
-      cardCount: rec?.count ?? 0,
+      totalRarityValue: r.fixedValue != null ? 0 : (rec?.sum ?? 0),
+      cardCount: r.fixedValue != null ? 0 : (rec?.count ?? 0),
       evPerPack: (chancePct / 100) * avg,
-      source: rec ? rec.source : 'none',
+      source: r.fixedValue != null ? 'justtcg' : (rec ? rec.source : 'none'),
     };
   });
   const evPerPack = rows.reduce((s, r) => s + r.evPerPack, 0);
