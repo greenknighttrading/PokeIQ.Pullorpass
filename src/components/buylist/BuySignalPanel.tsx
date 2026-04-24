@@ -274,29 +274,54 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
         if (prodResp?.error) throw new Error(prodResp.error);
 
         const product: any = prodResp?.data || prodResp;
-        setMatchedName(product?.name || top?.name || null);
+        setMatchedName(product?.productName || product?.name || top?.productName || top?.name || null);
 
-        const gradedRaw = product?.gradingData || product?.graded || product?.grades || product?.gradedPricing;
+        // Collectr returns a flat `gradedPrices` array. Each row looks like:
+        //   { grade: "PSA 9.0 (MINT)", population: "86", price: "843.0000", type: "Holofoil" }
+        // The grading company is embedded in the `grade` string prefix.
+        const gradedRaw =
+          product?.gradedPrices ||
+          product?.gradingData ||
+          product?.graded ||
+          product?.grades ||
+          product?.gradedPricing;
         const entries: GradeEntry[] = [];
+
+        const parseCompanyAndGrade = (raw: string): { company: string; grade: string } | null => {
+          const s = String(raw).trim();
+          // Match "PSA 10", "BGS 9.5", "CGC 8.0 (Mint)", "SGC 9", "ACE 7.0 (NM)" etc.
+          const m = s.match(/^([A-Za-z]{2,5})\s+([0-9]+(?:\.[0-9]+)?)/);
+          if (!m) return null;
+          return { company: m[1].toUpperCase(), grade: m[2] };
+        };
 
         const pushEntry = (company: string, grade: string | number, info: any) => {
           const inf = (info && typeof info === 'object' && !Array.isArray(info)) ? info : { price: info };
           const priceRaw = inf.price ?? inf.marketPrice ?? inf.market ?? inf.value ?? inf.lastSale;
           const price = typeof priceRaw === 'string' ? parseFloat(priceRaw) : Number(priceRaw);
           if (!Number.isFinite(price) || price <= 0) return;
-          const pop = inf.population ?? inf.pop ?? inf.count ?? null;
+          const popRaw = inf.population ?? inf.pop ?? inf.count ?? null;
+          const pop = popRaw != null ? Number(popRaw) : null;
           entries.push({
-            company: String(company),
+            company: String(company).toUpperCase(),
             grade: String(grade),
             price,
-            population: pop != null ? Number(pop) : null,
+            population: Number.isFinite(pop as number) ? pop : null,
           });
         };
 
         if (Array.isArray(gradedRaw)) {
           for (const row of gradedRaw as any[]) {
-            const company = row.grader || row.company || row.gradingCompany || '';
-            const grade = row.grade ?? row.gradeLabel ?? '';
+            // Prefer explicit company field if present, else parse from grade label.
+            let company = row.grader || row.company || row.gradingCompany || '';
+            let grade = row.grade ?? row.gradeLabel ?? '';
+            if (!company && typeof grade === 'string') {
+              const parsed = parseCompanyAndGrade(grade);
+              if (parsed) {
+                company = parsed.company;
+                grade = parsed.grade;
+              }
+            }
             if (company) pushEntry(company, grade, row);
           }
         } else if (gradedRaw && typeof gradedRaw === 'object') {
@@ -309,8 +334,15 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
           }
         }
 
-        entries.sort((a, b) => b.price - a.price);
-        setGrades(entries);
+        // Deduplicate: keep highest price per (company, grade) pair.
+        const dedup = new Map<string, GradeEntry>();
+        for (const e of entries) {
+          const key = `${e.company}|${e.grade}`;
+          const cur = dedup.get(key);
+          if (!cur || e.price > cur.price) dedup.set(key, e);
+        }
+        const finalEntries = Array.from(dedup.values()).sort((a, b) => b.price - a.price);
+        setGrades(finalEntries);
         setFetched(true);
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Failed');
