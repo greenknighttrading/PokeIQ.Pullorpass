@@ -516,6 +516,24 @@ export default function PackGainsCalculator() {
                           : <Cell value="—" muted />}
                         <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
                       </tr>
+                      {hasSession && (() => {
+                        const delta = sessPnL - expPnL;
+                        const tone = delta >= 0 ? 'pos' : 'neg';
+                        const arrow = delta >= 0 ? '↑' : '↓';
+                        return (
+                          <tr className="border-t border-border/30 bg-muted/20">
+                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                            <td colSpan={2} className={cn(
+                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                              tone === 'pos' && 'text-success',
+                              tone === 'neg' && 'text-destructive',
+                            )}>
+                              {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
+                              {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
+                            </td>
+                          </tr>
+                        );
+                      })()}
                     </tbody>
                   </table>
                   <p className="px-3 py-2.5 text-[11px] text-muted-foreground border-t border-border/40">
@@ -548,7 +566,16 @@ export default function PackGainsCalculator() {
                 </div>
                 <div className="pt-5 space-y-3">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
-                  <SummaryRow label="Expected value" value={fmtMoney(stats.evPerPack)} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm">Expected value</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Prices via {dataSourceLabel}
+                        {freshnessLabel ? ` · ${freshnessLabel}` : ''}
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Current avg gain/loss from ripping</span>
                     <span className={cn(
@@ -559,6 +586,15 @@ export default function PackGainsCalculator() {
                     </span>
                   </div>
                   <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
+                </div>
+                <div className="mt-5 pt-4 border-t border-border/40">
+                  <div className="flex items-start gap-2">
+                    <Target className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      You need <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span> in
+                      hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
