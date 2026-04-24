@@ -317,6 +317,7 @@ export default function PackGainsCalculator() {
                     <th className="text-center px-4 py-2 font-medium">Odds</th>
                     <th className="text-center px-4 py-2 font-medium">% Chance</th>
                     <th className="text-center px-4 py-2 font-medium">Avg Raw</th>
+                    <th className="text-center px-4 py-2 font-medium">Total Value</th>
                     <th className="text-center px-4 py-2 font-medium">EV Raw / Pack</th>
                     <th className="text-center px-4 py-2 font-medium">Sample</th>
                     <th className="text-center px-4 py-2 font-medium">Source</th>
@@ -331,6 +332,9 @@ export default function PackGainsCalculator() {
                       <td className="px-4 py-3 text-center tabular-nums">
                         {r.avgRawPrice > 0 ? fmtMoney(r.avgRawPrice) : <span className="text-muted-foreground">—</span>}
                       </td>
+                      <td className="px-4 py-3 text-center tabular-nums font-medium">
+                        {r.totalRarityValue > 0 ? fmtMoney(r.totalRarityValue) : <span className="text-muted-foreground">—</span>}
+                      </td>
                       <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(r.evPerPack)}</td>
                       <td className="px-4 py-3 text-center tabular-nums text-muted-foreground">{r.cardCount}</td>
                       <td className="px-4 py-3 text-center">
@@ -338,6 +342,18 @@ export default function PackGainsCalculator() {
                       </td>
                     </tr>
                   ))}
+                  <tr className="border-t-2 border-border bg-muted/20 font-semibold">
+                    <td className="px-4 py-3">Total</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center text-muted-foreground">—</td>
+                    <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(stats.totalSetValue)}</td>
+                    <td className="px-4 py-3 text-center tabular-nums">{fmtMoney(stats.evPerPack)}</td>
+                    <td className="px-4 py-3 text-center tabular-nums text-muted-foreground">
+                      {stats.rows.reduce((s, r) => s + r.cardCount, 0)}
+                    </td>
+                    <td className="px-4 py-3"></td>
+                  </tr>
                 </tbody>
               </table>
             )}
