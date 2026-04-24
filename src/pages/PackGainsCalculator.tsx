@@ -812,3 +812,62 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
   if (source === 'justtcg') return <Badge variant="outline" className="text-[10px] gap-1"><Cloud className="w-3 h-3" />JustTCG</Badge>;
   return <Badge variant="outline" className="text-[10px] text-muted-foreground">—</Badge>;
 }
+
+/**
+ * Mini bell curve visualization. Plots a standard-normal density curve and
+ * marks the user's session position (clamped to ±3σ) with a labeled dot.
+ */
+function BellCurve({ z }: { z: number }) {
+  const W = 280;
+  const H = 56;
+  const padX = 8;
+  const padY = 6;
+  const minZ = -3;
+  const maxZ = 3;
+  const clampedZ = Math.max(minZ, Math.min(maxZ, z));
+  // Standard normal density φ(z) = (1/√2π) e^(-z²/2). Peak ≈ 0.3989.
+  const phi = (t: number) => Math.exp(-(t * t) / 2) / Math.sqrt(2 * Math.PI);
+  const peak = phi(0);
+  const xFor = (zVal: number) => padX + ((zVal - minZ) / (maxZ - minZ)) * (W - padX * 2);
+  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (H - padY * 2);
+  const points: string[] = [];
+  const steps = 60;
+  for (let i = 0; i <= steps; i++) {
+    const zVal = minZ + (i / steps) * (maxZ - minZ);
+    points.push(`${xFor(zVal).toFixed(1)},${yFor(zVal).toFixed(1)}`);
+  }
+  const areaPath = `M${xFor(minZ).toFixed(1)},${(H - padY).toFixed(1)} L` +
+    points.join(' L') +
+    ` L${xFor(maxZ).toFixed(1)},${(H - padY).toFixed(1)} Z`;
+  const linePath = 'M' + points.join(' L');
+  const dotX = xFor(clampedZ);
+  const dotY = yFor(clampedZ);
+  const labelLeft = dotX > W / 2;
+  return (
+    <div className="w-full">
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="none">
+        {/* baseline */}
+        <line x1={padX} y1={H - padY} x2={W - padX} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" />
+        {/* mean line */}
+        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
+        {/* curve fill */}
+        <path d={areaPath} fill="hsl(var(--muted-foreground) / 0.15)" />
+        {/* curve line */}
+        <path d={linePath} fill="none" stroke="hsl(var(--muted-foreground) / 0.6)" strokeWidth="1.25" />
+        {/* user dot */}
+        <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
+        {/* user label */}
+        <text
+          x={labelLeft ? dotX - 6 : dotX + 6}
+          y={dotY - 6}
+          textAnchor={labelLeft ? 'end' : 'start'}
+          fontSize="9"
+          fill="hsl(var(--foreground))"
+          className="font-medium"
+        >
+          Your session
+        </text>
+      </svg>
+    </div>
+  );
+}
