@@ -9,6 +9,7 @@ import PriceMovementTable from './PriceMovementTable';
 import PriceHistoryChart from './PriceHistoryChart';
 import WatchlistButton from './WatchlistButton';
 import { getBuyScore, getRecommendation, type MoverCard } from './shared/signalHelpers';
+import CollectrPricingSection from './CollectrPricingSection';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -810,6 +811,9 @@ export default function BuySignalPanel({ tcgApiId, cardId, category, buyPrice, b
 
       {/* ═══ GRADED PRICING — above 30-day movement ═══ */}
       <GradedPricingSection cardName={card.name} cardNumber={card.number} setName={card.set_name} rawPrice={displayPrice ?? null} />
+
+      {/* ═══ COLLECTR PRICING — cross-source verification ═══ */}
+      <CollectrPricingSection cardName={card.name} setName={card.set_name} cardNumber={card.number} />
 
       {/* ═══ 30-DAY PRICE MOVEMENT — full width ═══ */}
       <PriceMovementTable priceHistory={(v as unknown as Record<string, unknown>).priceHistory as { p: number; t: number }[] ?? []} />
