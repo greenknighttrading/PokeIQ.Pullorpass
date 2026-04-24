@@ -190,6 +190,25 @@ export default function PackGainsCalculator() {
     [config, priceMap]
   );
 
+  // Per-pack standard deviation of pulled value, derived from the rare-slot
+  // distribution: Var(X) = Σ p_i * x_i^2 − (Σ p_i * x_i)^2.
+  // Used to approximate session outcome percentiles via a normal distribution.
+  const perPackStdDev = useMemo(() => {
+    const eligible = stats.rows.filter(r => r.avgRawPrice > 0);
+    if (eligible.length === 0) return 0;
+    const totalWeight = eligible.reduce((s, r) => s + r.chancePct, 0);
+    if (totalWeight <= 0) return 0;
+    let mean = 0;
+    let meanSq = 0;
+    for (const r of eligible) {
+      const p = r.chancePct / totalWeight;
+      mean += p * r.avgRawPrice;
+      meanSq += p * r.avgRawPrice * r.avgRawPrice;
+    }
+    const variance = Math.max(0, meanSq - mean * mean);
+    return Math.sqrt(variance);
+  }, [stats.rows]);
+
   const expectedValueTotal = stats.evPerPack * Math.max(0, packsOpened);
   const totalCost = costPerPack * Math.max(0, packsOpened);
   const expectedGainLoss = expectedValueTotal - totalCost;
