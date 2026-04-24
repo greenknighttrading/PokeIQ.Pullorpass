@@ -813,9 +813,11 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
  */
 function BellCurve({ z }: { z: number }) {
   const W = 280;
-  const H = 64;
+  const H = 84;
   const padX = 8;
   const padY = 14; // extra top room so the "Your session" label is never clipped
+  const axisY = H - padY; // baseline y
+  const labelBandY = H - 2; // x-axis label baseline
   const minZ = -3;
   const maxZ = 3;
   const clampedZ = Math.max(minZ, Math.min(maxZ, z));
@@ -823,16 +825,16 @@ function BellCurve({ z }: { z: number }) {
   const phi = (t: number) => Math.exp(-(t * t) / 2) / Math.sqrt(2 * Math.PI);
   const peak = phi(0);
   const xFor = (zVal: number) => padX + ((zVal - minZ) / (maxZ - minZ)) * (W - padX * 2);
-  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (H - padY * 2);
+  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (axisY - padY);
   const points: string[] = [];
   const steps = 60;
   for (let i = 0; i <= steps; i++) {
     const zVal = minZ + (i / steps) * (maxZ - minZ);
     points.push(`${xFor(zVal).toFixed(1)},${yFor(zVal).toFixed(1)}`);
   }
-  const areaPath = `M${xFor(minZ).toFixed(1)},${(H - padY).toFixed(1)} L` +
+  const areaPath = `M${xFor(minZ).toFixed(1)},${axisY.toFixed(1)} L` +
     points.join(' L') +
-    ` L${xFor(maxZ).toFixed(1)},${(H - padY).toFixed(1)} Z`;
+    ` L${xFor(maxZ).toFixed(1)},${axisY.toFixed(1)} Z`;
   const linePath = 'M' + points.join(' L');
   const dotX = xFor(clampedZ);
   const dotY = yFor(clampedZ);
@@ -851,17 +853,51 @@ function BellCurve({ z }: { z: number }) {
     labelX = Math.max(padX + approxLabelWidth / 2, Math.min(W - padX - approxLabelWidth / 2, dotX));
   }
   const labelY = Math.max(padY - 2, dotY - 8);
+  const xTicks: { z: number; label: string }[] = [
+    { z: -3, label: 'Much worse' },
+    { z: -1, label: '−1σ' },
+    { z: 0, label: 'Expected' },
+    { z: 1, label: '+1σ' },
+    { z: 3, label: 'Much better' },
+  ];
   return (
     <div className="w-full">
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
         {/* baseline */}
-        <line x1={padX} y1={H - padY} x2={W - padX} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" />
+        <line x1={padX} y1={axisY} x2={W - padX} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" />
         {/* mean line */}
-        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={H - padY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
+        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
         {/* curve fill */}
         <path d={areaPath} fill="hsl(var(--muted-foreground) / 0.15)" />
         {/* curve line */}
         <path d={linePath} fill="none" stroke="hsl(var(--muted-foreground) / 0.6)" strokeWidth="1.25" />
+        {/* x-axis ticks + labels */}
+        {xTicks.map((t) => {
+          const tx = xFor(t.z);
+          const anchorT: 'start' | 'middle' | 'end' =
+            t.z <= -3 ? 'start' : t.z >= 3 ? 'end' : 'middle';
+          return (
+            <g key={t.z}>
+              <line
+                x1={tx}
+                x2={tx}
+                y1={axisY}
+                y2={axisY + 3}
+                stroke="hsl(var(--border))"
+                strokeWidth="1"
+              />
+              <text
+                x={tx}
+                y={labelBandY}
+                textAnchor={anchorT}
+                fontSize="8"
+                fill="hsl(var(--muted-foreground))"
+              >
+                {t.label}
+              </text>
+            </g>
+          );
+        })}
         {/* user dot */}
         <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
         {/* user label */}
