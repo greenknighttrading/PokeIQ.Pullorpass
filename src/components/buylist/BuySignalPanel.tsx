@@ -345,6 +345,33 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     return isNaN(num) ? 0 : num;
   };
 
+  // Multiplier (e.g. 4.2× the raw)
+  const heroMultiple = heroGrade && rawPrice && rawPrice > 0
+    ? heroGrade.price / rawPrice
+    : null;
+
+  // Build a "best price per grade across all companies" comparison table.
+  // For each numeric grade (10, 9.5, 9, 8.5, …) we pick the highest price
+  // available across PSA / BGS / CGC so we can show how value scales by grade.
+  const bestByGrade = new Map<number, { grade: string; price: number; company: string; population?: number | null }>();
+  for (const g of grades) {
+    const n = parseFloat(g.grade.replace(/[^0-9.]/g, ''));
+    if (!Number.isFinite(n)) continue;
+    const cur = bestByGrade.get(n);
+    if (!cur || g.price > cur.price) {
+      bestByGrade.set(n, { grade: g.grade, price: g.price, company: g.company, population: g.population });
+    }
+  }
+  const gradeProgression = Array.from(bestByGrade.entries())
+    .sort((a, b) => b[0] - a[0])
+    .map(([n, v]) => ({
+      gradeNum: n,
+      ...v,
+      premium: rawPrice && rawPrice > 0 ? (v.price / rawPrice - 1) * 100 : null,
+      multiple: rawPrice && rawPrice > 0 ? v.price / rawPrice : null,
+    }));
+  const maxGradePrice = gradeProgression.reduce((m, r) => Math.max(m, r.price), 0);
+
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/70 backdrop-blur-sm p-6 md:p-8">
       <div className="flex items-center gap-3 mb-5">
