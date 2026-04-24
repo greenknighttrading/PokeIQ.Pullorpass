@@ -363,8 +363,90 @@ export default function PackGainsCalculator() {
           </Card>
         </div>
 
-        {/* Consolidated set summary */}
-        {(() => {
+        {/* Session vs Expected (left) + Set summary (right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          {(() => {
+            const sessSpend = sessionTotals.cost;
+            const sessValue = sessionTotals.value;
+            const sessPnL = sessValue - sessSpend;
+            const expPacks = sessionTotals.rolls > 0 ? sessionTotals.packs : Math.max(0, packsOpened);
+            const expSpend = sessionTotals.rolls > 0 ? sessionTotals.cost : totalCost;
+            const expReturn = stats.evPerPack * expPacks;
+            const expPnL = expReturn - expSpend;
+            const hasSession = sessionTotals.rolls > 0;
+            const Cell = ({ value, tone, muted }: { value: string; tone?: 'pos' | 'neg'; muted?: boolean }) => (
+              <td className={cn(
+                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                tone === 'pos' && 'text-success',
+                tone === 'neg' && 'text-destructive',
+                muted && 'text-muted-foreground font-normal',
+              )}>{value}</td>
+            );
+            return (
+              <Card className={cn(hasSession && 'border-primary/40')}>
+                <CardHeader className="pb-2 flex flex-row items-start justify-between">
+                  <div>
+                    <CardTitle className="text-base">Actual vs Expected</CardTitle>
+                    <p className="text-[11px] text-muted-foreground">
+                      {hasSession
+                        ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
+                        : `Run a simulation to populate actuals`}
+                    </p>
+                  </div>
+                  {hasSession && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSessionTotals({ packs: 0, value: 0, cost: 0, rolls: 0 })}
+                      className="shrink-0 -mt-1 -mr-1"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
+                </CardHeader>
+                <CardContent className="p-0">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border/40">
+                        <th className="text-left px-3 py-2 font-medium">Metric</th>
+                        <th className="text-right px-3 py-2 font-medium">Actual</th>
+                        <th className="text-right px-3 py-2 font-medium">Expected</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-border/30">
+                        <td className="px-3 py-2.5"># of packs ripped</td>
+                        {hasSession ? <Cell value={String(sessionTotals.packs)} /> : <Cell value="—" muted />}
+                        <Cell value={String(expPacks)} />
+                      </tr>
+                      <tr className="border-b border-border/30">
+                        <td className="px-3 py-2.5">Total spend</td>
+                        {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
+                        <Cell value={fmtMoney(expSpend)} />
+                      </tr>
+                      <tr className="border-b border-border/30">
+                        <td className="px-3 py-2.5">Total pulled value</td>
+                        {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
+                        <Cell value={fmtMoney(expReturn)} />
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-2.5 font-medium">P&L</td>
+                        {hasSession
+                          ? <Cell value={`${sessPnL >= 0 ? '+' : ''}${fmtMoney(sessPnL)}`} tone={sessPnL >= 0 ? 'pos' : 'neg'} />
+                          : <Cell value="—" muted />}
+                        <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
+                      </tr>
+                    </tbody>
+                  </table>
+                  <p className="px-3 py-2.5 text-[11px] text-muted-foreground border-t border-border/40">
+                    Expected = {expPacks} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })()}
+
+          {(() => {
           const sessionPacks = sessionTotals.packs;
           const avgGainLossLive = sessionPacks > 0
             ? (sessionTotals.value - sessionTotals.cost) / sessionPacks
@@ -401,84 +483,6 @@ export default function PackGainsCalculator() {
               </CardContent>
             </Card>
           );
-        })()}
-
-        {/* Session vs Expected comparison table */}
-        <div className="grid grid-cols-1 gap-4">
-          {(() => {
-            const sessSpend = sessionTotals.cost;
-            const sessValue = sessionTotals.value;
-            const sessPnL = sessValue - sessSpend;
-            const expPacks = sessionTotals.rolls > 0 ? sessionTotals.packs : Math.max(0, packsOpened);
-            const expSpend = sessionTotals.rolls > 0 ? sessionTotals.cost : totalCost;
-            const expReturn = stats.evPerPack * expPacks;
-            const expPnL = expReturn - expSpend;
-            const hasSession = sessionTotals.rolls > 0;
-            const Cell = ({ value, tone, muted }: { value: string; tone?: 'pos' | 'neg'; muted?: boolean }) => (
-              <td className={cn(
-                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
-                tone === 'pos' && 'text-success',
-                tone === 'neg' && 'text-destructive',
-                muted && 'text-muted-foreground font-normal',
-              )}>{value}</td>
-            );
-            return (
-              <Card className={cn(hasSession && 'border-primary/40')}>
-                <CardHeader className="pb-2 flex flex-row items-start justify-between">
-                  <div>
-                    <CardTitle className="text-base">Session vs Expected</CardTitle>
-                    <p className="text-[11px] text-muted-foreground">
-                      {hasSession
-                        ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
-                        : `Run a simulation to populate session totals`}
-                    </p>
-                  </div>
-                  {hasSession && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setSessionTotals({ packs: 0, value: 0, cost: 0, rolls: 0 })}
-                      className="shrink-0 -mt-1 -mr-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
-                  )}
-                </CardHeader>
-                <CardContent className="p-0">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border/40">
-                        <th className="text-left px-3 py-2 font-medium">Metric</th>
-                        <th className="text-right px-3 py-2 font-medium">Total session</th>
-                        <th className="text-right px-3 py-2 font-medium">Expected run</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b border-border/30">
-                        <td className="px-3 py-2.5">Total spend</td>
-                        {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
-                        <Cell value={fmtMoney(expSpend)} />
-                      </tr>
-                      <tr className="border-b border-border/30">
-                        <td className="px-3 py-2.5">Total pulled value</td>
-                        {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
-                        <Cell value={fmtMoney(expReturn)} />
-                      </tr>
-                      <tr>
-                        <td className="px-3 py-2.5 font-medium">Session P&L</td>
-                        {hasSession
-                          ? <Cell value={`${sessPnL >= 0 ? '+' : ''}${fmtMoney(sessPnL)}`} tone={sessPnL >= 0 ? 'pos' : 'neg'} />
-                          : <Cell value="—" muted />}
-                        <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
-                      </tr>
-                    </tbody>
-                  </table>
-                  <p className="px-3 py-2.5 text-[11px] text-muted-foreground border-t border-border/40">
-                    Expected = {expPacks} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
-                  </p>
-                </CardContent>
-              </Card>
-            );
           })()}
         </div>
 
