@@ -66,7 +66,6 @@ export default function PackGainsCalculator() {
   const [selectedSet, setSelectedSet] = useState<string>(PACK_ODDS_REGISTRY[0].setName);
   const [packsOpened, setPacksOpened] = useState<number>(10);
   const [costPerPack, setCostPerPack] = useState<number>(10);
-  const [simSeed, setSimSeed] = useState<number>(0); // bumps to trigger re-simulation
 
   const config = getPackOddsBySetName(selectedSet)!;
 
