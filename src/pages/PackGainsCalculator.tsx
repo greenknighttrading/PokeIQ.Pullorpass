@@ -363,37 +363,6 @@ export default function PackGainsCalculator() {
           </Card>
         </div>
 
-        {/* Hero KPI strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Kpi
-            icon={<Zap className="w-4 h-4" />}
-            label="Expected pack value"
-            value={fmtMoney(stats.evPerPack)}
-            sub={`vs ${fmtMoney(costPerPack)} cost`}
-          />
-          <Kpi
-            icon={<Target className="w-4 h-4" />}
-            label="Break-even pack cost"
-            value={fmtMoney(breakEvenPack)}
-            sub={breakEvenPack < costPerPack ? 'Pack is overpriced' : 'Pack is below EV'}
-            tone={breakEvenPack >= costPerPack ? 'pos' : 'neg'}
-          />
-          <Kpi
-            icon={avgGainPerPack >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-            label="Edge per pack"
-            value={fmtMoney(avgGainPerPack)}
-            sub={`${evRoiPct >= 0 ? '+' : ''}${evRoiPct.toFixed(1)}% ROI`}
-            tone={avgGainPerPack >= 0 ? 'pos' : 'neg'}
-          />
-          <Kpi
-            icon={<Wallet className="w-4 h-4" />}
-            label={`${packsOpened} packs · expected P&L`}
-            value={fmtMoney(expectedGainLoss)}
-            sub={`Spend ${fmtMoney(totalCost)} → return ${fmtMoney(expectedValueTotal)}`}
-            tone={expectedGainLoss >= 0 ? 'pos' : 'neg'}
-          />
-        </div>
-
         {/* Consolidated set summary */}
         {(() => {
           const sessionPacks = sessionTotals.packs;
@@ -417,6 +386,7 @@ export default function PackGainsCalculator() {
                 </div>
                 <div className="pt-5 space-y-3">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
+                  <SummaryRow label="Expected value" value={fmtMoney(stats.evPerPack)} />
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Current avg gain/loss from ripping</span>
                     <span className={cn(
@@ -426,8 +396,6 @@ export default function PackGainsCalculator() {
                       {avgGainLossLive >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainLossLive))}
                     </span>
                   </div>
-                  <SummaryRow label="Break-even pack cost" value={fmtMoney(breakEvenPack)} />
-                  <SummaryRow label="Packs opened" value={String(sessionPacks > 0 ? sessionPacks : packsOpened)} />
                   <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
                 </div>
               </CardContent>
@@ -435,50 +403,8 @@ export default function PackGainsCalculator() {
           );
         })()}
 
-        {/* Simulated run + comparison table */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className={cn(rollResult && 'border-primary/40')}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Simulated run</CardTitle>
-              <p className="text-[11px] text-muted-foreground">
-                {rollResult ? `Random roll — variance is real` : 'Run a simulation to see your luck'}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <SummaryRow label="Spend" value={fmtMoney(rollResult?.totalCost ?? totalCost)} />
-              <SummaryRow
-                label="Actual return"
-                value={rollResult ? fmtMoney(rollResult.totalValue) : '—'}
-              />
-              <div className="border-t border-border/60 pt-3 flex items-center justify-between">
-                <span className="text-sm">Actual P&L</span>
-                {rollResult ? (
-                  <span className={cn(
-                    'text-base font-bold tabular-nums',
-                    (rollResult.totalValue - rollResult.totalCost) >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {(rollResult.totalValue - rollResult.totalCost) >= 0 ? '+' : ''}
-                    {fmtMoney(rollResult.totalValue - rollResult.totalCost)}
-                  </span>
-                ) : (
-                  <span className="text-base font-bold text-muted-foreground">—</span>
-                )}
-              </div>
-              {rollResult && (
-                <p className="text-[11px] text-muted-foreground pt-1">
-                  Variance vs expected:{' '}
-                  <span className={cn(
-                    'font-semibold tabular-nums',
-                    (rollResult.totalValue - expectedValueTotal) >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {(rollResult.totalValue - expectedValueTotal) >= 0 ? '+' : ''}
-                    {fmtMoney(rollResult.totalValue - expectedValueTotal)}
-                  </span>
-                </p>
-              )}
-            </CardContent>
-          </Card>
-
+        {/* Session vs Expected comparison table */}
+        <div className="grid grid-cols-1 gap-4">
           {(() => {
             const sessSpend = sessionTotals.cost;
             const sessValue = sessionTotals.value;
