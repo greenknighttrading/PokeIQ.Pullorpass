@@ -224,6 +224,7 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
   const [expanded, setExpanded] = useState(false);
   const [fetched, setFetched] = useState(false);
   const [matchedName, setMatchedName] = useState<string | null>(null);
+  const [collectrRawPrice, setCollectrRawPrice] = useState<number | null>(null);
 
   useEffect(() => {
     if (!cardName) return;
@@ -275,6 +276,20 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
         const product: any = prodResp?.data || prodResp;
         setMatchedName(product?.productName || product?.name || top?.productName || top?.name || null);
+
+        // ── Raw market price comes from Collectr's `marketPrice[0].price` ──
+        const mp = product?.marketPrice;
+        let rawFromCollectr: number | null = null;
+        if (Array.isArray(mp) && mp.length > 0) {
+          // Prefer Holofoil if multiple types are present, else first entry.
+          const preferred = mp.find((m: any) => String(m?.type ?? '').toLowerCase().includes('holo')) || mp[0];
+          const v = typeof preferred?.price === 'string' ? parseFloat(preferred.price) : Number(preferred?.price);
+          if (Number.isFinite(v) && v > 0) rawFromCollectr = v;
+        } else if (mp && typeof mp === 'object') {
+          const v = typeof (mp as any).price === 'string' ? parseFloat((mp as any).price) : Number((mp as any).price);
+          if (Number.isFinite(v) && v > 0) rawFromCollectr = v;
+        }
+        if (!cancelled) setCollectrRawPrice(rawFromCollectr);
 
         // Collectr returns a flat `gradedPrices` array. Each row looks like:
         //   { grade: "PSA 9.0 (MINT)", population: "86", price: "843.0000", type: "Holofoil" }
