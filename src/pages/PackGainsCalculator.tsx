@@ -531,7 +531,7 @@ export default function PackGainsCalculator() {
                     <CardTitle className="text-base">Actual vs Expected</CardTitle>
                     <p className="text-xs text-muted-foreground">
                       {hasSession
-                        ? `${sessionTotals.rolls} ${sessionTotals.rolls === 1 ? 'run' : 'runs'} · ${sessionTotals.packs} packs ripped`
+                        ? <span><span className="text-base font-bold text-foreground">{sessionTotals.rolls}</span> <span className="text-muted-foreground">{sessionTotals.rolls === 1 ? 'run' : 'runs'}</span> · <span className="text-base font-bold text-foreground">{sessionTotals.packs}</span> <span className="text-muted-foreground">packs ripped</span></span>
                         : `Run a simulation to populate actuals`}
                     </p>
                   </div>
@@ -839,11 +839,12 @@ function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
  */
 function BellCurve({ z }: { z: number }) {
   const W = 280;
-  const H = 84;
+  const H = 110;
   const padX = 8;
-  const padY = 14; // extra top room so the "Your session" label is never clipped
-  const axisY = H - padY; // baseline y
-  const labelBandY = H - 2; // x-axis label baseline
+  const padTop = 6;
+  const axisY = 84; // baseline y — curve lives above this
+  const labelBandY = 92; // x-axis label baseline
+  const dotLabelY = 104; // "Your session" label sits here, well below the graph
   const minZ = -3;
   const maxZ = 3;
   const clampedZ = Math.max(minZ, Math.min(maxZ, z));
@@ -851,7 +852,7 @@ function BellCurve({ z }: { z: number }) {
   const phi = (t: number) => Math.exp(-(t * t) / 2) / Math.sqrt(2 * Math.PI);
   const peak = phi(0);
   const xFor = (zVal: number) => padX + ((zVal - minZ) / (maxZ - minZ)) * (W - padX * 2);
-  const yFor = (zVal: number) => padY + (1 - phi(zVal) / peak) * (axisY - padY);
+  const yFor = (zVal: number) => padTop + (1 - phi(zVal) / peak) * (axisY - padTop - 2); // -2 keeps top padding
   const points: string[] = [];
   const steps = 60;
   for (let i = 0; i <= steps; i++) {
@@ -878,7 +879,6 @@ function BellCurve({ z }: { z: number }) {
     anchor = 'middle';
     labelX = Math.max(padX + approxLabelWidth / 2, Math.min(W - padX - approxLabelWidth / 2, dotX));
   }
-  const labelY = Math.max(padY - 2, dotY - 8);
   const xTicks: { z: number; label: string }[] = [
     { z: -3, label: 'Much worse' },
     { z: -1, label: '−1σ' },
@@ -892,7 +892,7 @@ function BellCurve({ z }: { z: number }) {
         {/* baseline */}
         <line x1={padX} y1={axisY} x2={W - padX} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" />
         {/* mean line */}
-        <line x1={xFor(0)} y1={padY} x2={xFor(0)} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
+        <line x1={xFor(0)} y1={padTop} x2={xFor(0)} y2={axisY} stroke="hsl(var(--border))" strokeWidth="1" strokeDasharray="2 2" />
         {/* curve fill */}
         <path d={areaPath} fill="hsl(var(--muted-foreground) / 0.15)" />
         {/* curve line */}
@@ -926,10 +926,20 @@ function BellCurve({ z }: { z: number }) {
         })}
         {/* user dot */}
         <circle cx={dotX} cy={dotY} r="4" fill="hsl(var(--primary))" stroke="hsl(var(--background))" strokeWidth="1.5" />
-        {/* user label */}
+        {/* dotted line from dot down to baseline */}
+        <line
+          x1={dotX}
+          y1={dotY + 5}
+          x2={dotX}
+          y2={axisY}
+          stroke="hsl(var(--primary))"
+          strokeWidth="1"
+          strokeDasharray="2 2"
+        />
+        {/* user label — placed below the graph, never overlaps the curve */}
         <text
           x={labelX}
-          y={labelY}
+          y={dotLabelY}
           textAnchor={anchor}
           fontSize="9"
           fill="hsl(var(--foreground))"
