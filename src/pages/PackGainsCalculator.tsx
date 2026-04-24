@@ -234,17 +234,6 @@ export default function PackGainsCalculator() {
                 className="mt-1.5 h-11"
               />
             </div>
-            <div className="flex flex-col">
-              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Simulate</Label>
-              <Button
-                onClick={() => setSimSeed(s => s + 1)}
-                className="mt-1.5 h-11 gap-2"
-                variant="secondary"
-              >
-                <Dice5 className="w-4 h-4" />
-                Re-roll {packsOpened} {packsOpened === 1 ? 'pack' : 'packs'}
-              </Button>
-            </div>
           </CardContent>
         </Card>
 
