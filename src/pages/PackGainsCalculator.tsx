@@ -278,6 +278,7 @@ export default function PackGainsCalculator() {
             <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} each</p>
           </CardHeader>
           <CardContent className="space-y-3">
+            <SummaryRow label="Total set value (all rarities, NM)" value={fmtMoney(stats.totalSetValue)} sub="sum of every card price" />
             <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
             <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
             <div className="border-t border-border/60 pt-3 space-y-2">
