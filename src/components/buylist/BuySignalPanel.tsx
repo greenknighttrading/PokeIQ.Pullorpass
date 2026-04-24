@@ -9,6 +9,7 @@ import PriceMovementTable from './PriceMovementTable';
 import PriceHistoryChart from './PriceHistoryChart';
 import WatchlistButton from './WatchlistButton';
 import { getBuyScore, getRecommendation, type MoverCard } from './shared/signalHelpers';
+import CollectrPricingSection from './CollectrPricingSection';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
