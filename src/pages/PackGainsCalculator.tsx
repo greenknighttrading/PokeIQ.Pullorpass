@@ -18,6 +18,13 @@ import {
   PACK_ODDS_REGISTRY, getPackOddsBySetName, type PackOddsConfig,
 } from '@/lib/packOdds';
 import { cn } from '@/lib/utils';
+import setAscendedHeroes from '@/assets/set-ascended-heroes.png';
+import setPrismaticEvolutions from '@/assets/set-prismatic-evolutions.png';
+
+const SET_GRAPHICS: Record<string, string> = {
+  'ME: Ascended Heroes': setAscendedHeroes,
+  'SV: Prismatic Evolutions': setPrismaticEvolutions,
+};
 
 interface RarityRow {
   rarity: string;
