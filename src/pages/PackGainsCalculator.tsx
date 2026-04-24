@@ -97,20 +97,24 @@ export default function PackGainsCalculator() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('market_snapshots')
-        .select('rarity, price')
+        .select('rarity, price, synced_at')
         .eq('set_name', selectedSet)
         .eq('product_type', 'card')
         .gt('price', 0);
       if (error) throw error;
       const byRarity = new Map<string, { sum: number; count: number }>();
+      let latestSync: string | null = null;
       for (const row of data ?? []) {
         if (!row.rarity || !row.price) continue;
         const cur = byRarity.get(row.rarity) ?? { sum: 0, count: 0 };
         cur.sum += Number(row.price);
         cur.count += 1;
         byRarity.set(row.rarity, cur);
+        if (row.synced_at && (!latestSync || row.synced_at > latestSync)) {
+          latestSync = row.synced_at as string;
+        }
       }
-      return byRarity;
+      return { byRarity, latestSync };
     },
     staleTime: 1000 * 60 * 30,
   });
@@ -153,7 +157,8 @@ export default function PackGainsCalculator() {
   });
 
   // 3) Merge — prefer JustTCG for completeness (full set), fall back to DB
-  const dbBy = dbQuery.data;
+  const dbBy = dbQuery.data?.byRarity;
+  const latestSync = dbQuery.data?.latestSync ?? null;
   const priceMap = useMemo(() => {
     const out = new Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>();
     if (liveQuery.data) {
@@ -187,6 +192,21 @@ export default function PackGainsCalculator() {
   const dbCount = stats.rows.filter(r => r.source === 'db').length;
   const liveCount = stats.rows.filter(r => r.source === 'justtcg').length;
   const missingCount = stats.rows.filter(r => r.source === 'none').length;
+
+  // Data source + freshness label for the set summary
+  const dataSourceLabel = liveCount >= dbCount ? 'JustTCG' : 'PokeIQ market data';
+  const freshnessLabel = (() => {
+    if (liveCount >= dbCount) return 'Updated live';
+    if (!latestSync) return null;
+    const ms = Date.now() - new Date(latestSync).getTime();
+    if (!Number.isFinite(ms) || ms < 0) return null;
+    const mins = Math.floor(ms / 60000);
+    if (mins < 60) return `Updated ${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `Updated ${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `Updated ${days}d ago`;
+  })();
 
   const handleRoll = () => {
     // Roll one rare slot per pack using weighted pull rates
@@ -234,6 +254,41 @@ export default function PackGainsCalculator() {
     return Array.from(m.values()).sort((a, b) => Number(b.isHit) - Number(a.isHit) || b.value - a.value);
   }, [rollResult]);
 
+  // Hit-rate benchmark for the pulls panel
+  const expectedHitRate = useMemo(() => {
+    // Sum chance % of every "hit" rarity (anything not the No Hit / basic Rare baseline)
+    const hitChancePct = stats.rows
+      .filter(r => !/no hit/i.test(r.rarity))
+      .reduce((s, r) => s + r.chancePct, 0);
+    if (hitChancePct <= 0) return null;
+    const oneInN = 100 / hitChancePct;
+    return { oneInN, perPack: hitChancePct / 100 };
+  }, [stats.rows]);
+
+  // Session summary banner — actual vs expected P&L delta
+  const summaryBanner = useMemo(() => {
+    if (sessionTotals.rolls === 0) return null;
+    const actualPnL = sessionTotals.value - sessionTotals.cost;
+    const expectedPnL = stats.evPerPack * sessionTotals.packs - sessionTotals.cost;
+    const delta = actualPnL - expectedPnL;
+    const absDelta = Math.abs(delta);
+    let tone: 'lucky' | 'avg' | 'unlucky';
+    if (absDelta < 5) tone = 'avg';
+    else if (delta > 0) tone = 'lucky';
+    else tone = 'unlucky';
+    const headline = tone === 'lucky'
+      ? `You got lucky — pulled ${fmtMoney(absDelta)} more than the average session.`
+      : tone === 'unlucky'
+        ? `You ran cold — pulled ${fmtMoney(absDelta)} less than the average session.`
+        : `Right on average — within ${fmtMoney(absDelta)} of expected.`;
+    const tail = actualPnL < 0 && stats.evPerPack < costPerPack
+      ? ` You still lost money because this set has negative EV at ${fmtMoney(costPerPack)}/pack.`
+      : actualPnL > 0
+        ? ` Net session P&L: +${fmtMoney(actualPnL)}.`
+        : ` Net session P&L: ${fmtMoney(actualPnL)}.`;
+    return { tone, headline: headline + tail, delta };
+  }, [sessionTotals, stats.evPerPack, costPerPack]);
+
   return (
     <div className="min-h-screen bg-background">
       <Seo
@@ -266,6 +321,24 @@ export default function PackGainsCalculator() {
             )}
           </div>
         </header>
+
+        {summaryBanner && (
+          <Card className={cn(
+            'border-l-4',
+            summaryBanner.tone === 'lucky' && 'border-l-success bg-success/5',
+            summaryBanner.tone === 'avg' && 'border-l-warning bg-warning/5',
+            summaryBanner.tone === 'unlucky' && 'border-l-destructive bg-destructive/5',
+          )}>
+            <CardContent className="p-4 flex items-start gap-3">
+              {summaryBanner.tone === 'lucky'
+                ? <TrendingUp className="w-5 h-5 text-success shrink-0 mt-0.5" />
+                : summaryBanner.tone === 'unlucky'
+                  ? <TrendingDown className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+                  : <Target className="w-5 h-5 text-warning shrink-0 mt-0.5" />}
+              <p className="text-sm text-foreground leading-relaxed">{summaryBanner.headline}</p>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Controls + pulls */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
@@ -322,7 +395,14 @@ export default function PackGainsCalculator() {
                 <CardTitle className="text-base">Your pulls</CardTitle>
                 <p className="text-[11px] text-muted-foreground">
                   {rollResult
-                    ? `${rollResult.pulls.length} packs · ${pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0)} hits`
+                    ? (() => {
+                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
+                        const packs = rollResult.pulls.length;
+                        const expected = expectedHitRate
+                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
+                          : '';
+                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
+                      })()
                     : 'Hit Simulate to roll the rare slot for every pack.'}
                 </p>
               </div>
@@ -436,6 +516,24 @@ export default function PackGainsCalculator() {
                           : <Cell value="—" muted />}
                         <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
                       </tr>
+                      {hasSession && (() => {
+                        const delta = sessPnL - expPnL;
+                        const tone = delta >= 0 ? 'pos' : 'neg';
+                        const arrow = delta >= 0 ? '↑' : '↓';
+                        return (
+                          <tr className="border-t border-border/30 bg-muted/20">
+                            <td className="px-3 py-2.5 text-xs text-muted-foreground">vs. expected</td>
+                            <td colSpan={2} className={cn(
+                              'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                              tone === 'pos' && 'text-success',
+                              tone === 'neg' && 'text-destructive',
+                            )}>
+                              {delta >= 0 ? 'Beat expected by ' : 'Trailed expected by '}
+                              {delta >= 0 ? '+' : '-'}{fmtMoney(Math.abs(delta))} {arrow}
+                            </td>
+                          </tr>
+                        );
+                      })()}
                     </tbody>
                   </table>
                   <p className="px-3 py-2.5 text-[11px] text-muted-foreground border-t border-border/40">
@@ -468,7 +566,16 @@ export default function PackGainsCalculator() {
                 </div>
                 <div className="pt-5 space-y-3">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
-                  <SummaryRow label="Expected value" value={fmtMoney(stats.evPerPack)} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-sm">Expected value</div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                        Prices via {dataSourceLabel}
+                        {freshnessLabel ? ` · ${freshnessLabel}` : ''}
+                      </div>
+                    </div>
+                    <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Current avg gain/loss from ripping</span>
                     <span className={cn(
@@ -479,6 +586,15 @@ export default function PackGainsCalculator() {
                     </span>
                   </div>
                   <SummaryRow label="Avg cost per pack" value={fmtMoney(avgCostPerPackLive)} />
+                </div>
+                <div className="mt-5 pt-4 border-t border-border/40">
+                  <div className="flex items-start gap-2">
+                    <Target className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      You need <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span> in
+                      hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
