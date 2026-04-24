@@ -73,7 +73,7 @@ export default function PackGainsCalculator() {
 
   const config = getPackOddsBySetName(selectedSet)!;
 
-  // 1) Pull what we have from market_snapshots
+  // 1) Pull what we have from market_snapshots (sum + count by rarity)
   const dbQuery = useQuery({
     queryKey: ['pack-gains-db', selectedSet],
     queryFn: async () => {
@@ -97,21 +97,13 @@ export default function PackGainsCalculator() {
     staleTime: 1000 * 60 * 30,
   });
 
-  // 2) Determine which rarities are still missing and live-fetch from JustTCG
-  const dbBy = dbQuery.data;
-  const missingRarities = useMemo(() => {
-    if (!dbBy) return [];
-    return config.rarities.filter(r => !dbBy.has(r.rarity)).map(r => r.rarity);
-  }, [config.rarities, dbBy]);
-
+  // 2) Always fetch full JustTCG set so we can total every rarity (including ones missing from DB)
   const liveQuery = useQuery({
-    queryKey: ['pack-gains-live', selectedSet, missingRarities.join('|')],
-    enabled: !!dbBy && missingRarities.length > 0,
+    queryKey: ['pack-gains-live', selectedSet],
     staleTime: 1000 * 60 * 30,
     queryFn: async () => {
       const setParam = config.justTcgSetName ?? config.setName;
       const acc = new Map<string, { sum: number; count: number }>();
-      // Page through up to 4 pages (400 cards) to be safe
       for (let page = 0; page < 4; page++) {
         const { data, error } = await supabase.functions.invoke('justtcg', {
           body: {
@@ -127,7 +119,7 @@ export default function PackGainsCalculator() {
         if (items.length === 0) break;
         for (const card of items) {
           const rarity = card?.rarity;
-          if (!rarity || !missingRarities.includes(rarity)) continue;
+          if (!rarity) continue;
           const nm = card?.variants?.find((v: any) => v.condition === 'Near Mint') ?? card?.variants?.[0];
           const price = Number(nm?.price);
           if (!Number.isFinite(price) || price <= 0) continue;
@@ -142,13 +134,20 @@ export default function PackGainsCalculator() {
     },
   });
 
-  // 3) Merge DB + live into one map with source tracking
+  // 3) Merge — prefer JustTCG for completeness (full set), fall back to DB
+  const dbBy = dbQuery.data;
   const priceMap = useMemo(() => {
-    const out = new Map<string, { avg: number; count: number; source: 'db' | 'justtcg' }>();
-    if (dbBy) dbBy.forEach((v, k) => out.set(k, { avg: v.sum / v.count, count: v.count, source: 'db' }));
+    const out = new Map<string, { avg: number; sum: number; count: number; source: 'db' | 'justtcg' }>();
     if (liveQuery.data) {
       liveQuery.data.forEach((v, k) => {
-        if (!out.has(k) && v.count > 0) out.set(k, { avg: v.sum / v.count, count: v.count, source: 'justtcg' });
+        if (v.count > 0) out.set(k, { avg: v.sum / v.count, sum: v.sum, count: v.count, source: 'justtcg' });
+      });
+    }
+    if (dbBy) {
+      dbBy.forEach((v, k) => {
+        if (!out.has(k) && v.count > 0) {
+          out.set(k, { avg: v.sum / v.count, sum: v.sum, count: v.count, source: 'db' });
+        }
       });
     }
     return out;
