@@ -394,32 +394,8 @@ export default function PackGainsCalculator() {
           />
         </div>
 
-        {/* Expected vs Simulated */}
+        {/* Simulated run + Total session + Expected (cumulative) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Expected run</CardTitle>
-              <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} — pure math</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <SummaryRow label="Packs ripped" value={String(Math.max(0, packsOpened))} />
-              <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
-              <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
-              <div className="border-t border-border/60 pt-3 flex items-center justify-between">
-                <span className="text-sm">Expected P&L</span>
-                <span className={cn(
-                  'text-base font-bold tabular-nums',
-                  expectedGainLoss >= 0 ? 'text-success' : 'text-destructive'
-                )}>
-                  {expectedGainLoss >= 0 ? '+' : ''}{fmtMoney(expectedGainLoss)}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted-foreground pt-1">
-                Statistical EV: packs × pull rate × avg raw price.
-              </p>
-            </CardContent>
-          </Card>
-
           <Card className={cn(rollResult && 'border-primary/40')}>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Simulated run</CardTitle>
@@ -511,6 +487,45 @@ export default function PackGainsCalculator() {
               )}
             </CardContent>
           </Card>
+
+          {(() => {
+            const expRuns = Math.max(sessionTotals.rolls, 1);
+            const expPacks = sessionTotals.rolls > 0 ? sessionTotals.packs : Math.max(0, packsOpened);
+            const expSpend = sessionTotals.rolls > 0 ? sessionTotals.cost : totalCost;
+            const expReturn = stats.evPerPack * expPacks;
+            const expPnL = expReturn - expSpend;
+            const isCumulative = sessionTotals.rolls > 0;
+            return (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Expected run</CardTitle>
+                  <p className="text-[11px] text-muted-foreground">
+                    {isCumulative
+                      ? `${expRuns} ${expRuns === 1 ? 'run' : 'runs'} · ${expPacks} packs ripped — pure math`
+                      : `${expPacks} packs × ${fmtMoney(costPerPack)} — pure math`}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <SummaryRow label={isCumulative ? 'Total runs' : 'Runs'} value={String(expRuns)} />
+                  <SummaryRow label="Packs ripped" value={String(expPacks)} />
+                  <SummaryRow label="Spend" value={fmtMoney(expSpend)} />
+                  <SummaryRow label="Expected return" value={fmtMoney(expReturn)} />
+                  <div className="border-t border-border/60 pt-3 flex items-center justify-between">
+                    <span className="text-sm">Expected P&L</span>
+                    <span className={cn(
+                      'text-base font-bold tabular-nums',
+                      expPnL >= 0 ? 'text-success' : 'text-destructive'
+                    )}>
+                      {expPnL >= 0 ? '+' : ''}{fmtMoney(expPnL)}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground pt-1">
+                    Statistical EV: packs × pull rate × avg raw price.
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })()}
         </div>
 
         {/* Rarity breakdown */}
