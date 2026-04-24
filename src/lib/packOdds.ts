@@ -22,6 +22,8 @@ export interface PackOddsConfig {
   setCode: string;         // short tag, e.g. ASC
   cardsPerPack: number;
   rarities: RarityOdd[];
+  /** Optional override for the JustTCG `set` query parameter. Defaults to setName. */
+  justTcgSetName?: string;
 }
 
 /**
@@ -33,6 +35,7 @@ export const ASCENDED_HEROES: PackOddsConfig = {
   displayName: 'Pokémon Ascended Heroes',
   setCode: 'ASC',
   cardsPerPack: 10,
+  justTcgSetName: 'me-ascended-heroes-pokemon',
   rarities: [
     { rarity: 'Special Illustration Rare', shortLabel: 'SIR', oneIn: 70 },
     { rarity: 'Illustration Rare',         shortLabel: 'IR',  oneIn: 9  },
