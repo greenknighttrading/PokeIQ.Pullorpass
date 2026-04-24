@@ -272,30 +272,6 @@ export default function PackGainsCalculator() {
     return { oneInN, perPack: hitChancePct / 100 };
   }, [stats.rows]);
 
-  // Session summary banner — actual vs expected P&L delta
-  const summaryBanner = useMemo(() => {
-    if (sessionTotals.rolls === 0) return null;
-    const actualPnL = sessionTotals.value - sessionTotals.cost;
-    const expectedPnL = stats.evPerPack * sessionTotals.packs - sessionTotals.cost;
-    const delta = actualPnL - expectedPnL;
-    const absDelta = Math.abs(delta);
-    let tone: 'lucky' | 'avg' | 'unlucky';
-    if (absDelta < 5) tone = 'avg';
-    else if (delta > 0) tone = 'lucky';
-    else tone = 'unlucky';
-    const headline = tone === 'lucky'
-      ? `You got lucky — pulled ${fmtMoney(absDelta)} more than the average session.`
-      : tone === 'unlucky'
-        ? `You ran cold — pulled ${fmtMoney(absDelta)} less than the average session.`
-        : `Right on average — within ${fmtMoney(absDelta)} of expected.`;
-    const tail = actualPnL < 0 && stats.evPerPack < costPerPack
-      ? ` You still lost money because this set has negative EV at ${fmtMoney(costPerPack)}/pack.`
-      : actualPnL > 0
-        ? ` Net session P&L: +${fmtMoney(actualPnL)}.`
-        : ` Net session P&L: ${fmtMoney(actualPnL)}.`;
-    return { tone, headline: headline + tail, delta };
-  }, [sessionTotals, stats.evPerPack, costPerPack]);
-
   return (
     <div className="min-h-screen bg-background">
       <Seo
