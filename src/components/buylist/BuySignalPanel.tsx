@@ -345,6 +345,33 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
     return isNaN(num) ? 0 : num;
   };
 
+  // Multiplier (e.g. 4.2× the raw)
+  const heroMultiple = heroGrade && rawPrice && rawPrice > 0
+    ? heroGrade.price / rawPrice
+    : null;
+
+  // Build a "best price per grade across all companies" comparison table.
+  // For each numeric grade (10, 9.5, 9, 8.5, …) we pick the highest price
+  // available across PSA / BGS / CGC so we can show how value scales by grade.
+  const bestByGrade = new Map<number, { grade: string; price: number; company: string; population?: number | null }>();
+  for (const g of grades) {
+    const n = parseFloat(g.grade.replace(/[^0-9.]/g, ''));
+    if (!Number.isFinite(n)) continue;
+    const cur = bestByGrade.get(n);
+    if (!cur || g.price > cur.price) {
+      bestByGrade.set(n, { grade: g.grade, price: g.price, company: g.company, population: g.population });
+    }
+  }
+  const gradeProgression = Array.from(bestByGrade.entries())
+    .sort((a, b) => b[0] - a[0])
+    .map(([n, v]) => ({
+      gradeNum: n,
+      ...v,
+      premium: rawPrice && rawPrice > 0 ? (v.price / rawPrice - 1) * 100 : null,
+      multiple: rawPrice && rawPrice > 0 ? v.price / rawPrice : null,
+    }));
+  const maxGradePrice = gradeProgression.reduce((m, r) => Math.max(m, r.price), 0);
+
   return (
     <div className="rounded-2xl border border-border/60 bg-gradient-to-b from-card to-card/70 backdrop-blur-sm p-6 md:p-8">
       <div className="flex items-center gap-3 mb-5">
@@ -363,26 +390,142 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
         <p className="text-sm text-muted-foreground py-4">{error}</p>
       ) : (
         <div className="space-y-5">
-          {/* Hero: PSA 10 (or top grade) */}
+          {/* ─── Hero: Raw vs PSA 10 side-by-side comparison ─── */}
           {heroGrade && (
-            <div className="text-center py-3">
-              <Badge className="text-xs px-2.5 py-0.5 bg-primary/15 text-primary border-primary/30 mb-2">
-                {heroGrade.company.toUpperCase()} {heroGrade.grade}
-              </Badge>
-              <p className="text-2xl md:text-3xl font-black tabular-nums text-foreground">
-                ${heroGrade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </p>
+            <div>
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-stretch gap-3">
+                {/* Raw */}
+                <div className="rounded-xl border border-border/50 bg-muted/20 p-4 text-center">
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Raw / Ungraded</p>
+                  <p className="text-2xl md:text-3xl font-black tabular-nums text-foreground mt-2">
+                    {rawPrice != null && rawPrice > 0
+                      ? `$${rawPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : '—'}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground mt-1">market price</p>
+                </div>
+
+                {/* Arrow + multiple */}
+                <div className="flex flex-col items-center justify-center px-2">
+                  <div className="hidden sm:block text-2xl text-muted-foreground/60">→</div>
+                  {heroMultiple != null && (
+                    <p className="text-xs font-bold text-primary tabular-nums mt-1">
+                      {heroMultiple.toFixed(1)}×
+                    </p>
+                  )}
+                </div>
+
+                {/* PSA 10 (or best) */}
+                <div className="rounded-xl border border-primary/40 bg-primary/10 p-4 text-center">
+                  <p className="text-[10px] uppercase tracking-widest text-primary font-bold">
+                    {heroGrade.company.toUpperCase()} {heroGrade.grade}
+                  </p>
+                  <p className="text-2xl md:text-3xl font-black tabular-nums text-foreground mt-2">
+                    ${heroGrade.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                  {heroPremium != null && (
+                    <p className={cn(
+                      'text-[11px] font-bold mt-1 tabular-nums',
+                      heroPremium > 0 ? 'text-success' : 'text-warning'
+                    )}>
+                      {heroPremium > 0 ? '+' : ''}{heroPremium.toFixed(0)}% gain on grading
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Plain-language summary */}
               {rawPrice != null && rawPrice > 0 && heroPremium != null && (
-                <p className="text-sm text-muted-foreground mt-1.5">
-                  Raw: <span className="font-semibold text-foreground">${rawPrice.toFixed(2)}</span>
-                  <span className={cn('ml-2 font-bold', heroPremium > 0 ? 'text-success' : 'text-warning')}>
-                    {heroPremium > 0 ? '+' : ''}{heroPremium.toFixed(0)}% premium
-                  </span>
+                <p className="text-xs text-muted-foreground text-center mt-3">
+                  A {heroGrade.company.toUpperCase()} {heroGrade.grade} sells for{' '}
+                  <span className="font-bold text-foreground">
+                    ${(heroGrade.price - rawPrice).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                  </span>{' '}
+                  more than a raw copy
+                  {heroMultiple != null && <> — that&apos;s <span className="font-bold text-primary">{heroMultiple.toFixed(1)}×</span> the raw price.</>}
                 </p>
               )}
               {matchedName && (
-                <p className="text-[10px] text-muted-foreground/70 mt-1.5">Data from: {matchedName}</p>
+                <p className="text-[10px] text-muted-foreground/70 mt-1.5 text-center">Data from: {matchedName}</p>
               )}
+            </div>
+          )}
+
+          {/* ─── Grade-by-grade value progression (best price per grade across companies) ─── */}
+          {gradeProgression.length > 1 && (
+            <div>
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                How value scales by grade
+              </p>
+              <div className="rounded-xl border border-border/40 overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/30 text-muted-foreground">
+                    <tr>
+                      <th className="text-left px-3 py-2 font-semibold">Grade</th>
+                      <th className="text-right px-3 py-2 font-semibold">Price</th>
+                      <th className="text-right px-3 py-2 font-semibold hidden sm:table-cell">vs Raw</th>
+                      <th className="text-right px-3 py-2 font-semibold hidden md:table-cell">Multiple</th>
+                      <th className="px-3 py-2 font-semibold w-[35%]">Relative</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Raw row first as baseline */}
+                    {rawPrice != null && rawPrice > 0 && (
+                      <tr className="border-t border-border/30 bg-muted/10">
+                        <td className="px-3 py-2 font-bold text-foreground">Raw</td>
+                        <td className="px-3 py-2 text-right tabular-nums font-bold text-foreground">
+                          ${rawPrice.toFixed(2)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden sm:table-cell">—</td>
+                        <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">1.0×</td>
+                        <td className="px-3 py-2">
+                          <div className="h-1.5 rounded-full bg-muted-foreground/30" style={{ width: `${maxGradePrice > 0 ? (rawPrice / maxGradePrice) * 100 : 0}%` }} />
+                        </td>
+                      </tr>
+                    )}
+                    {gradeProgression.map((row) => {
+                      const widthPct = maxGradePrice > 0 ? (row.price / maxGradePrice) * 100 : 0;
+                      const isTop = row.gradeNum === gradeProgression[0].gradeNum;
+                      return (
+                        <tr key={`prog-${row.gradeNum}`} className={cn('border-t border-border/30', isTop && 'bg-primary/5')}>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1.5">
+                              <Badge variant="outline" className={cn(
+                                'text-[10px] px-1.5 py-0 font-bold',
+                                isTop ? 'border-primary/50 text-primary' : 'border-border/50'
+                              )}>
+                                {row.grade}
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground uppercase">{row.company}</span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums font-bold text-foreground">
+                            ${row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </td>
+                          <td className={cn(
+                            'px-3 py-2 text-right tabular-nums hidden sm:table-cell font-medium',
+                            row.premium != null && row.premium > 0 ? 'text-success' : 'text-warning'
+                          )}>
+                            {row.premium != null ? `${row.premium > 0 ? '+' : ''}${row.premium.toFixed(0)}%` : '—'}
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-muted-foreground hidden md:table-cell">
+                            {row.multiple != null ? `${row.multiple.toFixed(1)}×` : '—'}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div
+                              className={cn('h-1.5 rounded-full', isTop ? 'bg-primary' : 'bg-primary/40')}
+                              style={{ width: `${widthPct}%` }}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[10px] text-muted-foreground/70 mt-2">
+                Showing the highest price available at each grade across PSA, BGS, and CGC.
+              </p>
             </div>
           )}
 
@@ -393,7 +536,9 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                 onClick={() => setExpanded(!expanded)}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mx-auto"
               >
-                {expanded ? <>Hide all grades <ChevronUp className="w-3.5 h-3.5" /></> : <>View all {grades.length} grades <ChevronDown className="w-3.5 h-3.5" /></>}
+                {expanded
+                  ? <>Hide full breakdown by company <ChevronUp className="w-3.5 h-3.5" /></>
+                  : <>View full breakdown by company ({grades.length}) <ChevronDown className="w-3.5 h-3.5" /></>}
               </button>
 
               {expanded && (
