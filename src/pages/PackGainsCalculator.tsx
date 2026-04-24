@@ -380,8 +380,8 @@ export default function PackGainsCalculator() {
         </Card>
 
         {/* Set summary + pulls (left) + Actual vs Expected (right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
+          <div className="flex flex-col gap-4 h-full">
           {(() => {
           const sessionPacks = sessionTotals.packs;
           const avgCostPerPackLive = sessionPacks > 0
@@ -389,8 +389,8 @@ export default function PackGainsCalculator() {
             : costPerPack;
           const setGraphic = SET_GRAPHICS[config.setName];
           return (
-            <Card>
-              <CardContent className="p-6">
+            <Card className="flex-1 flex flex-col">
+              <CardContent className="p-6 flex-1 flex flex-col">
                 <div className="flex items-center gap-4 pb-5 border-b border-border/40">
                   <div className="w-20 h-20 rounded-md bg-muted/30 flex items-center justify-center shrink-0 overflow-hidden">
                     {setGraphic ? (
@@ -411,7 +411,7 @@ export default function PackGainsCalculator() {
                     <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
                   </div>
                 </div>
-                <div className="pt-5 space-y-3">
+                <div className="pt-5 space-y-3 flex-1">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -442,9 +442,6 @@ export default function PackGainsCalculator() {
                       hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
                     </p>
                   </div>
-                  <p className="text-[11px] text-muted-foreground mt-2 pl-6 leading-relaxed">
-                    Expected = {Math.max(0, packsOpened)} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
-                  </p>
                   <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
                     Each session is independent. Past unlucky runs don't make future hits more likely —
                     but over enough packs, results naturally trend toward expected value.
@@ -456,10 +453,10 @@ export default function PackGainsCalculator() {
           })()}
 
           {/* Your pulls — stacked under Pack Cost */}
-          <Card className={cn(rollResult && 'border-primary/40 bg-primary/5')}>
+          <Card className={cn('flex-1 flex flex-col', rollResult && 'border-primary/40 bg-primary/5')}>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base">Your pulls</CardTitle>
+                <CardTitle className="text-base">Your simulated Pulls</CardTitle>
                 <p className="text-[11px] text-muted-foreground">
                   {rollResult
                     ? (() => {
@@ -479,13 +476,13 @@ export default function PackGainsCalculator() {
                 </Button>
               )}
             </CardHeader>
-            <CardContent className="pt-1">
+            <CardContent className="pt-1 flex-1 flex flex-col">
               {!rollResult ? (
-                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
+                <div className="flex-1 min-h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
                   No simulation yet
                 </div>
               ) : (
-                <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                <div className="space-y-1.5 flex-1 overflow-y-auto pr-1">
                   {pullTally.map(t => (
                     <div
                       key={t.rarity}
