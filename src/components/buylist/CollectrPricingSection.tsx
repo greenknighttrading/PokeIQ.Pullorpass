@@ -60,26 +60,40 @@ export default function CollectrPricingSection({ cardName, setName, cardNumber }
     setLoading(true);
     setError(null);
     try {
-      // 1) Search Collectr in Pokemon category
-      const queryParts = [cardName, cardNumber, setName].filter(Boolean).join(' ');
-      const { data: searchData, error: searchErr } = await supabase.functions.invoke('collectr', {
-        body: {
-          action: 'search',
-          params: { searchString: queryParts, categories: 'pokemon' },
-        },
-      });
-      if (searchErr) throw new Error(searchErr.message);
+      // Collectr search is finicky — verbose queries return []. Try progressively simpler queries.
+      const candidates = [
+        cardNumber ? `${cardName} ${cardNumber}` : null,
+        cardName,
+      ].filter(Boolean) as string[];
 
-      const results: AnyObj[] =
-        (searchData?.results as AnyObj[]) ||
-        (searchData?.data as AnyObj[]) ||
-        (searchData?.products as AnyObj[]) ||
-        (Array.isArray(searchData) ? (searchData as AnyObj[]) : []) ||
-        [];
+      let results: AnyObj[] = [];
+      for (const q of candidates) {
+        const { data: searchData, error: searchErr } = await supabase.functions.invoke('collectr', {
+          body: { action: 'search', params: { searchString: q, categories: 'pokemon' } },
+        });
+        if (searchErr) throw new Error(searchErr.message);
+
+        const arr: AnyObj[] = Array.isArray(searchData)
+          ? (searchData as AnyObj[])
+          : ((searchData?.results as AnyObj[]) ||
+             (searchData?.data as AnyObj[]) ||
+             (searchData?.products as AnyObj[]) ||
+             []);
+        if (arr.length > 0) { results = arr; break; }
+      }
+
+      // If we have a set name, prefer matches whose setName matches (case-insensitive contains)
+      if (setName && results.length > 1) {
+        const wanted = setName.toLowerCase();
+        const filtered = results.filter(r => {
+          const s = String((r.setName as string) || (r.set_name as string) || '').toLowerCase();
+          return s && (s.includes(wanted) || wanted.includes(s));
+        });
+        if (filtered.length > 0) results = filtered;
+      }
 
       setSearchHits(results.slice(0, 5));
 
-      // 2) Pick the best hit and fetch full product (with grading data)
       const top = results[0];
       const productId =
         (top?.id as string) ||
@@ -89,10 +103,7 @@ export default function CollectrPricingSection({ cardName, setName, cardNumber }
 
       if (productId) {
         const { data: prodData, error: prodErr } = await supabase.functions.invoke('collectr', {
-          body: {
-            action: 'getProduct',
-            params: { productId, gradingData: true },
-          },
+          body: { action: 'getProduct', params: { productId, gradingData: true } },
         });
         if (prodErr) throw new Error(prodErr.message);
         setProduct((prodData?.data as AnyObj) || (prodData as AnyObj));
@@ -106,9 +117,15 @@ export default function CollectrPricingSection({ cardName, setName, cardNumber }
     }
   }, [cardName, cardNumber, setName]);
 
+  // Track whether we've fetched for the current expansion to avoid request loops.
+  const fetchedRef = React.useRef(false);
+  React.useEffect(() => { fetchedRef.current = false; }, [cardName, cardNumber, setName]);
   React.useEffect(() => {
-    if (expanded && !product && !loading && !error) fetchData();
-  }, [expanded, product, loading, error, fetchData]);
+    if (expanded && !fetchedRef.current) {
+      fetchedRef.current = true;
+      fetchData();
+    }
+  }, [expanded, fetchData]);
 
   if (!cardName) return null;
 
