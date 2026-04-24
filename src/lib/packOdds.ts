@@ -46,8 +46,28 @@ export const ASCENDED_HEROES: PackOddsConfig = {
   ],
 };
 
+/**
+ * SV: Prismatic Evolutions (PRE) — community-reported pull rates.
+ * Source: data compiled by @yprize from 2700+ packs.
+ */
+export const PRISMATIC_EVOLUTIONS: PackOddsConfig = {
+  setName: 'SV: Prismatic Evolutions',
+  displayName: 'Pokémon Prismatic Evolutions',
+  setCode: 'PRE',
+  cardsPerPack: 10,
+  justTcgSetName: 'prismatic-evolutions',
+  rarities: [
+    { rarity: 'Full Art Trainer',          shortLabel: 'FAT', oneIn: 16 },
+    { rarity: 'Master Ball Holo',          shortLabel: 'MBH', oneIn: 19 },
+    { rarity: 'ACE SPEC Rare',             shortLabel: 'ACE', oneIn: 29 },
+    { rarity: 'Alternate Art Special Illustration Rare', shortLabel: 'AA SIR', oneIn: 53 },
+    { rarity: 'Hyper Rare',                shortLabel: 'HR',  oneIn: 152 },
+  ],
+};
+
 export const PACK_ODDS_REGISTRY: PackOddsConfig[] = [
   ASCENDED_HEROES,
+  PRISMATIC_EVOLUTIONS,
 ];
 
 export function getPackOddsBySetName(setName: string): PackOddsConfig | undefined {
