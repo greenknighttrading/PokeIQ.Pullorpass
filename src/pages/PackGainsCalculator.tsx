@@ -548,6 +548,8 @@ export default function PackGainsCalculator() {
                   )}
                 </CardHeader>
                 <CardContent className="p-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    <div className="lg:border-r border-border/40">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-[11px] uppercase tracking-wide text-muted-foreground border-b border-border/40">
@@ -599,7 +601,9 @@ export default function PackGainsCalculator() {
                       })()}
                     </tbody>
                   </table>
-                  {hasSession && (() => {
+                    </div>
+                    <div className="lg:min-w-0">
+                  {hasSession ? (() => {
                     // Distribution math
                     const sigma = perPackStdDev > 0 ? perPackStdDev * Math.sqrt(sessionTotals.packs) : 0;
                     const meanValue = stats.evPerPack * sessionTotals.packs;
@@ -632,10 +636,10 @@ export default function PackGainsCalculator() {
                     }
 
                     return (
-                      <div className="border-t border-border/40 px-3 py-3 space-y-3">
+                      <div className="border-t lg:border-t-0 border-border/40 px-4 py-4 space-y-3 min-w-0">
                         {/* Percentile sentence + mini bell curve */}
                         <div className="space-y-2">
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                          <p className="text-xs text-muted-foreground leading-relaxed break-words">
                             {percentileSentence}
                           </p>
                           <BellCurve z={z} />
@@ -643,7 +647,7 @@ export default function PackGainsCalculator() {
 
                         {/* Convergence + variance */}
                         <div className="space-y-1.5 pt-2 border-t border-border/30">
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                          <p className="text-xs text-muted-foreground leading-relaxed break-words">
                             After <span className="text-foreground font-medium">{sessionTotals.packs}</span> packs,
                             your cumulative return is{' '}
                             <span className={cn(
@@ -653,7 +657,7 @@ export default function PackGainsCalculator() {
                             <span className="text-foreground font-medium">{fmtMoney(stats.evPerPack)}</span>/pack.
                           </p>
                           {sigma > 0 && (
-                            <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed break-words">
                               At {sessionTotals.packs} packs, a ±{fmtMoney(swing)} swing is completely normal.
                               At {sessionTotals.packs * 10} packs, that band tightens to ±{fmtMoney(swing10x / 3)}.
                             </p>
@@ -663,7 +667,7 @@ export default function PackGainsCalculator() {
                         {/* Milestone badge */}
                         {milestone && (
                           <div className={cn(
-                            'flex items-start gap-2 rounded-md px-2.5 py-2 text-[11px] leading-relaxed',
+                            'flex items-start gap-2 rounded-md px-2.5 py-2 text-xs leading-relaxed',
                             milestone.tone === 'good' && 'bg-success/10 text-success-foreground',
                             milestone.tone === 'info' && 'bg-primary/10 text-foreground',
                             milestone.tone === 'warn' && 'bg-warning/10 text-foreground',
@@ -679,13 +683,19 @@ export default function PackGainsCalculator() {
                         )}
 
                         {/* Gambler's fallacy caveat */}
-                        <p className="text-[10px] text-muted-foreground/80 leading-relaxed pt-1 border-t border-border/30 italic">
+                        <p className="text-[11px] text-muted-foreground/80 leading-relaxed pt-2 border-t border-border/30 italic break-words">
                           Each session is independent. Past unlucky runs don't make future hits more likely —
                           but over enough packs, results naturally trend toward expected value.
                         </p>
                       </div>
                     );
-                  })()}
+                  })() : (
+                    <div className="hidden lg:flex items-center justify-center h-full px-4 py-8 text-xs text-muted-foreground text-center">
+                      Run a simulation to see distribution insights.
+                    </div>
+                  )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             );
