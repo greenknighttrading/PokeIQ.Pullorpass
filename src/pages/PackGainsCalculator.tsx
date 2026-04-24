@@ -395,7 +395,14 @@ export default function PackGainsCalculator() {
                 <CardTitle className="text-base">Your pulls</CardTitle>
                 <p className="text-[11px] text-muted-foreground">
                   {rollResult
-                    ? `${rollResult.pulls.length} packs · ${pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0)} hits`
+                    ? (() => {
+                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
+                        const packs = rollResult.pulls.length;
+                        const expected = expectedHitRate
+                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
+                          : '';
+                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
+                      })()
                     : 'Hit Simulate to roll the rare slot for every pack.'}
                 </p>
               </div>
