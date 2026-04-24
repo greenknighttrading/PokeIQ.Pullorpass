@@ -379,8 +379,9 @@ export default function PackGainsCalculator() {
           </CardContent>
         </Card>
 
-        {/* Set summary (left) + Actual vs Expected (right) */}
+        {/* Set summary + pulls (left) + Actual vs Expected (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+          <div className="space-y-4">
           {(() => {
           const sessionPacks = sessionTotals.packs;
           const avgCostPerPackLive = sessionPacks > 0
@@ -444,11 +445,70 @@ export default function PackGainsCalculator() {
                   <p className="text-[11px] text-muted-foreground mt-2 pl-6 leading-relaxed">
                     Expected = {Math.max(0, packsOpened)} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
                   </p>
+                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
+                    Each session is independent. Past unlucky runs don't make future hits more likely —
+                    but over enough packs, results naturally trend toward expected value.
+                  </p>
                 </div>
               </CardContent>
             </Card>
           );
           })()}
+
+          {/* Your pulls — stacked under Pack Cost */}
+          <Card className={cn(rollResult && 'border-primary/40 bg-primary/5')}>
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base">Your pulls</CardTitle>
+                <p className="text-[11px] text-muted-foreground">
+                  {rollResult
+                    ? (() => {
+                        const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
+                        const packs = rollResult.pulls.length;
+                        const expected = expectedHitRate
+                          ? ` · Expected: 1 hit per ${expectedHitRate.oneInN.toFixed(1)} packs`
+                          : '';
+                        return `${hits} hit${hits === 1 ? '' : 's'} in ${packs} pack${packs === 1 ? '' : 's'}${expected}`;
+                      })()
+                    : 'Hit Simulate to roll the rare slot for every pack.'}
+                </p>
+              </div>
+              {rollResult && (
+                <Button variant="ghost" size="icon" onClick={() => setRollResult(null)} className="shrink-0">
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent className="pt-1">
+              {!rollResult ? (
+                <div className="h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
+                  No simulation yet
+                </div>
+              ) : (
+                <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+                  {pullTally.map(t => (
+                    <div
+                      key={t.rarity}
+                      className={cn(
+                        'flex items-center justify-between text-xs px-2.5 py-1.5 rounded-md',
+                        t.isHit ? 'bg-success/10 text-foreground' : 'bg-muted/40 text-muted-foreground'
+                      )}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{t.shortLabel}</Badge>
+                        <span className="truncate">{t.rarity}</span>
+                      </div>
+                      <div className="flex items-center gap-3 tabular-nums shrink-0">
+                        <span className="text-muted-foreground">×{t.count}</span>
+                        <span className="font-semibold">{fmtMoney(t.value)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+          </div>
 
           {(() => {
             const sessSpend = sessionTotals.cost;
