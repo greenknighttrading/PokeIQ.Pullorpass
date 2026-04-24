@@ -325,11 +325,11 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
 
   if (!cardName || (!loading && fetched && grades.length === 0 && !error)) return null;
 
-  const byCompany: Record<string, { grade: string; price: number }[]> = {};
+  const byCompany: Record<string, { grade: string; price: number; population?: number | null }[]> = {};
   for (const g of grades) {
     const key = g.company.toUpperCase();
     if (!byCompany[key]) byCompany[key] = [];
-    byCompany[key].push({ grade: g.grade, price: g.price });
+    byCompany[key].push({ grade: g.grade, price: g.price, population: g.population });
   }
 
   // Find PSA 10 specifically for the hero display
