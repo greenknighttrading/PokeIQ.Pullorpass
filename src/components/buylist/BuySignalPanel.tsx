@@ -536,7 +536,9 @@ function GradedPricingSection({ cardName, cardNumber, setName, rawPrice }: { car
                 onClick={() => setExpanded(!expanded)}
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mx-auto"
               >
-                {expanded ? <>Hide all grades <ChevronUp className="w-3.5 h-3.5" /></> : <>View all {grades.length} grades <ChevronDown className="w-3.5 h-3.5" /></>}
+                {expanded
+                  ? <>Hide full breakdown by company <ChevronUp className="w-3.5 h-3.5" /></>
+                  : <>View full breakdown by company ({grades.length}) <ChevronDown className="w-3.5 h-3.5" /></>}
               </button>
 
               {expanded && (
