@@ -171,7 +171,7 @@ export default function PackGainsCalculator() {
     <div className="min-h-screen bg-background">
       <Seo
         title="Pack Gains Calculator — Estimate Booster Pack EV | PokeIQ"
-        description="Estimate expected value, break-even cost, and simulated rip outcomes for Pokémon TCG booster packs using real market prices."
+        description="Estimate expected value and break-even cost for Pokémon TCG booster packs using real market prices."
       />
       <GlobalNavBar />
 
