@@ -499,6 +499,9 @@ export default function PackGainsCalculator() {
                       hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
                     </p>
                   </div>
+                  <p className="text-[11px] text-muted-foreground mt-2 pl-6 leading-relaxed">
+                    Expected = {Math.max(0, packsOpened)} packs × statistical EV ({fmtMoney(stats.evPerPack)}/pack).
+                  </p>
                 </div>
               </CardContent>
             </Card>
