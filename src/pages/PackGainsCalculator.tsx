@@ -268,135 +268,31 @@ export default function PackGainsCalculator() {
           />
         </div>
 
-        {/* Visual rarity breakdown — bars by EV contribution */}
+        {/* Run summary */}
         <Card>
           <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Where the value lives</CardTitle>
-              <span className="text-[11px] text-muted-foreground">Sorted by EV contribution per pack</span>
-            </div>
+            <CardTitle className="text-base">Run summary</CardTitle>
+            <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} each</p>
           </CardHeader>
-          <CardContent className="space-y-2">
-            {isLoading ? (
-              <div className="p-6 flex items-center justify-center">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+          <CardContent className="space-y-3">
+            <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
+            <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
+            <div className="border-t border-border/60 pt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Expected P&L</span>
+                <span className={cn(
+                  'text-base font-bold tabular-nums',
+                  expectedGainLoss >= 0 ? 'text-success' : 'text-destructive'
+                )}>
+                  {expectedGainLoss >= 0 ? '+' : ''}{fmtMoney(expectedGainLoss)}
+                </span>
               </div>
-            ) : (
-              rarityRanked.map(r => {
-                const widthPct = (r.evPerPack / maxEv) * 100;
-                const evShare = stats.evPerPack > 0 ? (r.evPerPack / stats.evPerPack) * 100 : 0;
-                return (
-                  <div key={r.rarity} className="grid grid-cols-12 items-center gap-3">
-                    <div className="col-span-4 sm:col-span-3 min-w-0">
-                      <div className="text-sm font-medium truncate flex items-center gap-1.5">
-                        {r.rarity}
-                        <SourceDot source={r.source} />
-                      </div>
-                      <div className="text-[11px] text-muted-foreground tabular-nums">
-                        1 / {r.oneIn} · {r.chancePct.toFixed(2)}%
-                      </div>
-                    </div>
-                    <div className="col-span-5 sm:col-span-6">
-                      <div className="h-2.5 rounded-full bg-muted/40 overflow-hidden">
-                        <div
-                          className={cn(
-                            'h-full rounded-full transition-all',
-                            r.source === 'none' ? 'bg-muted' : 'bg-primary/70'
-                          )}
-                          style={{ width: `${Math.max(2, widthPct)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="col-span-3 text-right">
-                      <div className="text-sm font-semibold tabular-nums">
-                        {r.avgRawPrice > 0 ? fmtMoney(r.evPerPack) : '—'}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground tabular-nums">
-                        {r.avgRawPrice > 0 ? `${evShare.toFixed(0)}% of pack EV` : 'no price'}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+            </div>
+            <p className="text-[11px] text-muted-foreground pt-1">
+              Expected uses statistical odds (packs × pull rate × avg raw price).
+            </p>
           </CardContent>
         </Card>
-
-        {/* Two-column: rip simulation + run breakdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Dice5 className="w-4 h-4" /> Single rip simulation
-                </CardTitle>
-                <Button size="sm" variant="ghost" onClick={() => setSimSeed(s => s + 1)} className="gap-1.5 h-7 text-xs">
-                  <RefreshCw className="w-3 h-3" /> Re-roll
-                </Button>
-              </div>
-              <p className="text-[11px] text-muted-foreground">Random outcome from {packsOpened} packs. Compare to expected.</p>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="grid grid-cols-12 px-4 py-2 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border/60">
-                <div className="col-span-4">Rarity</div>
-                <div className="col-span-4 text-right">Expected hits</div>
-                <div className="col-span-4 text-right">Sim hits</div>
-              </div>
-              {stats.rows.map(r => {
-                const expectedHits = (r.chancePct / 100) * packsOpened;
-                const simHits = sim.hits[r.rarity] ?? 0;
-                const delta = simHits - expectedHits;
-                return (
-                  <div key={r.rarity} className="grid grid-cols-12 px-4 py-2 text-sm border-b border-border/40 last:border-b-0">
-                    <div className="col-span-4 font-medium">{r.shortLabel}</div>
-                    <div className="col-span-4 text-right tabular-nums text-muted-foreground">{expectedHits.toFixed(2)}</div>
-                    <div className={cn(
-                      'col-span-4 text-right tabular-nums font-medium',
-                      delta > 0.5 ? 'text-success' : delta < -0.5 ? 'text-destructive' : 'text-foreground'
-                    )}>
-                      {simHits}
-                    </div>
-                  </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Run summary</CardTitle>
-              <p className="text-[11px] text-muted-foreground">{packsOpened} packs × {fmtMoney(costPerPack)} each</p>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <SummaryRow label="Spend" value={fmtMoney(totalCost)} />
-              <SummaryRow label="Expected return" value={fmtMoney(expectedValueTotal)} />
-              <SummaryRow label="Sim return" value={fmtMoney(sim.totalValue)} sub="this rip" />
-              <div className="border-t border-border/60 pt-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Expected P&L</span>
-                  <span className={cn(
-                    'text-base font-bold tabular-nums',
-                    expectedGainLoss >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {expectedGainLoss >= 0 ? '+' : ''}{fmtMoney(expectedGainLoss)}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Sim P&L (this rip)</span>
-                  <span className={cn(
-                    'text-base font-bold tabular-nums',
-                    simGainLoss >= 0 ? 'text-success' : 'text-destructive'
-                  )}>
-                    {simGainLoss >= 0 ? '+' : ''}{fmtMoney(simGainLoss)}
-                  </span>
-                </div>
-              </div>
-              <p className="text-[11px] text-muted-foreground pt-1">
-                Expected uses statistical odds (packs × pull rate × avg raw price). Sim is a single random outcome — re-roll to feel the variance.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Rarity breakdown */}
         <Card>
