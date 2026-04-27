@@ -347,38 +347,18 @@ export default function PackGainsCalculator() {
       />
       <GlobalNavBar />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
-        <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Pack Gains Calculator</h1>
-            <p className="text-base text-muted-foreground mt-1">
-              Math-driven booster economics. Real card prices, real pull rates, no hopium.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm">
-            <Badge variant="outline" className="gap-1.5">
-              <Database className="w-3 h-3" /> {dbCount} from DB
-            </Badge>
-            {liveCount > 0 && (
-              <Badge variant="outline" className="gap-1.5">
-                <Cloud className="w-3 h-3" /> {liveCount} from JustTCG
-              </Badge>
-            )}
-            {missingCount > 0 && (
-              <Badge variant="outline" className="gap-1.5 text-muted-foreground">
-                {missingCount} unmatched
-              </Badge>
-            )}
-          </div>
-        </header>
-
-        {/* Select Set — single full-width bar */}
+      <main className="max-w-7xl mx-auto px-4 py-4 space-y-3">
+        {/* Condensed header + controls — single row on desktop */}
         <Card>
-          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-end gap-3">
+          <CardContent className="p-3 flex flex-col lg:flex-row lg:items-end gap-3">
+            <div className="lg:mr-2">
+              <h1 className="text-xl font-bold text-foreground leading-tight">Pack Gains Calculator</h1>
+              <p className="text-xs text-muted-foreground">Math-driven booster economics.</p>
+            </div>
             <div className="flex-1 min-w-0">
-              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Select Set</Label>
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Set</Label>
               <Select value={selectedSet} onValueChange={setSelectedSet}>
-                <SelectTrigger className="mt-1.5 h-11">
+                <SelectTrigger className="mt-1 h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -390,30 +370,40 @@ export default function PackGainsCalculator() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-full sm:w-32">
-              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
+            <div className="w-full sm:w-24">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs</Label>
               <Input
                 type="number" min={0} value={packsOpened}
                 onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
-                className="mt-1.5 h-11"
+                className="mt-1 h-9"
               />
             </div>
-            <div className="w-full sm:w-36">
-              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
+            <div className="w-full sm:w-28">
+              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost / Pack</Label>
               <Input
                 type="number" min={0} step="0.01" value={costPerPack}
                 onChange={(e) => { setCostEdited(true); setCostPerPack(Math.max(0, Number(e.target.value) || 0)); }}
-                className="mt-1.5 h-11"
+                className="mt-1 h-9"
               />
             </div>
             <Button
               onClick={handleRoll}
               disabled={isLoading || stats.rows.every(r => r.avgRawPrice <= 0) || packsOpened <= 0}
-              className="h-11 w-full sm:w-auto gap-2 sm:px-6"
+              className="h-9 w-full sm:w-auto gap-2 sm:px-5"
             >
               <Dices className="w-4 h-4" />
-              {rollResult ? `Re-roll ${packsOpened} packs` : `Simulate ${packsOpened} packs`}
+              {rollResult ? `Re-roll ${packsOpened}` : `Simulate ${packsOpened}`}
             </Button>
+            <div className="hidden lg:flex items-center gap-1.5 text-xs">
+              <Badge variant="outline" className="gap-1 px-1.5 py-0.5 text-[11px]">
+                <Database className="w-3 h-3" /> {dbCount}
+              </Badge>
+              {liveCount > 0 && (
+                <Badge variant="outline" className="gap-1 px-1.5 py-0.5 text-[11px]">
+                  <Cloud className="w-3 h-3" /> {liveCount}
+                </Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -450,27 +440,8 @@ export default function PackGainsCalculator() {
                   </div>
                 </div>
                 <div className="pt-5 space-y-3 flex-1">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-base">Current pack cost</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        {packPriceQuery.data
-                          ? `${costEdited ? 'Manual override' : 'Auto from TCGplayer'} · ${packPriceQuery.data.basis}`
-                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live single-pack price — enter manually')}
-                      </div>
-                    </div>
-                    <span className="text-base font-semibold tabular-nums">{fmtMoney(costPerPack)}</span>
-                  </div>
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-base">Expected value</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">
-                        Prices via {dataSourceLabel}
-                        {freshnessLabel ? ` · ${freshnessLabel}` : ''}
-                      </div>
-                    </div>
-                    <span className="text-base font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
-                  </div>
+                  <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
+                  <SummaryRow label="Expected value" value={fmtMoney(stats.evPerPack)} />
                   <div className="flex items-center justify-between">
                     <span className="text-base">Expected gain/loss from ripping</span>
                     <span className={cn(
@@ -964,7 +935,7 @@ function BellCurve({ z }: { z: number }) {
                 x={tx}
                 y={labelBandY}
                 textAnchor={anchorT}
-                fontSize="10"
+                fontSize="8"
                 fill="hsl(var(--muted-foreground))"
               >
                 {t.label}
