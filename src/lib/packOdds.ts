@@ -74,9 +74,33 @@ export const PRISMATIC_EVOLUTIONS: PackOddsConfig = {
   ],
 };
 
+/**
+ * ME01: Mega Evolution (MEV) — official pull rates per pack.
+ * Source: Pull rate sheet shipped with the set.
+ * "Any" rates are used to compute per-pack expected hits.
+ * Secret Rare hit rate (any MHR/SIR/IR/UR) ≈ 19% per pack.
+ */
+export const MEGA_EVOLUTION: PackOddsConfig = {
+  setName: 'ME01: Mega Evolution',
+  displayName: 'Pokémon Mega Evolution',
+  setCode: 'MEV',
+  cardsPerPack: 10,
+  justTcgSetName: 'me01-mega-evolution-pokemon',
+  rarities: [
+    { rarity: 'Mega Hyper Rare',           shortLabel: 'MHR', oneIn: 1260 },
+    { rarity: 'Special Illustration Rare', shortLabel: 'SIR', oneIn: 101  },
+    { rarity: 'Illustration Rare',         shortLabel: 'IR',  oneIn: 9    },
+    { rarity: 'Ultra Rare',                shortLabel: 'UR',  oneIn: 12   },
+    { rarity: 'Double Rare',               shortLabel: 'DR',  oneIn: 5    },
+    // No-hit baseline: rare slot lands on a basic Rare (~$0.40). Fills remaining packs (~81% no secret hit).
+    { rarity: 'No Hit (Basic Rare)',       shortLabel: 'NH',  oneIn: 1.23, fixedValue: 0.40 },
+  ],
+};
+
 export const PACK_ODDS_REGISTRY: PackOddsConfig[] = [
   ASCENDED_HEROES,
   PRISMATIC_EVOLUTIONS,
+  MEGA_EVOLUTION,
 ];
 
 export function getPackOddsBySetName(setName: string): PackOddsConfig | undefined {
