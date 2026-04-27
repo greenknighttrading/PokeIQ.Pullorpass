@@ -85,8 +85,8 @@ function buildStats(
 
 export default function PackGainsCalculator() {
   const [selectedSet, setSelectedSet] = useState<string>(PACK_ODDS_REGISTRY[0].setName);
-  const [packsOpened, setPacksOpened] = useState<number>(10);
-  const [costPerPack, setCostPerPack] = useState<number>(10);
+  const [packsOpened, setPacksOpened] = useState<number>(5);
+  const [costPerPack, setCostPerPack] = useState<number>(5);
   const [rollResult, setRollResult] = useState<{
     pulls: { rarity: string; shortLabel: string; value: number }[];
     totalValue: number;
@@ -312,12 +312,12 @@ export default function PackGainsCalculator() {
       <main className="max-w-7xl mx-auto px-4 py-8 space-y-6">
         <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Pack Gains Calculator</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground">Pack Gains Calculator</h1>
+            <p className="text-base text-muted-foreground mt-1">
               Math-driven booster economics. Real card prices, real pull rates, no hopium.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-[11px]">
+          <div className="flex items-center gap-2 text-sm">
             <Badge variant="outline" className="gap-1.5">
               <Database className="w-3 h-3" /> {dbCount} from DB
             </Badge>
@@ -338,7 +338,7 @@ export default function PackGainsCalculator() {
         <Card>
           <CardContent className="p-4 flex flex-col sm:flex-row sm:items-end gap-3">
             <div className="flex-1 min-w-0">
-              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Select Set</Label>
+              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Select Set</Label>
               <Select value={selectedSet} onValueChange={setSelectedSet}>
                 <SelectTrigger className="mt-1.5 h-11">
                   <SelectValue />
@@ -353,7 +353,7 @@ export default function PackGainsCalculator() {
               </Select>
             </div>
             <div className="w-full sm:w-32">
-              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
+              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Packs Opened</Label>
               <Input
                 type="number" min={0} value={packsOpened}
                 onChange={(e) => setPacksOpened(Math.max(0, Number(e.target.value) || 0))}
@@ -361,7 +361,7 @@ export default function PackGainsCalculator() {
               />
             </div>
             <div className="w-full sm:w-36">
-              <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
+              <Label className="text-sm uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
               <Input
                 type="number" min={0} step="0.01" value={costPerPack}
                 onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
@@ -407,26 +407,26 @@ export default function PackGainsCalculator() {
                     )}
                   </div>
                   <div className="min-w-0">
-                    <div className="text-lg font-semibold text-foreground truncate">{config.displayName}</div>
-                    <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
+                    <div className="text-xl font-semibold text-foreground truncate">{config.displayName}</div>
+                    <div className="text-sm uppercase tracking-wide text-muted-foreground">{config.setCode}</div>
                   </div>
                 </div>
                 <div className="pt-5 space-y-3 flex-1">
                   <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <div className="text-sm">Expected value</div>
-                      <div className="text-[10px] text-muted-foreground mt-0.5">
+                      <div className="text-base">Expected value</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
                         Prices via {dataSourceLabel}
                         {freshnessLabel ? ` · ${freshnessLabel}` : ''}
                       </div>
                     </div>
-                    <span className="text-sm font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
+                    <span className="text-base font-semibold tabular-nums">{fmtMoney(stats.evPerPack)}</span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm">Expected gain/loss from ripping</span>
+                    <span className="text-base">Expected gain/loss from ripping</span>
                     <span className={cn(
-                      'text-sm font-semibold tabular-nums',
+                      'text-base font-semibold tabular-nums',
                       avgGainPerPack >= 0 ? 'text-success' : 'text-destructive'
                     )}>
                       {avgGainPerPack >= 0 ? '+' : '-'}{fmtMoney(Math.abs(avgGainPerPack))}
@@ -437,12 +437,12 @@ export default function PackGainsCalculator() {
                 <div className="mt-5 pt-4 border-t border-border/40">
                   <div className="flex items-start gap-2">
                     <Target className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <p className="text-xs text-muted-foreground leading-relaxed">
+                    <p className="text-sm text-muted-foreground leading-relaxed">
                       You need <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span> in
                       hits per pack to break even at <span className="font-semibold text-foreground">{fmtMoney(costPerPack)}</span>/pack.
                     </p>
                   </div>
-                  <p className="text-[10px] text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
+                  <p className="text-xs text-muted-foreground/80 leading-relaxed mt-3 pt-3 border-t border-border/30 italic">
                     Each session is independent. Past unlucky runs don't make future hits more likely —
                     but over enough packs, results naturally trend toward expected value.
                   </p>
@@ -456,8 +456,8 @@ export default function PackGainsCalculator() {
           <Card className={cn('flex-1 flex flex-col', rollResult && 'border-primary/40 bg-primary/5')}>
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
               <div>
-                <CardTitle className="text-base">Your simulated Pulls</CardTitle>
-                <p className="text-[11px] text-muted-foreground">
+                <CardTitle className="text-lg">Your simulated Pulls</CardTitle>
+                <p className="text-sm text-muted-foreground">
                   {rollResult
                     ? (() => {
                         const hits = pullTally.filter(t => t.isHit).reduce((s, t) => s + t.count, 0);
@@ -478,7 +478,7 @@ export default function PackGainsCalculator() {
             </CardHeader>
             <CardContent className="pt-1 flex-1 flex flex-col">
               {!rollResult ? (
-                <div className="flex-1 min-h-[120px] flex items-center justify-center text-xs text-muted-foreground border border-dashed border-border/60 rounded-md">
+                <div className="flex-1 min-h-[120px] flex items-center justify-center text-sm text-muted-foreground border border-dashed border-border/60 rounded-md">
                   No simulation yet
                 </div>
               ) : (
@@ -487,12 +487,12 @@ export default function PackGainsCalculator() {
                     <div
                       key={t.rarity}
                       className={cn(
-                        'flex items-center justify-between text-xs px-2.5 py-1.5 rounded-md',
+                        'flex items-center justify-between text-sm px-2.5 py-1.5 rounded-md',
                         t.isHit ? 'bg-success/10 text-foreground' : 'bg-muted/40 text-muted-foreground'
                       )}
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <Badge variant="outline" className="text-[10px] font-mono shrink-0">{t.shortLabel}</Badge>
+                        <Badge variant="outline" className="text-xs font-mono shrink-0">{t.shortLabel}</Badge>
                         <span className="truncate">{t.rarity}</span>
                       </div>
                       <div className="flex items-center gap-3 tabular-nums shrink-0">
@@ -518,7 +518,7 @@ export default function PackGainsCalculator() {
             const hasSession = sessionTotals.rolls > 0;
             const Cell = ({ value, tone, muted }: { value: string; tone?: 'pos' | 'neg'; muted?: boolean }) => (
               <td className={cn(
-                'px-3 py-2.5 text-right tabular-nums text-sm font-semibold',
+                'px-3 py-2.5 text-right tabular-nums text-base font-semibold',
                 tone === 'pos' && 'text-success',
                 tone === 'neg' && 'text-destructive',
                 muted && 'text-muted-foreground font-normal',
@@ -528,10 +528,10 @@ export default function PackGainsCalculator() {
               <Card className={cn('h-full flex flex-col', hasSession && 'border-primary/40')}>
                 <CardHeader className="pb-2 flex flex-row items-start justify-between">
                   <div>
-                    <CardTitle className="text-base">Actual vs Expected</CardTitle>
-                    <p className="text-xs text-muted-foreground">
+                    <CardTitle className="text-lg">Actual vs Expected</CardTitle>
+                    <p className="text-sm text-muted-foreground">
                       {hasSession
-                        ? <span><span className="text-base font-bold text-foreground">{sessionTotals.rolls}</span> <span className="text-muted-foreground">{sessionTotals.rolls === 1 ? 'run' : 'runs'}</span> · <span className="text-base font-bold text-foreground">{sessionTotals.packs}</span> <span className="text-muted-foreground">packs ripped</span></span>
+                        ? <span><span className="text-lg font-bold text-foreground">{sessionTotals.rolls}</span> <span className="text-muted-foreground">{sessionTotals.rolls === 1 ? 'run' : 'runs'}</span> · <span className="text-lg font-bold text-foreground">{sessionTotals.packs}</span> <span className="text-muted-foreground">packs ripped</span></span>
                         : `Run a simulation to populate actuals`}
                     </p>
                   </div>
@@ -547,9 +547,9 @@ export default function PackGainsCalculator() {
                   )}
                 </CardHeader>
                 <CardContent className="p-0 flex-1 flex flex-col">
-                  <table className="w-full text-base">
+                  <table className="w-full text-lg">
                     <thead>
-                      <tr className="text-xs uppercase tracking-wide text-muted-foreground border-b border-border/40">
+                      <tr className="text-sm uppercase tracking-wide text-muted-foreground border-b border-border/40">
                         <th className="text-left px-3 py-2.5 font-medium">Metric</th>
                         <th className="text-right px-3 py-2.5 font-medium">Actual</th>
                         <th className="text-right px-3 py-2.5 font-medium">Expected</th>
@@ -557,22 +557,22 @@ export default function PackGainsCalculator() {
                     </thead>
                     <tbody>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-3 text-sm"># of packs ripped</td>
+                        <td className="px-3 py-3 text-base"># of packs ripped</td>
                         {hasSession ? <Cell value={String(sessionTotals.packs)} /> : <Cell value="—" muted />}
                         <Cell value={String(expPacks)} />
                       </tr>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-3 text-sm">Total spend</td>
+                        <td className="px-3 py-3 text-base">Total spend</td>
                         {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expSpend)} />
                       </tr>
                       <tr className="border-b border-border/30">
-                        <td className="px-3 py-3 text-sm">Total pulled value</td>
+                        <td className="px-3 py-3 text-base">Total pulled value</td>
                         {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expReturn)} />
                       </tr>
                       <tr>
-                        <td className="px-3 py-3 text-sm font-medium">P&L</td>
+                        <td className="px-3 py-3 text-base font-medium">P&L</td>
                         {hasSession
                           ? <Cell value={`${sessPnL >= 0 ? '+' : ''}${fmtMoney(sessPnL)}`} tone={sessPnL >= 0 ? 'pos' : 'neg'} />
                           : <Cell value="—" muted />}
@@ -584,9 +584,9 @@ export default function PackGainsCalculator() {
                         const arrow = delta >= 0 ? '↑' : '↓';
                         return (
                           <tr className="border-t border-border/30 bg-muted/20">
-                            <td className="px-3 py-3 text-sm text-muted-foreground">vs. expected</td>
+                            <td className="px-3 py-3 text-base text-muted-foreground">vs. expected</td>
                             <td colSpan={2} className={cn(
-                              'px-3 py-3 text-right tabular-nums text-base font-semibold',
+                              'px-3 py-3 text-right tabular-nums text-lg font-semibold',
                               tone === 'pos' && 'text-success',
                               tone === 'neg' && 'text-destructive',
                             )}>
@@ -619,7 +619,7 @@ export default function PackGainsCalculator() {
                         <rect x="180" y="50" width="10" height="32" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
                         <rect x="205" y="65" width="10" height="17" rx="2" fill="hsl(var(--muted-foreground) / 0.25)" />
                       </svg>
-                      <p className="text-sm text-muted-foreground mt-5 text-center max-w-[260px] leading-relaxed">
+                      <p className="text-base text-muted-foreground mt-5 text-center max-w-[260px] leading-relaxed">
                         Simulate packs to see how your session compares to expected value.
                       </p>
                     </div>
@@ -660,7 +660,7 @@ export default function PackGainsCalculator() {
                       <div className="border-t border-border/40 px-3 py-4 space-y-4 flex-1">
                         {/* Percentile sentence + mini bell curve */}
                         <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-base text-muted-foreground leading-relaxed">
                             {percentileSentence}
                           </p>
                           <BellCurve z={z} />
@@ -668,7 +668,7 @@ export default function PackGainsCalculator() {
 
                         {/* Convergence + variance */}
                         <div className="space-y-2 pt-3 border-t border-border/30">
-                          <p className="text-sm text-muted-foreground leading-relaxed">
+                          <p className="text-base text-muted-foreground leading-relaxed">
                             After <span className="text-foreground font-medium">{sessionTotals.packs}</span> packs,
                             your cumulative return is{' '}
                             <span className={cn(
@@ -678,7 +678,7 @@ export default function PackGainsCalculator() {
                             <span className="text-foreground font-medium">{fmtMoney(stats.evPerPack)}</span>/pack.
                           </p>
                           {sigma > 0 && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
+                            <p className="text-base text-muted-foreground leading-relaxed">
                               At {sessionTotals.packs} packs, a ±{fmtMoney(swing)} swing is completely normal.
                               At {sessionTotals.packs * 10} packs, that band tightens to ±{fmtMoney(swing10x / 3)}.
                             </p>
@@ -688,7 +688,7 @@ export default function PackGainsCalculator() {
                         {/* Milestone badge */}
                         {milestone && (
                           <div className={cn(
-                            'flex items-start gap-2 rounded-md px-3 py-2.5 text-sm leading-relaxed',
+                            'flex items-start gap-2 rounded-md px-3 py-2.5 text-base leading-relaxed',
                             milestone.tone === 'good' && 'bg-success/10 text-success-foreground',
                             milestone.tone === 'info' && 'bg-primary/10 text-foreground',
                             milestone.tone === 'warn' && 'bg-warning/10 text-foreground',
@@ -716,8 +716,8 @@ export default function PackGainsCalculator() {
         {/* Rarity breakdown */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Full rarity table</CardTitle>
-            <p className="text-[11px] text-muted-foreground">All odds, average raw prices, sample sizes, and per-pack EV contribution.</p>
+            <CardTitle className="text-lg">Full rarity table</CardTitle>
+            <p className="text-sm text-muted-foreground">All odds, average raw prices, sample sizes, and per-pack EV contribution.</p>
           </CardHeader>
           <CardContent className="p-0 overflow-x-auto">
             {isLoading ? (
@@ -725,9 +725,9 @@ export default function PackGainsCalculator() {
                 <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <table className="w-full text-sm">
+              <table className="w-full text-base">
                 <thead>
-                  <tr className="bg-muted/40 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <tr className="bg-muted/40 text-sm uppercase tracking-wide text-muted-foreground">
                     <th className="text-left px-4 py-2 font-medium">Rarity</th>
                     <th className="text-center px-4 py-2 font-medium">Odds</th>
                     <th className="text-center px-4 py-2 font-medium">% Chance</th>
@@ -774,7 +774,7 @@ export default function PackGainsCalculator() {
                 </tbody>
               </table>
             )}
-            <p className="px-4 py-3 text-[11px] text-muted-foreground border-t border-border/40">
+            <p className="px-4 py-3 text-sm text-muted-foreground border-t border-border/40">
               <span className="font-semibold">DB</span> = price from PokeIQ market snapshots.{' '}
               <span className="font-semibold">JustTCG</span> = live fallback fetched for rarities missing from our sync.{' '}
               <span className="font-semibold">—</span> = no market data found yet.
@@ -792,18 +792,18 @@ function Kpi({
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm uppercase tracking-wide text-muted-foreground">
           {icon}
           <span className="truncate">{label}</span>
         </div>
         <div className={cn(
-          'mt-2 text-xl font-bold tabular-nums',
+          'mt-2 text-2xl font-bold tabular-nums',
           tone === 'pos' && 'text-success',
           tone === 'neg' && 'text-destructive',
         )}>
           {value}
         </div>
-        {sub && <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{sub}</div>}
+        {sub && <div className="text-sm text-muted-foreground mt-0.5 truncate">{sub}</div>}
       </CardContent>
     </Card>
   );
@@ -813,10 +813,10 @@ function SummaryRow({ label, value, sub }: { label: string; value: string; sub?:
   return (
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-sm">{label}</div>
-        {sub && <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{sub}</div>}
+        <div className="text-base">{label}</div>
+        {sub && <div className="text-xs uppercase tracking-wide text-muted-foreground">{sub}</div>}
       </div>
-      <div className="text-sm font-semibold tabular-nums">{value}</div>
+      <div className="text-base font-semibold tabular-nums">{value}</div>
     </div>
   );
 }
@@ -828,9 +828,9 @@ function SourceDot({ source }: { source: 'db' | 'justtcg' | 'none' }) {
 }
 
 function SourceBadge({ source }: { source: 'db' | 'justtcg' | 'none' }) {
-  if (source === 'db') return <Badge variant="outline" className="text-[10px] gap-1"><Database className="w-3 h-3" />DB</Badge>;
-  if (source === 'justtcg') return <Badge variant="outline" className="text-[10px] gap-1"><Cloud className="w-3 h-3" />JustTCG</Badge>;
-  return <Badge variant="outline" className="text-[10px] text-muted-foreground">—</Badge>;
+  if (source === 'db') return <Badge variant="outline" className="text-xs gap-1"><Database className="w-3 h-3" />DB</Badge>;
+  if (source === 'justtcg') return <Badge variant="outline" className="text-xs gap-1"><Cloud className="w-3 h-3" />JustTCG</Badge>;
+  return <Badge variant="outline" className="text-xs text-muted-foreground">—</Badge>;
 }
 
 /**
@@ -916,7 +916,7 @@ function BellCurve({ z }: { z: number }) {
                 x={tx}
                 y={labelBandY}
                 textAnchor={anchorT}
-                fontSize="8"
+                fontSize="10"
                 fill="hsl(var(--muted-foreground))"
               >
                 {t.label}
@@ -941,7 +941,7 @@ function BellCurve({ z }: { z: number }) {
           x={labelX}
           y={dotLabelY}
           textAnchor={anchor}
-          fontSize="9"
+          fontSize="11"
           fill="hsl(var(--foreground))"
           className="font-medium"
         >
