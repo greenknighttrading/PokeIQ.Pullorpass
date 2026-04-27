@@ -405,6 +405,7 @@ export default function PackGainsCalculator() {
                 </Badge>
               )}
             </div>
+            </div>
           </CardContent>
         </Card>
 
