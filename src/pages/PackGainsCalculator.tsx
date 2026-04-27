@@ -409,7 +409,7 @@ export default function PackGainsCalculator() {
               <Label className="text-sm uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
               <Input
                 type="number" min={0} step="0.01" value={costPerPack}
-                onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
+                onChange={(e) => { setCostEdited(true); setCostPerPack(Math.max(0, Number(e.target.value) || 0)); }}
                 className="mt-1.5 h-11"
               />
             </div>
