@@ -457,7 +457,17 @@ export default function PackGainsCalculator() {
                   </div>
                 </div>
                 <div className="pt-5 space-y-3 flex-1">
-                  <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-base">Current pack cost</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {packPriceQuery.data
+                          ? `${costEdited ? 'Manual override' : 'Auto from TCGplayer'} · ${packPriceQuery.data.basis}`
+                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live sealed price available')}
+                      </div>
+                    </div>
+                    <span className="text-base font-semibold tabular-nums">{fmtMoney(costPerPack)}</span>
+                  </div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-base">Expected value</div>
