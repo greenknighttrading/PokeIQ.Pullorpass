@@ -122,21 +122,14 @@ export default function PackGainsCalculator() {
         .gt('price', 0);
       if (error) throw error;
       const items = (data ?? []) as { name: string; price: number }[];
-      const find = (re: RegExp, exclude?: RegExp) =>
-        items.find(i => re.test(i.name) && (!exclude || !exclude.test(i.name)));
-      // Prefer plain "Booster Box" (36 packs), excluding cases/displays/exclusive variants.
-      const exclude = /(case|display|enhanced|sleeved|pokemon center|exclusive|build|battle)/i;
-      const boosterBox = find(/booster box/i, exclude);
-      if (boosterBox) {
-        return { perPack: boosterBox.price / 36, source: boosterBox.name, basis: 'Booster Box ÷ 36' };
-      }
-      const bundle = find(/booster bundle/i, exclude);
-      if (bundle) {
-        return { perPack: bundle.price / 6, source: bundle.name, basis: 'Booster Bundle ÷ 6' };
-      }
-      const etb = find(/elite trainer box/i, exclude);
-      if (etb) {
-        return { perPack: etb.price / 9, source: etb.name, basis: 'Elite Trainer Box ÷ 9' };
+      // ONLY use a real single-pack listing — no bundle/box/ETB math.
+      // Look for "Booster Pack" (singular) and exclude any multi-pack / bundle / box / case wording.
+      const exclude = /(bundle|box|case|display|blister|tin|collection|elite trainer|build|battle|\d+\s*-?\s*pack)/i;
+      const singlePack = items.find(i =>
+        /booster pack/i.test(i.name) && !exclude.test(i.name) && i.price > 0 && i.price < 50
+      );
+      if (singlePack) {
+        return { perPack: singlePack.price, source: singlePack.name, basis: 'Single booster pack' };
       }
       return null;
     },
@@ -463,7 +456,7 @@ export default function PackGainsCalculator() {
                       <div className="text-xs text-muted-foreground mt-0.5">
                         {packPriceQuery.data
                           ? `${costEdited ? 'Manual override' : 'Auto from TCGplayer'} · ${packPriceQuery.data.basis}`
-                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live sealed price available')}
+                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live single-pack price — enter manually')}
                       </div>
                     </div>
                     <span className="text-base font-semibold tabular-nums">{fmtMoney(costPerPack)}</span>
