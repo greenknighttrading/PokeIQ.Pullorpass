@@ -108,6 +108,51 @@ export default function PackGainsCalculator() {
 
   const config = getPackOddsBySetName(selectedSet)!;
 
+  // Fetch sealed-product market prices for this set and derive a per-pack cost.
+  // Booster Box ÷ 36 is the gold standard. Falls back to Booster Bundle ÷ 6 or ETB ÷ 9.
+  const packPriceQuery = useQuery({
+    queryKey: ['pack-gains-pack-price', selectedSet],
+    staleTime: 1000 * 60 * 30,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('market_snapshots')
+        .select('name, price')
+        .eq('set_name', selectedSet)
+        .eq('product_type', 'sealed')
+        .gt('price', 0);
+      if (error) throw error;
+      const items = (data ?? []) as { name: string; price: number }[];
+      const find = (re: RegExp, exclude?: RegExp) =>
+        items.find(i => re.test(i.name) && (!exclude || !exclude.test(i.name)));
+      // Prefer plain "Booster Box" (36 packs), excluding cases/displays/exclusive variants.
+      const exclude = /(case|display|enhanced|sleeved|pokemon center|exclusive|build|battle)/i;
+      const boosterBox = find(/booster box/i, exclude);
+      if (boosterBox) {
+        return { perPack: boosterBox.price / 36, source: boosterBox.name, basis: 'Booster Box ÷ 36' };
+      }
+      const bundle = find(/booster bundle/i, exclude);
+      if (bundle) {
+        return { perPack: bundle.price / 6, source: bundle.name, basis: 'Booster Bundle ÷ 6' };
+      }
+      const etb = find(/elite trainer box/i, exclude);
+      if (etb) {
+        return { perPack: etb.price / 9, source: etb.name, basis: 'Elite Trainer Box ÷ 9' };
+      }
+      return null;
+    },
+  });
+
+  // Has the user manually edited the cost? If so, don't overwrite it.
+  const [costEdited, setCostEdited] = useState(false);
+  useEffect(() => { setCostEdited(false); }, [selectedSet]);
+  useEffect(() => {
+    if (costEdited) return;
+    const live = packPriceQuery.data?.perPack;
+    if (live && Number.isFinite(live) && live > 0) {
+      setCostPerPack(Number(live.toFixed(2)));
+    }
+  }, [packPriceQuery.data, costEdited]);
+
   // 1) Pull what we have from market_snapshots (sum + count by rarity)
   const dbQuery = useQuery({
     queryKey: ['pack-gains-db', selectedSet],
@@ -364,7 +409,7 @@ export default function PackGainsCalculator() {
               <Label className="text-sm uppercase tracking-wide text-muted-foreground">Cost per Pack ($)</Label>
               <Input
                 type="number" min={0} step="0.01" value={costPerPack}
-                onChange={(e) => setCostPerPack(Math.max(0, Number(e.target.value) || 0))}
+                onChange={(e) => { setCostEdited(true); setCostPerPack(Math.max(0, Number(e.target.value) || 0)); }}
                 className="mt-1.5 h-11"
               />
             </div>
@@ -412,7 +457,17 @@ export default function PackGainsCalculator() {
                   </div>
                 </div>
                 <div className="pt-5 space-y-3 flex-1">
-                  <SummaryRow label="Current pack cost" value={fmtMoney(costPerPack)} />
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-base">Current pack cost</div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {packPriceQuery.data
+                          ? `${costEdited ? 'Manual override' : 'Auto from TCGplayer'} · ${packPriceQuery.data.basis}`
+                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live sealed price available')}
+                      </div>
+                    </div>
+                    <span className="text-base font-semibold tabular-nums">{fmtMoney(costPerPack)}</span>
+                  </div>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-base">Expected value</div>
