@@ -456,7 +456,7 @@ export default function PackGainsCalculator() {
                       <div className="text-xs text-muted-foreground mt-0.5">
                         {packPriceQuery.data
                           ? `${costEdited ? 'Manual override' : 'Auto from TCGplayer'} · ${packPriceQuery.data.basis}`
-                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live sealed price available')}
+                          : (packPriceQuery.isLoading ? 'Fetching live pack price…' : 'No live single-pack price — enter manually')}
                       </div>
                     </div>
                     <span className="text-base font-semibold tabular-nums">{fmtMoney(costPerPack)}</span>
