@@ -350,11 +350,12 @@ export default function PackGainsCalculator() {
       <main className="max-w-7xl mx-auto px-4 py-4 space-y-3">
         {/* Condensed header + controls — single row on desktop */}
         <Card>
-          <CardContent className="p-3 flex flex-col lg:flex-row lg:items-end gap-3">
-            <div className="lg:mr-2">
-              <h1 className="text-xl font-bold text-foreground leading-tight">Pack Gains Calculator</h1>
+          <CardContent className="p-3 space-y-3">
+            <div>
+              <h1 className="text-xl font-bold text-foreground leading-tight">Pack Odds Simulator</h1>
               <p className="text-xs text-muted-foreground">Math-driven booster economics.</p>
             </div>
+            <div className="flex flex-col lg:flex-row lg:items-end gap-3">
             <div className="flex-1 min-w-0">
               <Label className="text-[11px] uppercase tracking-wide text-muted-foreground">Set</Label>
               <Select value={selectedSet} onValueChange={setSelectedSet}>
