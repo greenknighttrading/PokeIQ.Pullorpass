@@ -417,7 +417,7 @@ export default function PackGainsCalculator() {
           </CardContent>
         </Card>
 
-        {/* Set summary + pulls (left) + Actual vs Expected (right) */}
+        {/* Set summary + pulls (left) + Expected vs Actual (right) */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
           <div className="flex flex-col gap-4 h-full">
           {(() => {
@@ -576,7 +576,7 @@ export default function PackGainsCalculator() {
               <Card className={cn('h-full flex flex-col', hasSession && 'border-primary/40')}>
                 <CardHeader className="pb-2 flex flex-row items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">Actual vs Expected</CardTitle>
+                    <CardTitle className="text-lg">Expected vs Actual</CardTitle>
                     <p className="text-sm text-muted-foreground">
                       {hasSession
                         ? <span><span className="text-lg font-bold text-foreground">{sessionTotals.rolls}</span> <span className="text-muted-foreground">{sessionTotals.rolls === 1 ? 'run' : 'runs'}</span> · <span className="text-lg font-bold text-foreground">{sessionTotals.packs}</span> <span className="text-muted-foreground">packs ripped</span></span>
@@ -599,32 +599,32 @@ export default function PackGainsCalculator() {
                     <thead>
                       <tr className="text-sm uppercase tracking-wide text-muted-foreground border-b border-border/40">
                         <th className="text-left px-3 py-2.5 font-medium">Metric</th>
-                        <th className="text-right px-3 py-2.5 font-medium">Actual</th>
                         <th className="text-right px-3 py-2.5 font-medium">Expected</th>
+                        <th className="text-right px-3 py-2.5 font-medium">Actual</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr className="border-b border-border/30">
                         <td className="px-3 py-3 text-base"># of packs ripped</td>
-                        {hasSession ? <Cell value={String(sessionTotals.packs)} /> : <Cell value="—" muted />}
                         <Cell value={String(expPacks)} />
+                        {hasSession ? <Cell value={String(sessionTotals.packs)} /> : <Cell value="—" muted />}
                       </tr>
                       <tr className="border-b border-border/30">
                         <td className="px-3 py-3 text-base">Total spend</td>
-                        {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expSpend)} />
+                        {hasSession ? <Cell value={fmtMoney(sessSpend)} /> : <Cell value="—" muted />}
                       </tr>
                       <tr className="border-b border-border/30">
                         <td className="px-3 py-3 text-base">Total pulled value</td>
-                        {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
                         <Cell value={fmtMoney(expReturn)} />
+                        {hasSession ? <Cell value={fmtMoney(sessValue)} /> : <Cell value="—" muted />}
                       </tr>
                       <tr>
                         <td className="px-3 py-3 text-base font-medium">P&L</td>
+                        <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
                         {hasSession
                           ? <Cell value={`${sessPnL >= 0 ? '+' : ''}${fmtMoney(sessPnL)}`} tone={sessPnL >= 0 ? 'pos' : 'neg'} />
                           : <Cell value="—" muted />}
-                        <Cell value={`${expPnL >= 0 ? '+' : ''}${fmtMoney(expPnL)}`} tone={expPnL >= 0 ? 'pos' : 'neg'} />
                       </tr>
                       {hasSession && (() => {
                         const delta = sessPnL - expPnL;
