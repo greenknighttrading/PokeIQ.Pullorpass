@@ -935,7 +935,7 @@ function BellCurve({ z }: { z: number }) {
                 x={tx}
                 y={labelBandY}
                 textAnchor={anchorT}
-                fontSize="10"
+                fontSize="8"
                 fill="hsl(var(--muted-foreground))"
               >
                 {t.label}
