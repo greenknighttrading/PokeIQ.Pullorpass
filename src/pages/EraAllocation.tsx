@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { EraRebalanceSimulator } from '@/components/rebalance/EraRebalanceSimulator';
+import { CollectionAdvisorWizard } from '@/components/rebalance/CollectionAdvisorWizard';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Clock, Inbox } from 'lucide-react';
 
 export default function EraAllocation() {
   const { isDataLoaded } = usePortfolio();
+  const [tab, setTab] = useState<'advisor' | 'advanced'>('advisor');
 
   if (!isDataLoaded) {
     return (
@@ -25,15 +28,25 @@ export default function EraAllocation() {
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Clock className="w-4 h-4 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">Era Rebalancer</h1>
+          <h1 className="text-xl font-bold text-foreground">Era Advisor</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          See how your portfolio is spread across Pokémon eras — then set a goal mix and get a monthly spending plan to reach it.
+          Answer 3 quick questions and we'll tell you which Pokémon era to focus on this month.
         </p>
       </div>
 
-      {/* Simulator */}
-      <EraRebalanceSimulator />
+      <Tabs value={tab} onValueChange={(v) => setTab(v as 'advisor' | 'advanced')} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="advisor">Advisor</TabsTrigger>
+          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+        </TabsList>
+        <TabsContent value="advisor">
+          <CollectionAdvisorWizard mode="era" onCustomize={() => setTab('advanced')} />
+        </TabsContent>
+        <TabsContent value="advanced">
+          <EraRebalanceSimulator />
+        </TabsContent>
+      </Tabs>
 
       {/* Disclaimer */}
       <div className="mt-8 p-4 rounded-xl bg-secondary/50 border border-border">
