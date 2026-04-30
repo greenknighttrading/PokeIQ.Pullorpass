@@ -1,10 +1,14 @@
 import React from 'react';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { RebalanceSimulator } from '@/components/rebalance/RebalanceSimulator';
+import { CollectionAdvisorWizard } from '@/components/rebalance/CollectionAdvisorWizard';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Scale, Inbox } from 'lucide-react';
+import { useState } from 'react';
 
 export default function Rebalance() {
   const { isDataLoaded } = usePortfolio();
+  const [tab, setTab] = useState<'advisor' | 'advanced'>('advisor');
 
   if (!isDataLoaded) {
     return (
@@ -25,15 +29,25 @@ export default function Rebalance() {
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Scale className="w-4 h-4 text-primary" />
           </div>
-          <h1 className="text-xl font-bold text-foreground">Asset Type Rebalancer</h1>
+          <h1 className="text-xl font-bold text-foreground">Collection Advisor</h1>
         </div>
         <p className="text-sm text-muted-foreground">
-          See how your portfolio is split between sealed, graded, and raw cards — then set a goal and get a spending plan to reach it.
+          Answer 3 quick questions and we'll tell you exactly where to put this month's budget.
         </p>
       </div>
 
-      {/* Simulator */}
-      <RebalanceSimulator />
+      <Tabs value={tab} onValueChange={(v) => setTab(v as 'advisor' | 'advanced')} className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="advisor">Advisor</TabsTrigger>
+          <TabsTrigger value="advanced">Advanced</TabsTrigger>
+        </TabsList>
+        <TabsContent value="advisor">
+          <CollectionAdvisorWizard mode="asset" onCustomize={() => setTab('advanced')} />
+        </TabsContent>
+        <TabsContent value="advanced">
+          <RebalanceSimulator />
+        </TabsContent>
+      </Tabs>
 
       {/* Disclaimer */}
       <div className="mt-8 p-4 rounded-xl bg-secondary/50 border border-border">
