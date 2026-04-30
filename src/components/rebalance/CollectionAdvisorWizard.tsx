@@ -1,0 +1,462 @@
+import React, { useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TrendingUp, Heart, Sparkles, Calendar, DollarSign, ArrowRight, Save, Settings2, Check, ArrowLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { usePortfolio } from '@/contexts/PortfolioContext';
+import {
+  ALLOCATION_PRESETS,
+  ERA_ALLOCATION_PRESETS,
+  AllocationPreset,
+  EraAllocationPreset,
+  ERA_INFO,
+  PokemonEra,
+} from '@/lib/types';
+import { calculateEraAllocationBreakdown } from '@/lib/eraClassification';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+export type AdvisorMode = 'asset' | 'era';
+
+type Goal = 'grow' | 'both' | 'collect';
+type Timeline = 'short' | 'medium' | 'long';
+
+const BUDGET_PRESETS = [100, 250, 500, 1000];
+
+const GOAL_OPTIONS: { id: Goal; label: string; sub: string; icon: typeof TrendingUp }[] = [
+  { id: 'grow', label: 'Grow my money', sub: 'I want the best return over time', icon: TrendingUp },
+  { id: 'both', label: 'Both — collect and invest', sub: 'I love the hobby and want smart picks', icon: Sparkles },
+  { id: 'collect', label: 'Complete my collection', sub: 'I buy what I love, value is a bonus', icon: Heart },
+];
+
+const TIMELINE_OPTIONS: { id: Timeline; label: string; sub: string }[] = [
+  { id: 'short', label: '1–2 years', sub: 'Short term' },
+  { id: 'medium', label: '3–5 years', sub: 'Medium horizon' },
+  { id: 'long', label: '5+ years', sub: 'Long-term store of value' },
+];
+
+function resolvePreset(goal: Goal, timeline: Timeline): AllocationPreset {
+  if (goal === 'collect') return 'conservative';
+  if (goal === 'both') return 'balanced';
+  // grow
+  if (timeline === 'short') return 'aggressive';
+  if (timeline === 'medium') return 'balanced'; // leaning aggressive
+  return 'balanced';
+}
+
+function presetLabel(p: AllocationPreset): string {
+  return p === 'conservative' ? 'Conservative' : p === 'aggressive' ? 'Aggressive' : 'Balanced';
+}
+
+function timelineLabel(t: Timeline): string {
+  return t === 'short' ? '1–2yr' : t === 'medium' ? '3–5yr' : '5+yr';
+}
+
+interface Props {
+  mode: AdvisorMode;
+  onCustomize?: () => void;
+}
+
+export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
+  const {
+    allocation,
+    items,
+    summary,
+    setAllocationPreset,
+    setEraAllocationPreset,
+  } = usePortfolio();
+
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [goal, setGoal] = useState<Goal | null>(null);
+  const [timeline, setTimeline] = useState<Timeline | null>(null);
+  const [budget, setBudget] = useState<number>(250);
+  const [customBudget, setCustomBudget] = useState<string>('');
+  const [usingCustomBudget, setUsingCustomBudget] = useState(false);
+
+  const totalValue = summary?.totalMarketValue || 0;
+
+  const eraAllocation = useMemo(() => calculateEraAllocationBreakdown(items), [items]);
+
+  const resolvedPreset = useMemo(() => {
+    if (!goal || !timeline) return null;
+    return resolvePreset(goal, timeline);
+  }, [goal, timeline]);
+
+  // Build plan rows (current vs target, gap, monthly allocation)
+  const plan = useMemo(() => {
+    if (!resolvedPreset) return null;
+
+    if (mode === 'asset') {
+      if (!allocation) return null;
+      const target = ALLOCATION_PRESETS[resolvedPreset];
+      const cats = [
+        { key: 'sealed' as const, label: 'Sealed Products', current: allocation.sealed, target: target.sealed },
+        { key: 'slabs' as const, label: 'Graded Cards', current: allocation.slabs, target: target.slabs },
+        { key: 'rawCards' as const, label: 'Raw Cards', current: allocation.rawCards, target: target.rawCards },
+      ];
+      const totalUnderweight = cats.reduce((sum, c) => {
+        const tv = (c.target / 100) * totalValue;
+        const d = tv - c.current.value;
+        return sum + (d > 0 ? d : 0);
+      }, 0);
+      return cats.map(c => {
+        const targetValue = (c.target / 100) * totalValue;
+        const delta = targetValue - c.current.value;
+        const monthlyShare = delta > 0 && totalUnderweight > 0 ? (delta / totalUnderweight) * budget : 0;
+        return {
+          key: c.key,
+          label: c.label,
+          currentPct: c.current.percent,
+          targetPct: c.target,
+          delta,
+          monthly: Math.max(0, monthlyShare),
+          isUnderweight: delta > 100,
+          isOverweight: delta < -100,
+        };
+      });
+    }
+
+    // era mode
+    const target = ERA_ALLOCATION_PRESETS[resolvedPreset];
+    const order: PokemonEra[] = ['current', 'ultraModern', 'modern', 'classic', 'vintage'];
+    const cats = order.map(e => ({
+      key: e,
+      label: ERA_INFO[e].name,
+      current: eraAllocation[e],
+      target: target[e],
+    }));
+    const totalUnderweight = cats.reduce((sum, c) => {
+      const tv = (c.target / 100) * totalValue;
+      const d = tv - c.current.value;
+      return sum + (d > 0 ? d : 0);
+    }, 0);
+    return cats.map(c => {
+      const targetValue = (c.target / 100) * totalValue;
+      const delta = targetValue - c.current.value;
+      const monthlyShare = delta > 0 && totalUnderweight > 0 ? (delta / totalUnderweight) * budget : 0;
+      return {
+        key: c.key,
+        label: c.label,
+        currentPct: c.current.percent,
+        targetPct: c.target,
+        delta,
+        monthly: Math.max(0, monthlyShare),
+        isUnderweight: delta > 100,
+        isOverweight: delta < -100,
+      };
+    });
+  }, [allocation, eraAllocation, mode, resolvedPreset, totalValue, budget]);
+
+  // Primary recommendation = the largest underweight category
+  const primary = useMemo(() => {
+    if (!plan) return null;
+    const sorted = [...plan].sort((a, b) => b.delta - a.delta);
+    return sorted[0]?.delta > 100 ? sorted[0] : null;
+  }, [plan]);
+
+  const overweightAlt = useMemo(() => {
+    if (!plan) return null;
+    const sorted = [...plan].sort((a, b) => a.delta - b.delta);
+    return sorted[0]?.delta < -100 ? sorted[0] : null;
+  }, [plan]);
+
+  const handleSelectGoal = (g: Goal) => {
+    setGoal(g);
+    setStep(2);
+  };
+  const handleSelectTimeline = (t: Timeline) => {
+    setTimeline(t);
+    setStep(3);
+  };
+  const handleSelectBudget = (amount: number) => {
+    setUsingCustomBudget(false);
+    setBudget(amount);
+    setStep(4);
+  };
+  const handleCustomBudget = () => {
+    const n = parseInt(customBudget, 10);
+    if (!isNaN(n) && n > 0) {
+      setUsingCustomBudget(true);
+      setBudget(n);
+      setStep(4);
+    }
+  };
+
+  const handleSavePlan = () => {
+    if (!resolvedPreset) return;
+    if (mode === 'asset') {
+      setAllocationPreset(resolvedPreset);
+    } else {
+      setEraAllocationPreset(resolvedPreset);
+    }
+    toast.success('Plan saved to your portfolio settings');
+  };
+
+  const handleReset = () => {
+    setStep(1);
+    setGoal(null);
+    setTimeline(null);
+  };
+
+  const stepNum = step;
+  const totalSteps = 3;
+
+  return (
+    <div className="space-y-4">
+      {/* Step indicator */}
+      {step < 4 && (
+        <div className="flex items-center gap-2">
+          {[1, 2, 3].map(i => (
+            <div
+              key={i}
+              className={cn(
+                'h-1 flex-1 rounded-full transition-colors',
+                i <= stepNum ? 'bg-primary' : 'bg-secondary'
+              )}
+            />
+          ))}
+          <span className="text-[11px] text-muted-foreground tabular-nums ml-2">
+            Step {stepNum} of {totalSteps}
+          </span>
+        </div>
+      )}
+
+      <AnimatePresence mode="wait">
+        {/* Step 1: Goal */}
+        {step === 1 && (
+          <motion.div
+            key="step1"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="glass-card p-5 sm:p-6"
+          >
+            <h2 className="text-lg font-semibold text-foreground mb-1">What's your goal?</h2>
+            <p className="text-xs text-muted-foreground mb-5">Pick what matters most to you.</p>
+            <div className="space-y-2">
+              {GOAL_OPTIONS.map(opt => {
+                const Icon = opt.icon;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => handleSelectGoal(opt.id)}
+                    className="w-full flex items-center gap-3 p-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 hover:border-primary/40 transition-all text-left group"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <Icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{opt.label}</p>
+                      <p className="text-xs text-muted-foreground">{opt.sub}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 2: Timeline */}
+        {step === 2 && (
+          <motion.div
+            key="step2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="glass-card p-5 sm:p-6"
+          >
+            <button
+              onClick={() => setStep(1)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3"
+            >
+              <ArrowLeft className="w-3 h-3" /> Back
+            </button>
+            <h2 className="text-lg font-semibold text-foreground mb-1">What's your timeline?</h2>
+            <p className="text-xs text-muted-foreground mb-5">How long are you planning to hold?</p>
+            <div className="space-y-2">
+              {TIMELINE_OPTIONS.map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelectTimeline(opt.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 hover:border-primary/40 transition-all text-left group"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground">{opt.sub}</p>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Step 3: Budget */}
+        {step === 3 && (
+          <motion.div
+            key="step3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="glass-card p-5 sm:p-6"
+          >
+            <button
+              onClick={() => setStep(2)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-3"
+            >
+              <ArrowLeft className="w-3 h-3" /> Back
+            </button>
+            <h2 className="text-lg font-semibold text-foreground mb-1">Monthly budget?</h2>
+            <p className="text-xs text-muted-foreground mb-5">How much can you put toward your collection each month?</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
+              {BUDGET_PRESETS.map(amount => (
+                <button
+                  key={amount}
+                  onClick={() => handleSelectBudget(amount)}
+                  className="px-3 py-3 rounded-lg border border-border bg-secondary/30 hover:bg-secondary/60 hover:border-primary/40 transition-all text-sm font-medium text-foreground tabular-nums"
+                >
+                  ${amount.toLocaleString()}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 p-2 rounded-lg border border-border bg-secondary/30">
+              <span className="text-sm text-muted-foreground pl-1">Custom $</span>
+              <input
+                type="number"
+                value={customBudget}
+                onChange={(e) => setCustomBudget(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') handleCustomBudget(); }}
+                placeholder="Enter amount"
+                className="flex-1 bg-transparent text-sm text-foreground focus:outline-none tabular-nums"
+              />
+              <Button size="sm" onClick={handleCustomBudget} disabled={!customBudget}>
+                Set
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Output: Plan */}
+        {step === 4 && plan && resolvedPreset && (
+          <motion.div
+            key="output"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-3"
+          >
+            {/* Summary badge + edit */}
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{presetLabel(resolvedPreset)} · {timeline ? timelineLabel(timeline) : ''} · ${budget.toLocaleString()}</span>
+              </div>
+              <button
+                onClick={handleReset}
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                Change answers
+              </button>
+            </div>
+
+            {/* Primary action card */}
+            <div className="glass-card p-5 sm:p-6 border-2 border-primary/40 bg-primary/5">
+              <p className="text-xs uppercase tracking-wider text-primary font-semibold mb-2">Your plan this month</p>
+              {primary ? (
+                <>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1">
+                    Put this month's budget toward {primary.label}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    You're underweight vs your target.
+                  </p>
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span className="text-4xl sm:text-5xl font-bold text-primary tabular-nums">
+                      ${Math.round(primary.monthly).toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground">this month</span>
+                  </div>
+                  <p className="text-xs text-foreground/80 leading-relaxed">
+                    You're currently <span className="font-semibold tabular-nums">{primary.currentPct.toFixed(0)}%</span> {primary.label.toLowerCase()},
+                    {' '}
+                    {primary.currentPct < primary.targetPct
+                      ? <>below your {presetLabel(resolvedPreset).toLowerCase()} target of <span className="font-semibold tabular-nums">{primary.targetPct}%</span>. Focus new spend here until you reach target.</>
+                      : <>at target.</>
+                    }
+                    {overweightAlt && (
+                      <> No new {overweightAlt.label.toLowerCase()} until you reach <span className="font-semibold tabular-nums">{overweightAlt.targetPct}%</span> (currently <span className="font-semibold tabular-nums">{overweightAlt.currentPct.toFixed(0)}%</span>).</>
+                    )}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1">
+                    You're already on target
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Spread your ${budget.toLocaleString()} across categories to maintain your mix.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {/* Secondary allocations */}
+            <div className="glass-card p-4 sm:p-5">
+              <p className="text-xs text-muted-foreground mb-3 font-medium">Other categories</p>
+              <div className="space-y-2">
+                {plan
+                  .filter(c => c.key !== primary?.key)
+                  .map(c => (
+                    <div
+                      key={c.key}
+                      className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/30"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">{c.label}</p>
+                        <p className="text-[11px] text-muted-foreground tabular-nums">
+                          {c.currentPct.toFixed(0)}% <ArrowRight className="inline w-2.5 h-2.5" /> {c.targetPct}%
+                          {c.isOverweight && <span className="text-warning ml-1.5">overweight</span>}
+                          {c.isUnderweight && <span className="text-primary ml-1.5">underweight</span>}
+                        </p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <span className="text-sm font-semibold text-foreground tabular-nums">
+                          ${Math.round(c.monthly).toLocaleString()}
+                        </span>
+                        <span className="text-xs text-muted-foreground">/mo</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Save button */}
+            <Button
+              onClick={handleSavePlan}
+              size="lg"
+              className="w-full gap-2"
+            >
+              <Save className="w-4 h-4" />
+              Save this plan
+            </Button>
+
+            {/* Advanced toggle */}
+            {onCustomize && (
+              <div className="text-center pt-1">
+                <button
+                  onClick={onCustomize}
+                  className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <Settings2 className="w-3 h-3" />
+                  Customize allocations manually →
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
