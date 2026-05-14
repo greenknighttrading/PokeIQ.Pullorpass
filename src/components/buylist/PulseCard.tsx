@@ -28,7 +28,7 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
     <button
       key={card.id}
       onClick={() => navigate(`/buylist/mover/${card.card_id || card.id}`)}
-      className="glass-card rounded-xl overflow-hidden flex flex-col hover:border-primary/30 transition-all group border-2 border-border w-full"
+      className="glass-card rounded-xl overflow-hidden flex flex-col hover:border-primary/30 transition-all group border-2 border-border w-full h-full min-h-[282px]"
     >
       {/* Image area with text overlay */}
       <div className="relative w-full">
@@ -54,7 +54,7 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
         <span className={cn('absolute top-2 left-2 w-2.5 h-2.5 rounded-full ring-2 ring-background', dotColor)} />
       </div>
       {/* Price + change row */}
-      <div className="px-2.5 py-2 flex items-center justify-between">
+      <div className="px-2.5 py-2 flex items-center justify-between mt-auto">
         <span className="text-sm font-black tabular-nums">${(card.price ?? 0).toFixed(2)}</span>
         <span className={cn('text-xs font-bold tabular-nums', change7d >= 0 ? 'text-success' : 'text-destructive')}>
           {change7d >= 0 ? '+' : ''}{change7d.toFixed(1)}%

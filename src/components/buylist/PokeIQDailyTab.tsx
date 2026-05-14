@@ -1180,7 +1180,9 @@ function InvestingIdeas() {
       // Use a seed from the day to shuffle consistently
       const seed = dayOfYear * 137;
 
-      // Fetch sealed products >$50 and cards >$30 from this set
+      const MAX_PICK_CARDS = 9;
+
+      // Fetch sealed products >$50 and cards >$10 from this set
       const { data: latestRow } = await supabase.from('market_snapshots')
         .select('snapshot_date').eq('product_type', 'card').order('snapshot_date', { ascending: false }).limit(1).single();
       const latestDate = latestRow?.snapshot_date;
@@ -1233,30 +1235,31 @@ function InvestingIdeas() {
       const pureCards = allCards.filter(c => !SEALED_NAME_RE.test(c.name));
       const combinedSealed = [...allSealed, ...misclassified];
 
-      const sealedData = seededShuffle(combinedSealed, seed).slice(0, 10) as MoverCard[];
-      let cardsData = seededShuffle(pureCards, seed + 1).slice(0, 10) as MoverCard[];
+      const sealedData = seededShuffle(combinedSealed, seed).slice(0, MAX_PICK_CARDS) as MoverCard[];
+      let cardsData = seededShuffle(pureCards, seed + 1).slice(0, MAX_PICK_CARDS) as MoverCard[];
 
       // Fallback: if spotlight set has too few cards in market_snapshots,
       // backfill with top-priced cards from sister sets sharing the same
       // series prefix (e.g. "SWSH12: Silver Tempest" → other "SWSH%" sets).
-      if (cardsData.length < 9) {
-        const seriesPrefix = (todaySet.setKey.match(/^[A-Za-z]+/)?.[0] ?? '').toUpperCase();
-        if (seriesPrefix.length >= 2) {
-          const existingIds = new Set(cardsData.map(c => c.card_id));
-          const { data: extra } = await supabase.from('market_snapshots')
+      if (cardsData.length < MAX_PICK_CARDS) {
+        const existingIds = new Set(cardsData.map(c => c.card_id));
+        const fallbackSets = PRIME_SETS.filter(s => s.setKey !== todaySet.setKey);
+        const fallbackResults = await Promise.all(
+          fallbackSets.map(s => supabase.from('market_snapshots')
             .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
-            .ilike('set_name', `${seriesPrefix}%`)
+            .ilike('set_name', `%${s.setKey}%`)
             .eq('product_type', 'card')
             .gt('price', 10)
             .not('price', 'is', null)
             .eq('snapshot_date', latestDate || '')
             .order('price', { ascending: false })
-            .limit(60);
-          const filler = (extra ?? [])
-            .filter(c => !existingIds.has(c.card_id) && !SEALED_NAME_RE.test(c.name))
-            .slice(0, 10 - cardsData.length) as MoverCard[];
-          cardsData = [...cardsData, ...filler];
-        }
+            .limit(12))
+        );
+        const fallbackCards = fallbackResults.flatMap(res => res.data ?? []);
+        const filler = seededShuffle(fallbackCards, seed + 7)
+          .filter(c => !existingIds.has(c.card_id) && !SEALED_NAME_RE.test(c.name))
+          .slice(0, MAX_PICK_CARDS - cardsData.length) as MoverCard[];
+        cardsData = [...cardsData, ...filler];
       }
 
       setSealedPicks(sealedData);
@@ -1311,7 +1314,7 @@ function InvestingIdeas() {
 
     return (
       <div>
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between min-h-8 mb-2">
           <div className="flex items-center gap-2">
             <Icon className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
@@ -1341,7 +1344,7 @@ function InvestingIdeas() {
             </div>
             {/* Desktop: paginated grid */}
             <div className="hidden sm:grid gap-3" style={{ gridTemplateColumns: `repeat(${perPage}, minmax(0, 1fr))` }}>
-              {visible.map(c => renderCard(c, type))}
+              {visible.map(c => <div key={c.id} className="h-full">{renderCard(c, type)}</div>)}
             </div>
           </>
         ) : (
