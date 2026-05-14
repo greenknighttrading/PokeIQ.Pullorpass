@@ -1343,7 +1343,7 @@ function InvestingIdeas() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PicksCarousel items={sealedPicks} type="sealed" label="Sealed Products" icon={Briefcase} priceLabel="· Over $50" />
-        <PicksCarousel items={cardPicks} type="card" label="Card Picks" icon={CreditCard} priceLabel="· Over $30" />
+        <PicksCarousel items={cardPicks} type="card" label="Card Picks" icon={CreditCard} priceLabel="· Over $10" />
       </div>
     </div>
   );
