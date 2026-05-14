@@ -175,7 +175,7 @@ export default function EraTimeline() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const cacheKey = 'era-timeline-rpc-cache-v2';
+    const cacheKey = 'era-timeline-rpc-cache-v3';
     let cancelled = false;
 
     try {
