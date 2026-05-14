@@ -1205,11 +1205,11 @@ function InvestingIdeas() {
           .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
           .ilike('set_name', `%${todaySet.setKey}%`)
           .eq('product_type', 'card')
-          .gt('price', 30)
+          .gt('price', 10)
           .not('price', 'is', null)
           .eq('snapshot_date', latestDate || '')
           .order('price', { ascending: false })
-          .limit(60),
+          .limit(80),
       ]);
 
       if (cancelled) return;
