@@ -1234,7 +1234,30 @@ function InvestingIdeas() {
       const combinedSealed = [...allSealed, ...misclassified];
 
       const sealedData = seededShuffle(combinedSealed, seed).slice(0, 10) as MoverCard[];
-      const cardsData = seededShuffle(pureCards, seed + 1).slice(0, 10) as MoverCard[];
+      let cardsData = seededShuffle(pureCards, seed + 1).slice(0, 10) as MoverCard[];
+
+      // Fallback: if spotlight set has too few cards in market_snapshots,
+      // backfill with top-priced cards from sister sets sharing the same
+      // series prefix (e.g. "SWSH12: Silver Tempest" → other "SWSH%" sets).
+      if (cardsData.length < 9) {
+        const seriesPrefix = (todaySet.setKey.match(/^[A-Za-z]+/)?.[0] ?? '').toUpperCase();
+        if (seriesPrefix.length >= 2) {
+          const existingIds = new Set(cardsData.map(c => c.card_id));
+          const { data: extra } = await supabase.from('market_snapshots')
+            .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
+            .ilike('set_name', `${seriesPrefix}%`)
+            .eq('product_type', 'card')
+            .gt('price', 10)
+            .not('price', 'is', null)
+            .eq('snapshot_date', latestDate || '')
+            .order('price', { ascending: false })
+            .limit(60);
+          const filler = (extra ?? [])
+            .filter(c => !existingIds.has(c.card_id) && !SEALED_NAME_RE.test(c.name))
+            .slice(0, 10 - cardsData.length) as MoverCard[];
+          cardsData = [...cardsData, ...filler];
+        }
+      }
 
       setSealedPicks(sealedData);
       setCardPicks(cardsData);
