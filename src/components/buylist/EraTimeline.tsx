@@ -31,7 +31,7 @@ const ERAS: EraConfig[] = [
   {
     key: 'mid', label: 'Mid Era', years: '2007–2013',
     keywords: [
-      'diamond & pearl', 'dp -', 'dp:', 'dp trainer', 'mysterious treasures', 'secret wonders', 'great encounters',
+      'diamond & pearl', 'diamond and pearl', 'dp -', 'dp:', 'dp trainer', 'mysterious treasures', 'secret wonders', 'great encounters',
       'majestic dawn', 'legends awakened', 'stormfront',
       'platinum', 'rising rivals', 'supreme victors', 'arceus',
       'heartgold', 'soulsilver', 'hgss', 'unleashed', 'undaunted', 'triumphant',
@@ -175,7 +175,7 @@ export default function EraTimeline() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const cacheKey = 'era-timeline-rpc-cache';
+    const cacheKey = 'era-timeline-rpc-cache-v2';
     let cancelled = false;
 
     try {
