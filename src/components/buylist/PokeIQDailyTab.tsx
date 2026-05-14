@@ -1207,10 +1207,9 @@ function InvestingIdeas() {
           .eq('product_type', 'card')
           .gt('price', 30)
           .not('price', 'is', null)
-          .not('price_change_7d', 'is', null)
           .eq('snapshot_date', latestDate || '')
-          .order('price_change_7d', { ascending: false })
-          .limit(40),
+          .order('price', { ascending: false })
+          .limit(60),
       ]);
 
       if (cancelled) return;
