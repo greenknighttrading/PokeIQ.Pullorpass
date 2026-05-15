@@ -1693,14 +1693,18 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
       </div>
 
       {/* Watchlist section */}
-      <SectionRule title="Watchlist · 7D" icon={Eye} />
-      <div className="mt-2">
-        {isAuthed ? (
-          <WatchlistBrief isAuthed={isAuthed} />
-        ) : (
-          <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
-        )}
-      </div>
+      {!hideWatchlist && (
+        <>
+          <SectionRule title="Watchlist · 7D" icon={Eye} />
+          <div className="mt-2">
+            {isAuthed ? (
+              <WatchlistBrief isAuthed={isAuthed} />
+            ) : (
+              <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
+            )}
+          </div>
+        </>
+      )}
 
       {/* Movers & Pullbacks */}
       <SectionRule title="Movers & Pullbacks" icon={Zap} />
