@@ -120,7 +120,7 @@ function SentimentGauge({ upPct, upCount, downCount, label }: { upPct: number; u
 /* ── Market Overview Banner ── */
 function MarketOverviewBanner({ dbCounts }: { dbCounts: { cards: number; cardsUpPct: number; cardsUp: number; cardsDown: number } }) {
   return (
-    <div className="glass-card rounded-xl p-2 space-y-0.5 flex flex-col">
+    <div className="glass-card rounded-xl p-2 space-y-0.5 flex flex-col h-full">
       <div className="flex items-center gap-2">
         <Zap className="w-3.5 h-3.5 text-warning" />
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Market Pulse</span>
