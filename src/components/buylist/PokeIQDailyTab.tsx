@@ -1443,7 +1443,7 @@ function MoversSection({ allMovers, isAuthed, onLoginPrompt }: { allMovers: Move
 /* ══════════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════════════════ */
-export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { mastheadTitle?: string; mastheadSubtitle?: string } = {}) {
+export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWatchlist = false }: { mastheadTitle?: string; mastheadSubtitle?: string; hideWatchlist?: boolean } = {}) {
   const navigate = useNavigate();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
