@@ -16,7 +16,7 @@ interface PackRow {
   era: 'modern' | 'legacy' | 'vintage';
 }
 
-const INITIAL_LIMIT = 15;
+const INITIAL_LIMIT = 5;
 const STEP = 15;
 type SortKey = 'price' | 'ev' | 'value' | 'set';
 
