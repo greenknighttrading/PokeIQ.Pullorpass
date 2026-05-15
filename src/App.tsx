@@ -52,6 +52,7 @@ const DailyReport = lazy(() => import("./pages/DailyReport"));
 const BuyListPicks = lazy(() => import("./pages/BuyListPicks"));
 const SealedVsCards = lazy(() => import("./pages/tools/SealedVsCards"));
 const PackGainsCalculator = lazy(() => import("./pages/PackGainsCalculator"));
+const MintdDaily = lazy(() => import("./pages/MintdDaily"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
@@ -76,6 +77,7 @@ function AppRoutes() {
         {/* Public pages */}
         <Route path="/" element={<PokeIQDaily />} />
         <Route path="/pokeiq-daily" element={<PokeIQDaily />} />
+        <Route path="/mintd-daily" element={<MintdDaily />} />
         <Route path="/about" element={<Landing />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<TermsOfService />} />
