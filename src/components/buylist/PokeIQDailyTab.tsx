@@ -1506,10 +1506,12 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { ma
       const needsSentiment = true; // Always compute live to ensure full market coverage
       const sentimentPromises: Array<Promise<any>> = [];
       if (needsSentiment && latestDate) {
+        // Cover the totality of the market (cards + sealed, excluding graded slabs)
+        const inTypes = ['card', 'sealed'];
         sentimentPromises.push(
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').eq('snapshot_date', latestDate)),
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').gt('price_change_7d', 0).eq('snapshot_date', latestDate)),
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').lt('price_change_7d', 0).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).gt('price_change_7d', 0).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).lt('price_change_7d', 0).eq('snapshot_date', latestDate)),
         );
       }
 
