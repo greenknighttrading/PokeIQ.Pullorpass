@@ -839,17 +839,20 @@ function PrimeWindowWidget() {
       });
 
       // Fallback: any set missing 7d/30d data → fetch median changes from market_snapshots
-      const missing = result.filter(r => r.pct7d == null || r.pct30d == null);
-      if (missing.length > 0) {
+      const needFallback = result.some(r => r.pct7d == null || r.pct30d == null);
+      if (needFallback) {
         try {
           const { data: stats } = await supabase.rpc('get_set_stats');
           if (Array.isArray(stats)) {
-            for (const r of result) {
+            for (let i = 0; i < result.length; i++) {
+              const r = result[i];
               if (r.pct7d != null && r.pct30d != null) continue;
+              const setKey = PRIME_SETS[i].setKey;
               const match = stats.find((s: any) => {
                 const stripped = stripSetPrefix(s.set_name?.toLowerCase() || '');
-                const key = r.name.toLowerCase();
-                return stripped === key || stripped.includes(key);
+                if (stripped === setKey) return true;
+                if (stripped.includes(setKey) && !stripped.includes('trainer gallery') && !stripped.includes('classic collection') && !stripped.includes('galarian gallery')) return true;
+                return false;
               });
               if (match) {
                 if (r.pct7d == null && match.median_7d != null) r.pct7d = Number(match.median_7d);
