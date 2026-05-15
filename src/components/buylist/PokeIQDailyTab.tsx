@@ -1443,7 +1443,7 @@ function MoversSection({ allMovers, isAuthed, onLoginPrompt }: { allMovers: Move
 /* ══════════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════════════════ */
-export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { mastheadTitle?: string; mastheadSubtitle?: string } = {}) {
+export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWatchlist = false }: { mastheadTitle?: string; mastheadSubtitle?: string; hideWatchlist?: boolean } = {}) {
   const navigate = useNavigate();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
@@ -1601,6 +1601,12 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { ma
 
       // Extract top set trends
       const setsData = Array.isArray(setsRes.data?.data) ? setsRes.data.data : [];
+      // Total cards available across all JustTCG sets (totality of the catalog)
+      const justTcgTotalCards = setsData.reduce((sum: number, s: any) => sum + (Number(s.cards_count) || 0) + (Number(s.sealed_count) || 0), 0);
+      if (justTcgTotalCards > 0) {
+        newDbCounts = { ...newDbCounts, cards: justTcgTotalCards };
+        setDbCounts(newDbCounts);
+      }
       const validSets = setsData
         .filter((s: any) => s.set_value_usd >= 4000 && s.set_value_change_7d_pct != null && !/^misc/i.test(s.name))
         .sort((a: any, b: any) => Math.abs(b.set_value_change_7d_pct) - Math.abs(a.set_value_change_7d_pct))
@@ -1687,14 +1693,18 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { ma
       </div>
 
       {/* Watchlist section */}
-      <SectionRule title="Watchlist · 7D" icon={Eye} />
-      <div className="mt-2">
-        {isAuthed ? (
-          <WatchlistBrief isAuthed={isAuthed} />
-        ) : (
-          <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
-        )}
-      </div>
+      {!hideWatchlist && (
+        <>
+          <SectionRule title="Watchlist · 7D" icon={Eye} />
+          <div className="mt-2">
+            {isAuthed ? (
+              <WatchlistBrief isAuthed={isAuthed} />
+            ) : (
+              <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
+            )}
+          </div>
+        </>
+      )}
 
       {/* Movers & Pullbacks */}
       <SectionRule title="Movers & Pullbacks" icon={Zap} />
