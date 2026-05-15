@@ -2,10 +2,11 @@ import React from 'react';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Seo } from '@/components/seo/Seo';
 import PokeIQDailyTab from '@/components/buylist/PokeIQDailyTab';
+import '@/styles/mintd-skin.css';
 
 export default function MintdDaily() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="mintd-skin min-h-screen bg-background text-foreground flex flex-col">
       <Seo title="Mintd Daily" description="Daily snapshot of the Pokémon TCG market." />
       <GlobalNavBar />
 

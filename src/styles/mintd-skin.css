@@ -1,0 +1,163 @@
+/* Mintd x PokeIQ reskin — scoped to .mintd-skin only.
+   Overrides design tokens + adds glow/typography polish.
+   Does not change layout, spacing, or functionality. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
+
+.mintd-skin {
+  /* Hex palette */
+  --mintd-bg-primary: #0B0B0F;
+  --mintd-bg-secondary: #15151B;
+  --mintd-bg-tertiary: #1D1E26;
+  --mintd-bg-hover: #242632;
+  --mintd-bg-elevated: #2B2E3A;
+
+  --mintd-accent-primary: #3BA7FF;
+  --mintd-accent-secondary: #6EDCFF;
+  --mintd-accent-gold: #FFD84D;
+  --mintd-accent-success: #44D17A;
+  --mintd-accent-danger: #FF5C7A;
+  --mintd-accent-purple: #8B7CFF;
+
+  --mintd-text-primary: #F5F7FA;
+  --mintd-text-secondary: #A7AFBF;
+  --mintd-text-muted: #6F7787;
+
+  --mintd-border-primary: #2A2E38;
+  --mintd-divider: rgba(255, 255, 255, 0.06);
+
+  /* Override semantic design tokens (HSL components) */
+  --background: 240 13% 5%;
+  --foreground: 214 29% 97%;
+
+  --card: 232 14% 13%;
+  --card-foreground: 214 29% 97%;
+
+  --popover: 230 14% 18%;
+  --popover-foreground: 214 29% 97%;
+
+  --primary: 207 100% 62%;
+  --primary-foreground: 240 13% 5%;
+
+  --secondary: 232 14% 13%;
+  --secondary-foreground: 214 29% 97%;
+
+  --muted: 240 11% 9%;
+  --muted-foreground: 218 13% 70%;
+
+  --accent: 49 100% 65%;
+  --accent-foreground: 240 13% 5%;
+
+  --destructive: 350 100% 68%;
+  --destructive-foreground: 214 29% 97%;
+
+  --success: 142 60% 54%;
+  --success-foreground: 240 13% 5%;
+
+  --warning: 49 100% 65%;
+  --warning-foreground: 240 13% 5%;
+
+  --border: 222 14% 19%;
+  --input: 240 11% 9%;
+  --ring: 207 100% 62%;
+
+  --radius: 1.25rem;
+
+  /* Typography */
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--mintd-text-primary);
+
+  /* Hero background gradient */
+  background:
+    radial-gradient(circle at top left, rgba(59, 167, 255, 0.10), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 216, 77, 0.06), transparent 22%),
+    var(--mintd-bg-primary);
+  min-height: 100vh;
+}
+
+/* Headline font */
+.mintd-skin h1,
+.mintd-skin h2,
+.mintd-skin h3 {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.mintd-skin h1 { font-weight: 800; }
+
+/* Cards — soft rounded with subtle blur */
+.mintd-skin .glass-card,
+.mintd-skin [class*="rounded-xl"][class*="border"],
+.mintd-skin [class*="rounded-2xl"][class*="border"] {
+  border-radius: 24px;
+  border-color: var(--mintd-border-primary);
+  background: rgba(29, 30, 38, 0.92);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.02);
+  transition: all 0.22s ease;
+}
+
+.mintd-skin .glass-card:hover,
+.mintd-skin button.glass-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59, 167, 255, 0.35);
+  box-shadow:
+    0 0 20px rgba(59, 167, 255, 0.20),
+    0 0 40px rgba(59, 167, 255, 0.08);
+}
+
+/* Primary buttons — pill with blue gradient */
+.mintd-skin button.bg-primary,
+.mintd-skin a.bg-primary,
+.mintd-skin .bg-primary:not(.glass-card):not([class*="bg-primary/"]) {
+  background: linear-gradient(135deg, #3BA7FF 0%, #6EDCFF 100%);
+  color: #FFFFFF;
+  border-radius: 999px;
+  font-weight: 600;
+  border: none;
+  transition: all 0.22s ease;
+}
+.mintd-skin button.bg-primary:hover,
+.mintd-skin a.bg-primary:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+/* Inputs */
+.mintd-skin input,
+.mintd-skin textarea,
+.mintd-skin select {
+  border-radius: 16px;
+  background: var(--mintd-bg-secondary);
+  border-color: var(--mintd-border-primary);
+}
+.mintd-skin input:focus,
+.mintd-skin textarea:focus {
+  border-color: var(--mintd-accent-primary);
+  box-shadow: 0 0 0 4px rgba(59, 167, 255, 0.12);
+}
+
+/* Tables */
+.mintd-skin table { border-radius: 20px; overflow: hidden; }
+.mintd-skin thead th {
+  background: var(--mintd-bg-secondary);
+  color: var(--mintd-text-secondary);
+  font-weight: 600;
+}
+.mintd-skin tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.mintd-skin tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Gold accent for premium / important metrics */
+.mintd-skin .text-accent {
+  color: var(--mintd-accent-gold);
+}
+
+/* Smooth section transitions */
+.mintd-skin section,
+.mintd-skin article { transition: all 0.22s ease; }
