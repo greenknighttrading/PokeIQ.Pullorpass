@@ -1697,7 +1697,7 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
 
       {/* Sets Explorer + Era Timeline + Pack Picker */}
       <div id="sets-explorer-section" />
-      <SectionRule title="Sets Explorer" icon={Layers} />
+      <SectionRule title="Sets Overview" icon={Layers} />
       <EraTimeline />
       <div className="mt-3 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4 items-start">
         <PackPicker />
