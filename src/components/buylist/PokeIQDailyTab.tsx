@@ -1601,6 +1601,12 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
 
       // Extract top set trends
       const setsData = Array.isArray(setsRes.data?.data) ? setsRes.data.data : [];
+      // Total cards available across all JustTCG sets (totality of the catalog)
+      const justTcgTotalCards = setsData.reduce((sum: number, s: any) => sum + (Number(s.cards_count) || 0) + (Number(s.sealed_count) || 0), 0);
+      if (justTcgTotalCards > 0) {
+        newDbCounts = { ...newDbCounts, cards: justTcgTotalCards };
+        setDbCounts(newDbCounts);
+      }
       const validSets = setsData
         .filter((s: any) => s.set_value_usd >= 4000 && s.set_value_change_7d_pct != null && !/^misc/i.test(s.name))
         .sort((a: any, b: any) => Math.abs(b.set_value_change_7d_pct) - Math.abs(a.set_value_change_7d_pct))
