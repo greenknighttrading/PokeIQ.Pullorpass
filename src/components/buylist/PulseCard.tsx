@@ -15,7 +15,13 @@ interface PulseCardProps {
 export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCardProps) {
   const [imgFailed, setImgFailed] = useState(false);
   const imgUrl = getImageUrl(card);
-  const change7d = card.price_change_7d ?? 0;
+  const change7dRaw = card.price_change_7d;
+  const change30d = card.price_change_30d ?? 0;
+  // For sealed (or any card whose 7d signal is missing/flat),
+  // fall back to the 30d change so we don't show "0.0%" everywhere.
+  const useFallback = type === 'sealed' && (change7dRaw == null || change7dRaw === 0) && change30d !== 0;
+  const changeValue = useFallback ? change30d : (change7dRaw ?? 0);
+  const changeLabel = useFallback ? '30D' : '7D';
   const dotColor = getTrendDot(card);
   const showPlaceholder = !imgUrl || imgFailed;
 
@@ -56,8 +62,9 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
       {/* Price + change row */}
       <div className="px-2.5 py-2 flex items-center justify-between mt-auto">
         <span className="text-sm font-black tabular-nums">${(card.price ?? 0).toFixed(2)}</span>
-        <span className={cn('text-xs font-bold tabular-nums', change7d >= 0 ? 'text-success' : 'text-destructive')}>
-          {change7d >= 0 ? '+' : ''}{change7d.toFixed(1)}%
+        <span className={cn('text-xs font-bold tabular-nums flex items-baseline gap-1', changeValue >= 0 ? 'text-success' : 'text-destructive')}>
+          {changeValue >= 0 ? '+' : ''}{changeValue.toFixed(1)}%
+          <span className="text-[9px] font-semibold text-muted-foreground">{changeLabel}</span>
         </span>
       </div>
       {/* TCGPlayer & eBay logos */}

@@ -49,14 +49,14 @@ interface Headline {
 /* ── Helpers ── */
 
 /* ── Masthead ── */
-function Masthead({ title }: { title: string }) {
+function Masthead({ title, subtitle }: { title: string; subtitle?: string }) {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return (
     <div className="text-center pb-2 mb-1 border-b border-border/50">
       <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-0.5">{dateStr}</p>
       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-      <p className="text-xs text-muted-foreground mt-0.5">Smart Signals, Clear Action</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{subtitle ?? 'Smart Signals, Clear Action'}</p>
     </div>
   );
 }
@@ -120,7 +120,7 @@ function SentimentGauge({ upPct, upCount, downCount, label }: { upPct: number; u
 /* ── Market Overview Banner ── */
 function MarketOverviewBanner({ dbCounts }: { dbCounts: { cards: number; cardsUpPct: number; cardsUp: number; cardsDown: number } }) {
   return (
-    <div className="glass-card rounded-xl p-2 space-y-0.5 flex flex-col">
+    <div className="glass-card rounded-xl p-2 space-y-0.5 flex flex-col h-full">
       <div className="flex items-center gap-2">
         <Zap className="w-3.5 h-3.5 text-warning" />
         <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Market Pulse</span>
@@ -149,7 +149,7 @@ function SetsSnapshotCard({ topSets }: { topSets?: { name: string; pct: number; 
   const displaySets = topSets?.slice(0, 4) ?? [];
 
   return (
-    <div className="glass-card rounded-xl p-2 flex flex-col">
+    <div className="glass-card rounded-xl p-2 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-1">
         <Layers className="w-3.5 h-3.5 text-primary" />
         <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Sets Snapshot · 7D</span>
@@ -771,7 +771,7 @@ const PRIME_SETS = [
 
 /* Strip common set prefixes like "SV01:", "SWSH08:", "SV:" for fuzzy matching */
 function stripSetPrefix(name: string): string {
-  return name.replace(/^(sv\d*|swsh\d*|me\d*|sve|mee):\s*/i, '').toLowerCase();
+  return name.replace(/^(sv\d*(?:\.\d+)?|swsh\d*(?:\.\d+)?|me\d*|sve|mee|sm\d*|xy\d*|bw\d*):\s*/i, '').toLowerCase();
 }
 
 function PrimeWindowWidget() {
@@ -837,6 +837,32 @@ function PrimeWindowWidget() {
           pct30d: apiMatch?.set_value_change_30d_pct ?? null,
         };
       });
+
+      // Fallback: any set missing 7d/30d data → fetch median changes from market_snapshots
+      const needFallback = result.some(r => r.pct7d == null || r.pct30d == null);
+      if (needFallback) {
+        try {
+          const { data: stats } = await supabase.rpc('get_set_stats');
+          if (Array.isArray(stats)) {
+            for (let i = 0; i < result.length; i++) {
+              const r = result[i];
+              if (r.pct7d != null && r.pct30d != null) continue;
+              const setKey = PRIME_SETS[i].setKey;
+              const match = stats.find((s: any) => {
+                const stripped = stripSetPrefix(s.set_name?.toLowerCase() || '');
+                if (stripped === setKey) return true;
+                if (stripped.includes(setKey) && !stripped.includes('trainer gallery') && !stripped.includes('classic collection') && !stripped.includes('galarian gallery')) return true;
+                return false;
+              });
+              if (match) {
+                if (r.pct7d == null && match.median_7d != null) r.pct7d = Number(match.median_7d);
+                if (r.pct30d == null && match.median_30d != null) r.pct30d = Number(match.median_30d);
+              }
+            }
+          }
+        } catch (e) { /* ignore */ }
+      }
+
       setSetData(result);
       setLoading(false);
     })();
@@ -1417,7 +1443,7 @@ function MoversSection({ allMovers, isAuthed, onLoginPrompt }: { allMovers: Move
 /* ══════════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════════════════ */
-export default function PokeIQDailyTab() {
+export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { mastheadTitle?: string; mastheadSubtitle?: string } = {}) {
   const navigate = useNavigate();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
@@ -1506,10 +1532,12 @@ export default function PokeIQDailyTab() {
       const needsSentiment = true; // Always compute live to ensure full market coverage
       const sentimentPromises: Array<Promise<any>> = [];
       if (needsSentiment && latestDate) {
+        // Cover the totality of the market (cards + sealed, excluding graded slabs)
+        const inTypes = ['card', 'sealed'];
         sentimentPromises.push(
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').eq('snapshot_date', latestDate)),
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').gt('price_change_7d', 0).eq('snapshot_date', latestDate)),
-          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).eq('product_type', 'card').lt('price_change_7d', 0).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).gt('price_change_7d', 0).eq('snapshot_date', latestDate)),
+          Promise.resolve(supabase.from('market_snapshots').select('id', { count: 'exact', head: true }).not('price', 'is', null).gt('price', 0).in('product_type', inTypes).lt('price_change_7d', 0).eq('snapshot_date', latestDate)),
         );
       }
 
@@ -1625,7 +1653,7 @@ export default function PokeIQDailyTab() {
 
   return (
     <div className="space-y-4">
-      <Masthead title="The Pulse" />
+      <Masthead title={mastheadTitle ?? 'The Pulse'} subtitle={mastheadSubtitle} />
 
       {/* Action Center Ticker — portfolio insights for logged in, market insights for guests */}
       {isAuthed ? <ActionTicker /> : <MarketTicker dbCounts={dbCounts} allMovers={allMovers} topSets={topSets} greatestHitsData={greatestHitsData} />}
