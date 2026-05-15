@@ -5,8 +5,18 @@ import PokeIQDailyTab from '@/components/buylist/PokeIQDailyTab';
 import '@/styles/mintd-skin.css';
 
 export default function MintdDaily() {
+  const handleClick = (e: React.MouseEvent) => {
+    // Allow normal interactions with links/buttons/inputs
+    const target = e.target as HTMLElement;
+    if (target.closest('a, button, input, textarea, select, [role="button"], [role="link"]')) return;
+    window.open('https://pokeiq.com', '_blank', 'noopener,noreferrer');
+  };
+
   return (
-    <div className="mintd-skin min-h-screen bg-background text-foreground flex flex-col">
+    <div
+      className="mintd-skin min-h-screen bg-background text-foreground flex flex-col cursor-pointer"
+      onClick={handleClick}
+    >
       <Seo title="Mintd Daily" description="Daily snapshot of the Pokémon TCG market." />
       <GlobalNavBar />
 
