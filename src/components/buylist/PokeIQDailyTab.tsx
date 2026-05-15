@@ -1604,7 +1604,19 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
       // Total cards available across all JustTCG sets (totality of the catalog)
       const justTcgTotalCards = setsData.reduce((sum: number, s: any) => sum + (Number(s.cards_count) || 0) + (Number(s.sealed_count) || 0), 0);
       if (justTcgTotalCards > 0) {
-        newDbCounts = { ...newDbCounts, cards: justTcgTotalCards };
+        // Scale up/down proportionally so they reflect the same universe as the displayed total
+        const snapshotTotal = newDbCounts.cards || 0;
+        if (snapshotTotal > 0 && justTcgTotalCards > snapshotTotal) {
+          const ratio = justTcgTotalCards / snapshotTotal;
+          newDbCounts = {
+            ...newDbCounts,
+            cards: justTcgTotalCards,
+            cardsUp: Math.round(newDbCounts.cardsUp * ratio),
+            cardsDown: Math.round(newDbCounts.cardsDown * ratio),
+          };
+        } else {
+          newDbCounts = { ...newDbCounts, cards: justTcgTotalCards };
+        }
         setDbCounts(newDbCounts);
       }
       const validSets = setsData
