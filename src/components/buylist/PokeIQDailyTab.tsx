@@ -49,14 +49,14 @@ interface Headline {
 /* ── Helpers ── */
 
 /* ── Masthead ── */
-function Masthead({ title }: { title: string }) {
+function Masthead({ title, subtitle }: { title: string; subtitle?: string }) {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return (
     <div className="text-center pb-2 mb-1 border-b border-border/50">
       <p className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-0.5">{dateStr}</p>
       <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{title}</h1>
-      <p className="text-xs text-muted-foreground mt-0.5">Smart Signals, Clear Action</p>
+      <p className="text-xs text-muted-foreground mt-0.5">{subtitle ?? 'Smart Signals, Clear Action'}</p>
     </div>
   );
 }
@@ -771,7 +771,7 @@ const PRIME_SETS = [
 
 /* Strip common set prefixes like "SV01:", "SWSH08:", "SV:" for fuzzy matching */
 function stripSetPrefix(name: string): string {
-  return name.replace(/^(sv\d*|swsh\d*|me\d*|sve|mee):\s*/i, '').toLowerCase();
+  return name.replace(/^(sv\d*(?:\.\d+)?|swsh\d*(?:\.\d+)?|me\d*|sve|mee|sm\d*|xy\d*|bw\d*):\s*/i, '').toLowerCase();
 }
 
 function PrimeWindowWidget() {
@@ -1417,7 +1417,7 @@ function MoversSection({ allMovers, isAuthed, onLoginPrompt }: { allMovers: Move
 /* ══════════════════════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ══════════════════════════════════════════════════════════════════════════════ */
-export default function PokeIQDailyTab() {
+export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle }: { mastheadTitle?: string; mastheadSubtitle?: string } = {}) {
   const navigate = useNavigate();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
@@ -1625,7 +1625,7 @@ export default function PokeIQDailyTab() {
 
   return (
     <div className="space-y-4">
-      <Masthead title="The Pulse" />
+      <Masthead title={mastheadTitle ?? 'The Pulse'} subtitle={mastheadSubtitle} />
 
       {/* Action Center Ticker — portfolio insights for logged in, market insights for guests */}
       {isAuthed ? <ActionTicker /> : <MarketTicker dbCounts={dbCounts} allMovers={allMovers} topSets={topSets} greatestHitsData={greatestHitsData} />}
