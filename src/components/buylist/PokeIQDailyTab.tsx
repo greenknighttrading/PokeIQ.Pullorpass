@@ -837,6 +837,29 @@ function PrimeWindowWidget() {
           pct30d: apiMatch?.set_value_change_30d_pct ?? null,
         };
       });
+
+      // Fallback: any set missing 7d/30d data → fetch median changes from market_snapshots
+      const missing = result.filter(r => r.pct7d == null || r.pct30d == null);
+      if (missing.length > 0) {
+        try {
+          const { data: stats } = await supabase.rpc('get_set_stats');
+          if (Array.isArray(stats)) {
+            for (const r of result) {
+              if (r.pct7d != null && r.pct30d != null) continue;
+              const match = stats.find((s: any) => {
+                const stripped = stripSetPrefix(s.set_name?.toLowerCase() || '');
+                const key = r.name.toLowerCase();
+                return stripped === key || stripped.includes(key);
+              });
+              if (match) {
+                if (r.pct7d == null && match.median_7d != null) r.pct7d = Number(match.median_7d);
+                if (r.pct30d == null && match.median_30d != null) r.pct30d = Number(match.median_30d);
+              }
+            }
+          }
+        } catch (e) { /* ignore */ }
+      }
+
       setSetData(result);
       setLoading(false);
     })();
