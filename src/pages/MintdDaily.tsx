@@ -15,7 +15,7 @@ export default function MintdDaily() {
     // (e.g. inside a Wix site) where a fixed-position modal would be
     // centered inside the iframe and scrolled off-screen.
     const ok = window.confirm(
-      "You're leaving Mintd Card Show.\n\nYou are now leaving Mintd Card Show and going into the PokeIQ app.",
+      "You're now leaving mitndcardshow and going into the PokeIQ app.",
     );
     if (ok) {
       window.open('https://pokeiq.com', '_blank', 'noopener,noreferrer');
