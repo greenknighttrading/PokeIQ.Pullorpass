@@ -1,35 +1,25 @@
 import React from 'react';
 import { Seo } from '@/components/seo/Seo';
 import PokeIQDailyTab from '@/components/buylist/PokeIQDailyTab';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import '@/styles/mintd-skin.css';
 
 export default function MintdDaily() {
-  const [open, setOpen] = React.useState(false);
-
   const handleClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     // Allow Latest News links (and anything explicitly marked) to behave normally
     if (target.closest('[data-mintd-allow="true"]')) return;
-    // Don't intercept clicks inside the dialog itself
-    if (target.closest('[role="alertdialog"]')) return;
     e.preventDefault();
     e.stopPropagation();
-    setOpen(true);
-  };
-
-  const confirmLeave = () => {
-    setOpen(false);
-    window.open('https://pokeiq.com', '_blank', 'noopener,noreferrer');
+    // Use native confirm so the prompt is rendered by the browser chrome
+    // and is always visible even when this page is embedded in an iframe
+    // (e.g. inside a Wix site) where a fixed-position modal would be
+    // centered inside the iframe and scrolled off-screen.
+    const ok = window.confirm(
+      "You're leaving Mintd Card Show.\n\nYou are now leaving Mintd Card Show and going into the PokeIQ app.",
+    );
+    if (ok) {
+      window.open('https://pokeiq.com', '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -45,23 +35,6 @@ export default function MintdDaily() {
           <PokeIQDailyTab mastheadTitle="The Mintd Brief" mastheadSubtitle="Powered by PokeIQ" hideWatchlist />
         </div>
       </main>
-
-      <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent onClick={(e) => e.stopPropagation()}>
-          <AlertDialogHeader>
-            <AlertDialogTitle>You're leaving Mintd Card Show</AlertDialogTitle>
-            <AlertDialogDescription>
-              You are now leaving Mintd Card Show and going into the PokeIQ app.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={(e) => { e.stopPropagation(); confirmLeave(); }}>
-              Continue to PokeIQ
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
