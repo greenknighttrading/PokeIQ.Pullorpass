@@ -17,6 +17,11 @@ export default function MintdDaily() {
   const [open, setOpen] = React.useState(false);
 
   const handleClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    // Allow Latest News links (and anything explicitly marked) to behave normally
+    if (target.closest('[data-mintd-allow="true"]')) return;
+    // Don't intercept clicks inside the dialog itself
+    if (target.closest('[role="alertdialog"]')) return;
     e.preventDefault();
     e.stopPropagation();
     setOpen(true);

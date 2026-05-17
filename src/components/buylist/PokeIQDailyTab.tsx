@@ -481,6 +481,7 @@ function PokeBeachNews({ headlines }: { headlines: Headline[] }) {
             href={h.url}
             target="_blank"
             rel="noopener noreferrer"
+             data-mintd-allow="true"
             className="block px-1.5 py-1.5 hover:bg-muted/30 transition-all group"
           >
             <div className="flex items-center gap-2 mb-0.5">
