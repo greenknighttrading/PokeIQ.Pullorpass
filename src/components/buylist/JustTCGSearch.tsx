@@ -137,7 +137,7 @@ export default function JustTCGSearch({ onSelect, categoryHint, defaultLanguage 
                 )}
               >
                 {imgUrl && (
-                  <img src={imgUrl} alt="" className="w-10 h-14 object-contain rounded flex-shrink-0" />
+                  <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-10 h-14 object-contain rounded flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{r.name}</p>

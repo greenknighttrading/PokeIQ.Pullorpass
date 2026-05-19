@@ -545,7 +545,7 @@ function MoversList({ cards, label, color, isAuthed, onLoginPrompt, maxVisible =
               <InlineWatchlistBtn card={card} isAuthed={isAuthed} onLoginPrompt={onLoginPrompt} />
               <span className="text-[10px] font-mono text-muted-foreground w-5 text-right shrink-0">{i + 1}</span>
               {imgUrl && (
-                <img src={imgUrl} alt="" className="w-7 h-9 object-contain rounded shrink-0"
+                <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-7 h-9 object-contain rounded shrink-0"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               )}
@@ -590,7 +590,7 @@ function WatchlistGridCard({ card, timePeriod, navigate }: { card: MoverCard; ti
       className="glass-card rounded-xl p-3 flex flex-col items-center text-center hover:border-primary/30 transition-all group"
     >
       {imgUrl ? (
-        <img src={imgUrl} alt="" className="w-20 h-28 object-contain rounded-lg mb-2"
+        <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-20 h-28 object-contain rounded-lg mb-2"
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       ) : (
@@ -715,7 +715,7 @@ function WatchlistBrief({ isAuthed }: { isAuthed: boolean }) {
             return (
               <button key={card.card_id || card.id} onClick={() => navigate(`/buylist/mover/${card.card_id || card.id}`)}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/20 transition-colors text-left group">
-                {imgUrl && <img src={imgUrl} alt="" className="w-7 h-9 object-contain rounded shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                {imgUrl && <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-7 h-9 object-contain rounded shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors">{card.name}</p>
                   <p className="text-[10px] text-muted-foreground truncate">{card.set_name}</p>
@@ -810,7 +810,7 @@ function GreatestHitsRow({ isAuthed, onLoginPrompt }: { isAuthed: boolean; onLog
               className="glass-card rounded-xl p-3 flex flex-col items-center text-center hover:border-primary/30 transition-all group"
             >
               {imgUrl ? (
-                <img src={imgUrl} alt="" className="w-20 h-28 object-contain rounded-lg mb-2"
+                <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-20 h-28 object-contain rounded-lg mb-2"
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
               ) : (
