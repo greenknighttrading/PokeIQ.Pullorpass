@@ -44,7 +44,7 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
             <span className="text-[10px] text-muted-foreground/50">Image not available</span>
           </div>
         ) : (
-          <img
+          <img referrerPolicy="no-referrer"
             src={imgUrl!}
             alt=""
             className="w-full h-44 sm:h-48 object-contain bg-muted/30 pt-2 mx-auto"
@@ -71,11 +71,11 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
       <div className="flex items-center justify-center gap-3 px-2.5 pb-2.5" onClick={(e) => e.stopPropagation()}>
         <a href={tcgplayerUrl} target="_blank" rel="noopener noreferrer"
           className="hover:opacity-70 transition-opacity">
-          <img src={tcgplayerLogo} alt="TCGPlayer" className="h-[22px] w-auto" />
+          <img referrerPolicy="no-referrer" src={tcgplayerLogo} alt="TCGPlayer" className="h-[22px] w-auto" />
         </a>
         <a href={ebayUrl} target="_blank" rel="noopener noreferrer"
           className="hover:opacity-70 transition-opacity">
-          <img src={ebayLogo} alt="eBay" className="h-5 w-auto" />
+          <img referrerPolicy="no-referrer" src={ebayLogo} alt="eBay" className="h-5 w-auto" />
         </a>
       </div>
     </button>

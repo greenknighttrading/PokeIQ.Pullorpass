@@ -182,7 +182,7 @@ function CardGridItem({ card, index, onClick, priceColorClass = 'text-success' }
     <div onClick={onClick} className="glass-card rounded-xl overflow-hidden hover:border-primary/30 transition-all text-left group relative cursor-pointer flex flex-col">
       <div className="relative aspect-[3/4] bg-muted/30 flex items-center justify-center">
         {card.imageUrl ? (
-          <img src={card.imageUrl} alt={card.name} className="w-full h-full object-contain p-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+          <img referrerPolicy="no-referrer" src={card.imageUrl} alt={card.name} className="w-full h-full object-contain p-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">No image</div>
         )}
@@ -213,7 +213,7 @@ function CardTableRow({ card, index, onClick, priceColorClass = 'text-success' }
     <tr onClick={onClick} className="border-b border-border/30 hover:bg-muted/20 cursor-pointer transition-colors group">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          {card.imageUrl && <img src={card.imageUrl} alt={card.name} className="w-14 h-20 object-contain rounded shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+          {card.imageUrl && <img referrerPolicy="no-referrer" src={card.imageUrl} alt={card.name} className="w-14 h-20 object-contain rounded shrink-0" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
           <div className="min-w-0">
             <p className="font-semibold truncate max-w-[200px] group-hover:text-accent transition-colors">{card.name}</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">{card.rarity || 'Unknown'}</p>
@@ -338,7 +338,7 @@ function ScanResultsGrid({ cards, navigate, onAddCard, addedCardIds }: { cards: 
               </div>
               <div className="flex flex-col items-center pt-6 pb-2">
                 {card.imageUrl && (
-                  <img src={card.imageUrl} alt={card.name} className="w-24 h-32 object-contain rounded-lg mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  <img referrerPolicy="no-referrer" src={card.imageUrl} alt={card.name} className="w-24 h-32 object-contain rounded-lg mb-2" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                 )}
                 <div className={cn('px-3 py-1.5 rounded-lg text-lg font-extrabold tabular-nums text-center mb-2', isUp ? 'bg-success/15 text-success' : 'bg-destructive/15 text-destructive')}>
                   {isUp ? '+' : ''}{card.pctChange.toFixed(1)}%
@@ -934,7 +934,7 @@ export default function MarketMoversCategories() {
                   </p>
                   {pendingCards.map(card => (
                     <div key={card.card_id} className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/20">
-                      {card.imageUrl && <img src={card.imageUrl} alt="" className="w-6 h-8 object-contain rounded shrink-0" />}
+                      {card.imageUrl && <img referrerPolicy="no-referrer" src={card.imageUrl} alt="" className="w-6 h-8 object-contain rounded shrink-0" />}
                       <span className="text-xs font-medium truncate flex-1">{card.name}</span>
                       <button onClick={() => handleRemovePending(card.card_id)} className="p-0.5 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive shrink-0" title="Remove">
                         <X className="w-3 h-3" />

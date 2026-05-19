@@ -117,7 +117,7 @@ export default function WatchlistSearch({ onAdded }: Props) {
                 )}
               >
                 {imgUrl && (
-                  <img src={imgUrl} alt="" className="w-10 h-14 object-contain rounded flex-shrink-0"
+                  <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-10 h-14 object-contain rounded flex-shrink-0"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
                 )}
