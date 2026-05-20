@@ -14,7 +14,7 @@ import {
 import { Seo } from '@/components/seo/Seo';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 
-const QUESTIONS_PER_PAGE = 6;
+const QUESTIONS_PER_PAGE = 4;
 const TOTAL_PAGES = Math.ceil(QUIZ_QUESTIONS.length / QUESTIONS_PER_PAGE);
 
 type TestStage = 'quiz' | 'email' | 'analyzing' | 'results';
