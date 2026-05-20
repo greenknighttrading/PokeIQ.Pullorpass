@@ -63,6 +63,8 @@ export function QuizResults({ result }: QuizResultsProps) {
   const info = PERSONALITY_INFO[safeType];
   const TypeIcon = TYPE_ICONS[safeType];
 
+  const [profileExpanded, setProfileExpanded] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('personalityResult', JSON.stringify(result));
   }, [result]);
