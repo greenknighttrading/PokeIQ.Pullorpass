@@ -214,7 +214,7 @@ export default function SmartFeedBrief() {
         {/* 7 — Quick News */}
         {brief.quickNews.length > 0 && (
           <section className="mb-10">
-            <SectionHeader kicker="07 · Around the market" title="Quick News" icon={Newspaper} />
+            <SectionHeader kicker="07 · Around the market" title="Additional News" icon={Newspaper} />
             <div className="space-y-4">
               {brief.quickNews.map((n, i) => (
                 <div key={i}>
