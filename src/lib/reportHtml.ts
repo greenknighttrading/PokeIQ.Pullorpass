@@ -1,5 +1,6 @@
 import { AllocationBreakdown, AllocationPreset, AllocationTarget, ConcentrationRisk, EraAllocationBreakdown, EraAllocationTarget, EraAllocationPreset, ERA_ALLOCATION_PRESETS, Insight, PortfolioItem, PortfolioSummary, ProfitMilestone, ERA_INFO } from "@/lib/types";
 import { HealthScoreBreakdown, PortfolioComparison } from "@/contexts/PortfolioContext";
+import { PERSONALITY_INFO, PersonalityType } from "@/lib/personalityEngine";
 
 // HTML escape function to prevent XSS attacks from user-supplied data
 function escapeHtml(str: string | undefined | null): string {
@@ -140,7 +141,21 @@ export function buildPortfolioReportHtml({
     return 'politician';
   };
 
-  const archetypeData: Record<string, {
+  // Map portfolio-derived archetype keys to the 9 PokeIQ personality profiles.
+  const OLD_TO_NEW_TYPE: Record<string, PersonalityType> = {
+    sentinel: 'Investor',
+    politician: 'Diplomat',
+    purist: 'Dreamer',
+    hustler: 'Flipper',
+    archivist: 'Archivist',
+    wayfinder: 'Explorer',
+    cartographer: 'Curator',
+    keystone: 'Hunter',
+    pathbreaker: 'Hunter',
+    detective: 'Analyst',
+  };
+
+  type ArchetypeDisplay = {
     emoji: string;
     name: string;
     subtitle: string;
@@ -149,108 +164,26 @@ export function buildPortfolioReportHtml({
     whatItSays: string;
     coreStrength: string;
     tradeOff: string;
-  }> = {
-    sentinel: {
-      emoji: '🛡️',
-      name: 'The Sentinel',
-      subtitle: 'A patient guardian of value, confident that time is ultimately the edge.',
-      role: '',
-      howTheyCollect: ['Sealed-heavy', 'Broad spread across products', 'Low turnover, long holds'],
-      whatItSays: "You're calm, patient, and unreactive. You don't feel pressure to constantly act, and you trust that time is your strongest ally. While others chase momentum, you stand watch. You believe the best moves are often the ones you don't make.",
-      coreStrength: 'Discipline',
-      tradeOff: 'Liquidity and speed'
-    },
-    politician: {
-      emoji: '🗳️',
-      name: 'The Politician',
-      subtitle: 'A master negotiator.',
-      role: 'Master of balance and negotiation',
-      howTheyCollect: ['Even mix of sealed, slabs, and raw', 'Flexible positioning', 'Willing to adjust allocations over time'],
-      whatItSays: "You're pragmatic and adaptable. You don't fall in love with absolutes — you manage trade-offs. You like having options and leverage, and you're comfortable shifting when conditions change. You win by staying reasonable when others polarize.",
-      coreStrength: 'Resilience',
-      tradeOff: 'Rarely all-in on one idea'
-    },
-    purist: {
-      emoji: '🔥',
-      name: 'The Purist',
-      subtitle: 'A devotee of conviction.',
-      role: 'Devotee of conviction and aesthetics',
-      howTheyCollect: ['Raw- and slab-heavy', 'Strong attachment to specific Pokémon, artists, or themes', 'Less concern for optimization'],
-      whatItSays: "You collect with your gut. You care about how a card feels, not just how it performs. Volatility doesn't scare you because belief matters more than comfort. Your collection is personal — and that's the point.",
-      coreStrength: 'Authentic conviction',
-      tradeOff: 'Higher variance'
-    },
-    hustler: {
-      emoji: '💼',
-      name: 'The Hustler',
-      subtitle: 'A grinding operator.',
-      role: 'Operator of volume and repetition',
-      howTheyCollect: ['Many positions', 'Smaller average position size', 'Frequent activity and turnover'],
-      whatItSays: "You trust process over perfection. You're comfortable grinding edges and stacking small wins. You don't need every move to be a home run — consistency is your weapon. You stay active while others overthink.",
-      coreStrength: 'Momentum through action',
-      tradeOff: 'Burnout and thin margins'
-    },
-    archivist: {
-      emoji: '📜',
-      name: 'The Archivist',
-      subtitle: 'A keeper of history.',
-      role: 'Keeper of history',
-      howTheyCollect: ['Vintage and early-era focus', 'Long hold times', 'Low exposure to current hype'],
-      whatItSays: "You value permanence. You're drawn to cards that have already proven their place in the canon. You're less interested in what's next and more interested in what lasts. Your collection feels like a library, not a trading desk.",
-      coreStrength: 'Stability',
-      tradeOff: 'Slower growth cycles'
-    },
-    wayfinder: {
-      emoji: '🧭',
-      name: 'The Wayfinder',
-      subtitle: 'A navigator of trends.',
-      role: 'Navigator of shifting terrain',
-      howTheyCollect: ['Newer sets and rising cards', 'Shorter-to-medium holds', 'Attention-aware positioning'],
-      whatItSays: "You read the room well. You understand that value follows attention, and you're comfortable moving with it. You don't fight the tide — you learn how to travel it.",
-      coreStrength: 'Timing',
-      tradeOff: 'Volatility exposure'
-    },
-    cartographer: {
-      emoji: '🗺️',
-      name: 'The Cartographer',
-      subtitle: 'A mapper of worlds.',
-      role: 'Mapper of worlds',
-      howTheyCollect: ['Deep focus on specific sets or eras', 'High internal coherence', 'Completion-oriented behavior'],
-      whatItSays: "You like understanding the whole picture. Finishing something matters to you. Your collection feels intentional and structured — not random. You collect systems, not just cards.",
-      coreStrength: 'Coherence',
-      tradeOff: 'Concentration risk'
-    },
-    keystone: {
-      emoji: '🧱',
-      name: 'The Keystone',
-      subtitle: 'A foundation builder.',
-      role: 'Foundation builder',
-      howTheyCollect: ['Iconic Pokémon and blue-chip cards', 'Cross-era anchors', 'Low turnover, high confidence'],
-      whatItSays: "You build around pieces meant to last. You want your collection to hold weight — emotionally and structurally. Everything else connects back to a few central pillars.",
-      coreStrength: 'Endurance',
-      tradeOff: 'Less experimentation'
-    },
-    pathbreaker: {
-      emoji: '🚩',
-      name: 'The Pathbreaker',
-      subtitle: 'A pioneer of belief.',
-      role: 'Pioneer of belief',
-      howTheyCollect: ['Few, highly concentrated positions', 'Early or contrarian bets', 'Strong personal thesis'],
-      whatItSays: "You're comfortable standing alone. You don't need consensus to act — you need belief. You accept being early, even wrong for a while, because you trust where the road leads.",
-      coreStrength: 'Asymmetry',
-      tradeOff: 'Drawdowns before payoff'
-    },
-    detective: {
-      emoji: '🕵️',
-      name: 'The Detective',
-      subtitle: 'A seeker of hidden signals.',
-      role: 'Seeker of hidden signals',
-      howTheyCollect: ['Under-the-radar sets and cards', 'Long quiet holds', 'Low hype exposure'],
-      whatItSays: "You notice details others miss. You're curious, observant, and patient. You don't need validation right away — discovery is the reward. When something finally clicks, you're already there.",
-      coreStrength: 'Early insight',
-      tradeOff: 'Long waits for recognition'
-    }
   };
+
+  const archetypeData: Record<string, ArchetypeDisplay> = Object.keys(OLD_TO_NEW_TYPE).reduce(
+    (acc, key) => {
+      const type = OLD_TO_NEW_TYPE[key];
+      const info = PERSONALITY_INFO[type];
+      acc[key] = {
+        emoji: info.emoji,
+        name: `The ${type}`,
+        subtitle: info.tagline,
+        role: '',
+        howTheyCollect: info.collectionStyle,
+        whatItSays: `${info.fullProfile.coreIdentity} ${info.fullProfile.collectingMindset}`,
+        coreStrength: info.strength.replace(/\.$/, ''),
+        tradeOff: info.weakness.replace(/\.$/, ''),
+      };
+      return acc;
+    },
+    {} as Record<string, ArchetypeDisplay>,
+  );
 
   const generateArchetypeSection = () => {
     const archetypeKey = getCollectorArchetype();
@@ -274,63 +207,12 @@ export function buildPortfolioReportHtml({
     const overUnder = sealedDiff > 0 ? 'under' : 'over';
     const diffAmount = Math.abs(sealedDiff);
     
-    // Personality traits based on archetype
-    const personalityTraits: Record<string, string[]> = {
-      sentinel: ["You don't panic easily.", "You'd rather be early than loud.", "You trust time more than timing."],
-      politician: ["You like having options.", "You're comfortable with compromise.", "You adapt without abandoning."],
-      purist: ["You trust your instincts, even when others don't.", "Aesthetics matter to you.", "You collect with conviction."],
-      hustler: ["You'd rather act than wait.", "You learn by doing.", "Small wins compound."],
-      archivist: ["History speaks to you.", "You respect what has lasted.", "Patience is your edge."],
-      wayfinder: ["You read momentum well.", "You're not afraid to move.", "Attention is information."],
-      cartographer: ["Completion drives you.", "You see systems, not just pieces.", "Structure matters."],
-      keystone: ["You build around pillars.", "Quality over quantity.", "Your core is intentional."],
-      pathbreaker: ["You're comfortable being early.", "Conviction beats consensus.", "You accept temporary pain."],
-      detective: ["You notice what others miss.", "Discovery is the reward.", "Quiet confidence."]
-    };
-    
-    const strengthsByArchetype: Record<string, string[]> = {
-      sentinel: ["People like you tend to do well in flat or boring markets.", "Your style rewards patience and conviction.", "You're less likely to make emotional decisions."],
-      politician: ["This is one of the most resilient styles.", "You can weather different market environments.", "Flexibility protects you from being wrong."],
-      purist: ["Your conviction creates natural holding power.", "You won't sell at the wrong time from fear.", "Personal connection drives discipline."],
-      hustler: ["Activity builds market intuition.", "You learn faster than passive collectors.", "Volume creates opportunities."],
-      archivist: ["Vintage has proven staying power.", "Your collection has historical significance.", "You hold what others wish they had."],
-      wayfinder: ["Timing can multiply returns.", "You capture attention-driven moves.", "You're positioned for new cycles."],
-      cartographer: ["Deep knowledge creates edge.", "Completion adds premium value.", "You understand your niche."],
-      keystone: ["Blue-chips anchor through volatility.", "Your core positions are battle-tested.", "Quality compounds over time."],
-      pathbreaker: ["Concentration creates outsized wins.", "You're positioned for asymmetric upside.", "Conviction is your competitive edge."],
-      detective: ["Early positioning pays off.", "You avoid crowded trades.", "Patience reveals hidden value."]
-    };
-    
-    const tradeOffByArchetype: Record<string, string> = {
-      sentinel: "liquidity — sealed can be slower to exit if you ever need cash quickly.",
-      politician: "you may never feel fully committed to one idea, which can limit maximum upside.",
-      purist: "volatility — when markets move against you, conviction cuts both ways.",
-      hustler: "margin erosion and burnout. Activity doesn't always equal progress.",
-      archivist: "opportunity cost — vintage moves slowly, and you may miss newer cycles.",
-      wayfinder: "volatility exposure — attention fades, and newer sets can correct sharply.",
-      cartographer: "concentration risk — depth in one area means exposure to that area's fate.",
-      keystone: "less experimentation — you may miss emerging opportunities outside your pillars.",
-      pathbreaker: "drawdowns before payoff — being early often means being uncomfortable first.",
-      detective: "long waits for recognition — your thesis may take years to play out."
-    };
-    
-    const gentleNudges: Record<string, string> = {
-      sentinel: "",
-      politician: "When you do feel strongly about a position, letting it grow slightly larger can be rewarding.",
-      purist: "Consider grading your best raw pieces to lock in their value.",
-      hustler: "Build a small 'anchor' position you never trade. It'll keep you grounded.",
-      archivist: "A small allocation to newer sets keeps you connected to the current market.",
-      wayfinder: "Consider holding 1-2 positions longer than usual — some trades become investments.",
-      cartographer: "If concentration feels heavy, one or two positions outside your focus can reduce risk.",
-      keystone: "Every few months, explore something new. Your pillars are strong enough.",
-      pathbreaker: "Size matters — make sure you can survive being wrong longer than expected.",
-      detective: "When one of your ideas starts gaining attention, don't be afraid to let it run — you earned it."
-    };
-    
-    const traits = personalityTraits[archetypeKey] || [];
-    const strengths = strengthsByArchetype[archetypeKey] || [];
-    const tradeOff = tradeOffByArchetype[archetypeKey] || '';
-    const nudge = gentleNudges[archetypeKey] || '';
+    const newType = OLD_TO_NEW_TYPE[archetypeKey];
+    const newInfo = newType ? PERSONALITY_INFO[newType] : null;
+    const traits = newInfo ? newInfo.coreTraits.map(t => `${t}.`) : [];
+    const strengths = newInfo ? [newInfo.strengthLong] : [];
+    const tradeOff = newInfo ? newInfo.weaknessLong : '';
+    const nudge = newInfo ? newInfo.recommendedAction : '';
     
     // Build portfolio analysis as flowing paragraphs (no subheadings)
     const dataShowsParagraph = `You have <strong>${sealed.toFixed(0)}%</strong> sealed${sealedCount > 0 ? `, spread across ${sealedCount} products${topSealedNames ? `, including ${topSealedNames}` : ''}` : ''}. Your allocation leans <strong>${overUnder}</strong> your target by <strong>${diffAmount.toFixed(0)}%</strong>.${dominantEraPercent > 30 ? ` You've concentrated most of your value in the <strong>${dominantEra}</strong> era (${dominantEraPercent.toFixed(0)}%).` : ''}`;
@@ -376,10 +258,12 @@ export function buildPortfolioReportHtml({
     const overUnder = sealedDiff > 0 ? 'under' : 'over';
     const diffAmount = Math.abs(sealedDiff);
     
-    const traits = personalityTraits[archetypeKey] || [];
-    const strengths = strengthsByArchetype[archetypeKey] || [];
-    const tradeOff = tradeOffByArchetype[archetypeKey] || '';
-    const nudge = gentleNudges[archetypeKey] || '';
+    const newType = OLD_TO_NEW_TYPE[archetypeKey];
+    const newInfo = newType ? PERSONALITY_INFO[newType] : null;
+    const traits = newInfo ? newInfo.coreTraits.map(t => `${t}.`) : [];
+    const strengths = newInfo ? [newInfo.strengthLong] : [];
+    const tradeOff = newInfo ? newInfo.weaknessLong : '';
+    const nudge = newInfo ? newInfo.recommendedAction : '';
     
     const dataShowsParagraph = `You have <strong>${sealed.toFixed(0)}%</strong> sealed${sealedCount > 0 ? `, spread across ${sealedCount} products${topSealedNames ? `, including ${topSealedNames}` : ''}` : ''}. Your allocation leans <strong>${overUnder}</strong> your target by <strong>${diffAmount.toFixed(0)}%</strong>.${dominantEraPercent > 30 ? ` You've concentrated most of your value in the <strong>${dominantEra}</strong> era (${dominantEraPercent.toFixed(0)}%).` : ''}`;
     
@@ -392,57 +276,7 @@ export function buildPortfolioReportHtml({
     return { dataShowsParagraph, whyParagraph, strengthsParagraph, nudgeParagraph };
   };
   
-  const personalityTraits: Record<string, string[]> = {
-    sentinel: ["You don't panic easily.", "You'd rather be early than loud.", "You trust time more than timing."],
-    politician: ["You like having options.", "You're comfortable with compromise.", "You adapt without abandoning."],
-    purist: ["You trust your instincts, even when others don't.", "Aesthetics matter to you.", "You collect with conviction."],
-    hustler: ["You'd rather act than wait.", "You learn by doing.", "Small wins compound."],
-    archivist: ["History speaks to you.", "You respect what has lasted.", "Patience is your edge."],
-    wayfinder: ["You read momentum well.", "You're not afraid to move.", "Attention is information."],
-    cartographer: ["Completion drives you.", "You see systems, not just pieces.", "Structure matters."],
-    keystone: ["You build around pillars.", "Quality over quantity.", "Your core is intentional."],
-    pathbreaker: ["You're comfortable being early.", "Conviction beats consensus.", "You accept temporary pain."],
-    detective: ["You notice what others miss.", "Discovery is the reward.", "Quiet confidence."]
-  };
-  
-  const strengthsByArchetype: Record<string, string[]> = {
-    sentinel: ["People like you tend to do well in flat or boring markets.", "Your style rewards patience and conviction.", "You're less likely to make emotional decisions."],
-    politician: ["This is one of the most resilient styles.", "You can weather different market environments.", "Flexibility protects you from being wrong."],
-    purist: ["Your conviction creates natural holding power.", "You won't sell at the wrong time from fear.", "Personal connection drives discipline."],
-    hustler: ["Activity builds market intuition.", "You learn faster than passive collectors.", "Volume creates opportunities."],
-    archivist: ["Vintage has proven staying power.", "Your collection has historical significance.", "You hold what others wish they had."],
-    wayfinder: ["Timing can multiply returns.", "You capture attention-driven moves.", "You're positioned for new cycles."],
-    cartographer: ["Deep knowledge creates edge.", "Completion adds premium value.", "You understand your niche."],
-    keystone: ["Blue-chips anchor through volatility.", "Your core positions are battle-tested.", "Quality compounds over time."],
-    pathbreaker: ["Concentration creates outsized wins.", "You're positioned for asymmetric upside.", "Conviction is your competitive edge."],
-    detective: ["Early positioning pays off.", "You avoid crowded trades.", "Patience reveals hidden value."]
-  };
-  
-  const tradeOffByArchetype: Record<string, string> = {
-    sentinel: "liquidity — sealed can be slower to exit if you ever need cash quickly.",
-    politician: "you may never feel fully committed to one idea, which can limit maximum upside.",
-    purist: "volatility — when markets move against you, conviction cuts both ways.",
-    hustler: "margin erosion and burnout. Activity doesn't always equal progress.",
-    archivist: "opportunity cost — vintage moves slowly, and you may miss newer cycles.",
-    wayfinder: "volatility exposure — attention fades, and newer sets can correct sharply.",
-    cartographer: "concentration risk — depth in one area means exposure to that area's fate.",
-    keystone: "less experimentation — you may miss emerging opportunities outside your pillars.",
-    pathbreaker: "drawdowns before payoff — being early often means being uncomfortable first.",
-    detective: "long waits for recognition — your thesis may take years to play out."
-  };
-  
-  const gentleNudges: Record<string, string> = {
-    sentinel: "",
-    politician: "When you do feel strongly about a position, letting it grow slightly larger can be rewarding.",
-    purist: "Consider grading your best raw pieces to lock in their value.",
-    hustler: "Build a small 'anchor' position you never trade. It'll keep you grounded.",
-    archivist: "A small allocation to newer sets keeps you connected to the current market.",
-    wayfinder: "Consider holding 1-2 positions longer than usual — some trades become investments.",
-    cartographer: "If concentration feels heavy, one or two positions outside your focus can reduce risk.",
-    keystone: "Every few months, explore something new. Your pillars are strong enough.",
-    pathbreaker: "Size matters — make sure you can survive being wrong longer than expected.",
-    detective: "When one of your ideas starts gaining attention, don't be afraid to let it run — you earned it."
-  };
+  // Outer-scope tables removed — both helper functions now read from PERSONALITY_INFO via OLD_TO_NEW_TYPE.
 
   const getNarrativeContent = () => {
     const sealed = allocation?.sealed.percent || 0;
@@ -2010,11 +1844,12 @@ export function buildPortfolioReportText({
   const raw = allocation?.rawCards.percent || 0;
 
   // Determine collector type
-  let collectorType = "The Balanced Collector";
-  if (sealed >= 50) collectorType = "The Vault Keeper";
-  else if (slabs >= 50) collectorType = "The Trophy Hunter";
-  else if (raw >= 50) collectorType = "The Volume Player";
-  else if (sealed >= 30 && slabs >= 30) collectorType = "The Strategic Diversifier";
+  // Match to one of the 9 PokeIQ collector personality profiles based on portfolio shape.
+  let collectorType = "The Diplomat";
+  if (sealed >= 50) collectorType = "The Investor";
+  else if (slabs >= 50) collectorType = "The Archivist";
+  else if (raw >= 50) collectorType = "The Dreamer";
+  else if (sealed >= 30 && slabs >= 30) collectorType = "The Hunter";
 
   const presetLabel = allocationPreset === 'conservative' ? 'The Investor (Conservative)' : 
                       allocationPreset === 'aggressive' ? 'The Purist (Aggressive)' : 
