@@ -103,6 +103,7 @@ export interface PersonalityResult {
 export interface PersonalityInfo {
   emoji: string;
   philosophy: string;       // one-liner
+  tagline: string;          // MBTI-style one-sentence identity description
   summary: string;          // emotionally resonant short paragraph
   coreTraits: string[];     // 4 chips
   strength: string;
@@ -117,6 +118,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Investor: {
     emoji: '\uD83E\uDDF1',
     philosophy: 'Slow and steady wins.',
+    tagline: 'Investors are patient, level-headed long-term thinkers who trust time and discipline more than hype or momentum.',
     summary: "The Investor is patient, disciplined, and long-term focused. You trust time more than hype, stay emotionally steady, and avoid impulsive decisions. You collect for stability, value preservation, and slow compounding — and you sleep just fine while it happens.",
     coreTraits: ['Patient', 'Stable', 'Risk-aware', 'Long-term focused'],
     strength: 'Strong emotional discipline during volatility.',
@@ -129,6 +131,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Archivist: {
     emoji: '\uD83D\uDCDA',
     philosophy: 'Some cards deserve preservation.',
+    tagline: 'Archivists are legacy-minded collectors who build deliberate, museum-worthy collections around iconic and historically significant cards.',
     summary: "The Archivist values significance, rarity, legacy, and iconic ownership. You believe certain cards matter culturally and deserve preservation. Your collection feels important and intentional — built around grails, trophy cards, and centerpieces that everyone notices first.",
     coreTraits: ['Legacy-focused', 'Selective', 'Preservation-minded', 'Significance-driven'],
     strength: 'Builds memorable collections with meaningful pieces.',
@@ -141,6 +144,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Dreamer: {
     emoji: '\uD83C\uDF1F',
     philosophy: 'I collect what I love.',
+    tagline: 'Dreamers are passionate, nostalgia-driven collectors whose collections are powered by personal stories, favorite Pokémon, and pure emotion.',
     summary: "The Dreamer is emotionally driven and passion-first. You collect because of favorite Pokémon, nostalgia, artwork, and memories. Your collection reflects identity and emotion more than market logic — and that\u2019s exactly the point.",
     coreTraits: ['Emotional', 'Passionate', 'Nostalgic', 'Authentic'],
     strength: 'Deep emotional satisfaction and personal connection.',
@@ -153,6 +157,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Flipper: {
     emoji: '\u26A1',
     philosophy: 'Movement creates opportunity.',
+    tagline: 'Flippers are fast-moving, opportunistic traders who thrive on momentum, rotation, and constantly reading where the market is heading next.',
     summary: "The Flipper thrives on activity, momentum, and market movement. You enjoy buying, selling, trading, and rotating inventory. You move fast, stay plugged into trends, and trust momentum over patience.",
     coreTraits: ['Active', 'Opportunistic', 'Fast-moving', 'Momentum-driven'],
     strength: 'Executes quickly on opportunities.',
@@ -165,6 +170,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Analyst: {
     emoji: '\uD83E\uDDE0',
     philosophy: 'The numbers tell the story.',
+    tagline: 'Analysts are research-obsessed strategists who find their edge in spreadsheets, pop reports, and patterns most collectors never bother to look for.',
     summary: "The Analyst is research-driven and highly analytical. You enjoy spreadsheets, population reports, market inefficiencies, probability, and trend analysis. You trust information over emotion, and your edge comes from doing the homework no one else does.",
     coreTraits: ['Analytical', 'Strategic', 'Logical', 'Research-driven'],
     strength: 'Excellent at identifying hidden value.',
@@ -177,6 +183,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Hunter: {
     emoji: '\uD83C\uDFAF',
     philosophy: "I\u2019d rather be right than diversified.",
+    tagline: 'Hunters are high-conviction, sniper-style collectors who would rather hold a few bold positions than spread thin across the market.',
     summary: "The Hunter is conviction-driven and highly selective. You don\u2019t buy often, but when you do, you go big. You prefer concentrated positions, sniper-like purchases, and high-conviction plays over spreading thin.",
     coreTraits: ['Focused', 'Conviction-driven', 'Selective', 'Aggressive'],
     strength: 'Strong instinct for high-conviction opportunities.',
@@ -189,6 +196,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Explorer: {
     emoji: '\uD83C\uDF0A',
     philosophy: 'The next big thing starts small.',
+    tagline: 'Explorers are curious, early-moving trend hunters who get energized by new sets, niche products, and ideas most collectors haven\u2019t noticed yet.',
     summary: "The Explorer loves discovery, experimentation, and emerging trends. You enjoy new sets, niche products, and unconventional opportunities. You\u2019re energized by uncertainty and curiosity, and you tend to be early on the things others later call obvious.",
     coreTraits: ['Curious', 'Experimental', 'Trend-aware', 'Early-moving'],
     strength: 'Finds opportunities before most collectors.',
@@ -201,6 +209,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Curator: {
     emoji: '\uD83C\uDFDB\uFE0F',
     philosophy: 'A collection should tell a story.',
+    tagline: 'Curators are aesthetic, story-driven collectors who treat their collection as a carefully composed piece of visual identity.',
     summary: "The Curator values presentation, cohesion, and aesthetics. You care about visual organization, binder layouts, thematic collections, and intentional presentation. Your collection feels carefully constructed and visually meaningful.",
     coreTraits: ['Organized', 'Aesthetic-focused', 'Intentional', 'Structured'],
     strength: 'Builds visually memorable and cohesive collections.',
@@ -213,6 +222,7 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
   Diplomat: {
     emoji: '\u2696\uFE0F',
     philosophy: 'Balance survives.',
+    tagline: 'Diplomats are balanced, adaptable collectors who build resilient portfolios designed to weather every market mood the hobby throws at them.',
     summary: "The Diplomat values flexibility, resilience, and diversification. You prefer balanced allocations, multiple eras, and multiple product types — and you rarely go all-in on a single strategy. You\u2019re built to weather every market mood.",
     coreTraits: ['Balanced', 'Adaptable', 'Diversified', 'Stable'],
     strength: 'Strong resilience across changing markets.',
