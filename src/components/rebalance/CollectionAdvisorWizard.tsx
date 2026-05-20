@@ -93,6 +93,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     summary,
     setAllocationPreset,
     setEraAllocationPreset,
+    allocationPreset: ctxAssetPreset,
+    allocationTarget: ctxAssetTarget,
+    eraAllocationPreset: ctxEraPreset,
+    eraAllocationTarget: ctxEraTarget,
   } = usePortfolio();
 
   const storageKey = `advisorWizard:${mode}`;
@@ -149,7 +153,8 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
 
     if (mode === 'asset') {
       if (!allocation) return null;
-      const target = ALLOCATION_PRESETS[resolvedPreset];
+      // If user customized in the Advanced tab, prefer their custom target.
+      const target = ctxAssetPreset === 'custom' ? ctxAssetTarget : ALLOCATION_PRESETS[resolvedPreset];
       const cats = [
         { key: 'sealed' as const, label: 'Sealed Products', current: allocation.sealed, target: target.sealed },
         { key: 'slabs' as const, label: 'Graded Cards', current: allocation.slabs, target: target.slabs },
@@ -178,7 +183,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     }
 
     // era mode
-    const target = ERA_ALLOCATION_PRESETS[resolvedPreset];
+    const target = ctxEraPreset === 'custom' ? ctxEraTarget : ERA_ALLOCATION_PRESETS[resolvedPreset];
     const order: PokemonEra[] = ['current', 'ultraModern', 'modern', 'classic', 'vintage'];
     const cats = order.map(e => ({
       key: e,
@@ -206,7 +211,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
         isOverweight: delta < -100,
       };
     });
-  }, [allocation, eraAllocation, mode, resolvedPreset, totalValue, budget]);
+  }, [allocation, eraAllocation, mode, resolvedPreset, totalValue, budget, ctxAssetPreset, ctxAssetTarget, ctxEraPreset, ctxEraTarget]);
 
   // Primary recommendation = the largest underweight category
   const primary = useMemo(() => {
@@ -430,7 +435,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
               {primary ? (
                 <>
                   <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1">
-                    Put this month's budget toward {primary.label}
+                    Put more of this month's budget into {primary.label}
                   </h3>
                   <p className="text-xs text-muted-foreground mb-4">
                     You're underweight vs your target.
@@ -466,29 +471,34 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
             </div>
 
             {/* Secondary allocations */}
-            <div className="glass-card p-4 sm:p-5">
-              <p className="text-xs text-muted-foreground mb-3 font-medium">Other categories</p>
-              <div className="space-y-2">
+            <div className="glass-card p-5 sm:p-6">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">Other categories</p>
+              <div className="space-y-3">
                 {plan
                   .filter(c => c.key !== primary?.key)
                   .map(c => (
                     <div
                       key={c.key}
-                      className="flex items-center justify-between p-2.5 rounded-lg bg-secondary/30"
+                      className={cn(
+                        "flex items-center justify-between p-4 sm:p-5 rounded-xl border bg-secondary/30",
+                        c.isOverweight && "border-warning/30 bg-warning/5",
+                        c.isUnderweight && "border-primary/30 bg-primary/5",
+                        !c.isOverweight && !c.isUnderweight && "border-border"
+                      )}
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">{c.label}</p>
-                        <p className="text-[11px] text-muted-foreground tabular-nums">
-                          {c.currentPct.toFixed(0)}% <ArrowRight className="inline w-2.5 h-2.5" /> {c.targetPct}%
-                          {c.isOverweight && <span className="text-warning ml-1.5">overweight</span>}
-                          {c.isUnderweight && <span className="text-primary ml-1.5">underweight</span>}
+                        <p className="text-base sm:text-lg font-semibold text-foreground mb-0.5">{c.label}</p>
+                        <p className="text-xs text-muted-foreground tabular-nums">
+                          {c.currentPct.toFixed(0)}% <ArrowRight className="inline w-3 h-3" /> {c.targetPct}%
+                          {c.isOverweight && <span className="text-warning ml-2 font-medium">overweight</span>}
+                          {c.isUnderweight && <span className="text-primary ml-2 font-medium">underweight</span>}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
-                        <span className="text-sm font-semibold text-foreground tabular-nums">
+                        <span className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
                           ${Math.round(c.monthly).toLocaleString()}
                         </span>
-                        <span className="text-xs text-muted-foreground">/mo</span>
+                        <span className="text-sm text-muted-foreground ml-1">/mo</span>
                       </div>
                     </div>
                   ))}
