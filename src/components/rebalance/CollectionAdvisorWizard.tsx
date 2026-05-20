@@ -115,10 +115,21 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     } catch { return null; }
   })();
 
+  // In era mode, reuse the budget already chosen in the asset advisor (if available)
+  const inheritedAssetBudget = (() => {
+    if (mode !== 'era' || typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem('advisorWizard:asset');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return typeof parsed?.budget === 'number' && parsed.budget > 0 ? parsed.budget as number : null;
+    } catch { return null; }
+  })();
+
   const [step, setStep] = useState<1 | 2 | 3 | 4>(saved?.step ?? 1);
   const [goal, setGoal] = useState<Goal | null>(saved?.goal ?? null);
   const [timeline, setTimeline] = useState<Timeline | null>(saved?.timeline ?? null);
-  const [budget, setBudget] = useState<number>(saved?.budget ?? 250);
+  const [budget, setBudget] = useState<number>(saved?.budget ?? inheritedAssetBudget ?? 250);
   const [customBudget, setCustomBudget] = useState<string>(saved?.customBudget ?? '');
   const [usingCustomBudget, setUsingCustomBudget] = useState(saved?.usingCustomBudget ?? false);
 
@@ -232,7 +243,12 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
   };
   const handleSelectTimeline = (t: Timeline) => {
     setTimeline(t);
-    setStep(3);
+    // Era mode skips the budget step — it's inherited from the asset advisor
+    if (mode === 'era') {
+      setStep(4);
+    } else {
+      setStep(3);
+    }
   };
   const handleSelectBudget = (amount: number) => {
     setUsingCustomBudget(false);
@@ -266,14 +282,14 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
   };
 
   const stepNum = step;
-  const totalSteps = 3;
+  const totalSteps = mode === 'era' ? 2 : 3;
 
   return (
     <div className="space-y-4">
       {/* Step indicator */}
       {step < 4 && (
         <div className="flex items-center gap-2">
-          {[1, 2, 3].map(i => (
+          {Array.from({ length: totalSteps }, (_, idx) => idx + 1).map(i => (
             <div
               key={i}
               className={cn(
