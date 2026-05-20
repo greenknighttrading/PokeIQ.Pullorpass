@@ -136,6 +136,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Still holding sealed from years ago.',
     dangerZone: 'Holding so long you forget to ever take a win — patience can quietly turn into stagnation.',
     recommendedAction: 'Pick one proven sealed product to add this quarter, then let it sit untouched.',
+    strengthLong: 'Emotional discipline during volatility. While others panic-sell on dips or chase greens, Investors stay steady and let time do the heavy lifting.',
+    weaknessLong: 'May wait too long before acting. The same patience that protects you can also cause you to hesitate through moves that required boldness.',
+    fullProfile: {
+      coreIdentity: 'People with the Investor personality type approach collecting with patience, discipline, and emotional steadiness. While others chase hype, panic during dips, or constantly rotate products, Investors prefer stability, consistency, and long-term positioning. They rarely feel pressure to move quickly and are often more comfortable missing an opportunity than making an impulsive decision they may regret later.',
+      collectingMindset: 'Investors understand something many collectors struggle to accept: great collections are rarely built overnight. Their mindset naturally leans toward preservation, slow accumulation, and allowing time to do the heavy lifting. Because of this, they are often drawn toward sealed products, established cards, and safer long-term positions that can quietly compound over years.',
+      innerWorld: 'Although Investors may appear cautious from the outside, their patience is not driven by fear. More often, it comes from confidence. They trust themselves enough to avoid emotional reactions during market swings and understand that consistency often outperforms excitement in the long run.',
+      blindSpots: 'At times, this steady mindset can work against them. Investors may hesitate too long before acting, miss opportunities requiring boldness, or hold positions long after the hobby has shifted around them. Their desire for stability can occasionally become resistance to change.',
+      growthPath: 'The strongest Investors eventually learn that growth is not just about protecting value, but knowing when to evolve alongside the hobby itself.',
+    },
   },
   Archivist: {
     emoji: '\uD83D\uDCDA',
@@ -149,6 +158,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Owns one card everyone asks about immediately.',
     dangerZone: 'Chasing prestige at any price — paying premiums for status rather than value.',
     recommendedAction: 'Define your next grail and the max you\u2019ll pay before you start hunting it.',
+    strengthLong: 'Builds memorable collections with meaningful, museum-worthy pieces. Archivists instinctively know which cards will matter to the hobby long after the hype cycle ends.',
+    weaknessLong: 'Can overvalue prestige or iconic status, paying premiums for the story or the legacy rather than the underlying value.',
+    fullProfile: {
+      coreIdentity: 'Archivists see collecting differently from most people. While others focus on trends, profits, or activity, Archivists are drawn toward significance. To them, certain cards feel larger than the hobby itself — pieces of history worthy of preservation, admiration, and long-term care.',
+      collectingMindset: 'People with this personality type are often captivated by iconic cards, grails, trophy pieces, and historically meaningful eras. Their collections tend to feel intentional and curated, built less around quantity and more around importance. They are naturally selective collectors, preferring a few meaningful centerpieces over endless accumulation.',
+      innerWorld: 'Archivists often feel deeply connected to the legacy of Pokémon itself. They appreciate the stories behind cards, the context surrounding specific eras, and the emotional weight certain pieces carry within the hobby. Even modern cards may interest them if they believe those cards will someday become culturally important.',
+      blindSpots: 'At times, Archivists can become overly attached to prestige and significance. They may romanticize certain cards, overpay for iconic pieces, or dismiss newer products too quickly simply because they have not yet earned historical importance.',
+      growthPath: 'The healthiest Archivists learn that preserving the history of the hobby also means remaining open to its future.',
+    },
   },
   Dreamer: {
     emoji: '\uD83C\uDF1F',
@@ -162,6 +180,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Bought the card because it made them feel something.',
     dangerZone: 'Overpaying because a card hits the heart — emotion outrunning common sense.',
     recommendedAction: 'Keep collecting what you love, but set a soft monthly budget for emotional buys.',
+    strengthLong: 'Deep emotional satisfaction and personal connection. Dreamers genuinely enjoy their collections every single day, regardless of what the market is doing.',
+    weaknessLong: 'Can become overly attached to cards, struggling to sell pieces they no longer need or overvaluing sentimental holdings beyond what the market supports.',
+    fullProfile: {
+      coreIdentity: 'For Dreamers, collecting is deeply emotional. Cards are not simply products, assets, or investments — they are memories, feelings, stories, and personal connections. Dreamers are often drawn toward favorite Pokémon, nostalgic artwork, meaningful experiences, and cards that simply “feel right” to them.',
+      collectingMindset: 'People with this personality type rarely separate emotion from collecting. Their collections often reflect who they are as people, with each card carrying some kind of personal significance. They may remember exactly where they pulled a card, who gave it to them, or why it mattered emotionally at a certain point in their life.',
+      innerWorld: 'Dreamers are often among the happiest collectors in the hobby because their enjoyment comes from genuine connection rather than external validation. They collect because it excites them, comforts them, or reminds them of something meaningful.',
+      blindSpots: 'Their emotional attachment can sometimes cloud their judgment. Dreamers may struggle to sell cards they no longer need, overvalue sentimental pieces, or ignore practical realities because their heart has already decided what matters.',
+      growthPath: 'The strongest Dreamers learn that protecting the joy of collecting sometimes means balancing emotion with perspective.',
+    },
   },
   Flipper: {
     emoji: '\u26A1',
@@ -175,6 +202,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Sold the card before reading the attack.',
     dangerZone: 'Trading for the sake of trading — fees and small losses quietly eat the edge.',
     recommendedAction: 'Pick one high-conviction card to actually hold for 12 months while you keep flipping the rest.',
+    strengthLong: 'Executes quickly on opportunities. Flippers have sharp instincts for timing and can pivot strategies faster than almost any other type when the market moves.',
+    weaknessLong: 'Can overtrade or miss long-term compounding. The constant motion that energizes Flippers can also burn them out and erode profits through fees and early exits.',
+    fullProfile: {
+      coreIdentity: 'Flippers thrive on activity, momentum, and staying in motion. While some collectors prefer patience and preservation, Flippers feel most energized when they are actively buying, selling, trading, and adapting to the market around them.',
+      collectingMindset: 'People with this personality type often possess strong instincts for timing and opportunity. They enjoy the excitement of fast decisions, quick flips, and spotting momentum before others fully react. For Flippers, the hobby feels alive when things are moving.',
+      innerWorld: 'Flippers are highly adaptable collectors. They can pivot strategies quickly, react to changing trends, and remain deeply connected to current market behavior. Their collections tend to evolve constantly, with products rotating in and out far more frequently than most other personality types.',
+      blindSpots: 'Constant movement comes with its own challenges. Flippers may struggle with patience, sell too early, or burn themselves out chasing nonstop opportunities. Their excitement for activity can sometimes make them feel restless during slower periods of the hobby.',
+      growthPath: 'The best Flippers eventually realize that not every opportunity needs to be chased — and that sometimes the biggest gains come from slowing down.',
+    },
   },
   Analyst: {
     emoji: '\uD83E\uDDE0',
@@ -188,6 +224,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Has a spreadsheet for their spreadsheet.',
     dangerZone: 'Analysis paralysis — researching a buy until the window quietly closes.',
     recommendedAction: 'Give yourself a 48-hour decision rule on any card under your conviction threshold.',
+    strengthLong: 'Excellent at identifying hidden value. Analysts spot inefficiencies, pop report gaps, and undervalued plays long before they become consensus.',
+    weaknessLong: 'Can overanalyze and hesitate too long, missing windows of opportunity while still searching for the perfect data point.',
+    fullProfile: {
+      coreIdentity: 'Analysts approach collecting with curiosity, logic, and deep research. Their minds naturally search for patterns, inefficiencies, and hidden signals within the hobby. While other collectors may rely on emotion or instinct, Analysts trust information.',
+      collectingMindset: 'People with this personality type often enjoy spreadsheets, population reports, market data, print trends, and historical analysis as much as the cards themselves. They are naturally skeptical thinkers who prefer understanding why something matters before committing to it.',
+      innerWorld: 'Analysts tend to be highly independent decision makers. They rarely follow hype blindly and often enjoy discovering insights that most collectors overlook. In many ways, the process of understanding the hobby intellectually is just as rewarding to them as collecting itself.',
+      blindSpots: 'Analysts can become trapped inside their own thinking. They may overanalyze purchases, hesitate too long, or struggle to act because they are still searching for the “perfect” answer.',
+      growthPath: 'The strongest Analysts learn that collecting is not only about understanding the hobby — it is also about experiencing it.',
+    },
   },
   Hunter: {
     emoji: '\uD83C\uDFAF',
@@ -201,6 +246,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Owns three cards worth more than everything else combined.',
     dangerZone: 'One bad conviction call wiping out a disproportionate share of the collection.',
     recommendedAction: 'Cap any single position at a clear % of your total collection value.',
+    strengthLong: 'Strong instinct for high-conviction opportunities. Hunters identify special pieces early and commit at a scale that pays off when they’re right.',
+    weaknessLong: 'Higher concentration risk. The same conviction that drives the wins can become emotional stubbornness when a thesis turns against them.',
+    fullProfile: {
+      coreIdentity: 'Hunters are conviction-driven collectors who prefer focus over balance. They are highly selective about what they buy, but when they believe in something, they commit fully and confidently.',
+      collectingMindset: 'People with this personality type are rarely interested in owning a little bit of everything. Instead, Hunters prefer concentrated positions, centerpiece purchases, and high-conviction plays that reflect strong personal belief.',
+      innerWorld: 'Hunters enjoy the feeling of identifying something special before the rest of the market fully recognizes it. Whether it is a card, product, era, or niche category, they often build their collections around a small number of deeply believed-in ideas.',
+      blindSpots: 'This confidence can become both a strength and a weakness. Hunters may become overly concentrated, emotionally tied to being “right,” or resistant to changing their views once they commit.',
+      growthPath: 'The strongest Hunters learn that conviction becomes even more powerful when paired with adaptability.',
+    },
   },
   Explorer: {
     emoji: '\uD83C\uDF0A',
@@ -214,6 +268,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Already collecting the set nobody understands yet.',
     dangerZone: 'Spreading across too many bets so no winner ever moves the needle.',
     recommendedAction: 'Cull your experimental bets to your top 3 conviction ideas each quarter.',
+    strengthLong: 'Finds opportunities before most collectors. Explorers naturally gravitate to niches and emerging sets long before the rest of the hobby catches on.',
+    weaknessLong: 'Can chase too many ideas at once, spreading thin enough that even good calls fail to meaningfully move the collection.',
+    fullProfile: {
+      coreIdentity: 'Explorers are energized by discovery, experimentation, and possibility. They are naturally curious collectors who enjoy exploring areas of the hobby most people overlook.',
+      collectingMindset: 'People with this personality type are often drawn toward new sets, emerging trends, niche products, unconventional ideas, and underexplored categories. Explorers enjoy the feeling of finding something before everyone else notices it.',
+      innerWorld: 'Because they enjoy experimentation, Explorers frequently evolve their interests and collecting habits. Their collections can feel unpredictable, diverse, and constantly changing as new curiosities capture their attention.',
+      blindSpots: 'This curiosity can sometimes become distraction. Explorers may jump between too many ideas, chase trends too aggressively, or struggle to stay committed long enough for their convictions to fully develop.',
+      growthPath: 'The strongest Explorers learn that discovery becomes more meaningful when paired with patience and direction.',
+    },
   },
   Curator: {
     emoji: '\uD83C\uDFDB\uFE0F',
@@ -227,6 +290,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Owns twelve binders and color-coded all of them.',
     dangerZone: 'Optimizing the binder more than the collection — perfection over progress.',
     recommendedAction: 'Pick one theme to complete fully this quarter instead of starting a new one.',
+    strengthLong: 'Builds visually memorable and cohesive collections. Curators craft experiences, not just piles of cards — every binder feels intentional.',
+    weaknessLong: 'Can overfocus on perfection and presentation, spending more energy on layout than on actually growing or enjoying the collection.',
+    fullProfile: {
+      coreIdentity: 'Curators care deeply about how collections feel as a whole. While some collectors focus primarily on value or rarity, Curators are drawn toward presentation, cohesion, aesthetics, and intentional design.',
+      collectingMindset: 'People with this personality type often think carefully about how cards fit together visually and emotionally. They enjoy creating collections that feel organized, complete, and personally expressive.',
+      innerWorld: 'Curators are often highly intentional with presentation. Binder layouts, display cases, themes, color coordination, and visual storytelling may matter just as much as the cards themselves. They frequently derive satisfaction from refining and perfecting their collection over time.',
+      blindSpots: 'Curators can become overly perfectionistic. They may obsess over organization, hesitate to disrupt carefully crafted collections, or spend more time refining presentation than simply enjoying the hobby.',
+      growthPath: 'The strongest Curators learn that the purpose of a collection is not just to look beautiful, but to be lived with and enjoyed.',
+    },
   },
   Diplomat: {
     emoji: '\u2696\uFE0F',
@@ -240,6 +312,15 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Owns a little bit of everything.',
     dangerZone: 'Spreading so thin no single position ever meaningfully wins.',
     recommendedAction: 'Pick one era or product type to overweight slightly for the next 6 months.',
+    strengthLong: 'Strong resilience across changing markets. Diplomats are built to weather every market mood because they’re never fully exposed to a single trend.',
+    weaknessLong: 'Can struggle to fully commit to one direction, leaving the collection balanced but without any breakout positions.',
+    fullProfile: {
+      coreIdentity: 'Diplomats are adaptable, balanced, and highly flexible collectors. Rather than committing fully to one philosophy, they naturally prefer diversification, moderation, and maintaining stability across multiple approaches.',
+      collectingMindset: 'People with this personality type are often comfortable navigating different parts of the hobby simultaneously. They may appreciate vintage while still enjoying modern, collect sealed while also enjoying raw cards, or balance emotional purchases alongside strategic ones.',
+      innerWorld: 'Diplomats rarely feel comfortable living at extremes. Instead, they value resilience and flexibility, preferring collections capable of adapting as the hobby changes over time.',
+      blindSpots: 'Because they can see value in many different approaches, Diplomats may hesitate to fully commit to one direction or feel stretched across too many interests at once.',
+      growthPath: 'The strongest Diplomats learn that balance is most powerful when it is paired with conviction.',
+    },
   },
 };
 
