@@ -93,6 +93,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     summary,
     setAllocationPreset,
     setEraAllocationPreset,
+    allocationPreset: ctxAssetPreset,
+    allocationTarget: ctxAssetTarget,
+    eraAllocationPreset: ctxEraPreset,
+    eraAllocationTarget: ctxEraTarget,
   } = usePortfolio();
 
   const storageKey = `advisorWizard:${mode}`;
@@ -149,7 +153,8 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
 
     if (mode === 'asset') {
       if (!allocation) return null;
-      const target = ALLOCATION_PRESETS[resolvedPreset];
+      // If user customized in the Advanced tab, prefer their custom target.
+      const target = ctxAssetPreset === 'custom' ? ctxAssetTarget : ALLOCATION_PRESETS[resolvedPreset];
       const cats = [
         { key: 'sealed' as const, label: 'Sealed Products', current: allocation.sealed, target: target.sealed },
         { key: 'slabs' as const, label: 'Graded Cards', current: allocation.slabs, target: target.slabs },
@@ -178,7 +183,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     }
 
     // era mode
-    const target = ERA_ALLOCATION_PRESETS[resolvedPreset];
+    const target = ctxEraPreset === 'custom' ? ctxEraTarget : ERA_ALLOCATION_PRESETS[resolvedPreset];
     const order: PokemonEra[] = ['current', 'ultraModern', 'modern', 'classic', 'vintage'];
     const cats = order.map(e => ({
       key: e,
@@ -206,7 +211,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
         isOverweight: delta < -100,
       };
     });
-  }, [allocation, eraAllocation, mode, resolvedPreset, totalValue, budget]);
+  }, [allocation, eraAllocation, mode, resolvedPreset, totalValue, budget, ctxAssetPreset, ctxAssetTarget, ctxEraPreset, ctxEraTarget]);
 
   // Primary recommendation = the largest underweight category
   const primary = useMemo(() => {
