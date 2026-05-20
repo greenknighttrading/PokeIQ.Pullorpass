@@ -52,8 +52,10 @@ const TRAIT_LABELS: Record<keyof TraitScores, string> = {
 };
 
 export function QuizResults({ result }: QuizResultsProps) {
-  const info = PERSONALITY_INFO[result.type];
-  const TypeIcon = TYPE_ICONS[result.type];
+  const safeType: PersonalityType =
+    (result.type && PERSONALITY_INFO[result.type] ? result.type : 'Investor');
+  const info = PERSONALITY_INFO[safeType];
+  const TypeIcon = TYPE_ICONS[safeType];
 
   useEffect(() => {
     localStorage.setItem('personalityResult', JSON.stringify(result));
