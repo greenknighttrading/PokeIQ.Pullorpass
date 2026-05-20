@@ -30,14 +30,14 @@ export default function SmartFeedNewsBrief({ inputs }: Props) {
         <div className="flex items-center gap-2">
           <Newspaper className="w-4 h-4 text-primary" />
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
-            Smart Feed News Brief
+            News Brief
           </span>
         </div>
         <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{dateLabel}</span>
       </div>
 
       <h2 className="text-xl sm:text-2xl font-black leading-tight mb-2 group-hover:text-primary transition-colors">
-        Daily Pokémon Market Intelligence
+        Market Recap
       </h2>
       <p className="text-sm sm:text-base text-foreground/85 leading-relaxed line-clamp-3">
         {teaser}
