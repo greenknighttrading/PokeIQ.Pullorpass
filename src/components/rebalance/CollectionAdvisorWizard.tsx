@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TrendingUp, Heart, Sparkles, Calendar, DollarSign, ArrowRight, Save, Settings2, Check, ArrowLeft, Clock, Hourglass, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -95,12 +95,37 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     setEraAllocationPreset,
   } = usePortfolio();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
-  const [goal, setGoal] = useState<Goal | null>(null);
-  const [timeline, setTimeline] = useState<Timeline | null>(null);
-  const [budget, setBudget] = useState<number>(250);
-  const [customBudget, setCustomBudget] = useState<string>('');
-  const [usingCustomBudget, setUsingCustomBudget] = useState(false);
+  const storageKey = `advisorWizard:${mode}`;
+  const saved = (() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = localStorage.getItem(storageKey);
+      return raw ? JSON.parse(raw) as {
+        step: 1 | 2 | 3 | 4;
+        goal: Goal | null;
+        timeline: Timeline | null;
+        budget: number;
+        customBudget: string;
+        usingCustomBudget: boolean;
+      } : null;
+    } catch { return null; }
+  })();
+
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(saved?.step ?? 1);
+  const [goal, setGoal] = useState<Goal | null>(saved?.goal ?? null);
+  const [timeline, setTimeline] = useState<Timeline | null>(saved?.timeline ?? null);
+  const [budget, setBudget] = useState<number>(saved?.budget ?? 250);
+  const [customBudget, setCustomBudget] = useState<string>(saved?.customBudget ?? '');
+  const [usingCustomBudget, setUsingCustomBudget] = useState(saved?.usingCustomBudget ?? false);
+
+  // Persist answers per mode
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        step, goal, timeline, budget, customBudget, usingCustomBudget,
+      }));
+    } catch {}
+  }, [storageKey, step, goal, timeline, budget, customBudget, usingCustomBudget]);
 
   const totalValue = summary?.totalMarketValue || 0;
 
@@ -232,6 +257,7 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
     setStep(1);
     setGoal(null);
     setTimeline(null);
+    try { localStorage.removeItem(storageKey); } catch {}
   };
 
   const stepNum = step;
