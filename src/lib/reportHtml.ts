@@ -1,5 +1,6 @@
 import { AllocationBreakdown, AllocationPreset, AllocationTarget, ConcentrationRisk, EraAllocationBreakdown, EraAllocationTarget, EraAllocationPreset, ERA_ALLOCATION_PRESETS, Insight, PortfolioItem, PortfolioSummary, ProfitMilestone, ERA_INFO } from "@/lib/types";
 import { HealthScoreBreakdown, PortfolioComparison } from "@/contexts/PortfolioContext";
+import { PERSONALITY_INFO, PersonalityType } from "@/lib/personalityEngine";
 
 // HTML escape function to prevent XSS attacks from user-supplied data
 function escapeHtml(str: string | undefined | null): string {
