@@ -208,7 +208,7 @@ function PersonalizedSetsSnapshot({ items, topSets7d }: { items: any[]; topSets7
   }, [items, topSets7d]);
 
   return (
-    <div className="glass-card rounded-xl p-2 flex flex-col">
+    <div className="glass-card rounded-xl p-2 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-1">
         <Layers className="w-3.5 h-3.5 text-primary" />
         <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Your Sets · 7D Gain</span>
@@ -983,7 +983,7 @@ function PrimeWindowWidget() {
    ══════════════════════════════════════════════════════════════════════════════ */
 export default function SmartFeedTab() {
   const navigate = useNavigate();
-  const { items, isDataLoaded, allocation, summary } = usePortfolio();
+  const { items, isDataLoaded, allocation, summary, authInitialized } = usePortfolio();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [dbCounts, setDbCounts] = useState({ cards: 0, cardsUpPct: 50, cardsUp: 0, cardsDown: 0 });
@@ -1228,6 +1228,15 @@ export default function SmartFeedTab() {
     })();
     return () => { cancelled = true; };
   }, [budget, eraAllocations, top2Eras, prefersCards, selectedWatchlistEra]);
+
+  if (!authInitialized) {
+    return (
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading Smart Feed…</span>
+      </div>
+    );
+  }
 
   if (!isDataLoaded) {
     return (
