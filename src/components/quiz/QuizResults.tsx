@@ -15,6 +15,12 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface QuizResultsProps {
   result: PersonalityResult;
@@ -89,6 +95,17 @@ export function QuizResults({ result }: QuizResultsProps) {
         <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base">
           {info.tagline}
         </p>
+        {/* Snapshot chips */}
+        <div className="flex flex-wrap justify-center gap-2 pt-2">
+          {info.coreTraits.map((t, i) => (
+            <span
+              key={i}
+              className="px-2.5 py-1 rounded-full bg-background/60 border border-primary/30 text-xs text-foreground/90"
+            >
+              {t}
+            </span>
+          ))}
+        </div>
       </motion.div>
 
       {/* Core Traits — chips */}
@@ -110,6 +127,42 @@ export function QuizResults({ result }: QuizResultsProps) {
               </span>
             ))}
           </div>
+        </Card>
+      </motion.div>
+
+      {/* Full Personality Readout */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
+      >
+        <Card className="p-6">
+          <Accordion type="single" collapsible>
+            <AccordionItem value="profile" className="border-b-0">
+              <AccordionTrigger className="py-0 hover:no-underline">
+                <div className="flex items-center gap-2 font-semibold text-foreground">
+                  <ScrollText className="w-5 h-5 text-primary" />
+                  Read Full {safeType} Profile
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="pt-5">
+                <div className="space-y-5">
+                  {[
+                    { title: 'Core Identity', body: info.fullProfile.coreIdentity },
+                    { title: 'Collecting Mindset', body: info.fullProfile.collectingMindset },
+                    { title: 'Inner World', body: info.fullProfile.innerWorld },
+                    { title: 'Blind Spots', body: info.fullProfile.blindSpots },
+                    { title: 'Growth Path', body: info.fullProfile.growthPath },
+                  ].map((s) => (
+                    <div key={s.title}>
+                      <p className="text-xs uppercase tracking-wider text-primary font-medium mb-1.5">
+                        {s.title}
+                      </p>
+                      <p className="text-sm text-foreground/90 leading-relaxed">{s.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
       </motion.div>
 
@@ -165,6 +218,16 @@ export function QuizResults({ result }: QuizResultsProps) {
             <span className="font-semibold text-success">Strength</span>
           </div>
           <p className="text-foreground">{result.strength}</p>
+          <Accordion type="single" collapsible className="mt-2">
+            <AccordionItem value="s" className="border-b-0">
+              <AccordionTrigger className="py-1 text-sm text-success hover:no-underline">
+                Read more
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-foreground/90 leading-relaxed pt-2">
+                {info.strengthLong}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
         <Card className="p-6 bg-warning/10 border-warning/20">
           <div className="flex items-center gap-2 mb-2">
@@ -172,6 +235,16 @@ export function QuizResults({ result }: QuizResultsProps) {
             <span className="font-semibold text-warning">Weakness</span>
           </div>
           <p className="text-foreground">{result.weakness}</p>
+          <Accordion type="single" collapsible className="mt-2">
+            <AccordionItem value="w" className="border-b-0">
+              <AccordionTrigger className="py-1 text-sm text-warning hover:no-underline">
+                Read more
+              </AccordionTrigger>
+              <AccordionContent className="text-sm text-foreground/90 leading-relaxed pt-2">
+                {info.weaknessLong}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </Card>
       </motion.div>
 
