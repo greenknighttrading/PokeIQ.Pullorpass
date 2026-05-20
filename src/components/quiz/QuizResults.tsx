@@ -152,29 +152,30 @@ export function QuizResults({ result }: QuizResultsProps) {
               </div>
             ))}
           </div>
-          <Accordion type="single" collapsible className="mt-2">
-            <AccordionItem value="profile-more" className="border-b-0">
-              <AccordionTrigger className="py-2 text-sm text-primary hover:no-underline">
-                Read more
-              </AccordionTrigger>
-              <AccordionContent className="pt-3">
-                <div className="space-y-5">
-                  {[
-                    { title: 'Inner World', body: info.fullProfile.innerWorld },
-                    { title: 'Blind Spots', body: info.fullProfile.blindSpots },
-                    { title: 'Growth Path', body: info.fullProfile.growthPath },
-                  ].map((s) => (
-                    <div key={s.title}>
-                      <p className="text-xs uppercase tracking-wider text-primary font-medium mb-1.5">
-                        {s.title}
-                      </p>
-                      <p className="text-sm text-foreground/90 leading-relaxed">{s.body}</p>
-                    </div>
-                  ))}
+          {!profileExpanded && (
+            <button
+              onClick={() => setProfileExpanded(true)}
+              className="mt-2 text-sm text-primary hover:underline"
+            >
+              Read more
+            </button>
+          )}
+          {profileExpanded && (
+            <div className="pt-3 space-y-5">
+              {[
+                { title: 'Inner World', body: info.fullProfile.innerWorld },
+                { title: 'Blind Spots', body: info.fullProfile.blindSpots },
+                { title: 'Growth Path', body: info.fullProfile.growthPath },
+              ].map((s) => (
+                <div key={s.title}>
+                  <p className="text-xs uppercase tracking-wider text-primary font-medium mb-1.5">
+                    {s.title}
+                  </p>
+                  <p className="text-sm text-foreground/90 leading-relaxed">{s.body}</p>
                 </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+              ))}
+            </div>
+          )}
         </Card>
       </motion.div>
 
