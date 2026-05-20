@@ -1844,11 +1844,12 @@ export function buildPortfolioReportText({
   const raw = allocation?.rawCards.percent || 0;
 
   // Determine collector type
-  let collectorType = "The Balanced Collector";
-  if (sealed >= 50) collectorType = "The Vault Keeper";
-  else if (slabs >= 50) collectorType = "The Trophy Hunter";
-  else if (raw >= 50) collectorType = "The Volume Player";
-  else if (sealed >= 30 && slabs >= 30) collectorType = "The Strategic Diversifier";
+  // Match to one of the 9 PokeIQ collector personality profiles based on portfolio shape.
+  let collectorType = "The Diplomat";
+  if (sealed >= 50) collectorType = "The Investor";
+  else if (slabs >= 50) collectorType = "The Archivist";
+  else if (raw >= 50) collectorType = "The Dreamer";
+  else if (sealed >= 30 && slabs >= 30) collectorType = "The Hunter";
 
   const presetLabel = allocationPreset === 'conservative' ? 'The Investor (Conservative)' : 
                       allocationPreset === 'aggressive' ? 'The Purist (Aggressive)' : 
