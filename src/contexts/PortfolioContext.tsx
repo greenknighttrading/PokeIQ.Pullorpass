@@ -71,6 +71,7 @@ interface PortfolioContextType {
   detectedColumns: ColumnMapping | null;
   isDataLoaded: boolean;
   hasUploadedBefore: boolean;
+  authInitialized: boolean;
   isPriceMatching: boolean;
   priceMatchProgress: { completed: number; total: number } | null;
   priceMatchStats: { matched: number; total: number } | null;
@@ -727,6 +728,7 @@ export function PortfolioProvider({ children }: { children: React.ReactNode }) {
     detectedColumns,
     isDataLoaded,
     hasUploadedBefore,
+    authInitialized,
     isPriceMatching,
     priceMatchProgress,
     priceMatchStats,
