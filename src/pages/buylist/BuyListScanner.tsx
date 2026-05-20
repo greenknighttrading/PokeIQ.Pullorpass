@@ -70,6 +70,20 @@ function ScannerCard({ card, timePeriod }: { card: MoverCard; timePeriod: string
   const change = getChangeForTime(card, timePeriod) ?? 0;
   const currentPrice = card.price ?? 0;
   const isUp = change >= 0;
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const inList = isInWatchlist(card.card_id || card.id);
+  const handleWatchlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (inList) removeFromWatchlist(card.card_id || card.id);
+    else addToWatchlist({
+      card_id: card.card_id || card.id,
+      name: card.name,
+      set_name: card.set_name,
+      product_type: card.product_type,
+      tcgplayer_id: card.tcgplayer_id,
+      rarity: card.rarity,
+    });
+  };
 
   return (
     <div
@@ -97,6 +111,22 @@ function ScannerCard({ card, timePeriod }: { card: MoverCard; timePeriod: string
         <p className="text-[11px] font-bold text-foreground truncate leading-tight">{card.name}</p>
         <p className="text-[10px] text-muted-foreground truncate">{card.set_name || '—'}</p>
         <p className="text-[10px] text-muted-foreground truncate">{card.rarity || card.product_type || '—'}</p>
+        {/* Watchlist bar — sits just above the price/prev row */}
+        <div className="flex justify-end pt-1">
+          <button
+            onClick={handleWatchlist}
+            className={cn(
+              'flex items-center gap-1 px-2 py-1 rounded-md border text-[10px] font-semibold transition-colors',
+              inList
+                ? 'border-success/30 bg-success/10 text-success hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30'
+                : 'border-border/40 bg-secondary/30 text-muted-foreground hover:bg-primary/10 hover:text-primary hover:border-primary/30'
+            )}
+            title={inList ? 'Remove from Watchlist' : 'Add to Watchlist'}
+          >
+            {inList ? <CheckCircle className="w-3 h-3" /> : <PlusCircle className="w-3 h-3" />}
+            {inList ? 'On Watchlist' : 'Add to Watchlist'}
+          </button>
+        </div>
         <div className="flex items-center justify-between pt-0.5">
           <p className="text-sm font-black tabular-nums text-success">${currentPrice.toFixed(2)}</p>
           <p className="text-[10px] tabular-nums text-muted-foreground">Prev: ${(change !== 0 ? currentPrice / (1 + change / 100) : currentPrice).toFixed(2)}</p>
