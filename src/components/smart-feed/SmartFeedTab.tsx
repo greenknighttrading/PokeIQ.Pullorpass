@@ -983,7 +983,7 @@ function PrimeWindowWidget() {
    ══════════════════════════════════════════════════════════════════════════════ */
 export default function SmartFeedTab() {
   const navigate = useNavigate();
-  const { items, isDataLoaded, allocation, summary } = usePortfolio();
+  const { items, isDataLoaded, allocation, summary, authInitialized } = usePortfolio();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [dbCounts, setDbCounts] = useState({ cards: 0, cardsUpPct: 50, cardsUp: 0, cardsDown: 0 });
@@ -1228,6 +1228,15 @@ export default function SmartFeedTab() {
     })();
     return () => { cancelled = true; };
   }, [budget, eraAllocations, top2Eras, prefersCards, selectedWatchlistEra]);
+
+  if (!authInitialized) {
+    return (
+      <div className="flex items-center justify-center gap-3 py-16">
+        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading Smart Feed…</span>
+      </div>
+    );
+  }
 
   if (!isDataLoaded) {
     return (
