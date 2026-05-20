@@ -94,6 +94,81 @@ function closingLine(seed: number): string {
   return lines[seed % lines.length];
 }
 
+function buildEraNarrative(sorted: BriefEraPerformance[]): string {
+  // Map era keys to a normalized bucket
+  const get = (key: string) => sorted.find(e => e.era === key);
+  const current = get('current');
+  const ultra = get('ultraModern') || get('ultra-modern') || get('ultramodern');
+  const modern = get('modern');
+  const classic = get('classic');
+  const vintage = get('vintage');
+
+  const up = (e?: BriefEraPerformance) => !!e && e.pct7d > 1.5;
+  const down = (e?: BriefEraPerformance) => !!e && e.pct7d < -1.5;
+  const flat = (e?: BriefEraPerformance) => !!e && !up(e) && !down(e);
+
+  const parts: string[] = [];
+
+  // Opening: where attention is concentrated
+  if (up(current) && up(ultra)) {
+    parts.push(
+      `Most of the heat this week is sitting in Current and Ultra Modern — Current at ${current!.pct7d >= 0 ? '+' : ''}${current!.pct7d.toFixed(1)}% and Ultra Modern at ${ultra!.pct7d >= 0 ? '+' : ''}${ultra!.pct7d.toFixed(1)}% 7D. That's the usual pattern: new product cycles pull the spotlight, and casual buyers chase what's printed, opened, and posted online right now.`
+    );
+  } else if (up(ultra) && !up(current)) {
+    parts.push(
+      `Ultra Modern is doing most of the lifting (${ultra!.pct7d >= 0 ? '+' : ''}${ultra!.pct7d.toFixed(1)}% 7D) while Current sits quieter. Buyers are leaning toward sets that already have a track record over the freshest product on shelves.`
+    );
+  } else if (up(current) && !up(ultra)) {
+    parts.push(
+      `Current product is leading the tape at ${current!.pct7d >= 0 ? '+' : ''}${current!.pct7d.toFixed(1)}% 7D. That usually points to a new-release hype cycle — fun for traders, but the most reflexive part of the market.`
+    );
+  }
+
+  // Modern as "modern vintage"
+  if (up(modern)) {
+    parts.push(
+      `Modern is up ${modern!.pct7d >= 0 ? '+' : ''}${modern!.pct7d.toFixed(1)}% 7D, which is notable. Sets that are now 5–10+ years out start behaving like a "modern vintage" tier — they've survived the post-boom reset, supply is no longer flooding in, and the nostalgia bid quietly compounds. When Modern moves, it's usually a healthier signal than Current spiking.`
+    );
+  } else if (down(modern)) {
+    parts.push(
+      `Modern is cooling (${modern!.pct7d.toFixed(1)}% 7D). The 5–10 year band is where long-term opportunity tends to live, so weakness here often reads as a setup rather than a problem — older Modern sets becoming forgotten is exactly what creates the next round of safe bets.`
+    );
+  } else if (flat(modern)) {
+    parts.push(
+      `Modern is roughly flat. Quiet stretches in the 5–10 year range are when patient buyers usually accumulate — these sets rarely make headlines, but they're the bridge between Current hype and true Vintage scarcity.`
+    );
+  }
+
+  // Classic + Vintage — the forgotten / safe-bet narrative
+  const classicQuiet = !up(classic);
+  const vintageQuiet = !up(vintage);
+  if (classicQuiet && vintageQuiet && (classic || vintage)) {
+    const bits: string[] = [];
+    if (classic) bits.push(`Classic at ${classic.pct7d >= 0 ? '+' : ''}${classic.pct7d.toFixed(1)}%`);
+    if (vintage) bits.push(`Vintage at ${vintage.pct7d >= 0 ? '+' : ''}${vintage.pct7d.toFixed(1)}%`);
+    parts.push(
+      `Classic and Vintage are getting overlooked right now (${bits.join(', ')} 7D). That's typical when the front of the market is loud — older eras get forgotten, then re-rated months later when attention rotates back. Anything 10+ years out with real scarcity tends to be a safer bet than chasing whatever is green this week.`
+    );
+  } else if (up(vintage)) {
+    parts.push(
+      `Vintage is moving (${vintage!.pct7d >= 0 ? '+' : ''}${vintage!.pct7d.toFixed(1)}% 7D), which is the strongest signal in this list. Vintage rarely rallies on noise — when it lifts, it usually reflects real conviction from longer-horizon buyers.`
+    );
+  } else if (up(classic)) {
+    parts.push(
+      `Classic is showing strength (${classic!.pct7d >= 0 ? '+' : ''}${classic!.pct7d.toFixed(1)}% 7D). That era spent years overlooked, so even modest momentum there tends to mean buyers are reaching back for under-printed inventory.`
+    );
+  }
+
+  if (parts.length === 0) {
+    // Fallback narrative when nothing decisively up/down
+    parts.push(
+      `Eras are moving together this week with no single tier breaking out. When everything drifts in unison, it's usually broad sentiment doing the work rather than a real rotation — a good week to focus on quality over chasing relative strength.`
+    );
+  }
+
+  return parts.join(' ');
+}
+
 export function generateSmartBrief(inp: BriefInputs): SmartBrief {
   const { allMovers, dbCounts, topSets7d, sealedPicks, cardPicks, headlines, summary, eraLabel, budget, collectingStyle, eraPerformance = [] } = inp;
 
