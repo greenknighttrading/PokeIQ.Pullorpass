@@ -22,6 +22,7 @@ import EraRotation from '@/components/buylist/EraRotation';
 import { Masthead, SectionRule, MarketOverviewBanner, getTrendDotColor, SEALED_NAME_RE } from '@/components/pulse/PulseShared';
 import { PokemonEra } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import SmartFeedNewsBrief from '@/components/smart-feed/SmartFeedNewsBrief';
 
 /* ── Types ── */
 interface Headline { title: string; url: string; excerpt: string; date: string; category: string; }
@@ -982,7 +983,7 @@ function PrimeWindowWidget() {
    ══════════════════════════════════════════════════════════════════════════════ */
 export default function SmartFeedTab() {
   const navigate = useNavigate();
-  const { items, isDataLoaded, allocation } = usePortfolio();
+  const { items, isDataLoaded, allocation, summary } = usePortfolio();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [headlines, setHeadlines] = useState<Headline[]>([]);
   const [dbCounts, setDbCounts] = useState({ cards: 0, cardsUpPct: 50, cardsUp: 0, cardsDown: 0 });
@@ -1265,6 +1266,27 @@ export default function SmartFeedTab() {
 
       {/* Live Ticker — portfolio insights for logged-in users */}
       <SmartFeedTicker items={items} allMovers={allMovers} dbCounts={dbCounts} topSets7d={topSets7d} />
+
+      {/* News Brief teaser — links to full newsletter */}
+      <SmartFeedNewsBrief
+        inputs={{
+          items,
+          allMovers,
+          dbCounts,
+          topSets7d,
+          sealedPicks,
+          cardPicks,
+          headlines,
+          summary: summary ? {
+            totalMarketValue: summary.totalMarketValue,
+            unrealizedPL: summary.unrealizedPL,
+            unrealizedPLPercent: summary.unrealizedPLPercent,
+          } : null,
+          eraLabel,
+          budget,
+          collectingStyle,
+        }}
+      />
 
       {/* Row 1: Personalized Sets + Market Pulse + News */}
       <div className="grid grid-cols-1 lg:grid-cols-[30%_22%_48%] gap-3 items-stretch">
