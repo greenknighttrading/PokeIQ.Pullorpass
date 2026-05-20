@@ -112,6 +112,15 @@ export interface PersonalityInfo {
   famousBehavior: string;
   dangerZone: string;
   recommendedAction: string;
+  strengthLong: string;
+  weaknessLong: string;
+  fullProfile: {
+    coreIdentity: string;
+    collectingMindset: string;
+    innerWorld: string;
+    blindSpots: string;
+    growthPath: string;
+  };
 }
 
 export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
