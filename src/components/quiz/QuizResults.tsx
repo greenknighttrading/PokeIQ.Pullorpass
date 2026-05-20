@@ -135,19 +135,31 @@ export function QuizResults({ result }: QuizResultsProps) {
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}
       >
         <Card className="p-6">
-          <Accordion type="single" collapsible>
-            <AccordionItem value="profile" className="border-b-0">
-              <AccordionTrigger className="py-0 hover:no-underline">
-                <div className="flex items-center gap-2 font-semibold text-foreground">
-                  <ScrollText className="w-5 h-5 text-primary" />
-                  Read Full {safeType} Profile
-                </div>
+          <h3 className="font-semibold text-foreground mb-5 flex items-center gap-2">
+            <ScrollText className="w-5 h-5 text-primary" />
+            Your Full {safeType} Profile
+          </h3>
+          <div className="space-y-5">
+            {[
+              { title: 'Core Identity', body: info.fullProfile.coreIdentity },
+              { title: 'Collecting Mindset', body: info.fullProfile.collectingMindset },
+            ].map((s) => (
+              <div key={s.title}>
+                <p className="text-xs uppercase tracking-wider text-primary font-medium mb-1.5">
+                  {s.title}
+                </p>
+                <p className="text-sm text-foreground/90 leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </div>
+          <Accordion type="single" collapsible className="mt-2">
+            <AccordionItem value="profile-more" className="border-b-0">
+              <AccordionTrigger className="py-2 text-sm text-primary hover:no-underline">
+                Read more
               </AccordionTrigger>
-              <AccordionContent className="pt-5">
+              <AccordionContent className="pt-3">
                 <div className="space-y-5">
                   {[
-                    { title: 'Core Identity', body: info.fullProfile.coreIdentity },
-                    { title: 'Collecting Mindset', body: info.fullProfile.collectingMindset },
                     { title: 'Inner World', body: info.fullProfile.innerWorld },
                     { title: 'Blind Spots', body: info.fullProfile.blindSpots },
                     { title: 'Growth Path', body: info.fullProfile.growthPath },
