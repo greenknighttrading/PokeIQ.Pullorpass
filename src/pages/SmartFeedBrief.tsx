@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Seo } from '@/components/seo/Seo';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Newspaper, TrendingUp, TrendingDown, Sparkles, AlertTriangle, Lightbulb, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Newspaper, TrendingUp, TrendingDown, Sparkles, AlertTriangle, Lightbulb, ExternalLink, Layers } from 'lucide-react';
 import { loadBriefFromSession, type SmartBrief } from '@/lib/smartBrief';
 import { cn } from '@/lib/utils';
 
@@ -80,7 +80,7 @@ export default function SmartFeedBrief() {
             </span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-black leading-[1.05] tracking-tight">
-            Daily Pokémon Market Intelligence
+            Market Recap
           </h1>
           <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span>{dateLabel}</span>
@@ -153,6 +153,32 @@ export default function SmartFeedBrief() {
                 <div key={i} className="border-l-2 border-warning/60 pl-4 py-1">
                   <h3 className="text-base font-bold">{w.name}</h3>
                   <p className="text-sm text-foreground/80 mt-1">{w.detail}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Era Pulse */}
+        {brief.eraPerformance && brief.eraPerformance.length > 0 && (
+          <section className="mb-10">
+            <SectionHeader kicker="Era pulse" title="Eras in Focus" icon={Layers} />
+            {brief.eraCommentary && (
+              <p className="text-sm sm:text-base text-foreground/85 mb-4 leading-relaxed">{brief.eraCommentary}</p>
+            )}
+            <div className="space-y-2">
+              {brief.eraPerformance.map((e, i) => (
+                <div key={i} className="glass-card rounded-lg p-4 border border-border flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <h3 className="text-base font-bold leading-tight">{e.label}</h3>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      {e.count} tracked card{e.count === 1 ? '' : 's'}
+                      {e.topCard ? ` · Top: ${e.topCard.name} (${e.topCard.pct >= 0 ? '+' : ''}${e.topCard.pct.toFixed(1)}%)` : ''}
+                    </p>
+                  </div>
+                  <span className={cn('text-base font-black tabular-nums shrink-0', e.pct7d >= 0 ? 'text-success' : 'text-destructive')}>
+                    {e.pct7d >= 0 ? '+' : ''}{e.pct7d.toFixed(1)}% (7D)
+                  </span>
                 </div>
               ))}
             </div>
