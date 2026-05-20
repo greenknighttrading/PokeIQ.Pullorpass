@@ -258,10 +258,12 @@ export function buildPortfolioReportHtml({
     const overUnder = sealedDiff > 0 ? 'under' : 'over';
     const diffAmount = Math.abs(sealedDiff);
     
-    const traits = personalityTraits[archetypeKey] || [];
-    const strengths = strengthsByArchetype[archetypeKey] || [];
-    const tradeOff = tradeOffByArchetype[archetypeKey] || '';
-    const nudge = gentleNudges[archetypeKey] || '';
+    const newType = OLD_TO_NEW_TYPE[archetypeKey];
+    const newInfo = newType ? PERSONALITY_INFO[newType] : null;
+    const traits = newInfo ? newInfo.coreTraits.map(t => `${t}.`) : [];
+    const strengths = newInfo ? [newInfo.strengthLong] : [];
+    const tradeOff = newInfo ? newInfo.weaknessLong : '';
+    const nudge = newInfo ? newInfo.recommendedAction : '';
     
     const dataShowsParagraph = `You have <strong>${sealed.toFixed(0)}%</strong> sealed${sealedCount > 0 ? `, spread across ${sealedCount} products${topSealedNames ? `, including ${topSealedNames}` : ''}` : ''}. Your allocation leans <strong>${overUnder}</strong> your target by <strong>${diffAmount.toFixed(0)}%</strong>.${dominantEraPercent > 30 ? ` You've concentrated most of your value in the <strong>${dominantEra}</strong> era (${dominantEraPercent.toFixed(0)}%).` : ''}`;
     
@@ -274,57 +276,7 @@ export function buildPortfolioReportHtml({
     return { dataShowsParagraph, whyParagraph, strengthsParagraph, nudgeParagraph };
   };
   
-  const personalityTraits: Record<string, string[]> = {
-    sentinel: ["You don't panic easily.", "You'd rather be early than loud.", "You trust time more than timing."],
-    politician: ["You like having options.", "You're comfortable with compromise.", "You adapt without abandoning."],
-    purist: ["You trust your instincts, even when others don't.", "Aesthetics matter to you.", "You collect with conviction."],
-    hustler: ["You'd rather act than wait.", "You learn by doing.", "Small wins compound."],
-    archivist: ["History speaks to you.", "You respect what has lasted.", "Patience is your edge."],
-    wayfinder: ["You read momentum well.", "You're not afraid to move.", "Attention is information."],
-    cartographer: ["Completion drives you.", "You see systems, not just pieces.", "Structure matters."],
-    keystone: ["You build around pillars.", "Quality over quantity.", "Your core is intentional."],
-    pathbreaker: ["You're comfortable being early.", "Conviction beats consensus.", "You accept temporary pain."],
-    detective: ["You notice what others miss.", "Discovery is the reward.", "Quiet confidence."]
-  };
-  
-  const strengthsByArchetype: Record<string, string[]> = {
-    sentinel: ["People like you tend to do well in flat or boring markets.", "Your style rewards patience and conviction.", "You're less likely to make emotional decisions."],
-    politician: ["This is one of the most resilient styles.", "You can weather different market environments.", "Flexibility protects you from being wrong."],
-    purist: ["Your conviction creates natural holding power.", "You won't sell at the wrong time from fear.", "Personal connection drives discipline."],
-    hustler: ["Activity builds market intuition.", "You learn faster than passive collectors.", "Volume creates opportunities."],
-    archivist: ["Vintage has proven staying power.", "Your collection has historical significance.", "You hold what others wish they had."],
-    wayfinder: ["Timing can multiply returns.", "You capture attention-driven moves.", "You're positioned for new cycles."],
-    cartographer: ["Deep knowledge creates edge.", "Completion adds premium value.", "You understand your niche."],
-    keystone: ["Blue-chips anchor through volatility.", "Your core positions are battle-tested.", "Quality compounds over time."],
-    pathbreaker: ["Concentration creates outsized wins.", "You're positioned for asymmetric upside.", "Conviction is your competitive edge."],
-    detective: ["Early positioning pays off.", "You avoid crowded trades.", "Patience reveals hidden value."]
-  };
-  
-  const tradeOffByArchetype: Record<string, string> = {
-    sentinel: "liquidity — sealed can be slower to exit if you ever need cash quickly.",
-    politician: "you may never feel fully committed to one idea, which can limit maximum upside.",
-    purist: "volatility — when markets move against you, conviction cuts both ways.",
-    hustler: "margin erosion and burnout. Activity doesn't always equal progress.",
-    archivist: "opportunity cost — vintage moves slowly, and you may miss newer cycles.",
-    wayfinder: "volatility exposure — attention fades, and newer sets can correct sharply.",
-    cartographer: "concentration risk — depth in one area means exposure to that area's fate.",
-    keystone: "less experimentation — you may miss emerging opportunities outside your pillars.",
-    pathbreaker: "drawdowns before payoff — being early often means being uncomfortable first.",
-    detective: "long waits for recognition — your thesis may take years to play out."
-  };
-  
-  const gentleNudges: Record<string, string> = {
-    sentinel: "",
-    politician: "When you do feel strongly about a position, letting it grow slightly larger can be rewarding.",
-    purist: "Consider grading your best raw pieces to lock in their value.",
-    hustler: "Build a small 'anchor' position you never trade. It'll keep you grounded.",
-    archivist: "A small allocation to newer sets keeps you connected to the current market.",
-    wayfinder: "Consider holding 1-2 positions longer than usual — some trades become investments.",
-    cartographer: "If concentration feels heavy, one or two positions outside your focus can reduce risk.",
-    keystone: "Every few months, explore something new. Your pillars are strong enough.",
-    pathbreaker: "Size matters — make sure you can survive being wrong longer than expected.",
-    detective: "When one of your ideas starts gaining attention, don't be afraid to let it run — you earned it."
-  };
+  // Outer-scope tables removed — both helper functions now read from PERSONALITY_INFO via OLD_TO_NEW_TYPE.
 
   const getNarrativeContent = () => {
     const sealed = allocation?.sealed.percent || 0;
