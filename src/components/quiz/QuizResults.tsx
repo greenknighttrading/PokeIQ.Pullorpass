@@ -87,7 +87,7 @@ export function QuizResults({ result }: QuizResultsProps) {
           <p className="text-lg text-primary italic">"{info.philosophy}"</p>
         </div>
         <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base">
-          {info.summary}
+          {info.tagline}
         </p>
       </motion.div>
 
@@ -123,9 +123,17 @@ export function QuizResults({ result }: QuizResultsProps) {
             Your Trait Profile
           </h3>
           <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
-            {(Object.keys(TRAIT_LABELS) as (keyof TraitScores)[]).map((key) => {
-              const value = Math.round(result.traits[key]);
-              return (
+            {(Object.keys(TRAIT_LABELS) as (keyof TraitScores)[])
+              .map((key) => {
+                const raw = result.traits[key];
+                const value = Number.isFinite(raw) ? Math.round(raw) : 0;
+                return { key, value };
+              })
+              .sort((a, b) => b.value - a.value)
+              .map(({ key, value }) => {
+                // Always show at least a sliver so 0 doesn't look broken.
+                const barWidth = Math.max(value, 3);
+                return (
                 <div key={key} className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">{TRAIT_LABELS[key]}</span>
@@ -134,14 +142,14 @@ export function QuizResults({ result }: QuizResultsProps) {
                   <div className="h-2 rounded-full bg-secondary overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${value}%` }}
+                      animate={{ width: `${barWidth}%` }}
                       transition={{ duration: 0.6 }}
                       className="h-full rounded-full bg-primary"
                     />
                   </div>
                 </div>
-              );
-            })}
+                );
+              })}
           </div>
         </Card>
       </motion.div>
