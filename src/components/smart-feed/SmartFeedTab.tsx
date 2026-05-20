@@ -1212,9 +1212,10 @@ export default function SmartFeedTab() {
         }
       }
       
-      // If still null (no era results at all), use empty array rather than unfiltered data
-      if (filteredSealed === null) filteredSealed = [];
-      if (filteredCards === null) filteredCards = [];
+      // If still null (no era results at all), fall back to unfiltered data so the
+      // News Brief / Watchlist still surface picks when no era filter is active.
+      if (filteredSealed === null) filteredSealed = activeEras.length === 0 ? sealedData : [];
+      if (filteredCards === null) filteredCards = activeEras.length === 0 ? cardData : [];
 
       // Always show up to 12 items (4 pages of 3) for both columns
       const sealedCount = 12;
@@ -1285,6 +1286,25 @@ export default function SmartFeedTab() {
           eraLabel,
           budget,
           collectingStyle,
+          eraPerformance: (() => {
+            const eras: PokemonEra[] = top2Eras.length > 0
+              ? top2Eras
+              : (Object.entries(eraAllocations).filter(([_, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([k]) => k as PokemonEra).slice(0, 3));
+            const pool = eras.length > 0 ? eras : (['vintage','classic','modern','ultraModern','current'] as PokemonEra[]);
+            return pool.map((era) => {
+              const matches = allMovers.filter(m => isInTargetEra(m.set_name || '', era) && (m.price_change_7d ?? null) !== null);
+              if (!matches.length) return { era, label: formatEra(era), pct7d: 0, count: 0 };
+              const avg = matches.reduce((s, m) => s + (m.price_change_7d ?? 0), 0) / matches.length;
+              const top = [...matches].sort((a, b) => (b.price_change_7d ?? 0) - (a.price_change_7d ?? 0))[0];
+              return {
+                era,
+                label: formatEra(era),
+                pct7d: avg,
+                count: matches.length,
+                topCard: top ? { name: top.name, pct: top.price_change_7d ?? 0, price: top.price ?? 0 } : undefined,
+              };
+            });
+          })(),
         }}
       />
 

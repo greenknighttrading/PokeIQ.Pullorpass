@@ -26,6 +26,14 @@ export interface BriefQuickNews {
   url?: string;
 }
 
+export interface BriefEraPerformance {
+  era: string;
+  label: string;
+  pct7d: number;
+  count: number;
+  topCard?: { name: string; pct: number; price: number };
+}
+
 export interface SmartBrief {
   generatedAt: string;
   eraLabel: string;
@@ -38,6 +46,8 @@ export interface SmartBrief {
   insight: string;
   quickNews: BriefQuickNews[];
   closing: string;
+  eraPerformance: BriefEraPerformance[];
+  eraCommentary: string;
 }
 
 export interface BriefInputs {
@@ -52,6 +62,7 @@ export interface BriefInputs {
   eraLabel: string;
   budget: number;
   collectingStyle: string;
+  eraPerformance?: BriefEraPerformance[];
 }
 
 // Liquidity-weighted score: filter noise by requiring real price exposure.
@@ -84,7 +95,7 @@ function closingLine(seed: number): string {
 }
 
 export function generateSmartBrief(inp: BriefInputs): SmartBrief {
-  const { allMovers, dbCounts, topSets7d, sealedPicks, cardPicks, headlines, summary, eraLabel, budget, collectingStyle } = inp;
+  const { allMovers, dbCounts, topSets7d, sealedPicks, cardPicks, headlines, summary, eraLabel, budget, collectingStyle, eraPerformance = [] } = inp;
 
   // Sets ranked
   const setEntries = Array.from(topSets7d.entries()).filter(([n]) => n && n.length > 1);
@@ -102,15 +113,16 @@ export function generateSmartBrief(inp: BriefInputs): SmartBrief {
 
   // Snapshot — 3-5 data-backed sentences
   const snapshot: string[] = [];
+  // Lead with the general market pulse
+  snapshot.push(
+    `The broader Pokémon market is ${sentiment}: ${dbCounts.cardsUpPct}% of ${dbCounts.cards.toLocaleString()} tracked cards traded higher over the last 7 days, with ${dbCounts.cardsUp.toLocaleString()} up versus ${dbCounts.cardsDown.toLocaleString()} down.`
+  );
   if (topSet) {
     const second = secondSet ? ` and ${titleCase(secondSet[0])} (${secondSet[1] >= 0 ? '+' : ''}${secondSet[1].toFixed(1)}%)` : '';
     snapshot.push(
-      `${titleCase(topSet[0])} led set-level movement over the last 7 days, up ${topSet[1].toFixed(1)}%${second}.`
+      `At the set level, ${titleCase(topSet[0])} led movement, up ${topSet[1].toFixed(1)}%${second}.`
     );
   }
-  snapshot.push(
-    `Breadth is ${sentiment}: ${dbCounts.cardsUpPct}% of ${dbCounts.cards.toLocaleString()} tracked cards traded higher this week, with ${dbCounts.cardsUp.toLocaleString()} up versus ${dbCounts.cardsDown.toLocaleString()} down.`
-  );
   if (summary) {
     const sign = summary.unrealizedPL >= 0 ? 'outperformed' : 'lagged';
     snapshot.push(
@@ -244,6 +256,19 @@ export function generateSmartBrief(inp: BriefInputs): SmartBrief {
 
   const seed = Math.floor(Date.now() / 86400000);
 
+  // Era commentary
+  const sortedEras = [...eraPerformance].filter(e => e.count > 0).sort((a, b) => b.pct7d - a.pct7d);
+  let eraCommentary = '';
+  if (sortedEras.length > 0) {
+    const lead = sortedEras[0];
+    const lag = sortedEras[sortedEras.length - 1];
+    if (sortedEras.length >= 2 && lead.label !== lag.label) {
+      eraCommentary = `${lead.label} is leading your tracked eras at ${lead.pct7d >= 0 ? '+' : ''}${lead.pct7d.toFixed(1)}% 7D, while ${lag.label} is lagging at ${lag.pct7d >= 0 ? '+' : ''}${lag.pct7d.toFixed(1)}%. Rotation is favoring ${lead.label} demand right now.`;
+    } else {
+      eraCommentary = `${lead.label} is averaging ${lead.pct7d >= 0 ? '+' : ''}${lead.pct7d.toFixed(1)}% 7D across ${lead.count} tracked cards — the dominant era in your view.`;
+    }
+  }
+
   return {
     generatedAt: new Date().toISOString(),
     eraLabel,
@@ -256,6 +281,8 @@ export function generateSmartBrief(inp: BriefInputs): SmartBrief {
     insight,
     quickNews,
     closing: closingLine(seed),
+    eraPerformance: sortedEras,
+    eraCommentary,
   };
 }
 
