@@ -260,13 +260,7 @@ export function generateSmartBrief(inp: BriefInputs): SmartBrief {
   const sortedEras = [...eraPerformance].filter(e => e.count > 0).sort((a, b) => b.pct7d - a.pct7d);
   let eraCommentary = '';
   if (sortedEras.length > 0) {
-    const lead = sortedEras[0];
-    const lag = sortedEras[sortedEras.length - 1];
-    if (sortedEras.length >= 2 && lead.label !== lag.label) {
-      eraCommentary = `${lead.label} is leading your tracked eras at ${lead.pct7d >= 0 ? '+' : ''}${lead.pct7d.toFixed(1)}% 7D, while ${lag.label} is lagging at ${lag.pct7d >= 0 ? '+' : ''}${lag.pct7d.toFixed(1)}%. Rotation is favoring ${lead.label} demand right now.`;
-    } else {
-      eraCommentary = `${lead.label} is averaging ${lead.pct7d >= 0 ? '+' : ''}${lead.pct7d.toFixed(1)}% 7D across ${lead.count} tracked cards — the dominant era in your view.`;
-    }
+    eraCommentary = buildEraNarrative(sortedEras);
   }
 
   return {
