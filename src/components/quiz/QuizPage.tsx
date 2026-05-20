@@ -15,7 +15,7 @@ interface QuizPageProps {
   totalPages: number;
 }
 
-const QUESTIONS_PER_PAGE = 6;
+const QUESTIONS_PER_PAGE = 4;
 
 export function QuizPage({ 
   currentPage, 
