@@ -36,6 +36,7 @@ const PrintReport = lazy(() => import("./pages/PrintReport"));
 const PersonalityTest = lazy(() => import("./pages/PersonalityTest"));
 const MyCollection = lazy(() => import("./pages/MyCollection"));
 const SmartFeed = lazy(() => import("./pages/SmartFeed"));
+const SmartFeedBrief = lazy(() => import("./pages/SmartFeedBrief"));
 
 const BuyListLanding = lazy(() => import("./pages/buylist/BuyListLanding"));
 const BuyListAccess = lazy(() => import("./pages/buylist/BuyListAccess"));
@@ -128,6 +129,7 @@ function AppRoutes() {
         <Route path="/era-allocation" element={<AppLayout><EraAllocation /></AppLayout>} />
         <Route path="/report" element={<AppLayout><Report /></AppLayout>} />
         <Route path="/smart-feed" element={<SmartFeed />} />
+        <Route path="/smart-feed/brief" element={<SmartFeedBrief />} />
         <Route path="/buy-list" element={<AppLayout><BuyListPicks /></AppLayout>} />
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
       </Routes>
