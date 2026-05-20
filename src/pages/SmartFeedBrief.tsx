@@ -160,26 +160,12 @@ export default function SmartFeedBrief() {
         )}
 
         {/* Era Pulse */}
-        {brief.eraPerformance && brief.eraPerformance.length > 0 && (
+        {brief.eraCommentary && (
           <section className="mb-10">
             <SectionHeader kicker="Era pulse" title="Eras in Focus" icon={Layers} />
-            {brief.eraCommentary && (
-              <p className="text-sm sm:text-base text-foreground/85 mb-4 leading-relaxed">{brief.eraCommentary}</p>
-            )}
-            <div className="space-y-2">
-              {brief.eraPerformance.map((e, i) => (
-                <div key={i} className="glass-card rounded-lg p-4 border border-border flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <h3 className="text-base font-bold leading-tight">{e.label}</h3>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">
-                      {e.count} tracked card{e.count === 1 ? '' : 's'}
-                      {e.topCard ? ` · Top: ${e.topCard.name} (${e.topCard.pct >= 0 ? '+' : ''}${e.topCard.pct.toFixed(1)}%)` : ''}
-                    </p>
-                  </div>
-                  <span className={cn('text-base font-black tabular-nums shrink-0', e.pct7d >= 0 ? 'text-success' : 'text-destructive')}>
-                    {e.pct7d >= 0 ? '+' : ''}{e.pct7d.toFixed(1)}% (7D)
-                  </span>
-                </div>
+            <div className="space-y-3 text-base sm:text-lg leading-relaxed text-foreground/90">
+              {brief.eraCommentary.split(/(?<=\.) (?=[A-Z])/).map((p, i) => (
+                <p key={i}>{p}</p>
               ))}
             </div>
           </section>
