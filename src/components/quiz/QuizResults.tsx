@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { 
-  PersonalityResult, 
-  PRIMARY_TYPE_INFO, 
-  MODIFIER_INFO 
+import {
+  PersonalityResult,
+  PersonalityType,
+  PERSONALITY_INFO,
+  TraitScores,
 } from '@/lib/personalityEngine';
-import { 
-  Shield, Vote, Flame, Briefcase, ScrollText,
-  Lock, TrendingUp, PieChart, Target, BarChart3,
-  ChevronRight, CheckCircle2, Sparkles, AlertCircle,
-  Zap, Wallet, Trophy, Scale, Calculator, FileText,
-  ExternalLink
+import {
+  PiggyBank, ScrollText, Heart, Zap, Calculator, Target,
+  Compass, LayoutGrid, Scale,
+  Lock, TrendingUp, PieChart, BarChart3, ChevronRight,
+  CheckCircle2, AlertCircle, AlertTriangle, Sparkles, ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -20,15 +20,19 @@ interface QuizResultsProps {
   result: PersonalityResult;
 }
 
-const TYPE_ICONS = {
-  Sentinel: Shield,
-  Politician: Vote,
-  Purist: Flame,
-  Hustler: Briefcase,
+const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string }>> = {
+  Investor: PiggyBank,
   Archivist: ScrollText,
+  Dreamer: Heart,
+  Flipper: Zap,
+  Analyst: Calculator,
+  Hunter: Target,
+  Explorer: Compass,
+  Curator: LayoutGrid,
+  Diplomat: Scale,
 };
 
-const ERA_LABELS = {
+const ERA_LABELS: Record<keyof PersonalityResult['eraAllocation'], string> = {
   vintage: 'Vintage',
   classic: 'Classic',
   modern: 'Modern',
@@ -36,11 +40,21 @@ const ERA_LABELS = {
   current: 'Current',
 };
 
-export function QuizResults({ result }: QuizResultsProps) {
-  const typeInfo = PRIMARY_TYPE_INFO[result.primaryType];
-  const TypeIcon = TYPE_ICONS[result.primaryType];
+const TRAIT_LABELS: Record<keyof TraitScores, string> = {
+  patience: 'Patience',
+  activity: 'Activity',
+  emotion: 'Emotion',
+  analysis: 'Analysis',
+  conviction: 'Conviction',
+  structure: 'Structure',
+  curiosity: 'Curiosity',
+  balance: 'Balance',
+};
 
-  // Save personality result to localStorage for budget tool
+export function QuizResults({ result }: QuizResultsProps) {
+  const info = PERSONALITY_INFO[result.type];
+  const TypeIcon = TYPE_ICONS[result.type];
+
   useEffect(() => {
     localStorage.setItem('personalityResult', JSON.stringify(result));
   }, [result]);
@@ -51,12 +65,12 @@ export function QuizResults({ result }: QuizResultsProps) {
       animate={{ opacity: 1 }}
       className="space-y-8"
     >
-      {/* Hero Type Card */}
+      {/* Hero */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-center space-y-6 p-8 rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card border border-primary/30"
+        transition={{ delay: 0.15 }}
+        className="text-center space-y-5 p-8 rounded-2xl bg-gradient-to-br from-primary/20 via-card to-card border border-primary/30"
       >
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/20 border border-primary/30">
           <TypeIcon className="w-10 h-10 text-primary" />
@@ -66,64 +80,26 @@ export function QuizResults({ result }: QuizResultsProps) {
             Your Collector Personality
           </p>
           <h1 className="text-4xl font-bold text-foreground">
-            {typeInfo.emoji} The {result.primaryType}
+            {info.emoji} The {result.type}
           </h1>
-          <p className="text-lg text-primary">{typeInfo.tagline}</p>
+          <p className="text-lg text-primary italic">"{info.philosophy}"</p>
         </div>
-        
-        {/* Elaborate Description */}
         <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base">
-          {typeInfo.fullDescription}
+          {info.summary}
         </p>
-        
-        {/* Modifiers with readable labels */}
-        {result.modifiers.length > 0 && (
-          <div className="flex justify-center gap-3 pt-4 flex-wrap">
-            {result.modifiers.map((modifier) => (
-              <span
-                key={modifier}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent/15 text-accent text-sm font-medium border border-accent/20"
-              >
-                {MODIFIER_INFO[modifier].emoji} {MODIFIER_INFO[modifier].label}
-              </span>
-            ))}
-          </div>
-        )}
       </motion.div>
 
-      {/* Section 1: PERSONALITY */}
+      {/* Core Traits — chips */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
       >
         <Card className="p-6">
-          <h2 className="text-xl font-bold text-foreground mb-4 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-primary" />
-            Personality
-          </h2>
-          <div className="text-muted-foreground leading-relaxed space-y-4">
-            {typeInfo.personalityProfile.split('\n\n').map((paragraph, i) => (
-              <p key={i}>{paragraph}</p>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Key Collecting Traits */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.35 }}
-      >
-        <Card className="p-6">
-          <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Key Collecting Traits
+          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-primary" />
+            Core Traits
           </h3>
-          <p className="text-sm text-muted-foreground mb-4">The tendencies that most influence your decisions</p>
           <div className="flex flex-wrap gap-2">
-            {typeInfo.collectingTraits.map((trait, i) => (
+            {info.coreTraits.map((trait, i) => (
               <span
                 key={i}
                 className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-medium border border-primary/20"
@@ -135,125 +111,101 @@ export function QuizResults({ result }: QuizResultsProps) {
         </Card>
       </motion.div>
 
-      {/* Your Strengths as a Collector */}
+      {/* Trait bars */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
       >
-      <Card className="p-6">
+        <Card className="p-6">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-success" />
-            Your Strengths as a Collector
+            <BarChart3 className="w-5 h-5 text-primary" />
+            Your Trait Profile
           </h3>
-          <div className="space-y-4">
-            {typeInfo.strengths.map((strength, i) => (
-              <div key={i}>
-                <h4 className="font-semibold text-foreground">{strength.title}</h4>
-                <p className="text-sm text-muted-foreground mt-0.5">{strength.description}</p>
-              </div>
-            ))}
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-3">
+            {(Object.keys(TRAIT_LABELS) as (keyof TraitScores)[]).map((key) => {
+              const value = Math.round(result.traits[key]);
+              return (
+                <div key={key} className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{TRAIT_LABELS[key]}</span>
+                    <span className="font-medium text-foreground">{value}</span>
+                  </div>
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${value}%` }}
+                      transition={{ duration: 0.6 }}
+                      className="h-full rounded-full bg-primary"
+                    />
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </Card>
       </motion.div>
 
-      {/* Potential Blind Spots */}
+      {/* Strength + Weakness */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
-      >
-      <Card className="p-6">
-          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-warning" />
-            Potential Blind Spots
-          </h3>
-          <div className="space-y-4">
-            {typeInfo.blindSpots.map((spot, i) => (
-              <div key={i}>
-                <h4 className="font-semibold text-foreground">{spot.title}</h4>
-                <p className="text-sm text-muted-foreground mt-0.5">{spot.description}</p>
-              </div>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
-
-      {/* Your Growth as a Collector */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <Card className="p-6 bg-primary/5 border-primary/20">
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            Your Growth as a Collector
-          </h3>
-          <p className="text-sm text-muted-foreground mb-3">How to level up without losing your identity</p>
-          <p className="text-muted-foreground leading-relaxed">{typeInfo.growth}</p>
-          <p className="text-muted-foreground leading-relaxed mt-3">
-            Your best collections will always reflect who you are—thoughtful, historically grounded, and intentional. The goal isn't to chase every trend, but to build something that still feels meaningful years from now.
-          </p>
-        </Card>
-      </motion.div>
-
-      {/* How You Collect Best / What Drains You */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.55 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
         className="grid md:grid-cols-2 gap-4"
       >
-        <Card className="p-6">
-          <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-success" />
-            How You Collect Best
-          </h3>
-          <p className="text-sm text-muted-foreground mb-3">Environments and habits that suit you</p>
-          <ul className="space-y-2">
-            {typeInfo.collectsBest.map((item, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="w-4 h-4 text-success mt-0.5 flex-shrink-0" />
-                {item}
-              </li>
-            ))}
-          </ul>
+        <Card className="p-6 bg-success/10 border-success/20">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle2 className="w-5 h-5 text-success" />
+            <span className="font-semibold text-success">Strength</span>
+          </div>
+          <p className="text-foreground">{result.strength}</p>
         </Card>
+        <Card className="p-6 bg-warning/10 border-warning/20">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertCircle className="w-5 h-5 text-warning" />
+            <span className="font-semibold text-warning">Weakness</span>
+          </div>
+          <p className="text-foreground">{result.weakness}</p>
+        </Card>
+      </motion.div>
+
+      {/* Collection Style + Famous Behavior */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+      >
         <Card className="p-6">
           <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-destructive" />
-            What Drains You
+            <LayoutGrid className="w-5 h-5 text-primary" />
+            Collection Style
           </h3>
-          <ul className="space-y-2 mt-6">
-            {typeInfo.drains.map((item, i) => (
+          <ul className="space-y-2 mb-4">
+            {info.collectionStyle.map((item, i) => (
               <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                <span className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0">×</span>
+                <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
                 {item}
               </li>
             ))}
           </ul>
+          <div className="pt-3 border-t border-border/50">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+              Famous behavior
+            </p>
+            <p className="text-foreground italic">"{info.famousBehavior}"</p>
+          </div>
         </Card>
       </motion.div>
 
       {/* Allocations */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
         className="grid md:grid-cols-2 gap-6"
       >
-        {/* Product Allocation */}
         <Card className="p-6">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <PieChart className="w-5 h-5 text-primary" />
-            Recommended Product Allocation
+            Product Allocation
           </h3>
           <div className="space-y-4">
             {[
               { label: 'Sealed', value: result.productAllocation.sealedPct, color: 'bg-primary' },
               { label: 'Graded', value: result.productAllocation.gradedPct, color: 'bg-accent' },
-              { label: 'Raw', value: result.productAllocation.rawPct, color: 'bg-success' },
+              { label: 'Raw',    value: result.productAllocation.rawPct,    color: 'bg-success' },
             ].map((item) => (
               <div key={item.label} className="space-y-1.5">
                 <div className="flex justify-between text-sm">
@@ -264,7 +216,7 @@ export function QuizResults({ result }: QuizResultsProps) {
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${item.value}%` }}
-                    transition={{ delay: 0.7, duration: 0.5 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
                     className={`h-full rounded-full ${item.color}`}
                   />
                 </div>
@@ -273,26 +225,25 @@ export function QuizResults({ result }: QuizResultsProps) {
           </div>
         </Card>
 
-        {/* Era Allocation */}
         <Card className="p-6">
           <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            Recommended Era Allocation
+            Era Focus
           </h3>
           <div className="space-y-4">
-            {Object.entries(result.eraAllocation).map(([era, value], i) => (
+            {(Object.entries(result.eraAllocation) as [keyof typeof ERA_LABELS, number][]).map(([era, value], i) => (
               <div key={era} className="space-y-1.5">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{ERA_LABELS[era as keyof typeof ERA_LABELS]}</span>
+                  <span className="text-muted-foreground">{ERA_LABELS[era]}</span>
                   <span className="font-medium text-foreground">{value}%</span>
                 </div>
                 <div className="h-2 rounded-full bg-secondary overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${value}%` }}
-                    transition={{ delay: 0.8 + i * 0.1, duration: 0.5 }}
+                    transition={{ delay: 0.6 + i * 0.08, duration: 0.5 }}
                     className="h-full rounded-full bg-primary"
-                    style={{ opacity: 0.4 + (i * 0.15) }}
+                    style={{ opacity: 0.45 + i * 0.13 }}
                   />
                 </div>
               </div>
@@ -301,73 +252,35 @@ export function QuizResults({ result }: QuizResultsProps) {
         </Card>
       </motion.div>
 
-      {/* Why You Got This */}
+      {/* Danger Zone */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.65 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
       >
-        <Card className="p-6">
-          <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-            <Target className="w-5 h-5 text-primary" />
-            Why You Got This
+        <Card className="p-6 bg-destructive/10 border-destructive/30">
+          <h3 className="font-semibold text-destructive mb-2 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5" />
+            Danger Zone
           </h3>
-          <ul className="space-y-3">
-            {result.explanations.map((explanation, i) => (
-              <li key={i} className="flex items-start gap-3 text-muted-foreground">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary text-sm font-medium flex items-center justify-center">
-                  {i + 1}
-                </span>
-                {explanation}
-              </li>
-            ))}
-          </ul>
+          <p className="text-foreground">{result.dangerZone}</p>
         </Card>
       </motion.div>
 
-      {/* One Action */}
+      {/* Recommended Action */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
       >
-        <Card className="p-6 bg-accent/5 border-accent/20">
+        <Card className="p-6 bg-accent/10 border-accent/30">
           <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Zap className="w-5 h-5 text-accent" />
-            Your Next Move
+            <TrendingUp className="w-5 h-5 text-accent" />
+            Recommended Action
           </h3>
-          <p className="text-muted-foreground">{result.oneAction}</p>
+          <p className="text-foreground">{result.recommendedAction}</p>
         </Card>
       </motion.div>
 
-      {/* Strengths & Trade-offs (moved to bottom) */}
+      {/* Locked Premium */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.75 }}
-        className="grid md:grid-cols-2 gap-4"
-      >
-        <Card className="p-5 bg-success/10 border-success/20">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-5 h-5 text-success" />
-            <span className="font-semibold text-success">Core Strength</span>
-          </div>
-          <p className="text-foreground">{typeInfo.strength}</p>
-        </Card>
-        <Card className="p-5 bg-warning/10 border-warning/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="w-5 h-5 text-warning" />
-            <span className="font-semibold text-warning">Trade-off</span>
-          </div>
-          <p className="text-foreground">{typeInfo.tradeoff}</p>
-        </Card>
-      </motion.div>
-
-      {/* Locked Premium Section */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
       >
         <Card className="p-6 border-2 border-primary/40 bg-gradient-to-b from-card to-primary/5">
           <div className="text-center space-y-4">
@@ -380,8 +293,6 @@ export function QuizResults({ result }: QuizResultsProps) {
                 Get powerful tools to analyze, budget, and optimize your collection.
               </p>
             </div>
-            
-            {/* Feature List */}
             <div className="text-left max-w-md mx-auto space-y-2 py-4">
               {[
                 'Upload your actual portfolio for personalized insights',
@@ -399,7 +310,6 @@ export function QuizResults({ result }: QuizResultsProps) {
                 </div>
               ))}
             </div>
-
             <Link to="/auth">
               <Button size="lg" className="gap-2">
                 Sign Up
@@ -410,11 +320,8 @@ export function QuizResults({ result }: QuizResultsProps) {
         </Card>
       </motion.div>
 
-      {/* Final CTA */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9 }}
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
         className="text-center pt-4"
       >
         <Link to="/">
