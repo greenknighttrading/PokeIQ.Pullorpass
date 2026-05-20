@@ -82,7 +82,7 @@ export function QuizResults({ result }: QuizResultsProps) {
             Your Collector Personality
           </p>
           <h1 className="text-4xl font-bold text-foreground">
-            {info.emoji} The {result.type}
+            {info.emoji} The {safeType}
           </h1>
           <p className="text-lg text-primary italic">"{info.philosophy}"</p>
         </div>
