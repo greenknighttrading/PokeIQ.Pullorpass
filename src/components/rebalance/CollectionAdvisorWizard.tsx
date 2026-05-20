@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TrendingUp, Heart, Sparkles, Calendar, DollarSign, ArrowRight, Save, Settings2, Check, ArrowLeft } from 'lucide-react';
+import { TrendingUp, Heart, Sparkles, Calendar, DollarSign, ArrowRight, Save, Settings2, Check, ArrowLeft, Clock, Hourglass, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import {
@@ -22,24 +22,54 @@ type Timeline = 'short' | 'medium' | 'long';
 
 const BUDGET_PRESETS = [100, 250, 500, 1000];
 
-const GOAL_OPTIONS: { id: Goal; label: string; sub: string; icon: typeof TrendingUp }[] = [
+const ASSET_GOAL_OPTIONS: { id: Goal; label: string; sub: string; icon: typeof TrendingUp }[] = [
   { id: 'grow', label: 'Grow my money', sub: 'I want the best return over time', icon: TrendingUp },
   { id: 'both', label: 'Both — collect and invest', sub: 'I love the hobby and want smart picks', icon: Sparkles },
   { id: 'collect', label: 'Complete my collection', sub: 'I buy what I love, value is a bonus', icon: Heart },
 ];
 
-const TIMELINE_OPTIONS: { id: Timeline; label: string; sub: string }[] = [
+// Era-specific: 'collect' maps to vintage-heavy (conservative), 'grow' maps to current/ultra-modern (aggressive)
+const ERA_GOAL_OPTIONS: { id: Goal; label: string; sub: string; icon: typeof TrendingUp }[] = [
+  { id: 'collect', label: 'Vintage & nostalgia', sub: 'Base Set, Neo, e-Reader — proven scarcity', icon: Hourglass },
+  { id: 'both', label: 'A mix of old and new', sub: 'Spread across classic, modern, and recent sets', icon: Sparkles },
+  { id: 'grow', label: 'Newest releases & hype', sub: 'Chase current sets and ultra-modern chase cards', icon: Zap },
+];
+
+const ASSET_TIMELINE_OPTIONS: { id: Timeline; label: string; sub: string }[] = [
   { id: 'short', label: '1–2 years', sub: 'Short term' },
   { id: 'medium', label: '3–5 years', sub: 'Medium horizon' },
   { id: 'long', label: '5+ years', sub: 'Long-term store of value' },
 ];
 
-function resolvePreset(goal: Goal, timeline: Timeline): AllocationPreset {
+// Era-specific second question — reframed around era exposure preference rather than hold time
+const ERA_TIMELINE_OPTIONS: { id: Timeline; label: string; sub: string }[] = [
+  { id: 'short', label: 'Ride the current wave', sub: 'Lean into what\'s printing and hot right now' },
+  { id: 'medium', label: 'Balance reprint risk', sub: 'Spread across eras to avoid any one era\'s cycle' },
+  { id: 'long', label: 'Anchor in scarcity', sub: 'Tilt toward vintage and classic — supply only shrinks' },
+];
+
+function resolveAssetPreset(goal: Goal, timeline: Timeline): AllocationPreset {
   if (goal === 'collect') return 'conservative';
   if (goal === 'both') return 'balanced';
   // grow
   if (timeline === 'short') return 'aggressive';
   if (timeline === 'medium') return 'balanced'; // leaning aggressive
+  return 'balanced';
+}
+
+function resolveEraPreset(goal: Goal, timeline: Timeline): EraAllocationPreset {
+  // goal carries era-preference weight, timeline carries cycle stance
+  if (goal === 'collect') {
+    // vintage-leaning
+    return timeline === 'short' ? 'balanced' : 'conservative';
+  }
+  if (goal === 'grow') {
+    // newest-leaning
+    return timeline === 'long' ? 'balanced' : 'aggressive';
+  }
+  // mix
+  if (timeline === 'long') return 'conservative';
+  if (timeline === 'short') return 'aggressive';
   return 'balanced';
 }
 
@@ -78,8 +108,15 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
 
   const resolvedPreset = useMemo(() => {
     if (!goal || !timeline) return null;
-    return resolvePreset(goal, timeline);
-  }, [goal, timeline]);
+    return mode === 'era' ? resolveEraPreset(goal, timeline) : resolveAssetPreset(goal, timeline);
+  }, [goal, timeline, mode]);
+
+  const goalOptions = mode === 'era' ? ERA_GOAL_OPTIONS : ASSET_GOAL_OPTIONS;
+  const timelineOptions = mode === 'era' ? ERA_TIMELINE_OPTIONS : ASSET_TIMELINE_OPTIONS;
+  const step1Title = mode === 'era' ? 'Which era excites you most?' : "What's your goal?";
+  const step1Sub = mode === 'era' ? 'Pick the era vibe you want more of.' : 'Pick what matters most to you.';
+  const step2Title = mode === 'era' ? 'How do you see the market?' : "What's your timeline?";
+  const step2Sub = mode === 'era' ? 'Your stance on reprints and release cycles.' : 'How long are you planning to hold?';
 
   // Build plan rows (current vs target, gap, monthly allocation)
   const plan = useMemo(() => {
@@ -230,10 +267,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
             exit={{ opacity: 0, y: -8 }}
             className="glass-card p-5 sm:p-6"
           >
-            <h2 className="text-lg font-semibold text-foreground mb-1">What's your goal?</h2>
-            <p className="text-xs text-muted-foreground mb-5">Pick what matters most to you.</p>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{step1Title}</h2>
+            <p className="text-xs text-muted-foreground mb-5">{step1Sub}</p>
             <div className="space-y-2">
-              {GOAL_OPTIONS.map(opt => {
+              {goalOptions.map(opt => {
                 const Icon = opt.icon;
                 return (
                   <button
@@ -271,10 +308,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
             >
               <ArrowLeft className="w-3 h-3" /> Back
             </button>
-            <h2 className="text-lg font-semibold text-foreground mb-1">What's your timeline?</h2>
-            <p className="text-xs text-muted-foreground mb-5">How long are you planning to hold?</p>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{step2Title}</h2>
+            <p className="text-xs text-muted-foreground mb-5">{step2Sub}</p>
             <div className="space-y-2">
-              {TIMELINE_OPTIONS.map(opt => (
+              {timelineOptions.map(opt => (
                 <button
                   key={opt.id}
                   onClick={() => handleSelectTimeline(opt.id)}
