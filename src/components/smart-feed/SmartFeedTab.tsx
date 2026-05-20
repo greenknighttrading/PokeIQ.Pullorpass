@@ -208,7 +208,7 @@ function PersonalizedSetsSnapshot({ items, topSets7d }: { items: any[]; topSets7
   }, [items, topSets7d]);
 
   return (
-    <div className="glass-card rounded-xl p-2 flex flex-col">
+    <div className="glass-card rounded-xl p-2 flex flex-col h-full">
       <div className="flex items-center gap-2 mb-1">
         <Layers className="w-3.5 h-3.5 text-primary" />
         <span className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Your Sets · 7D Gain</span>
