@@ -141,7 +141,21 @@ export function buildPortfolioReportHtml({
     return 'politician';
   };
 
-  const archetypeData: Record<string, {
+  // Map portfolio-derived archetype keys to the 9 PokeIQ personality profiles.
+  const OLD_TO_NEW_TYPE: Record<string, PersonalityType> = {
+    sentinel: 'Investor',
+    politician: 'Diplomat',
+    purist: 'Dreamer',
+    hustler: 'Flipper',
+    archivist: 'Archivist',
+    wayfinder: 'Explorer',
+    cartographer: 'Curator',
+    keystone: 'Hunter',
+    pathbreaker: 'Hunter',
+    detective: 'Analyst',
+  };
+
+  type ArchetypeDisplay = {
     emoji: string;
     name: string;
     subtitle: string;
@@ -150,108 +164,26 @@ export function buildPortfolioReportHtml({
     whatItSays: string;
     coreStrength: string;
     tradeOff: string;
-  }> = {
-    sentinel: {
-      emoji: '🛡️',
-      name: 'The Sentinel',
-      subtitle: 'A patient guardian of value, confident that time is ultimately the edge.',
-      role: '',
-      howTheyCollect: ['Sealed-heavy', 'Broad spread across products', 'Low turnover, long holds'],
-      whatItSays: "You're calm, patient, and unreactive. You don't feel pressure to constantly act, and you trust that time is your strongest ally. While others chase momentum, you stand watch. You believe the best moves are often the ones you don't make.",
-      coreStrength: 'Discipline',
-      tradeOff: 'Liquidity and speed'
-    },
-    politician: {
-      emoji: '🗳️',
-      name: 'The Politician',
-      subtitle: 'A master negotiator.',
-      role: 'Master of balance and negotiation',
-      howTheyCollect: ['Even mix of sealed, slabs, and raw', 'Flexible positioning', 'Willing to adjust allocations over time'],
-      whatItSays: "You're pragmatic and adaptable. You don't fall in love with absolutes — you manage trade-offs. You like having options and leverage, and you're comfortable shifting when conditions change. You win by staying reasonable when others polarize.",
-      coreStrength: 'Resilience',
-      tradeOff: 'Rarely all-in on one idea'
-    },
-    purist: {
-      emoji: '🔥',
-      name: 'The Purist',
-      subtitle: 'A devotee of conviction.',
-      role: 'Devotee of conviction and aesthetics',
-      howTheyCollect: ['Raw- and slab-heavy', 'Strong attachment to specific Pokémon, artists, or themes', 'Less concern for optimization'],
-      whatItSays: "You collect with your gut. You care about how a card feels, not just how it performs. Volatility doesn't scare you because belief matters more than comfort. Your collection is personal — and that's the point.",
-      coreStrength: 'Authentic conviction',
-      tradeOff: 'Higher variance'
-    },
-    hustler: {
-      emoji: '💼',
-      name: 'The Hustler',
-      subtitle: 'A grinding operator.',
-      role: 'Operator of volume and repetition',
-      howTheyCollect: ['Many positions', 'Smaller average position size', 'Frequent activity and turnover'],
-      whatItSays: "You trust process over perfection. You're comfortable grinding edges and stacking small wins. You don't need every move to be a home run — consistency is your weapon. You stay active while others overthink.",
-      coreStrength: 'Momentum through action',
-      tradeOff: 'Burnout and thin margins'
-    },
-    archivist: {
-      emoji: '📜',
-      name: 'The Archivist',
-      subtitle: 'A keeper of history.',
-      role: 'Keeper of history',
-      howTheyCollect: ['Vintage and early-era focus', 'Long hold times', 'Low exposure to current hype'],
-      whatItSays: "You value permanence. You're drawn to cards that have already proven their place in the canon. You're less interested in what's next and more interested in what lasts. Your collection feels like a library, not a trading desk.",
-      coreStrength: 'Stability',
-      tradeOff: 'Slower growth cycles'
-    },
-    wayfinder: {
-      emoji: '🧭',
-      name: 'The Wayfinder',
-      subtitle: 'A navigator of trends.',
-      role: 'Navigator of shifting terrain',
-      howTheyCollect: ['Newer sets and rising cards', 'Shorter-to-medium holds', 'Attention-aware positioning'],
-      whatItSays: "You read the room well. You understand that value follows attention, and you're comfortable moving with it. You don't fight the tide — you learn how to travel it.",
-      coreStrength: 'Timing',
-      tradeOff: 'Volatility exposure'
-    },
-    cartographer: {
-      emoji: '🗺️',
-      name: 'The Cartographer',
-      subtitle: 'A mapper of worlds.',
-      role: 'Mapper of worlds',
-      howTheyCollect: ['Deep focus on specific sets or eras', 'High internal coherence', 'Completion-oriented behavior'],
-      whatItSays: "You like understanding the whole picture. Finishing something matters to you. Your collection feels intentional and structured — not random. You collect systems, not just cards.",
-      coreStrength: 'Coherence',
-      tradeOff: 'Concentration risk'
-    },
-    keystone: {
-      emoji: '🧱',
-      name: 'The Keystone',
-      subtitle: 'A foundation builder.',
-      role: 'Foundation builder',
-      howTheyCollect: ['Iconic Pokémon and blue-chip cards', 'Cross-era anchors', 'Low turnover, high confidence'],
-      whatItSays: "You build around pieces meant to last. You want your collection to hold weight — emotionally and structurally. Everything else connects back to a few central pillars.",
-      coreStrength: 'Endurance',
-      tradeOff: 'Less experimentation'
-    },
-    pathbreaker: {
-      emoji: '🚩',
-      name: 'The Pathbreaker',
-      subtitle: 'A pioneer of belief.',
-      role: 'Pioneer of belief',
-      howTheyCollect: ['Few, highly concentrated positions', 'Early or contrarian bets', 'Strong personal thesis'],
-      whatItSays: "You're comfortable standing alone. You don't need consensus to act — you need belief. You accept being early, even wrong for a while, because you trust where the road leads.",
-      coreStrength: 'Asymmetry',
-      tradeOff: 'Drawdowns before payoff'
-    },
-    detective: {
-      emoji: '🕵️',
-      name: 'The Detective',
-      subtitle: 'A seeker of hidden signals.',
-      role: 'Seeker of hidden signals',
-      howTheyCollect: ['Under-the-radar sets and cards', 'Long quiet holds', 'Low hype exposure'],
-      whatItSays: "You notice details others miss. You're curious, observant, and patient. You don't need validation right away — discovery is the reward. When something finally clicks, you're already there.",
-      coreStrength: 'Early insight',
-      tradeOff: 'Long waits for recognition'
-    }
   };
+
+  const archetypeData: Record<string, ArchetypeDisplay> = Object.keys(OLD_TO_NEW_TYPE).reduce(
+    (acc, key) => {
+      const type = OLD_TO_NEW_TYPE[key];
+      const info = PERSONALITY_INFO[type];
+      acc[key] = {
+        emoji: info.emoji,
+        name: `The ${type}`,
+        subtitle: info.tagline,
+        role: '',
+        howTheyCollect: info.collectionStyle,
+        whatItSays: `${info.fullProfile.coreIdentity} ${info.fullProfile.collectingMindset}`,
+        coreStrength: info.strength.replace(/\.$/, ''),
+        tradeOff: info.weakness.replace(/\.$/, ''),
+      };
+      return acc;
+    },
+    {} as Record<string, ArchetypeDisplay>,
+  );
 
   const generateArchetypeSection = () => {
     const archetypeKey = getCollectorArchetype();
