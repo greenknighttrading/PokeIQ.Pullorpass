@@ -267,10 +267,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
             exit={{ opacity: 0, y: -8 }}
             className="glass-card p-5 sm:p-6"
           >
-            <h2 className="text-lg font-semibold text-foreground mb-1">What's your goal?</h2>
-            <p className="text-xs text-muted-foreground mb-5">Pick what matters most to you.</p>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{step1Title}</h2>
+            <p className="text-xs text-muted-foreground mb-5">{step1Sub}</p>
             <div className="space-y-2">
-              {GOAL_OPTIONS.map(opt => {
+              {goalOptions.map(opt => {
                 const Icon = opt.icon;
                 return (
                   <button
@@ -308,10 +308,10 @@ export function CollectionAdvisorWizard({ mode, onCustomize }: Props) {
             >
               <ArrowLeft className="w-3 h-3" /> Back
             </button>
-            <h2 className="text-lg font-semibold text-foreground mb-1">What's your timeline?</h2>
-            <p className="text-xs text-muted-foreground mb-5">How long are you planning to hold?</p>
+            <h2 className="text-lg font-semibold text-foreground mb-1">{step2Title}</h2>
+            <p className="text-xs text-muted-foreground mb-5">{step2Sub}</p>
             <div className="space-y-2">
-              {TIMELINE_OPTIONS.map(opt => (
+              {timelineOptions.map(opt => (
                 <button
                   key={opt.id}
                   onClick={() => handleSelectTimeline(opt.id)}
