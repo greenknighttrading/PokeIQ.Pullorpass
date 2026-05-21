@@ -5,6 +5,7 @@ import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { TrendingUp } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface Snapshot {
   snapshot_date: string;
@@ -12,9 +13,14 @@ interface Snapshot {
   total_cost_basis: number;
 }
 
+type Range = '30d' | '90d' | '1y';
+const RANGE_DAYS: Record<Range, number> = { '30d': 30, '90d': 90, '1y': 365 };
+const RANGE_LABELS: Record<Range, string> = { '30d': '30D', '90d': '90D', '1y': '1Y' };
+
 export function PortfolioValueChart() {
   const { items, summary, priceMatchDetails } = usePortfolio();
   const [dbSnapshots, setDbSnapshots] = useState<Snapshot[]>([]);
+  const [range, setRange] = useState<Range>('30d');
 
   // Build historical portfolio value by summing per-item historical prices.
   // Uses each card's latest market_snapshots row (price + price_change_7d/30d/90d)
