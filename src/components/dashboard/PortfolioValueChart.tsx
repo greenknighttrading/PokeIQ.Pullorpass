@@ -16,7 +16,9 @@ export function PortfolioValueChart() {
   const { items, summary, priceMatchDetails } = usePortfolio();
   const [dbSnapshots, setDbSnapshots] = useState<Snapshot[]>([]);
 
-  // Fetch historical snapshots; seed today's with live prices if edge function hasn't run
+  // Build historical portfolio value by summing per-item historical prices.
+  // Uses each card's latest market_snapshots row (price + price_change_7d/30d/90d)
+  // to derive prices 7d/30d/90d ago, then sums across the collection.
   useEffect(() => {
     if (!items.length || !summary) return;
 
@@ -25,20 +27,15 @@ export function PortfolioValueChart() {
       if (!session?.user) return;
       const userId = session.user.id;
       const today = new Date().toISOString().split('T')[0];
+      const totalCost = Math.round(summary.totalCostBasis);
 
-      // Fetch all snapshots
-      const { data } = await supabase
-        .from('portfolio_value_snapshots')
-        .select('snapshot_date, total_market_value, total_cost_basis')
-        .eq('user_id', userId)
-        .order('snapshot_date', { ascending: true });
-
-      const snapshots = (data ?? []) as Snapshot[];
-
-      // Always recalculate today's value with latest market prices
-      // Build tcgplayer_id map from priceMatchDetails
+      // Map item.id -> tcgplayer_id, and item.id -> quantity
       const itemTcgMap = new Map<string, string>();
+      const qtyMap = new Map<string, number>();
       const allTcgIds: string[] = [];
+      for (const item of items as any[]) {
+        qtyMap.set(item.id, item.quantity || 1);
+      }
       if (priceMatchDetails) {
         for (const detail of priceMatchDetails) {
           if (detail.tcgplayerId && detail.confidence !== 'none') {
@@ -48,11 +45,17 @@ export function PortfolioValueChart() {
         }
       }
 
-      // Fetch live prices for matched items — use the latest snapshot date
-      const priceMap = new Map<string, number>();
+      // Fetch latest market_snapshots row per tcgplayer_id (includes change%)
+      type Snap = {
+        tcgplayer_id: string;
+        price: number | null;
+        price_change_7d: number | null;
+        price_change_30d: number | null;
+        price_change_90d: number | null;
+      };
+      const snapByTcg = new Map<string, Snap>();
       const uniqueTcgIds = [...new Set(allTcgIds)];
       if (uniqueTcgIds.length > 0) {
-        // Get the latest snapshot date first
         const { data: latestRow } = await supabase
           .from('market_snapshots')
           .select('snapshot_date')
@@ -61,53 +64,91 @@ export function PortfolioValueChart() {
           .single();
         const latestDate = latestRow?.snapshot_date || today;
 
-        for (let i = 0; i < uniqueTcgIds.length; i += 50) {
-          const chunk = uniqueTcgIds.slice(i, i + 50);
+        for (let i = 0; i < uniqueTcgIds.length; i += 100) {
+          const chunk = uniqueTcgIds.slice(i, i + 100);
           const { data: pData } = await supabase
             .from('market_snapshots')
-            .select('tcgplayer_id, price')
+            .select('tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d')
             .in('tcgplayer_id', chunk)
             .eq('snapshot_date', latestDate)
             .not('price', 'is', null);
-          for (const p of pData ?? []) {
-            if (p.tcgplayer_id && p.price) priceMap.set(p.tcgplayer_id, Number(p.price));
+          for (const p of (pData ?? []) as Snap[]) {
+            if (p.tcgplayer_id) snapByTcg.set(p.tcgplayer_id, p);
           }
         }
       }
 
-      // Calculate total with live prices for matched, stored for unmatched
-      let totalMarketValue = 0;
-      for (const item of items as any[]) {
-        const qty = item.quantity || 1;
-        const tcgId = itemTcgMap.get(item.id);
-        const livePrice = tcgId ? priceMap.get(tcgId) ?? null : null;
-        totalMarketValue += (livePrice ?? item.marketPrice ?? 0) * qty;
+      // For each anchor offset, sum portfolio value across all items.
+      // For matched items: price_then = price_now / (1 + pctChange/100).
+      // For unmatched items: use stored marketPrice constant.
+      const anchors: { daysAgo: number; field: keyof Snap | null }[] = [
+        { daysAgo: 90, field: 'price_change_90d' },
+        { daysAgo: 30, field: 'price_change_30d' },
+        { daysAgo: 7, field: 'price_change_7d' },
+        { daysAgo: 0, field: null },
+      ];
+
+      const series: Snapshot[] = [];
+      for (const a of anchors) {
+        let total = 0;
+        for (const item of items as any[]) {
+          const qty = qtyMap.get(item.id) || 1;
+          const tcgId = itemTcgMap.get(item.id);
+          const snap = tcgId ? snapByTcg.get(tcgId) : undefined;
+          const priceNow = snap?.price != null ? Number(snap.price) : (item.marketPrice ?? 0);
+          let priceThen = priceNow;
+          if (snap && a.field) {
+            const pct = snap[a.field] as number | null;
+            if (pct != null && Number.isFinite(Number(pct))) {
+              const denom = 1 + Number(pct) / 100;
+              if (denom > 0.01) priceThen = priceNow / denom;
+            }
+          }
+          total += priceThen * qty;
+        }
+        const d = new Date();
+        d.setDate(d.getDate() - a.daysAgo);
+        series.push({
+          snapshot_date: d.toISOString().split('T')[0],
+          total_market_value: Math.round(total),
+          total_cost_basis: totalCost,
+        });
       }
 
-      const valueToStore = Math.round(totalMarketValue);
+      // Merge in any real stored portfolio snapshots (overrides derived points for same date)
+      const { data: stored } = await supabase
+        .from('portfolio_value_snapshots')
+        .select('snapshot_date, total_market_value, total_cost_basis')
+        .eq('user_id', userId)
+        .order('snapshot_date', { ascending: true });
 
+      const byDate = new Map<string, Snapshot>();
+      for (const s of series) byDate.set(s.snapshot_date, s);
+      for (const s of (stored ?? []) as Snapshot[]) {
+        byDate.set(s.snapshot_date, {
+          snapshot_date: s.snapshot_date,
+          total_market_value: Number(s.total_market_value),
+          total_cost_basis: Number(s.total_cost_basis),
+        });
+      }
+
+      const merged = [...byDate.values()].sort((a, b) =>
+        a.snapshot_date.localeCompare(b.snapshot_date)
+      );
+
+      // Persist today's value
+      const todayVal = byDate.get(today)?.total_market_value ?? series[series.length - 1].total_market_value;
       await supabase
         .from('portfolio_value_snapshots')
         .upsert({
           user_id: userId,
           snapshot_date: today,
-          total_market_value: valueToStore,
-          total_cost_basis: Math.round(summary.totalCostBasis),
+          total_market_value: todayVal,
+          total_cost_basis: totalCost,
           item_count: items.length,
         }, { onConflict: 'user_id,snapshot_date' });
 
-      // Update or add today's entry in the snapshots array
-      const todayIdx = snapshots.findIndex(s => s.snapshot_date === today);
-      const todayEntry = { snapshot_date: today, total_market_value: valueToStore, total_cost_basis: Math.round(summary.totalCostBasis) };
-      if (todayIdx >= 0) {
-        snapshots[todayIdx] = todayEntry;
-      } else {
-        snapshots.push(todayEntry);
-      }
-
-      if (snapshots.length > 0) {
-        setDbSnapshots(snapshots);
-      }
+      setDbSnapshots(merged);
     };
 
     run();
