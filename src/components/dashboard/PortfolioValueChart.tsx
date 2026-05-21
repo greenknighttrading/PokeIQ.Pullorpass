@@ -177,7 +177,13 @@ export function PortfolioValueChart() {
   const chartData = useMemo(() => {
     // If we have DB snapshots, use them
     if (dbSnapshots.length >= 2) {
-      return dbSnapshots.map(s => ({
+      const cutoff = new Date();
+      cutoff.setHours(0, 0, 0, 0);
+      cutoff.setDate(cutoff.getDate() - RANGE_DAYS[range]);
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      return dbSnapshots
+        .filter(s => s.snapshot_date >= cutoffStr)
+        .map(s => ({
         month: s.snapshot_date,
         label: format(parseISO(s.snapshot_date), 'MMM d'),
         value: Math.round(s.total_market_value),
@@ -272,7 +278,7 @@ export function PortfolioValueChart() {
     }
 
     return result;
-  }, [items, summary, dbSnapshots]);
+  }, [items, summary, dbSnapshots, range]);
 
   if (chartData.length < 2) return null;
 
@@ -288,11 +294,29 @@ export function PortfolioValueChart() {
           <TrendingUp className="w-4 h-4 text-primary" />
           <h3 className="font-semibold text-sm text-foreground">Collection Value Over Time</h3>
         </div>
-        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-          isPositive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
-        }`}>
-          {isPositive ? '+' : ''}{growthPct}%
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1">
+            {(Object.keys(RANGE_LABELS) as Range[]).map(r => (
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={cn(
+                  'px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors',
+                  range === r
+                    ? 'bg-primary/15 text-primary border border-primary/40'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/30 border border-transparent'
+                )}
+              >
+                {RANGE_LABELS[r]}
+              </button>
+            ))}
+          </div>
+          <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+            isPositive ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
+          }`}>
+            {isPositive ? '+' : ''}{growthPct}%
+          </span>
+        </div>
       </div>
 
       <div className="h-48 sm:h-56">
