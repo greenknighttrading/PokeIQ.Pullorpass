@@ -84,36 +84,49 @@ export function PortfolioValueChart() {
         }
       }
 
-      // For each anchor offset, sum portfolio value across all items.
-      // For matched items: price_then = price_now / (1 + pctChange/100).
-      // For unmatched items: use stored marketPrice constant.
-      const anchors: { daysAgo: number; field: keyof Snap | null }[] = [
-        { daysAgo: 90, field: 'price_change_90d' },
-        { daysAgo: 30, field: 'price_change_30d' },
-        { daysAgo: 7, field: 'price_change_7d' },
-        { daysAgo: 0, field: null },
-      ];
+      // Build per-item anchor prices (today, -7d, -30d, -90d) then linearly
+      // interpolate a daily price for each item across the last 365 days,
+      // and sum across the collection to get a daily portfolio value series.
+      type ItemAnchors = { qty: number; p0: number; p7: number; p30: number; p90: number };
+      const itemAnchors: ItemAnchors[] = [];
+      for (const item of items as any[]) {
+        const qty = qtyMap.get(item.id) || 1;
+        const tcgId = itemTcgMap.get(item.id);
+        const snap = tcgId ? snapByTcg.get(tcgId) : undefined;
+        const p0 = snap?.price != null ? Number(snap.price) : (item.marketPrice ?? 0);
+        const derive = (pct: number | null | undefined) => {
+          if (pct == null || !Number.isFinite(Number(pct))) return p0;
+          const denom = 1 + Number(pct) / 100;
+          if (denom <= 0.01) return p0;
+          return p0 / denom;
+        };
+        itemAnchors.push({
+          qty,
+          p0,
+          p7: snap ? derive(snap.price_change_7d) : p0,
+          p30: snap ? derive(snap.price_change_30d) : p0,
+          p90: snap ? derive(snap.price_change_90d) : p0,
+        });
+      }
+
+      // Linear interpolation by daysAgo using the 4 anchors.
+      const priceAt = (a: ItemAnchors, daysAgo: number): number => {
+        const d = Math.max(0, daysAgo);
+        if (d <= 0) return a.p0;
+        if (d <= 7) return a.p0 + (a.p7 - a.p0) * (d / 7);
+        if (d <= 30) return a.p7 + (a.p30 - a.p7) * ((d - 7) / 23);
+        if (d <= 90) return a.p30 + (a.p90 - a.p30) * ((d - 30) / 60);
+        return a.p90; // beyond 90d we hold flat (no data available)
+      };
 
       const series: Snapshot[] = [];
-      for (const a of anchors) {
+      const today0 = new Date();
+      today0.setHours(0, 0, 0, 0);
+      for (let daysAgo = 365; daysAgo >= 0; daysAgo--) {
         let total = 0;
-        for (const item of items as any[]) {
-          const qty = qtyMap.get(item.id) || 1;
-          const tcgId = itemTcgMap.get(item.id);
-          const snap = tcgId ? snapByTcg.get(tcgId) : undefined;
-          const priceNow = snap?.price != null ? Number(snap.price) : (item.marketPrice ?? 0);
-          let priceThen = priceNow;
-          if (snap && a.field) {
-            const pct = snap[a.field] as number | null;
-            if (pct != null && Number.isFinite(Number(pct))) {
-              const denom = 1 + Number(pct) / 100;
-              if (denom > 0.01) priceThen = priceNow / denom;
-            }
-          }
-          total += priceThen * qty;
-        }
-        const d = new Date();
-        d.setDate(d.getDate() - a.daysAgo);
+        for (const a of itemAnchors) total += priceAt(a, daysAgo) * a.qty;
+        const d = new Date(today0);
+        d.setDate(d.getDate() - daysAgo);
         series.push({
           snapshot_date: d.toISOString().split('T')[0],
           total_market_value: Math.round(total),
