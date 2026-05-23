@@ -409,8 +409,8 @@ export default function PokeYelp() {
   return (
     <>
       <Seo
-        title="Earn — Train PokeIQ, Unlock Swipes & Premium | PokeIQ"
-        description="Help train PokeIQ. Your reviews personalize recommendations, unlock more PullOrPass swipes, and earn PokeIQ Premium."
+        title="Earn Credits — Train PokeIQ, Unlock Swipes & Premium | PokeIQ"
+        description="Help train PokeIQ. Your reviews personalize recommendations, unlock more Pull or Pass swipes, and earn PokeIQ Premium."
       />
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
@@ -419,7 +419,7 @@ export default function PokeYelp() {
           {/* Header */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
+              <h1 className="text-2xl font-bold text-foreground">Earn Credits — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
                 Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
                 {todaysMode && todaysRemaining != null && todaysRemaining > 0 && ` · ${todaysRemaining} of today's swipes left to tag`}

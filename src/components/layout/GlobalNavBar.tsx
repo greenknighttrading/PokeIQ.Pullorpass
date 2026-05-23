@@ -67,13 +67,13 @@ export function GlobalNavBar({
 
   const personalityItems = [
     { label: 'Personality Test', href: '/test', icon: Sparkles },
-    { label: 'All 12 Types', href: '/personality-types', icon: Users },
+    { label: 'Collector Types', href: '/personality-types', icon: Users },
   ];
 
   const discoverItems = [
-    { label: 'PULLorPASS', href: '/swipe', icon: Heart },
+    { label: 'Pull or Pass', href: '/swipe', icon: Heart },
     { label: 'Matches', href: '/matches', icon: Heart },
-    { label: 'Earn', href: '/earn', icon: MessageSquare },
+    { label: 'Earn Credits', href: '/earn', icon: MessageSquare },
   ];
 
   const toolsItems = [
