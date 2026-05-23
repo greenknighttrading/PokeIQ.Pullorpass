@@ -122,14 +122,14 @@ export default function PersonalityTypes() {
                             {type}
                           </h3>
                         </div>
-                        <p className="text-sm italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem] mb-0">
+                        <p className="text-base italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem] mb-1">
                           "{t.philosophy}"
                         </p>
                       </div>
                     </div>
 
                     <div className="px-4 pt-1 pb-4">
-                      <p className="text-[13px] leading-relaxed text-foreground/80 line-clamp-3 min-h-[4.2rem]">
+                      <p className="text-base leading-relaxed text-foreground/80 line-clamp-3 min-h-[4.2rem]">
                         {t.tagline}
                       </p>
                     </div>
