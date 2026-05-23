@@ -391,8 +391,8 @@ export default function PokeYelp() {
   return (
     <>
       <Seo
-        title="PokeYelp — Review Pokémon Cards, Earn Credits | PokeIQ"
-        description="Tag and review random Pokémon cards. Help build the most accurate community database and earn PokeIQ credits as you go."
+        title="Earn — Train PokeIQ, Unlock Swipes & Premium | PokeIQ"
+        description="Help train PokeIQ. Your reviews personalize recommendations, unlock more PullOrPass swipes, and earn PokeIQ Premium."
       />
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
@@ -401,11 +401,10 @@ export default function PokeYelp() {
           {/* Header */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">PokeYelp</h1>
+              <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
-                {packGainsMode
-                  ? `Reviewing Pack Gains sets first${packGainsRemaining != null ? ` · ${packGainsRemaining} left` : ''}`
-                  : 'Tap any AI tag that fits. Earn 1 credit per card reviewed.'}
+                Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
+                {packGainsMode && packGainsRemaining != null && ` · ${packGainsRemaining} priority cards left`}
               </p>
             </div>
             <div className="flex items-center gap-2">
