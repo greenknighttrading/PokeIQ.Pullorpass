@@ -55,6 +55,7 @@ const SealedVsCards = lazy(() => import("./pages/tools/SealedVsCards"));
 const PackGainsCalculator = lazy(() => import("./pages/PackGainsCalculator"));
 const MintdDaily = lazy(() => import("./pages/MintdDaily"));
 const PullOrPass = lazy(() => import("./pages/PullOrPass"));
+const PokeYelp = lazy(() => import("./pages/PokeYelp"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
@@ -116,6 +117,7 @@ function AppRoutes() {
         <Route path="/tools/sealed-vs-cards" element={<SealedVsCards />} />
         <Route path="/pack-gains" element={<PackGainsCalculator />} />
         <Route path="/swipe" element={<PullOrPass />} />
+        <Route path="/pokeyelp" element={<PokeYelp />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />

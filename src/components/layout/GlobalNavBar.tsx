@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart } from 'lucide-react';
+import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
@@ -64,6 +64,7 @@ export function GlobalNavBar({
     { label: 'My Portfolio', href: '/home', icon: TrendingUp, requiresAuth: false },
     { label: 'Pack Gains', href: '/pack-gains', icon: Package, requiresAuth: false },
     { label: 'PULLorPASS', href: '/swipe', icon: Heart, requiresAuth: false },
+    { label: 'PokeYelp', href: '/pokeyelp', icon: MessageSquare, requiresAuth: false },
     { label: 'Personality Test', href: '/test', icon: Sparkles, requiresAuth: false },
   ];
 
