@@ -115,7 +115,9 @@ export default function PokeYelp() {
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
   const [comment, setComment] = useState('');
-  const [reviewedCount, setReviewedCount] = useState(0);
+  const [reviewedCount, setReviewedCount] = useState<number>(() => {
+    try { return Number(localStorage.getItem('earn_reviews_total') || '0'); } catch { return 0; }
+  });
   const [imgErr, setImgErr] = useState(false);
 
   // Filters
@@ -719,18 +721,18 @@ export default function PokeYelp() {
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
                   <Button onClick={submit} className="flex-[2] gap-1.5">
-                    <Coins className="w-4 h-4" />
-                    Submit (+1 credit)
+                    <Sparkles className="w-4 h-4" />
+                    Train PokeIQ
                   </Button>
                 </div>
 
                 {!userId && (
                   <Card className="p-4 border-primary/40 bg-primary/5 text-center">
                     <p className="text-xs text-muted-foreground mb-2">
-                      Sign up to keep your credits and track your contributions.
+                      Sign up to save your contributions, unlock swipe bonuses, and earn PokeIQ Premium.
                     </p>
                     <Button onClick={() => navigate('/auth')} size="sm" className="gap-1.5">
-                      <LogIn className="w-3.5 h-3.5" /> Sign up to earn credits
+                      <LogIn className="w-3.5 h-3.5" /> Sign up to start earning
                     </Button>
                   </Card>
                 )}
