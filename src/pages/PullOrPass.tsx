@@ -96,8 +96,9 @@ export default function PullOrPass() {
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
-  const remaining = Math.max(0, dailyLimit - quota.used);
-  const outOfSwipes = remaining <= 0;
+  const premium = isPremiumActive();
+  const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = !premium && remaining <= 0;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -115,18 +116,15 @@ export default function PullOrPass() {
     } else {
       loadRound();
     }
-    // Detect PokéYelp completion for bonus swipes
-    try {
-      const yelp = localStorage.getItem('pokeyelp_done_' + todayKey());
-      if (yelp) {
-        setQuota((q) => {
-          if (q.bonus >= POKEYELP_BONUS) return q;
-          const next = { ...q, bonus: POKEYELP_BONUS };
-          writeQuota(next);
-          return next;
-        });
-      }
-    } catch {}
+    // Bonus swipes are written directly into pop_quota by the Earn page
+    // (every 20 reviews → +10 swipes). Refresh on focus to pick them up.
+    const refresh = () => setQuota(readQuota());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, []);
 
   // Persist in-progress round so users can leave and come back
