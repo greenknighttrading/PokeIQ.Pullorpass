@@ -12,6 +12,42 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PACK_ODDS_REGISTRY } from '@/lib/packOdds';
 
+// ── Reward constants ────────────────────────────────────
+// Every 20 reviews → +10 PullOrPass swipes
+// Every 200 reviews → 30 days of PokeIQ Premium (unlimited swipes + premium features)
+const REVIEWS_PER_SWIPE_BATCH = 20;
+const SWIPES_PER_BATCH = 10;
+const REVIEWS_FOR_PREMIUM = 200;
+const PREMIUM_DAYS = 30;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function grantSwipeBonus(amount: number) {
+  try {
+    const raw = localStorage.getItem('pop_quota');
+    const today = todayKey();
+    const q = raw ? JSON.parse(raw) : null;
+    const fresh = !q || q.date !== today;
+    const next = {
+      date: today,
+      used: fresh ? 0 : (q.used ?? 0),
+      bonus: (fresh ? 0 : (q.bonus ?? 0)) + amount,
+      lifetime: q?.lifetime ?? 0,
+    };
+    localStorage.setItem('pop_quota', JSON.stringify(next));
+  } catch {}
+}
+
+function grantPremium(days: number) {
+  try {
+    const until = Date.now() + days * 24 * 60 * 60 * 1000;
+    localStorage.setItem('pokeiq_premium_until', String(until));
+  } catch {}
+}
+
 // Cards from Pack Gains sets (only "hit" rarities — i.e. not the no-hit baseline)
 const PACK_GAINS_SETS = PACK_ODDS_REGISTRY.map((p) => p.setName);
 const PACK_GAINS_HIT_RARITIES = Array.from(
