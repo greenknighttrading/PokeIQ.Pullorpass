@@ -64,7 +64,7 @@ export function GlobalNavBar({
     { label: 'My Portfolio', href: '/home', icon: TrendingUp, requiresAuth: false },
     { label: 'Pack Gains', href: '/pack-gains', icon: Package, requiresAuth: false },
     { label: 'PULLorPASS', href: '/swipe', icon: Heart, requiresAuth: false },
-    { label: 'PokeYelp', href: '/pokeyelp', icon: MessageSquare, requiresAuth: false },
+    { label: 'Earn', href: '/earn', icon: MessageSquare, requiresAuth: false },
     { label: 'Personality Test', href: '/test', icon: Sparkles, requiresAuth: false },
   ];
 

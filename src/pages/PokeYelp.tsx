@@ -12,6 +12,42 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PACK_ODDS_REGISTRY } from '@/lib/packOdds';
 
+// ── Reward constants ────────────────────────────────────
+// Every 20 reviews → +10 PullOrPass swipes
+// Every 200 reviews → 30 days of PokeIQ Premium (unlimited swipes + premium features)
+const REVIEWS_PER_SWIPE_BATCH = 20;
+const SWIPES_PER_BATCH = 10;
+const REVIEWS_FOR_PREMIUM = 200;
+const PREMIUM_DAYS = 30;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function grantSwipeBonus(amount: number) {
+  try {
+    const raw = localStorage.getItem('pop_quota');
+    const today = todayKey();
+    const q = raw ? JSON.parse(raw) : null;
+    const fresh = !q || q.date !== today;
+    const next = {
+      date: today,
+      used: fresh ? 0 : (q.used ?? 0),
+      bonus: (fresh ? 0 : (q.bonus ?? 0)) + amount,
+      lifetime: q?.lifetime ?? 0,
+    };
+    localStorage.setItem('pop_quota', JSON.stringify(next));
+  } catch {}
+}
+
+function grantPremium(days: number) {
+  try {
+    const until = Date.now() + days * 24 * 60 * 60 * 1000;
+    localStorage.setItem('pokeiq_premium_until', String(until));
+  } catch {}
+}
+
 // Cards from Pack Gains sets (only "hit" rarities — i.e. not the no-hit baseline)
 const PACK_GAINS_SETS = PACK_ODDS_REGISTRY.map((p) => p.setName);
 const PACK_GAINS_HIT_RARITIES = Array.from(
@@ -79,7 +115,9 @@ export default function PokeYelp() {
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
   const [comment, setComment] = useState('');
-  const [reviewedCount, setReviewedCount] = useState(0);
+  const [reviewedCount, setReviewedCount] = useState<number>(() => {
+    try { return Number(localStorage.getItem('earn_reviews_total') || '0'); } catch { return 0; }
+  });
   const [imgErr, setImgErr] = useState(false);
 
   // Filters
@@ -286,8 +324,8 @@ export default function PokeYelp() {
         } catch { /* ignore */ }
         if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
       }
-      toast.message('Sign up to earn PokeIQ credits', {
-        description: 'Your review will not be saved without an account.',
+      toast.message('Sign up to keep training PokeIQ', {
+        description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
       });
       nextCard();
@@ -323,14 +361,34 @@ export default function PokeYelp() {
     await supabase.from('pokeiq_credits').upsert({
       user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
     });
-    toast.success('+1 PokeIQ credit');
-    setReviewedCount((c) => c + 1);
-    // Unlock +20 PullOrPass swipes for today
+    // Track lifetime review count → reward milestones
+    let lifetime = 0;
     try {
-      const d = new Date();
-      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-      localStorage.setItem('pokeyelp_done_' + key, '1');
+      lifetime = Number(localStorage.getItem('earn_reviews_total') || '0') + 1;
+      localStorage.setItem('earn_reviews_total', String(lifetime));
     } catch {}
+    setReviewedCount((c) => c + 1);
+
+    // Every 20 reviews → +10 PullOrPass swipes
+    if (lifetime > 0 && lifetime % REVIEWS_PER_SWIPE_BATCH === 0) {
+      grantSwipeBonus(SWIPES_PER_BATCH);
+      toast.success(`+${SWIPES_PER_BATCH} PullOrPass swipes unlocked!`, {
+        description: `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
+      });
+    } else {
+      const toNext = REVIEWS_PER_SWIPE_BATCH - (lifetime % REVIEWS_PER_SWIPE_BATCH);
+      toast.success('Review saved — PokeIQ just got smarter', {
+        description: `${toNext} more to unlock +${SWIPES_PER_BATCH} swipes.`,
+      });
+    }
+
+    // 200 reviews → 30 days of PokeIQ Premium
+    if (lifetime === REVIEWS_FOR_PREMIUM) {
+      grantPremium(PREMIUM_DAYS);
+      toast.success(`🎉 PokeIQ Premium unlocked — ${PREMIUM_DAYS} days!`, {
+        description: 'Unlimited swipes and premium features are now active.',
+      });
+    }
     if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
       setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
@@ -355,8 +413,8 @@ export default function PokeYelp() {
   return (
     <>
       <Seo
-        title="PokeYelp — Review Pokémon Cards, Earn Credits | PokeIQ"
-        description="Tag and review random Pokémon cards. Help build the most accurate community database and earn PokeIQ credits as you go."
+        title="Earn — Train PokeIQ, Unlock Swipes & Premium | PokeIQ"
+        description="Help train PokeIQ. Your reviews personalize recommendations, unlock more PullOrPass swipes, and earn PokeIQ Premium."
       />
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
@@ -365,11 +423,10 @@ export default function PokeYelp() {
           {/* Header */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">PokeYelp</h1>
+              <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
-                {packGainsMode
-                  ? `Reviewing Pack Gains sets first${packGainsRemaining != null ? ` · ${packGainsRemaining} left` : ''}`
-                  : 'Tap any AI tag that fits. Earn 1 credit per card reviewed.'}
+                Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
+                {packGainsMode && packGainsRemaining != null && ` · ${packGainsRemaining} priority cards left`}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -664,18 +721,18 @@ export default function PokeYelp() {
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
                   <Button onClick={submit} className="flex-[2] gap-1.5">
-                    <Coins className="w-4 h-4" />
-                    Submit (+1 credit)
+                    <Sparkles className="w-4 h-4" />
+                    Train PokeIQ
                   </Button>
                 </div>
 
                 {!userId && (
                   <Card className="p-4 border-primary/40 bg-primary/5 text-center">
                     <p className="text-xs text-muted-foreground mb-2">
-                      Sign up to keep your credits and track your contributions.
+                      Sign up to save your contributions, unlock swipe bonuses, and earn PokeIQ Premium.
                     </p>
                     <Button onClick={() => navigate('/auth')} size="sm" className="gap-1.5">
-                      <LogIn className="w-3.5 h-3.5" /> Sign up to earn credits
+                      <LogIn className="w-3.5 h-3.5" /> Sign up to start earning
                     </Button>
                   </Card>
                 )}
