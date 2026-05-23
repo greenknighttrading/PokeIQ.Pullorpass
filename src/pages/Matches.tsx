@@ -322,8 +322,8 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
-        {/* Super Like star (top-right) — sits ABOVE any badge */}
-        {superLiked && (
+        {/* Super Like star (only in Likes section) */}
+        {badge === 'like' && superLiked && (
           <div className="absolute top-1.5 right-1.5 z-10">
             <div className="bg-background/70 backdrop-blur-sm rounded-full p-1 shadow-lg ring-1 ring-amber-400/50">
               <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
@@ -331,7 +331,7 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
           </div>
         )}
         {badge === 'match' && (
-          <div className={`absolute ${superLiked ? 'top-1.5 left-1.5' : 'top-1.5 right-1.5'} bg-primary/90 rounded-full p-1 shadow-md`}>
+          <div className="absolute top-1.5 right-1.5 bg-primary/90 rounded-full p-1 shadow-md">
             <Heart className="w-3 h-3 text-white fill-white" />
           </div>
         )}
