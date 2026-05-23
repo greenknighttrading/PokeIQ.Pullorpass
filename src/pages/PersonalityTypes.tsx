@@ -18,6 +18,34 @@ import {
 import { Seo } from '@/components/seo/Seo';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 
+import investorImg from '@/assets/personalities/investor.jpg';
+import archivistImg from '@/assets/personalities/archivist.jpg';
+import dreamerImg from '@/assets/personalities/dreamer.jpg';
+import flipperImg from '@/assets/personalities/flipper.jpg';
+import analystImg from '@/assets/personalities/analyst.jpg';
+import hunterImg from '@/assets/personalities/hunter.jpg';
+import explorerImg from '@/assets/personalities/explorer.jpg';
+import curatorImg from '@/assets/personalities/curator.jpg';
+import diplomatImg from '@/assets/personalities/diplomat.jpg';
+import gamblerImg from '@/assets/personalities/gambler.jpg';
+import showmanImg from '@/assets/personalities/showman.jpg';
+import minimalistImg from '@/assets/personalities/minimalist.jpg';
+
+const TYPE_IMAGES: Record<PersonalityType, string> = {
+  Investor: investorImg,
+  Archivist: archivistImg,
+  Dreamer: dreamerImg,
+  Flipper: flipperImg,
+  Analyst: analystImg,
+  Hunter: hunterImg,
+  Explorer: explorerImg,
+  Curator: curatorImg,
+  Diplomat: diplomatImg,
+  Gambler: gamblerImg,
+  Showman: showmanImg,
+  Minimalist: minimalistImg,
+};
+
 const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string }>> = {
   Investor: PiggyBank,
   Archivist: ScrollText,
@@ -73,15 +101,26 @@ export default function PersonalityTypes() {
                   onClick={() => setSelected(type)}
                   className="text-left group"
                 >
-                  <Card className="h-full p-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary/15 border border-primary/20">
-                        <Icon className="w-4 h-4 text-primary" />
-                      </div>
-                      <h3 className="font-semibold text-foreground">{type}</h3>
+                  <Card className="h-full overflow-hidden hover:border-primary/50 transition-all cursor-pointer group-hover:scale-[1.02]">
+                    <div className="aspect-[3/4] overflow-hidden bg-muted/30 relative">
+                      <img
+                        src={TYPE_IMAGES[type]}
+                        alt={`${type} collector personality illustration`}
+                        loading="lazy"
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent" />
                     </div>
-                    <p className="text-xs italic text-primary/80 mb-2">"{t.philosophy}"</p>
-                    <p className="text-xs text-muted-foreground line-clamp-3">{t.tagline}</p>
+                    <div className="p-3 -mt-12 relative">
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 backdrop-blur">
+                          <Icon className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <h3 className="font-semibold text-foreground">{type}</h3>
+                      </div>
+                      <p className="text-xs italic text-primary/80 mb-1">"{t.philosophy}"</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{t.tagline}</p>
+                    </div>
                   </Card>
                 </motion.button>
               );
@@ -94,6 +133,14 @@ export default function PersonalityTypes() {
             {selected && info && SelectedIcon && (
               <>
                 <DialogHeader>
+                  <div className="-mx-6 -mt-6 mb-2 aspect-[16/9] overflow-hidden bg-muted/30 relative">
+                    <img
+                      src={TYPE_IMAGES[selected]}
+                      alt={`${selected} illustration`}
+                      className="w-full h-full object-cover object-top"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  </div>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 border border-primary/30">
                       <SelectedIcon className="w-6 h-6 text-primary" />
