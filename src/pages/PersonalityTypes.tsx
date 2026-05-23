@@ -113,7 +113,7 @@ export default function PersonalityTypes() {
                       <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/85 to-transparent" />
 
                       {/* Name + tagline overlay on art */}
-                      <div className="absolute inset-x-0 bottom-0 p-4 pb-3">
+                      <div className="absolute inset-x-0 bottom-0 px-4 pt-4 pb-2">
                         <div className="flex items-center gap-2 mb-1.5">
                           <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 border border-primary/40 backdrop-blur-sm">
                             <Icon className="w-3.5 h-3.5 text-primary" />
@@ -122,13 +122,13 @@ export default function PersonalityTypes() {
                             {type}
                           </h3>
                         </div>
-                        <p className="text-sm italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem]">
+                        <p className="text-sm italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem] mb-0">
                           "{t.philosophy}"
                         </p>
                       </div>
                     </div>
 
-                    <div className="px-4 pt-3 pb-5">
+                    <div className="px-4 pt-1 pb-4">
                       <p className="text-[13px] leading-relaxed text-foreground/80 line-clamp-3 min-h-[4.2rem]">
                         {t.tagline}
                       </p>
@@ -141,17 +141,21 @@ export default function PersonalityTypes() {
         </main>
 
         <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
-          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             {selected && info && SelectedIcon && (
               <>
                 <DialogHeader>
-                  <div className="-mx-6 -mt-6 mb-2 aspect-[16/9] overflow-hidden bg-muted/30 relative">
-                    <img
-                      src={TYPE_IMAGES[selected]}
-                      alt={`${selected} illustration`}
-                      className="w-full h-full object-cover object-top"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+                  {/* Trading card style framed portrait */}
+                  <div className="mx-auto mb-3 w-full max-w-[280px]">
+                    <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-muted/40 to-background border-2 border-primary/40 shadow-[0_15px_45px_-10px_hsl(var(--primary)/0.45)] p-2">
+                      <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted/40 border border-primary/20">
+                        <img
+                          src={TYPE_IMAGES[selected]}
+                          alt={`${selected} illustration`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3 mb-2">
                     <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/20 border border-primary/30">
