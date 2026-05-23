@@ -15,7 +15,7 @@ interface QuizPageProps {
   totalPages: number;
 }
 
-const QUESTIONS_PER_PAGE = 4;
+const QUESTIONS_PER_PAGE = 6;
 
 export function QuizPage({ 
   currentPage, 
@@ -28,7 +28,6 @@ export function QuizPage({
   const startIdx = currentPage * QUESTIONS_PER_PAGE;
   const endIdx = startIdx + QUESTIONS_PER_PAGE;
   const pageQuestions = QUIZ_QUESTIONS.slice(startIdx, endIdx);
-  const sectionName = pageQuestions[0]?.section || '';
   
   const totalQuestions = QUIZ_QUESTIONS.length;
   const answeredCount = Object.keys(answers).length;
@@ -51,13 +50,6 @@ export function QuizPage({
           <span>{answeredCount} of {totalQuestions} answered</span>
         </div>
         <Progress value={progressPercent} className="h-2" />
-      </div>
-      
-      {/* Section Header */}
-      <div className="text-center py-4 border-b border-border/50">
-        <p className="text-sm uppercase tracking-wider text-primary font-medium">
-          {sectionName}
-        </p>
       </div>
       
       {/* Questions */}
