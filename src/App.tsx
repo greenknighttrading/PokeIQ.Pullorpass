@@ -34,6 +34,7 @@ const Report = lazy(() => import("./pages/Report"));
 const GeneratedReport = lazy(() => import("./pages/GeneratedReport"));
 const PrintReport = lazy(() => import("./pages/PrintReport"));
 const PersonalityTest = lazy(() => import("./pages/PersonalityTest"));
+const PersonalityTypes = lazy(() => import("./pages/PersonalityTypes"));
 const MyCollection = lazy(() => import("./pages/MyCollection"));
 const SmartFeed = lazy(() => import("./pages/SmartFeed"));
 const SmartFeedBrief = lazy(() => import("./pages/SmartFeedBrief"));
@@ -88,6 +89,7 @@ function AppRoutes() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/test" element={<PersonalityTest />} />
+        <Route path="/personality-types" element={<PersonalityTypes />} />
         <Route path="/get-started" element={<GetStarted />} />
 
         {/* Portfolio Simulator */}
