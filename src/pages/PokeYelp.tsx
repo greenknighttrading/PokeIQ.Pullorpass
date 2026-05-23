@@ -422,26 +422,26 @@ export default function PokeYelp() {
               <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
                 Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
-                {todaysMode && todaysRemaining != null && ` · ${todaysRemaining} priority cards left`}
+                {todaysMode && todaysRemaining != null && todaysRemaining > 0 && ` · ${todaysRemaining} of today's swipes left to tag`}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline" size="sm"
                 onClick={() => {
-                  if (todaysMode) {
+                  if (todaysMode && (todaysRemaining ?? 0) > 0) {
                     toast.message('Filters locked', {
-                      description: `Review the ${todaysRemaining ?? ''} remaining Pack Gains cards first.`,
+                      description: `Tag the ${todaysRemaining ?? ''} cards you swiped today first to teach PokeIQ your vibe.`,
                     });
                     return;
                   }
                   setShowFilters((s) => !s);
                 }}
                 className="gap-1.5 h-8"
-                aria-disabled={todaysMode}
+                aria-disabled={todaysMode && (todaysRemaining ?? 0) > 0}
               >
                 <Filter className="w-3.5 h-3.5" />
-                {todaysMode ? 'Filters 🔒' : 'Filters'}
+                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters 🔒' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                     {activeFiltersCount}
