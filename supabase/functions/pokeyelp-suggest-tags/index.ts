@@ -5,6 +5,7 @@ const TAG_VOCAB = {
   'Aesthetic Style': ['Cute','Cool','Girly','Beautiful','Colorful','Minimalist','Detailed','Clean','Cinematic','Playful','Epic','Dreamlike','Modern','Soft','Aggressive'],
   'Action / Pose': ['Flying','Jumping','Sitting','Squatting','Running','Walking','Standing','Sleeping','Attacking','Floating','Swimming','Posing'],
   'Type / Species': ['Bug'],
+  'Real-life Animal': ['Cat','Dog','Bird','Fish','Mouse','Rabbit','Bear','Fox','Lizard','Snake','Turtle','Frog','Horse','Dragon','Dinosaur','Insect','Bug','Crab','Octopus','Shark','Whale','Dolphin','Owl','Bat','Wolf','Lion','Tiger','Monkey','Elephant','Deer','Seal','Penguin','Ghost'],
   'Collector Appeal': ['Grail','Display piece','Binder card','Investment','Chase card','Sleeper','Underrated','Overrated','Personal favorite','Trade bait'],
   'Vibe / Cultural Energy': ['Main character energy','Childhood vibes','Rich collector energy','Anime opening vibes','Rainy day vibes','Sunday morning vibes','Cozy collector vibes','Casino energy'],
 };
@@ -27,7 +28,7 @@ Deno.serve(async (req) => {
       .map(([cat, tags]) => `${cat}: ${tags.join(', ')}`)
       .join('\n');
 
-    const systemPrompt = `You are a Pokémon card taste expert. Suggest 6-8 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
+    const systemPrompt = `You are a Pokémon card taste expert. Suggest 7-9 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
 
 IMPORTANT RULES:
 - Use single common adjectives like: Cute, Cool, Girly, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
@@ -41,6 +42,7 @@ IMPORTANT RULES:
   * Girly — if the card uses traditionally feminine colors (pink, pastel, purple, soft tones) or the Pokémon/art has a very cute, feminine, or lovely aesthetic.
   * Bug — if the Pokémon is a Bug-type or has strong insect/bug characteristics (e.g., Butterfree, Scyther, Caterpie).
   * Colorful — if the card art has many colors, a vivid palette, or is particularly bright and multicolored.
+- ALWAYS include exactly one Real-life Animal tag naming the real-world animal the Pokémon most closely resembles (e.g. Pikachu → Mouse, Charizard → Dragon, Squirtle → Turtle, Vaporeon → Fish, Eevee → Fox, Meowth → Cat). Skip only if the Pokémon clearly resembles no real animal (e.g. abstract/object Pokémon like Voltorb, Magnemite).
 
 Preferred vocabulary by category:
 ${vocabList}
@@ -68,19 +70,19 @@ Price: $${price ?? '?'}`;
           type: 'function',
           function: {
             name: 'suggest_tags',
-            description: 'Suggest 6-8 evocative tags for this Pokémon card.',
+            description: 'Suggest 7-9 evocative tags for this Pokémon card.',
             parameters: {
               type: 'object',
               properties: {
                 suggestions: {
                   type: 'array',
-                  minItems: 6,
-                  maxItems: 8,
+                  minItems: 7,
+                  maxItems: 9,
                   items: {
                     type: 'object',
                     properties: {
                       tag: { type: 'string', description: 'Short tag, 1-3 words' },
-                      category: { type: 'string', enum: ['Emotional Tone','Aesthetic Style','Action / Pose','Type / Species','Collector Appeal','Vibe / Cultural Energy','Custom'] },
+                      category: { type: 'string', enum: ['Emotional Tone','Aesthetic Style','Action / Pose','Type / Species','Real-life Animal','Collector Appeal','Vibe / Cultural Energy','Custom'] },
                       reason: { type: 'string', description: 'One short phrase (max 8 words) why it fits' },
                     },
                     required: ['tag','category','reason'],
