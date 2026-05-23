@@ -308,10 +308,10 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
-    const isPackGainsCard = PACK_GAINS_SETS.includes(current.set_name ?? '');
+    const isPriorityCard = todaysMode;
     if (!userId) {
-      // Track anon-reviewed pack-gains cards so they don't repeat in the locked pool
-      if (isPackGainsCard) {
+      // Track anon-reviewed priority cards so they don't repeat in the locked pool
+      if (isPriorityCard) {
         try {
           const prev: string[] = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
           if (!prev.includes(current.card_id)) {
@@ -385,7 +385,7 @@ export default function PokeYelp() {
         description: 'Unlimited swipes and premium features are now active.',
       });
     }
-    if (todaysMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
+    if (todaysMode) {
       setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
     nextCard();
