@@ -516,21 +516,21 @@ function SwipeAnimationLayer({ anim }: { anim: { type: 'pull' | 'love' | 'pass';
 // ─────────────────────────────────────────────────────────
 
 function StackCardShell({ offset, children }: { offset: number; children: React.ReactNode }) {
-  // Behind cards: scaled down, pushed down, dimmed
+  // Behind cards: scaled down, pushed down, dimmed.
+  // Animated so when index advances they smoothly glide forward.
   const scale = 1 - offset * 0.05;
   const y = offset * 14;
-  const opacity = offset === 1 ? 0.85 : 0.55;
+  const opacity = offset === 1 ? 0.9 : 0.6;
   return (
-    <div
+    <motion.div
       className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-xl"
-      style={{
-        transform: `translateY(${y}px) scale(${scale})`,
-        opacity,
-        zIndex: 10 - offset,
-      }}
+      initial={{ scale: scale - 0.04, y: y + 10, opacity: 0 }}
+      animate={{ scale, y, opacity }}
+      transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.6 }}
+      style={{ zIndex: 10 - offset }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
