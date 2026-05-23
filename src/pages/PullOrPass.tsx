@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy } from 'lucide-react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,14 @@ import {
 import { toast } from 'sonner';
 
 type Stage = 'loading' | 'swiping' | 'tagging' | 'results' | 'auth';
+type SwipeDir = 'left' | 'right' | 'up';
+
+const SWIPE_THRESHOLD = 110;
+
+function tcgImage(tcgplayerId: string | null): string | null {
+  if (!tcgplayerId) return null;
+  return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
+}
 
 export default function PullOrPass() {
   const navigate = useNavigate();
@@ -46,40 +54,48 @@ export default function PullOrPass() {
     setImgError(false);
     setRoundId(crypto.randomUUID());
 
-    // Pull a pool of price>$5 cards with images, then diversify to 20
+    // Pool of value cards. image_url is empty in DB so we build TCGPlayer CDN URLs.
+    // Exclude unwanted variants per project rules.
     const { data, error } = await supabase
       .from('market_snapshots')
-      .select('card_id, name, set_name, image_url, price, rarity')
+      .select('card_id, tcgplayer_id, name, set_name, price, rarity')
       .eq('game', 'Pokemon')
       .eq('product_type', 'card')
       .gt('price', 5)
-      .not('image_url', 'is', null)
-      .order('synced_at', { ascending: false })
-      .limit(800);
+      .not('tcgplayer_id', 'is', null)
+      .order('price', { ascending: false })
+      .limit(1500);
 
     if (error || !data || data.length === 0) {
+      console.error('pullorpass load error', error);
       toast.error('Could not load cards for this round');
       setStage('swiping');
       return;
     }
 
+    const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
     const pool: SwipeCard[] = data
-      .filter((c) => c.image_url && c.price)
+      .filter((c) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name))
       .map((c) => ({
         card_id: c.card_id,
         name: c.name,
         set_name: c.set_name,
-        image_url: c.image_url,
+        image_url: tcgImage(c.tcgplayer_id),
         price: Number(c.price),
         rarity: c.rarity,
       }));
 
     const picked = pickDiverse20(pool);
+    if (picked.length === 0) {
+      toast.error('No cards available right now');
+    }
     setCards(picked);
     setStage('swiping');
   }, []);
 
   const current = cards[index];
+  const next = cards[index + 1];
+  const after = cards[index + 2];
 
   const recordSwipe = async (rec: SwipeRecord) => {
     const newRecords = [...records, rec];
@@ -145,6 +161,18 @@ export default function PullOrPass() {
     recordSwipe({ card: current, decision: 'pass', tags: [] });
   };
 
+  const handleLove = () => {
+    // "Love" = strong pull, auto-tagged, skips tag picker
+    if (!current) return;
+    recordSwipe({ card: current, decision: 'pull', tags: ['Loved'] });
+  };
+
+  const handleSwipeDir = (dir: SwipeDir) => {
+    if (dir === 'left') handlePass();
+    else if (dir === 'right') handlePull();
+    else handleLove();
+  };
+
   const confirmTags = () => {
     if (!current) return;
     recordSwipe({ card: current, decision: 'pull', tags: pendingTags });
@@ -172,7 +200,7 @@ export default function PullOrPass() {
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
 
-        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 flex flex-col">
+        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 flex flex-col select-none">
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -209,32 +237,29 @@ export default function PullOrPass() {
                 />
               </div>
 
-              {/* Card */}
+              {/* Card stack */}
               <div className="flex-1 flex flex-col items-center justify-center gap-6">
-                <AnimatePresence mode="wait">
-                  <motion.div
+                <div className="relative w-full max-w-xs aspect-[2.5/3.5]" style={{ touchAction: 'none' }}>
+                  {/* +2 card */}
+                  {after && (
+                    <StackCardShell offset={2}>
+                      <CardArt card={after} />
+                    </StackCardShell>
+                  )}
+                  {/* +1 card (visible shadow behind) */}
+                  {next && (
+                    <StackCardShell offset={1}>
+                      <CardArt card={next} />
+                    </StackCardShell>
+                  )}
+                  {/* Top draggable card */}
+                  <DraggableCard
                     key={current.card_id + '-' + index}
-                    initial={{ opacity: 0, y: 24, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.25 }}
-                    className="relative w-full max-w-xs aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-2xl"
-                  >
-                    {current.image_url && !imgError ? (
-                      <img
-                        src={current.image_url}
-                        alt={current.name}
-                        className="w-full h-full object-cover"
-                        onError={() => setImgError(true)}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                        <ImageOff className="w-10 h-10" />
-                        <span className="text-xs">No image</span>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+                    card={current}
+                    onSwipe={handleSwipeDir}
+                    disabled={stage === 'tagging'}
+                  />
+                </div>
 
                 <div className="text-center">
                   <h2 className="text-lg font-semibold text-foreground">{current.name}</h2>
@@ -245,25 +270,39 @@ export default function PullOrPass() {
                 </div>
 
                 {stage === 'swiping' && (
-                  <div className="flex items-center gap-4">
-                    <Button
-                      onClick={handlePass}
-                      size="lg"
-                      variant="outline"
-                      className="rounded-full h-16 w-16 p-0 border-2"
-                      aria-label="Pass"
-                    >
-                      <X className="w-7 h-7" />
-                    </Button>
-                    <Button
-                      onClick={handlePull}
-                      size="lg"
-                      className="rounded-full h-16 w-16 p-0 bg-primary hover:bg-primary/90"
-                      aria-label="Pull"
-                    >
-                      <Heart className="w-7 h-7 fill-current" />
-                    </Button>
-                  </div>
+                  <>
+                    <div className="flex items-center gap-4">
+                      <Button
+                        onClick={handlePass}
+                        size="lg"
+                        variant="outline"
+                        className="rounded-full h-14 w-14 p-0 border-2"
+                        aria-label="Pass"
+                      >
+                        <X className="w-6 h-6" />
+                      </Button>
+                      <Button
+                        onClick={handleLove}
+                        size="lg"
+                        variant="outline"
+                        className="rounded-full h-14 w-14 p-0 border-2 border-amber-400/60 text-amber-400 hover:text-amber-400 hover:bg-amber-400/10"
+                        aria-label="Love"
+                      >
+                        <Star className="w-6 h-6 fill-current" />
+                      </Button>
+                      <Button
+                        onClick={handlePull}
+                        size="lg"
+                        className="rounded-full h-14 w-14 p-0 bg-primary hover:bg-primary/90"
+                        aria-label="Pull"
+                      >
+                        <Heart className="w-6 h-6 fill-current" />
+                      </Button>
+                    </div>
+                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      Swipe ← Pass · ↑ Love · Pull →
+                    </p>
+                  </>
                 )}
               </div>
 
@@ -321,6 +360,121 @@ export default function PullOrPass() {
         </main>
       </div>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Card stack subcomponents
+// ─────────────────────────────────────────────────────────
+
+function StackCardShell({ offset, children }: { offset: number; children: React.ReactNode }) {
+  // Behind cards: scaled down, pushed down, dimmed
+  const scale = 1 - offset * 0.05;
+  const y = offset * 14;
+  const opacity = offset === 1 ? 0.85 : 0.55;
+  return (
+    <div
+      className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-xl"
+      style={{
+        transform: `translateY(${y}px) scale(${scale})`,
+        opacity,
+        zIndex: 10 - offset,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CardArt({ card }: { card: SwipeCard }) {
+  const [err, setErr] = React.useState(false);
+  if (!card.image_url || err) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted/30">
+        <ImageOff className="w-10 h-10" />
+        <span className="text-xs">No image</span>
+      </div>
+    );
+  }
+  return (
+    <img
+      src={card.image_url}
+      alt={card.name}
+      draggable={false}
+      className="w-full h-full object-cover pointer-events-none"
+      onError={() => setErr(true)}
+    />
+  );
+}
+
+function DraggableCard({
+  card,
+  onSwipe,
+  disabled,
+}: {
+  card: SwipeCard;
+  onSwipe: (dir: SwipeDir) => void;
+  disabled?: boolean;
+}) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 0, 200], [-18, 0, 18]);
+  const passOpacity = useTransform(x, [-150, -40, 0], [1, 0.4, 0]);
+  const pullOpacity = useTransform(x, [0, 40, 150], [0, 0.4, 1]);
+  const loveOpacity = useTransform(y, [-150, -40, 0], [1, 0.4, 0]);
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    const { x: dx, y: dy } = info.offset;
+    const { x: vx, y: vy } = info.velocity;
+    const fastUp = vy < -500 || dy < -SWIPE_THRESHOLD;
+    const fastRight = vx > 500 || dx > SWIPE_THRESHOLD;
+    const fastLeft = vx < -500 || dx < -SWIPE_THRESHOLD;
+
+    // Prioritize vertical only if vertical motion dominates
+    if (fastUp && Math.abs(dy) > Math.abs(dx)) {
+      onSwipe('up');
+    } else if (fastRight) {
+      onSwipe('right');
+    } else if (fastLeft) {
+      onSwipe('left');
+    }
+    // else snap back (framer handles it)
+  };
+
+  return (
+    <motion.div
+      className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-2xl cursor-grab active:cursor-grabbing"
+      style={{ x, y, rotate, zIndex: 20, touchAction: 'none' }}
+      drag={disabled ? false : true}
+      dragElastic={0.6}
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      onDragEnd={handleDragEnd}
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileTap={{ cursor: 'grabbing' }}
+    >
+      <CardArt card={card} />
+
+      {/* Overlays */}
+      <motion.div
+        style={{ opacity: pullOpacity }}
+        className="absolute top-6 left-6 px-3 py-1 rounded-md border-2 border-primary text-primary font-bold tracking-widest rotate-[-12deg] bg-background/50 backdrop-blur-sm"
+      >
+        PULL
+      </motion.div>
+      <motion.div
+        style={{ opacity: passOpacity }}
+        className="absolute top-6 right-6 px-3 py-1 rounded-md border-2 border-destructive text-destructive font-bold tracking-widest rotate-[12deg] bg-background/50 backdrop-blur-sm"
+      >
+        PASS
+      </motion.div>
+      <motion.div
+        style={{ opacity: loveOpacity }}
+        className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md border-2 border-amber-400 text-amber-400 font-bold tracking-widest bg-background/50 backdrop-blur-sm"
+      >
+        LOVE
+      </motion.div>
+    </motion.div>
   );
 }
 
