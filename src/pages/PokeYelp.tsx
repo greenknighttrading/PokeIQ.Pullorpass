@@ -274,7 +274,18 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
+    const isPackGainsCard = PACK_GAINS_SETS.includes(current.set_name ?? '');
     if (!userId) {
+      // Track anon-reviewed pack-gains cards so they don't repeat in the locked pool
+      if (isPackGainsCard) {
+        try {
+          const prev: string[] = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
+          if (!prev.includes(current.card_id)) {
+            localStorage.setItem(ANON_REVIEWED_KEY, JSON.stringify([...prev, current.card_id]));
+          }
+        } catch { /* ignore */ }
+        if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+      }
       toast.message('Sign up to earn PokeIQ credits', {
         description: 'Your review will not be saved without an account.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
