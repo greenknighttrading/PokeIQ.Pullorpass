@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star } from 'lucide-react';
+import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Seo } from '@/components/seo/Seo';
 
 const PROFILE_GOAL = 20;
+const INITIAL_VISIBLE = 12;   // ~2 rows × 6 on desktop
+const LOAD_MORE_STEP = 12;
+const PAGE_CAP = 50;          // overflow → dedicated collection page
 
 type Swipe = {
   id: string;
@@ -211,6 +214,7 @@ export default function Matches() {
                 items={matches}
                 emptyText="No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste."
                 badge="match"
+                category="matches"
               />
               <Section
                 title="Likes"
@@ -219,6 +223,7 @@ export default function Matches() {
                 items={likes}
                 emptyText="No likes yet."
                 badge="like"
+                category="likes"
               />
               <Section
                 title="Passes"
@@ -227,6 +232,7 @@ export default function Matches() {
                 items={passes}
                 emptyText="No passes yet."
                 badge="pass"
+                category="passes"
               />
             </>
           )}
@@ -237,7 +243,7 @@ export default function Matches() {
 }
 
 function Section({
-  title, subtitle, icon, items, emptyText, badge,
+  title, subtitle, icon, items, emptyText, badge, category,
 }: {
   title: string;
   subtitle: string;
@@ -245,23 +251,56 @@ function Section({
   items: Swipe[];
   emptyText: string;
   badge: 'match' | 'like' | 'pass';
+  category: 'matches' | 'likes' | 'passes';
 }) {
+  const [visible, setVisible] = useState(INITIAL_VISIBLE);
+  const cappedTotal = Math.min(items.length, PAGE_CAP);
+  const shown = items.slice(0, Math.min(visible, cappedTotal));
+  const canLoadMore = visible < cappedTotal;
+  const hasOverflow = items.length > PAGE_CAP;
   return (
-    <section className="mb-7">
-      <div className="flex items-center justify-between mb-2">
+    <section className="mb-10">
+      <div className="flex items-end justify-between mb-2 gap-3">
         <div className="flex items-center gap-2">
           {icon}
           <h2 className="text-base font-semibold text-foreground">{title}</h2>
           <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
         </div>
+        {hasOverflow && (
+          <Link to={`/matches/${category}`} className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+            See complete {category} <ArrowRight className="w-3 h-3" />
+          </Link>
+        )}
       </div>
       <p className="text-xs text-muted-foreground mb-3">{subtitle}</p>
       {items.length === 0 ? (
         <Card className="p-6 text-center text-xs text-muted-foreground">{emptyText}</Card>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-          {items.map((m) => <SwipeThumb key={m.id} m={m} badge={badge} />)}
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+            {shown.map((m) => <SwipeThumb key={m.id} m={m} badge={badge} />)}
+          </div>
+          {(canLoadMore || hasOverflow) && (
+            <div className="flex items-center justify-center gap-3 mt-5">
+              {canLoadMore && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setVisible((v) => Math.min(v + LOAD_MORE_STEP, cappedTotal))}
+                >
+                  Load more · {Math.min(LOAD_MORE_STEP, cappedTotal - visible)} more
+                </Button>
+              )}
+              {!canLoadMore && hasOverflow && (
+                <Link to={`/matches/${category}`}>
+                  <Button size="sm" className="gap-2">
+                    See complete {category} <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
+        </>
       )}
     </section>
   );
@@ -270,34 +309,47 @@ function Section({
 function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }) {
   const [err, setErr] = useState(false);
   const dim = badge === 'pass';
+  const superLiked = (m.tags || []).includes('Loved');
   return (
-    <div className="space-y-1">
-      <div className={`relative aspect-[2.5/3.5] rounded-lg overflow-hidden bg-muted/30 shadow-md ${dim ? 'opacity-50 grayscale' : ''}`}>
+    <motion.div
+      whileHover={{ y: -6, scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="space-y-1.5 group"
+    >
+      <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 shadow-md transition-shadow duration-300 group-hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.45)] ring-1 ring-border/40 group-hover:ring-primary/40 ${dim ? 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0' : ''}`}>
         {m.card_image && !err ? (
           <img src={m.card_image} alt={m.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
+        {/* Super Like star (top-right) — sits ABOVE any badge */}
+        {superLiked && (
+          <div className="absolute top-1.5 right-1.5 z-10">
+            <div className="bg-background/70 backdrop-blur-sm rounded-full p-1 shadow-lg ring-1 ring-amber-400/50">
+              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
+            </div>
+          </div>
+        )}
         {badge === 'match' && (
-          <div className="absolute top-1 right-1 bg-primary/90 rounded-full p-1">
+          <div className={`absolute ${superLiked ? 'top-1.5 left-1.5' : 'top-1.5 right-1.5'} bg-primary/90 rounded-full p-1 shadow-md`}>
             <Heart className="w-3 h-3 text-white fill-white" />
           </div>
         )}
-        {badge === 'like' && (
-          <div className="absolute top-1 right-1 bg-amber-400/90 rounded-full p-1">
-            <Star className="w-3 h-3 text-white fill-white" />
+        {badge === 'like' && !superLiked && (
+          <div className="absolute top-1.5 right-1.5 bg-primary/80 rounded-full p-1 shadow-md">
+            <Heart className="w-3 h-3 text-white fill-white" />
           </div>
         )}
         {badge === 'pass' && (
-          <div className="absolute top-1 right-1 bg-muted-foreground/80 rounded-full p-1">
+          <div className="absolute top-1.5 right-1.5 bg-muted-foreground/80 rounded-full p-1 shadow-md">
             <X className="w-3 h-3 text-background" />
           </div>
         )}
       </div>
-      <p className="text-[11px] text-foreground truncate">{m.card_name}</p>
+      <p className="text-xs text-foreground truncate font-medium">{m.card_name}</p>
       <p className="text-[10px] text-muted-foreground truncate">
         {m.card_set ?? '—'}{m.card_price ? ` · $${Number(m.card_price).toFixed(0)}` : ''}
       </p>
-    </div>
+    </motion.div>
   );
 }
