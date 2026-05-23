@@ -430,6 +430,8 @@ function DraggableCard({
   const pullScale = useTransform(x, [0, 30, 200], [0.5, 0.7, 1.4]);
   const loveOpacity = useTransform(y, [-150, -40, 0], [1, 0.4, 0]);
 
+  const [frozen, setFrozen] = React.useState<{ x: number; y: number; rot: number } | null>(null);
+
   const handleDragEnd = (_: any, info: PanInfo) => {
     const { x: dx, y: dy } = info.offset;
     const { x: vx, y: vy } = info.velocity;
@@ -437,7 +439,12 @@ function DraggableCard({
     const fastRight = vx > 500 || dx > SWIPE_THRESHOLD;
     const fastLeft = vx < -500 || dx < -SWIPE_THRESHOLD;
 
-    // Prioritize vertical only if vertical motion dominates
+    const willSwipe = (fastUp && Math.abs(dy) > Math.abs(dx)) || fastRight || fastLeft;
+    if (willSwipe) {
+      // Freeze card at its current released position before exit animation.
+      setFrozen({ x: x.get(), y: y.get(), rot: (rotate as any).get() });
+    }
+
     if (fastUp && Math.abs(dy) > Math.abs(dx)) {
       onSwipe('up');
     } else if (fastRight) {
@@ -448,23 +455,39 @@ function DraggableCard({
     // else snap back (framer handles it)
   };
 
-  const exitX = exitDir === 'right' ? 600 : exitDir === 'left' ? -600 : 0;
-  const exitY = exitDir === 'up' ? -700 : 0;
+  const exitX = exitDir === 'right' ? 800 : exitDir === 'left' ? -800 : 0;
+  const exitY = exitDir === 'up' ? -900 : 0;
+  const exitRot = exitDir === 'right' ? 25 : exitDir === 'left' ? -25 : 0;
+
+  // Build a keyframe animation: hold at the frozen release pose, then fly off.
+  const buildExitAnimate = () => {
+    if (!exitDir) return { opacity: 1, scale: 1 };
+    const fx = frozen?.x ?? 0;
+    const fy = frozen?.y ?? 0;
+    const fr = frozen?.rot ?? 0;
+    return {
+      x: [fx, fx, exitX],
+      y: [fy, fy, exitY],
+      rotate: [fr, fr, exitRot],
+      opacity: [1, 1, 0],
+      transition: {
+        duration: 0.75,
+        times: [0, 0.45, 1],
+        ease: 'easeIn',
+      },
+    } as any;
+  };
 
   return (
     <motion.div
       className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-2xl cursor-grab active:cursor-grabbing"
-      style={{ x, y, rotate, zIndex: 20, touchAction: 'none' }}
+      style={exitDir ? { zIndex: 20, touchAction: 'none' } : { x, y, rotate, zIndex: 20, touchAction: 'none' }}
       drag={disabled || exitDir ? false : true}
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       onDragEnd={handleDragEnd}
       initial={{ opacity: 0, scale: 0.96 }}
-      animate={
-        exitDir
-          ? { x: exitX, y: exitY, opacity: 0, rotate: exitDir === 'right' ? 25 : exitDir === 'left' ? -25 : 0, transition: { duration: 0.45, ease: 'easeIn', delay: 0.25 } }
-          : { opacity: 1, scale: 1 }
-      }
+      animate={buildExitAnimate()}
       whileTap={{ cursor: 'grabbing' }}
     >
       <CardArt card={card} />
