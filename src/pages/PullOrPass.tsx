@@ -12,6 +12,7 @@ import {
   SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
 import { toast } from 'sonner';
+import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
