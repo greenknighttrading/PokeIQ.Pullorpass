@@ -267,7 +267,7 @@ export default function PokeYelp() {
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
 
-        <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6 flex flex-col select-none">
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 flex flex-col select-none">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
@@ -398,10 +398,10 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row gap-5 items-start"
+              className="flex flex-col sm:flex-row gap-6 items-start justify-center"
             >
               {/* Card image and info: left column on tablet/desktop */}
-              <div className="space-y-2 w-full max-w-[220px] sm:max-w-none sm:w-[220px] lg:w-[240px] sm:shrink-0">
+              <div className="space-y-2 w-full max-w-[260px] mx-auto sm:mx-0 sm:max-w-none sm:w-[260px] lg:w-[280px] sm:shrink-0">
                 <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
                   {current.image_url && !imgErr ? (
                     <img
