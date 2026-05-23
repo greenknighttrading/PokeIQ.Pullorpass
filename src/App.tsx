@@ -122,6 +122,7 @@ function AppRoutes() {
         <Route path="/matches" element={<Matches />} />
         <Route path="/matches/:category" element={<MatchesCollection />} />
         <Route path="/pokeyelp" element={<PokeYelp />} />
+        <Route path="/earn" element={<PokeYelp />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
