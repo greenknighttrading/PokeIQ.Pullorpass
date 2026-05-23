@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare } from 'lucide-react';
+import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
@@ -60,13 +60,27 @@ export function GlobalNavBar({
   }, []);
 
   const navItems = [
-    { label: 'The Pulse', href: '/pokeiq-daily', icon: FileText, requiresAuth: false },
-    { label: 'My Portfolio', href: '/home', icon: TrendingUp, requiresAuth: false },
-    { label: 'Pack Gains', href: '/pack-gains', icon: Package, requiresAuth: false },
-    { label: 'PULLorPASS', href: '/swipe', icon: Heart, requiresAuth: false },
-    { label: 'Earn', href: '/earn', icon: MessageSquare, requiresAuth: false },
-    { label: 'Personality Test', href: '/test', icon: Sparkles, requiresAuth: false },
+    { label: 'Home', href: '/pokeiq-daily', icon: Home, requiresAuth: false },
+    { label: 'DNA', href: '/test', icon: Sparkles, requiresAuth: false },
   ];
+
+  const discoverItems = [
+    { label: 'PULLorPASS', href: '/swipe', icon: Heart },
+    { label: 'Matches', href: '/matches', icon: Heart },
+    { label: 'Earn', href: '/earn', icon: MessageSquare },
+  ];
+
+  const toolsItems = [
+    { label: 'Scanner', href: '/buylist/scanner', icon: Search },
+    { label: 'Smart List', href: '/buylist/movers', icon: TrendingUp },
+    { label: 'Watchlist', href: '/buylist/watchlist', icon: Eye },
+    { label: 'Pack Gains', href: '/pack-gains', icon: Package },
+    { label: 'Sealed vs Cards', href: '/tools/sealed-vs-cards', icon: Scale },
+  ];
+
+  const isDiscoverActive = discoverItems.some(i => location.pathname.startsWith(i.href));
+  const isToolsActive = toolsItems.some(i => location.pathname.startsWith(i.href));
+  const isCollectActive = location.pathname.startsWith('/home') || location.pathname.startsWith('/collection') || location.pathname.startsWith('/winners') || location.pathname.startsWith('/insights') || location.pathname.startsWith('/rebalance') || location.pathname.startsWith('/era-allocation') || location.pathname.startsWith('/report') || location.pathname.startsWith('/smart-feed') || location.pathname.startsWith('/simulator');
 
   // Fetch watchlist alerts
   useEffect(() => {
@@ -160,26 +174,28 @@ export function GlobalNavBar({
                   </Link>
                 );
               })}
-              <Link to="/buylist/movers">
-                <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith('/buylist/movers') ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
-                  <TrendingUp className="w-4 h-4" />Smart List
+              <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Discover</div>
+              {discoverItems.map((item) => (
+                <Link key={item.href} to={item.href}>
+                  <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith(item.href) ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
+                    <item.icon className="w-4 h-4" />{item.label}
+                  </div>
+                </Link>
+              ))}
+              <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Collect</div>
+              <Link to="/home">
+                <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', isCollectActive ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
+                  <Briefcase className="w-4 h-4" />My Portfolio
                 </div>
               </Link>
-              <Link to="/buylist/scanner">
-                <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith('/buylist/scanner') ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
-                  <Search className="w-4 h-4" />Scanner
-                </div>
-              </Link>
-              <Link to="/buylist/watchlist">
-                <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith('/buylist/watchlist') ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
-                  <Eye className="w-4 h-4" />Watchlist
-                </div>
-              </Link>
-              <Link to="/tools/sealed-vs-cards">
-                <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith('/tools/') ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
-                  <Scale className="w-4 h-4" />Sealed vs Cards
-                </div>
-              </Link>
+              <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Tools</div>
+              {toolsItems.map((item) => (
+                <Link key={item.href} to={item.href}>
+                  <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname.startsWith(item.href) ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
+                    <item.icon className="w-4 h-4" />{item.label}
+                  </div>
+                </Link>
+              ))}
               {isAuthed && (
                 <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted/50 transition-colors">
                   <LogOut className="w-4 h-4" />Log Out
@@ -218,39 +234,59 @@ export function GlobalNavBar({
             );
           })}
 
+          {/* Discover dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={isDiscoverActive ? 'secondary' : 'ghost'}
+                size="sm"
+                className={cn('gap-1.5 shrink-0', isDiscoverActive && 'bg-primary/10 text-primary')}
+              >
+                <Compass className="w-4 h-4" />
+                <span className="hidden sm:inline">Discover</span>
+                <ChevronDown className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {discoverItems.map((item) => (
+                <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)}>
+                  <item.icon className="w-4 h-4 mr-2" />{item.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Collect */}
+          <Link to="/home">
+            <Button
+              variant={isCollectActive ? 'secondary' : 'ghost'}
+              size="sm"
+              className={cn('gap-2 shrink-0', isCollectActive && 'bg-primary/10 text-primary')}
+            >
+              <Briefcase className="w-4 h-4" />
+              <span className="hidden sm:inline">Collect</span>
+            </Button>
+          </Link>
+
           {/* Tools dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant={location.pathname.startsWith('/buylist/movers') || location.pathname.startsWith('/buylist/scanner') || location.pathname.startsWith('/buylist/watchlist') || location.pathname.startsWith('/tools/') ? 'secondary' : 'ghost'} 
-                size="sm" 
-                className={cn(
-                  'gap-1.5 shrink-0',
-                  (location.pathname.startsWith('/buylist/movers') || location.pathname.startsWith('/buylist/scanner') || location.pathname.startsWith('/buylist/watchlist') || location.pathname.startsWith('/tools/')) && 'bg-primary/10 text-primary'
-                )}
+              <Button
+                variant={isToolsActive ? 'secondary' : 'ghost'}
+                size="sm"
+                className={cn('gap-1.5 shrink-0', isToolsActive && 'bg-primary/10 text-primary')}
               >
-                <TrendingUp className="w-4 h-4" />
+                <Wrench className="w-4 h-4" />
                 <span className="hidden sm:inline">Tools</span>
                 <ChevronDown className="w-3 h-3" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/buylist/movers')}>
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Smart List
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/buylist/scanner')}>
-                <Search className="w-4 h-4 mr-2" />
-                Scanner
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/buylist/watchlist')}>
-                <Eye className="w-4 h-4 mr-2" />
-                Watchlist
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/tools/sealed-vs-cards')}>
-                <Scale className="w-4 h-4 mr-2" />
-                Sealed vs Cards
-              </DropdownMenuItem>
+              {toolsItems.map((item) => (
+                <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)}>
+                  <item.icon className="w-4 h-4 mr-2" />{item.label}
+                </DropdownMenuItem>
+              ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
