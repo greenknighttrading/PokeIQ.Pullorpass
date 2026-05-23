@@ -314,7 +314,9 @@ function SwipeAnimationLayer({ anim }: { anim: { type: 'pull' | 'love' | 'pass';
               exit={{ scale: 0, opacity: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <Heart className="w-32 h-32 text-primary fill-primary drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)]" />
+              <div className="w-40 h-40 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_80px_rgba(16,185,129,0.9)]">
+                <Check className="w-24 h-24 text-white" strokeWidth={4} />
+              </div>
             </motion.div>
           )}
           {anim.type === 'love' && (
@@ -348,12 +350,14 @@ function SwipeAnimationLayer({ anim }: { anim: { type: 'pull' | 'love' | 'pass';
           )}
           {anim.type === 'pass' && (
             <motion.div
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 0.85 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ duration: 0.35 }}
+              initial={{ scale: 0, rotate: 20 }}
+              animate={{ scale: [0, 1.3, 1.1], rotate: [0, -10, 0] }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <X className="w-20 h-20 text-muted-foreground" strokeWidth={2.5} />
+              <div className="w-40 h-40 rounded-full bg-red-500 flex items-center justify-center shadow-[0_0_80px_rgba(239,68,68,0.9)]">
+                <X className="w-24 h-24 text-white" strokeWidth={4} />
+              </div>
             </motion.div>
           )}
         </motion.div>
