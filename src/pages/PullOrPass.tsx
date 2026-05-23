@@ -34,6 +34,8 @@ export default function PullOrPass() {
   const [imgError, setImgError] = useState(false);
   const [flyAnim, setFlyAnim] = useState<{ type: 'pull' | 'love' | 'pass'; key: number } | null>(null);
   const [exitDir, setExitDir] = useState<SwipeDir | null>(null);
+  const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
+  const [matchCount, setMatchCount] = useState(0);
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -93,7 +95,7 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord) => {
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 800) => {
     const newRecords = [...records, rec];
     setRecords(newRecords);
 
@@ -121,7 +123,7 @@ export default function PullOrPass() {
         setImgError(false);
         setExitDir(null);
       }
-    }, 800);
+    }, advanceDelay);
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
@@ -155,11 +157,33 @@ export default function PullOrPass() {
     setTimeout(() => setFlyAnim(null), 700);
   };
 
+  const shouldTriggerMatch = () => {
+    // Only during the first 20 reviews, max 2 matches per session,
+    // never on the very first card, ~18% chance after that.
+    if (index === 0) return false;
+    if (index >= 20) return false;
+    if (matchCount >= 2) return false;
+    // Spacing: don't fire two in a row
+    const lastRec = records[records.length - 1];
+    if (lastRec && (lastRec as any).matched) return false;
+    return Math.random() < 0.18;
+  };
+
   const handlePull = () => {
     if (!current) return;
     triggerAnim('pull');
     setExitDir('right');
-    recordSwipe({ card: current, decision: 'pull', tags: [] });
+    const matched = shouldTriggerMatch();
+    const pulledCard = current;
+    if (matched) {
+      setMatchCount((c) => c + 1);
+      // Show match overlay shortly after the card freezes, give it room to breathe.
+      window.setTimeout(() => setMatchCard(pulledCard), 450);
+      window.setTimeout(() => setMatchCard(null), 2700);
+      recordSwipe({ card: pulledCard, decision: 'pull', tags: ['Match'] }, 2700);
+    } else {
+      recordSwipe({ card: pulledCard, decision: 'pull', tags: [] });
+    }
   };
 
   const handlePass = () => {
@@ -192,6 +216,7 @@ export default function PullOrPass() {
         <GlobalNavBar />
 
         <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none">
+          <MatchOverlay card={matchCard} />
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
