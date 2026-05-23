@@ -12,6 +12,7 @@ import {
   Compass, LayoutGrid, Scale,
   Lock, TrendingUp, PieChart, BarChart3, ChevronRight,
   CheckCircle2, AlertCircle, AlertTriangle, Sparkles, ExternalLink,
+  Dice5, Crown, Leaf,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -36,6 +37,9 @@ const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: stri
   Explorer: Compass,
   Curator: LayoutGrid,
   Diplomat: Scale,
+  Gambler: Dice5,
+  Showman: Crown,
+  Minimalist: Leaf,
 };
 
 const ERA_LABELS: Record<keyof PersonalityResult['eraAllocation'], string> = {
@@ -55,6 +59,11 @@ const TRAIT_LABELS: Record<keyof TraitScores, string> = {
   structure: 'Structure',
   curiosity: 'Curiosity',
   balance: 'Balance',
+  preservation: 'Preservation',
+  aesthetics: 'Aesthetics',
+  recognition: 'Recognition',
+  excitement: 'Excitement',
+  restraint: 'Restraint',
 };
 
 export function QuizResults({ result }: QuizResultsProps) {
