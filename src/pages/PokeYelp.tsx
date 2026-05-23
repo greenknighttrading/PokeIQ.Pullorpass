@@ -324,8 +324,8 @@ export default function PokeYelp() {
         } catch { /* ignore */ }
         if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
       }
-      toast.message('Sign up to earn PokeIQ credits', {
-        description: 'Your review will not be saved without an account.',
+      toast.message('Sign up to keep training PokeIQ', {
+        description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
       });
       nextCard();
