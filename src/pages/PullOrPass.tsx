@@ -188,10 +188,10 @@ export default function PullOrPass() {
         title="PULLorPASS — Discover Your Collector DNA | PokeIQ"
         description="React to Pokémon cards on instinct. PULLorPASS builds your Collector DNA so you discover what cards actually feel like you."
       />
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="h-screen overflow-hidden bg-background flex flex-col">
         <GlobalNavBar />
 
-        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 flex flex-col select-none">
+        <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none">
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -202,7 +202,7 @@ export default function PullOrPass() {
           {stage === 'swiping' && current && (
             <>
               {/* Progress */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-medium text-muted-foreground tabular-nums">
                   Card {index + 1} / {cards.length}
                 </span>
@@ -210,7 +210,7 @@ export default function PullOrPass() {
                   {records.filter((r) => r.decision === 'pull').length} pulled
                 </span>
               </div>
-              <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-6">
+              <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-3">
                 <div
                   className="h-full bg-primary transition-all duration-300"
                   style={{ width: `${(index / cards.length) * 100}%` }}
@@ -218,9 +218,12 @@ export default function PullOrPass() {
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 flex flex-col items-center justify-center gap-6 relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 relative">
                 <SwipeAnimationLayer anim={flyAnim} />
-                <div className="relative w-full max-w-xs aspect-[2.5/3.5]" style={{ touchAction: 'none' }}>
+                <div
+                  className="relative aspect-[2.5/3.5] w-auto"
+                  style={{ touchAction: 'none', height: 'min(60vh, 420px)' }}
+                >
                   {/* +2 card */}
                   {after && (
                     <StackCardShell offset={2}>
@@ -243,7 +246,7 @@ export default function PullOrPass() {
                 </div>
 
                 <div className="text-center">
-                  <h2 className="text-lg font-semibold text-foreground">{current.name}</h2>
+                  <h2 className="text-base font-semibold text-foreground leading-tight">{current.name}</h2>
                   <p className="text-xs text-muted-foreground">
                     {current.set_name ?? 'Unknown set'} · ${current.price.toFixed(2)}
                     {current.rarity && ` · ${current.rarity}`}
@@ -256,27 +259,27 @@ export default function PullOrPass() {
                         onClick={handlePass}
                         size="lg"
                         variant="outline"
-                        className="rounded-full h-14 w-14 p-0 border-2"
+                        className="rounded-full h-12 w-12 p-0 border-2"
                         aria-label="Pass"
                       >
-                        <X className="w-6 h-6" />
+                        <X className="w-5 h-5" />
                       </Button>
                       <Button
                         onClick={handleLove}
                         size="lg"
                         variant="outline"
-                        className="rounded-full h-14 w-14 p-0 border-2 border-amber-400/60 text-amber-400 hover:text-amber-400 hover:bg-amber-400/10"
+                        className="rounded-full h-12 w-12 p-0 border-2 border-amber-400/60 text-amber-400 hover:text-amber-400 hover:bg-amber-400/10"
                         aria-label="Love"
                       >
-                        <Star className="w-6 h-6 fill-current" />
+                        <Star className="w-5 h-5 fill-current" />
                       </Button>
                       <Button
                         onClick={handlePull}
                         size="lg"
-                        className="rounded-full h-14 w-14 p-0 bg-primary hover:bg-primary/90"
+                        className="rounded-full h-12 w-12 p-0 bg-primary hover:bg-primary/90"
                         aria-label="Pull"
                       >
-                        <Heart className="w-6 h-6 fill-current" />
+                        <Heart className="w-5 h-5 fill-current" />
                       </Button>
                   </div>
                   <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
