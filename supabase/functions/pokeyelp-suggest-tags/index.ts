@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
       .map(([cat, tags]) => `${cat}: ${tags.join(', ')}`)
       .join('\n');
 
-    const systemPrompt = `You are a Pokémon card taste expert. Suggest 6-8 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
+    const systemPrompt = `You are a Pokémon card taste expert. Suggest 7-9 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
 
 IMPORTANT RULES:
 - Use single common adjectives like: Cute, Cool, Girly, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
@@ -70,14 +70,14 @@ Price: $${price ?? '?'}`;
           type: 'function',
           function: {
             name: 'suggest_tags',
-            description: 'Suggest 6-8 evocative tags for this Pokémon card.',
+            description: 'Suggest 7-9 evocative tags for this Pokémon card.',
             parameters: {
               type: 'object',
               properties: {
                 suggestions: {
                   type: 'array',
-                  minItems: 6,
-                  maxItems: 8,
+                  minItems: 7,
+                  maxItems: 9,
                   items: {
                     type: 'object',
                     properties: {
