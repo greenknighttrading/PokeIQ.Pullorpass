@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -398,7 +398,7 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid md:grid-cols-[260px_1fr] gap-5 items-start"
+              className="grid md:grid-cols-[286px_1fr] gap-5 items-start"
             >
               {/* Card image */}
               <div className="space-y-2">
@@ -537,6 +537,24 @@ export default function PokeYelp() {
                 </Card>
 
                 <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      if (index > 0) {
+                        setSelected(new Set());
+                        setSuggestions([]);
+                        setCustom([]);
+                        setCustomInput('');
+                        setComment('');
+                        setImgErr(false);
+                        setIndex(index - 1);
+                      }
+                    }}
+                    disabled={index === 0}
+                    className="gap-1"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" /> Back
+                  </Button>
                   <Button variant="ghost" onClick={skip} className="flex-1 gap-1">
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
