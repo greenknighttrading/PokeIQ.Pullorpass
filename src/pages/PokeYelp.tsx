@@ -450,18 +450,18 @@ export default function PokeYelp() {
             >
               {/* Card image */}
               <div className="space-y-1.5">
-                <div className="aspect-[63/88] rounded-xl overflow-hidden bg-muted/30 shadow-md">
+                <div className="aspect-[63/88] rounded-xl overflow-hidden bg-black/40 shadow-md">
                   {current.image_url && !imgErr ? (
                     <img
                       src={current.image_url}
                       alt={current.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={() => setImgErr(true)}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                      <ImageOff className="w-8 h-8" />
-                      <span className="text-xs">No image</span>
+                      <ImageOff className="w-6 h-6" />
+                      <span className="text-[10px]">No image</span>
                     </div>
                   )}
                 </div>
