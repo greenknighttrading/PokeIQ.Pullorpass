@@ -21,7 +21,7 @@ const SWIPE_THRESHOLD = 110;
 
 // ─── Daily swipe quota (free tier) ───────────────────────
 const DAILY_BASE_LIMIT = 20;
-const POKEYELP_BONUS   = 20;
+const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 20 Earn reviews
 
 function todayKey() {
   const d = new Date();
@@ -38,6 +38,14 @@ function readQuota() {
 }
 function writeQuota(q: { date: string; used: number; bonus: number; lifetime: number }) {
   try { localStorage.setItem('pop_quota', JSON.stringify(q)); } catch {}
+}
+
+// PokeIQ Premium (granted after 200 Earn reviews → 30 days unlimited)
+function isPremiumActive(): boolean {
+  try {
+    const until = Number(localStorage.getItem('pokeiq_premium_until') || '0');
+    return until > Date.now();
+  } catch { return false; }
 }
 
 // ─── Resume state (remember where the user left off) ─────
