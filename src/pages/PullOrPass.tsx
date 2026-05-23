@@ -908,18 +908,15 @@ function OutOfSwipesView({
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-foreground">You're out of swipes today</h2>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Free players get {limit} swipes per day.
-          {!hasBonus && ' Complete a PokéYelp review to unlock +20 more right now.'}
+          Free players get {limit} swipes per day. Review 20 cards on Earn to unlock <strong className="text-foreground">+10 more swipes</strong>, and help train PokeIQ to spot your taste.
         </p>
       </div>
       <div className="flex flex-col gap-2 w-full max-w-xs">
-        {!hasBonus && (
-          <Link to="/pokeyelp">
-            <Button size="lg" className="w-full gap-2">
-              <Sparkles className="w-4 h-4" /> Do PokéYelp for +20 swipes
-            </Button>
-          </Link>
-        )}
+        <Link to="/earn">
+          <Button size="lg" className="w-full gap-2">
+            <Sparkles className="w-4 h-4" /> Earn +10 swipes — train PokeIQ
+          </Button>
+        </Link>
         <Link to="/matches">
           <Button size="lg" variant="outline" className="w-full gap-2">
             <Heart className="w-4 h-4" /> See your Matches
