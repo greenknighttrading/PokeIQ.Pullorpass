@@ -40,6 +40,31 @@ function writeQuota(q: { date: string; used: number; bonus: number; lifetime: nu
   try { localStorage.setItem('pop_quota', JSON.stringify(q)); } catch {}
 }
 
+// ─── Resume state (remember where the user left off) ─────
+const RESUME_KEY = 'pop_resume_v1';
+type ResumeState = {
+  cards: SwipeCard[];
+  index: number;
+  records: SwipeRecord[];
+  roundId: string;
+};
+function readResume(): ResumeState | null {
+  try {
+    const raw = localStorage.getItem(RESUME_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    if (!v?.cards?.length) return null;
+    if (typeof v.index !== 'number' || v.index >= v.cards.length) return null;
+    return v as ResumeState;
+  } catch { return null; }
+}
+function writeResume(s: ResumeState) {
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify(s)); } catch {}
+}
+function clearResume() {
+  try { localStorage.removeItem(RESUME_KEY); } catch {}
+}
+
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
   return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
@@ -71,7 +96,17 @@ export default function PullOrPass() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
     });
-    loadRound();
+    // Try to resume an in-progress round first
+    const resume = readResume();
+    if (resume) {
+      setCards(resume.cards);
+      setIndex(resume.index);
+      setRecords(resume.records || []);
+      setRoundId(resume.roundId);
+      setStage('swiping');
+    } else {
+      loadRound();
+    }
     // Detect PokéYelp completion for bonus swipes
     try {
       const yelp = localStorage.getItem('pokeyelp_done_' + todayKey());
@@ -85,6 +120,14 @@ export default function PullOrPass() {
       }
     } catch {}
   }, []);
+
+  // Persist in-progress round so users can leave and come back
+  useEffect(() => {
+    if (stage !== 'swiping') return;
+    if (!cards.length) return;
+    if (index >= cards.length) return;
+    writeResume({ cards, index, records, roundId });
+  }, [stage, cards, index, records, roundId]);
 
   const loadRound = useCallback(async () => {
     setStage('loading');
@@ -182,6 +225,7 @@ export default function PullOrPass() {
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
     setStage('results');
+    clearResume();
     if (!userId) return;
     const analysis = analyzeRound(allRecords);
 
