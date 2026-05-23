@@ -2,7 +2,7 @@ import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const TAG_VOCAB = {
   'Emotional Tone': ['Nostalgic','Cozy','Peaceful','Exciting','Powerful','Dark','Chaotic','Joyful','Lonely','Adventurous','Mysterious','Relaxing','Hopeful','Intimidating','Happy','Angry'],
-  'Aesthetic Style': ['Cute','Cool','Girly','Beautiful','Colorful','Minimalist','Detailed','Clean','Cinematic','Playful','Epic','Dreamlike','Vintage','Modern','Soft','Aggressive'],
+  'Aesthetic Style': ['Cute','Cool','Girly','Beautiful','Colorful','Minimalist','Detailed','Clean','Cinematic','Playful','Epic','Dreamlike','Modern','Soft','Aggressive'],
   'Action / Pose': ['Flying','Jumping','Sitting','Squatting','Running','Walking','Standing','Sleeping','Attacking','Floating','Swimming','Posing'],
   'Type / Species': ['Bug'],
   'Collector Appeal': ['Grail','Display piece','Binder card','Investment','Chase card','Sleeper','Underrated','Overrated','Personal favorite','Trade bait'],
@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     const systemPrompt = `You are a Pokémon card taste expert. Suggest 6-8 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
 
 IMPORTANT RULES:
-- Use single common adjectives like: Cute, Cool, Girly, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Vintage, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
+- Use single common adjectives like: Cute, Cool, Girly, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
 - Prefer broad, universally understood words over niche or compound phrases.
 - Avoid overly specific phrases like "Main character energy" or "Anime opening vibes".
 - Each tag should be 1 word (max 2). No descriptions, no card-specific wording.
