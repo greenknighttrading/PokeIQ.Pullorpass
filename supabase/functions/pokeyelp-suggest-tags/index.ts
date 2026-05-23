@@ -25,12 +25,17 @@ Deno.serve(async (req) => {
       .map(([cat, tags]) => `${cat}: ${tags.join(', ')}`)
       .join('\n');
 
-    const systemPrompt = `You are a Pokémon card taste expert. Given a card, suggest 6-8 tags that best describe its vibe, art, and collector appeal.
+    const systemPrompt = `You are a Pokémon card taste expert. Suggest 6-8 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
 
-Pick mostly from this vocabulary (preferred):
+IMPORTANT RULES:
+- Use single common adjectives like: Cute, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Vintage, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
+- Prefer broad, universally understood words over niche or compound phrases.
+- Avoid overly specific phrases like "Main character energy" or "Anime opening vibes".
+- Each tag should be 1 word (max 2). No descriptions, no card-specific wording.
+
+Preferred vocabulary by category:
 ${vocabList}
 
-You may also invent up to 2 short, creative custom tags (max 3 words each) when they really fit.
 Return ONLY via the suggest_tags function.`;
 
     const userPrompt = `Card: ${name}
