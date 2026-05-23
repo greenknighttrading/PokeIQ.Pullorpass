@@ -14,7 +14,7 @@ import {
 import { Seo } from '@/components/seo/Seo';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 
-const QUESTIONS_PER_PAGE = 4;
+const QUESTIONS_PER_PAGE = 6;
 const TOTAL_PAGES = Math.ceil(QUIZ_QUESTIONS.length / QUESTIONS_PER_PAGE);
 
 type TestStage = 'quiz' | 'email' | 'analyzing' | 'results';
@@ -78,7 +78,10 @@ export default function PersonalityTest() {
                     Collector Personality Test
                   </h1>
                   <p className="text-muted-foreground">
-                    Answer 18 quick questions to discover your collecting style.
+                    Answer {QUIZ_QUESTIONS.length} quick questions to discover your collecting style.
+                  </p>
+                  <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto pt-2">
+                    In just 10 minutes, uncover the hidden psychology behind how you collect, spend, hold, chase, and connect with Pokémon.
                   </p>
                 </div>
               )}

@@ -1,5 +1,5 @@
 // PokeIQ Collector Personality Engine — V5
-// Identity-first: 12 archetypes, 32 questions, no modifiers.
+// Identity-first: 12 archetypes, 30 questions, no modifiers.
 
 export interface QuizQuestion {
   id: number;
@@ -8,53 +8,36 @@ export interface QuizQuestion {
 }
 
 export const QUIZ_QUESTIONS: QuizQuestion[] = [
-  // Section 1 — Patience & Decision Making
   { id: 1, text: "I'm comfortable holding cards for years without needing immediate results.", section: "Patience & Decision Making" },
   { id: 2, text: "I rarely panic when Pokémon prices suddenly rise or fall.", section: "Patience & Decision Making" },
   { id: 3, text: "I would rather miss an opportunity than make a rushed purchase.", section: "Patience & Decision Making" },
-  { id: 4, text: "I prefer steady growth over quick wins.", section: "Patience & Decision Making" },
-
-  // Section 2 — Emotional Connection
-  { id: 5, text: "Some cards feel meaningful to me beyond their market value.", section: "Emotional Connection" },
-  { id: 6, text: "My favorite cards usually have a personal story or emotional connection.", section: "Emotional Connection" },
-  { id: 7, text: "I care more about owning cards I truly love than owning the \u201Cbest investments.\u201D", section: "Emotional Connection" },
-  { id: 8, text: "The memories attached to a card can matter as much as the card itself.", section: "Emotional Connection" },
-
-  // Section 3 — Risk & Activity
-  { id: 9, text: "I enjoy buying, selling, or trading cards regularly.", section: "Risk & Activity" },
-  { id: 10, text: "I like keeping part of my collection flexible in case new opportunities appear.", section: "Risk & Activity" },
-  { id: 11, text: "I'm comfortable taking risks on cards or products others overlook.", section: "Risk & Activity" },
-  { id: 12, text: "I enjoy the excitement of making a bold collecting move.", section: "Risk & Activity" },
-
-  // Section 4 — Identity & Presentation
-  { id: 13, text: "I enjoy organizing my collection in a visually satisfying way.", section: "Identity & Presentation" },
-  { id: 14, text: "I want my collection to feel intentional, not random.", section: "Identity & Presentation" },
-  { id: 15, text: "Owning iconic or centerpiece cards matters to me.", section: "Identity & Presentation" },
-  { id: 16, text: "I care about how my collection looks when displayed as a whole.", section: "Identity & Presentation" },
-
-  // Section 5 — Discovery & Exploration
-  { id: 17, text: "I enjoy exploring newer or less proven Pokémon products.", section: "Discovery & Exploration" },
-  { id: 18, text: "I often research cards deeply before making decisions.", section: "Discovery & Exploration" },
-  { id: 19, text: "I enjoy discovering trends before they become mainstream.", section: "Discovery & Exploration" },
-  { id: 20, text: "I like learning parts of the hobby most collectors overlook.", section: "Discovery & Exploration" },
-
-  // Section 6 — Structure & Balance
-  { id: 21, text: "I prefer balancing my collection across different eras or product types.", section: "Structure & Balance" },
-  { id: 22, text: "I usually think about how new purchases fit into my collection as a whole.", section: "Structure & Balance" },
-  { id: 23, text: "I see my Pokémon collection as something I'm building long-term.", section: "Structure & Balance" },
-  { id: 24, text: "I enjoy refining and improving my collection over time.", section: "Structure & Balance" },
-
-  // Section 7 — Thrill & Risk Appetite
-  { id: 25, text: "Ripping packs is one of my favorite parts of the hobby.", section: "Thrill & Risk Appetite" },
-  { id: 26, text: "I love the unpredictability of chasing a big hit.", section: "Thrill & Risk Appetite" },
-  { id: 27, text: "I'll take a long-shot bet on a card if the payoff feels exciting enough.", section: "Thrill & Risk Appetite" },
-  { id: 28, text: "A boring collection is worse than a risky one.", section: "Thrill & Risk Appetite" },
-
-  // Section 8 — Identity, Presence & Restraint
-  { id: 29, text: "I enjoy sharing my pickups and showing my collection to others.", section: "Identity, Presence & Restraint" },
-  { id: 30, text: "I love owning cards that other collectors immediately recognize.", section: "Identity, Presence & Restraint" },
-  { id: 31, text: "I'd rather own fewer truly meaningful cards than a large collection.", section: "Identity, Presence & Restraint" },
-  { id: 32, text: "I regularly trim or refine my collection to keep it intentional.", section: "Identity, Presence & Restraint" },
+  { id: 4, text: "Some cards feel meaningful to me beyond their market value.", section: "Emotional Connection" },
+  { id: 5, text: "My favorite cards usually have a personal story or emotional connection.", section: "Emotional Connection" },
+  { id: 6, text: "I care more about owning cards I truly love than owning the \u201Cbest investments.\u201D", section: "Emotional Connection" },
+  { id: 7, text: "I enjoy buying, selling, or trading cards regularly.", section: "Risk & Activity" },
+  { id: 8, text: "I like keeping part of my collection flexible in case new opportunities appear.", section: "Risk & Activity" },
+  { id: 9, text: "I'm comfortable taking risks on cards or products others overlook.", section: "Risk & Activity" },
+  { id: 10, text: "I enjoy the excitement of making a bold collecting move.", section: "Risk & Activity" },
+  { id: 11, text: "I enjoy organizing my collection in a visually satisfying way.", section: "Identity & Presentation" },
+  { id: 12, text: "I want my collection to feel intentional, not random.", section: "Identity & Presentation" },
+  { id: 13, text: "Owning iconic or centerpiece cards matters to me.", section: "Identity & Presentation" },
+  { id: 14, text: "I care about how my collection looks when displayed as a whole.", section: "Identity & Presentation" },
+  { id: 15, text: "I enjoy exploring newer or less proven Pokémon products.", section: "Discovery & Exploration" },
+  { id: 16, text: "I often research cards deeply before making decisions.", section: "Discovery & Exploration" },
+  { id: 17, text: "I enjoy discovering trends before they become mainstream.", section: "Discovery & Exploration" },
+  { id: 18, text: "I like learning parts of the hobby most collectors overlook.", section: "Discovery & Exploration" },
+  { id: 19, text: "I prefer balancing my collection across different eras or product types.", section: "Structure & Balance" },
+  { id: 20, text: "I usually think about how new purchases fit into my collection as a whole.", section: "Structure & Balance" },
+  { id: 21, text: "I see my Pokémon collection as something I'm building long-term.", section: "Structure & Balance" },
+  { id: 22, text: "I enjoy refining and improving my collection over time.", section: "Structure & Balance" },
+  { id: 23, text: "Ripping packs is one of my favorite parts of the hobby.", section: "Thrill & Risk Appetite" },
+  { id: 24, text: "I love the unpredictability of chasing a big hit.", section: "Thrill & Risk Appetite" },
+  { id: 25, text: "I'll take a long-shot bet on a card if the payoff feels exciting enough.", section: "Thrill & Risk Appetite" },
+  { id: 26, text: "A boring collection is worse than a risky one.", section: "Thrill & Risk Appetite" },
+  { id: 27, text: "I enjoy sharing my pickups and showing my collection to others.", section: "Identity, Presence & Restraint" },
+  { id: 28, text: "I love owning cards that other collectors immediately recognize.", section: "Identity, Presence & Restraint" },
+  { id: 29, text: "I'd rather own fewer truly meaningful cards than a large collection.", section: "Identity, Presence & Restraint" },
+  { id: 30, text: "I regularly trim or refine my collection to keep it intentional.", section: "Identity, Presence & Restraint" },
 ];
 
 export type LikertValue = 1 | 2 | 3 | 4 | 5;
@@ -419,19 +402,19 @@ const clamp = (v: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v));
 function computeTraits(answers: Answers): TraitScores {
   const a = (id: number) => norm(answers[id]);
   return {
-    patience: clamp(avg([a(1), a(2), a(3), a(4)])),
-    emotion: clamp(avg([a(5), a(6), a(7), a(8)])),
-    activity: clamp(avg([a(9), a(12)])),
-    conviction: clamp(avg([a(11), a(12), a(15)])),
-    structure: clamp(avg([a(13), a(14), a(16), a(22)])),
-    curiosity: clamp(avg([a(17), a(19), a(20)])),
-    analysis: clamp(avg([a(18), a(20), a(22)])),
-    balance: clamp(avg([a(10), a(21), a(23), a(24)])),
-    preservation: clamp(avg([a(3), a(15), a(23)])),
-    aesthetics: clamp(avg([a(13), a(16)])),
-    recognition: clamp(avg([a(29), a(30), a(15)])),
-    excitement: clamp(avg([a(25), a(26), a(27), a(28)])),
-    restraint: clamp(avg([a(31), a(32), a(3)])),
+    patience: clamp(avg([a(1), a(2), a(3)])),
+    emotion: clamp(avg([a(4), a(5), a(6)])),
+    activity: clamp(avg([a(7), a(10)])),
+    conviction: clamp(avg([a(9), a(10), a(13)])),
+    structure: clamp(avg([a(11), a(12), a(14), a(20)])),
+    curiosity: clamp(avg([a(15), a(17), a(18)])),
+    analysis: clamp(avg([a(16), a(18), a(20)])),
+    balance: clamp(avg([a(8), a(19), a(21), a(22)])),
+    preservation: clamp(avg([a(3), a(13), a(21)])),
+    aesthetics: clamp(avg([a(11), a(14)])),
+    recognition: clamp(avg([a(27), a(28), a(13)])),
+    excitement: clamp(avg([a(23), a(24), a(25), a(26)])),
+    restraint: clamp(avg([a(29), a(30), a(3)])),
   };
 }
 
