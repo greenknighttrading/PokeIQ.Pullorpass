@@ -10,6 +10,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Seo } from '@/components/seo/Seo';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { PACK_ODDS_REGISTRY } from '@/lib/packOdds';
+
+// Cards from Pack Gains sets (only "hit" rarities — i.e. not the no-hit baseline)
+const PACK_GAINS_SETS = PACK_ODDS_REGISTRY.map((p) => p.setName);
+const PACK_GAINS_HIT_RARITIES = Array.from(
+  new Set(
+    PACK_ODDS_REGISTRY.flatMap((p) =>
+      p.rarities.filter((r) => r.fixedValue == null).map((r) => r.rarity)
+    )
+  )
+);
+const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
 
 interface YelpCard {
   card_id: string;
@@ -77,6 +89,10 @@ export default function PokeYelp() {
   const [setQuery, setSetQuery] = useState<string>('');
   const [eraId, setEraId] = useState<string>('');
 
+  // Force user to review Pack Gains cards first — filters stay locked until done
+  const [packGainsMode, setPackGainsMode] = useState(true);
+  const [packGainsRemaining, setPackGainsRemaining] = useState<number | null>(null);
+
   const fetchCredits = useCallback(async (uid: string) => {
     const { data } = await supabase
       .from('pokeiq_credits').select('credits').eq('user_id', uid).maybeSingle();
@@ -85,6 +101,64 @@ export default function PokeYelp() {
 
   const loadPool = useCallback(async () => {
     setLoading(true);
+
+    // === Pack Gains First mode ===
+    if (packGainsMode) {
+      let reviewedIds: string[] = [];
+      if (userId) {
+        const { data: revs } = await supabase
+          .from('pokeyelp_reviews')
+          .select('card_id')
+          .eq('user_id', userId)
+          .in('card_set', PACK_GAINS_SETS);
+        reviewedIds = Array.from(new Set((revs ?? []).map((r: any) => r.card_id)));
+      } else {
+        try {
+          reviewedIds = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
+        } catch { reviewedIds = []; }
+      }
+
+      const { data, error } = await supabase
+        .from('market_snapshots')
+        .select('card_id, tcgplayer_id, name, set_name, price, rarity')
+        .eq('game', 'Pokemon')
+        .eq('product_type', 'card')
+        .in('set_name', PACK_GAINS_SETS)
+        .in('rarity', PACK_GAINS_HIT_RARITIES)
+        .gt('price', 0)
+        .not('tcgplayer_id', 'is', null)
+        .limit(1000);
+
+      if (!error && data) {
+        const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
+        const reviewedSet = new Set(reviewedIds);
+        const items: YelpCard[] = data
+          .filter((c: any) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name) && !reviewedSet.has(c.card_id))
+          .map((c: any) => ({
+            card_id: c.card_id,
+            name: c.name,
+            set_name: c.set_name,
+            image_url: tcgImage(c.tcgplayer_id),
+            price: Number(c.price),
+            rarity: c.rarity,
+          }));
+
+        setPackGainsRemaining(items.length);
+
+        if (items.length > 0) {
+          setPool(items.sort(() => Math.random() - 0.5));
+          setIndex(0);
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Pack Gains exhausted — unlock filters and fall through to normal load
+      setPackGainsMode(false);
+      setPackGainsRemaining(0);
+      toast.success('Pack Gains complete — filters unlocked!');
+    }
+
     const minP = Number(minPrice) || 5;
     const maxP = Number(maxPrice) || 0;
     let q = supabase
@@ -127,7 +201,7 @@ export default function PokeYelp() {
     setPool(items);
     setIndex(0);
     setLoading(false);
-  }, [minPrice, maxPrice, setQuery, eraId]);
+  }, [packGainsMode, userId, minPrice, maxPrice, setQuery, eraId]);
 
   const fetchSuggestions = useCallback(async (card: YelpCard) => {
     setSuggestLoading(true);
@@ -154,8 +228,8 @@ export default function PokeYelp() {
         setUserId(session.user.id);
         fetchCredits(session.user.id);
       }
+      loadPool();
     });
-    loadPool();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -200,7 +274,18 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
+    const isPackGainsCard = PACK_GAINS_SETS.includes(current.set_name ?? '');
     if (!userId) {
+      // Track anon-reviewed pack-gains cards so they don't repeat in the locked pool
+      if (isPackGainsCard) {
+        try {
+          const prev: string[] = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
+          if (!prev.includes(current.card_id)) {
+            localStorage.setItem(ANON_REVIEWED_KEY, JSON.stringify([...prev, current.card_id]));
+          }
+        } catch { /* ignore */ }
+        if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+      }
       toast.message('Sign up to earn PokeIQ credits', {
         description: 'Your review will not be saved without an account.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
@@ -240,6 +325,9 @@ export default function PokeYelp() {
     });
     toast.success('+1 PokeIQ credit');
     setReviewedCount((c) => c + 1);
+    if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
+      setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+    }
     nextCard();
   };
 
@@ -273,17 +361,28 @@ export default function PokeYelp() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">PokeYelp</h1>
               <p className="text-xs text-muted-foreground">
-                Tap any AI tag that fits. Earn 1 credit per card reviewed.
+                {packGainsMode
+                  ? `Reviewing Pack Gains sets first${packGainsRemaining != null ? ` · ${packGainsRemaining} left` : ''}`
+                  : 'Tap any AI tag that fits. Earn 1 credit per card reviewed.'}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline" size="sm"
-                onClick={() => setShowFilters((s) => !s)}
+                onClick={() => {
+                  if (packGainsMode) {
+                    toast.message('Filters locked', {
+                      description: `Review the ${packGainsRemaining ?? ''} remaining Pack Gains cards first.`,
+                    });
+                    return;
+                  }
+                  setShowFilters((s) => !s);
+                }}
                 className="gap-1.5 h-8"
+                aria-disabled={packGainsMode}
               >
                 <Filter className="w-3.5 h-3.5" />
-                Filters
+                {packGainsMode ? 'Filters 🔒' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                     {activeFiltersCount}
