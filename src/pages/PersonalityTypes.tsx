@@ -88,7 +88,7 @@ export default function PersonalityTypes() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
             {TYPES.map((type, i) => {
               const t = PERSONALITY_INFO[type];
               const Icon = TYPE_ICONS[type];
@@ -99,27 +99,39 @@ export default function PersonalityTypes() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
                   onClick={() => setSelected(type)}
-                  className="text-left group"
+                  className="text-left group focus:outline-none"
                 >
-                  <Card className="h-full overflow-hidden hover:border-primary/50 transition-all cursor-pointer group-hover:scale-[1.02]">
-                    <div className="aspect-[3/4] overflow-hidden bg-muted/30 relative">
+                  <Card className="h-full overflow-hidden border-border/60 hover:border-primary/60 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.35)]">
+                    <div className="aspect-[4/5] overflow-hidden bg-muted/30 relative">
                       <img
                         src={TYPE_IMAGES[type]}
                         alt={`${type} collector personality illustration`}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/30 to-transparent" />
-                    </div>
-                    <div className="p-3 -mt-12 relative">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 border border-primary/30 backdrop-blur">
-                          <Icon className="w-3.5 h-3.5 text-primary" />
+                      {/* Gradient overlay so the name overlaps art bottom */}
+                      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/85 to-transparent" />
+
+                      {/* Name + tagline overlay on art */}
+                      <div className="absolute inset-x-0 bottom-0 p-5 pb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 border border-primary/40 backdrop-blur-sm">
+                            <Icon className="w-4 h-4 text-primary" />
+                          </div>
+                          <h3 className="text-3xl md:text-[2rem] font-extrabold tracking-tight leading-none text-foreground">
+                            {type}
+                          </h3>
                         </div>
-                        <h3 className="font-semibold text-foreground">{type}</h3>
+                        <p className="text-base italic text-primary font-medium leading-snug">
+                          "{t.philosophy}"
+                        </p>
                       </div>
-                      <p className="text-xs italic text-primary/80 mb-1">"{t.philosophy}"</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{t.tagline}</p>
+                    </div>
+
+                    <div className="px-5 pt-4 pb-6">
+                      <p className="text-sm md:text-[15px] leading-relaxed text-foreground/80 line-clamp-3">
+                        {t.tagline}
+                      </p>
                     </div>
                   </Card>
                 </motion.button>
