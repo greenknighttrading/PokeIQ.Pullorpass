@@ -98,9 +98,10 @@ export default function Matches() {
   const topSets = Object.entries(setCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const avgPrice = priced > 0 ? totalPrice / priced : 0;
 
-  const matchCount = matches.length;
-  const remainingToProfile = Math.max(0, PROFILE_GOAL - matchCount);
-  const profileUnlocked = matchCount >= PROFILE_GOAL;
+  // Vibe Profile unlocks based on TOTAL individual cards swiped (not just "Match"-tagged)
+  const swipeCount = swipes.length;
+  const remainingToProfile = Math.max(0, PROFILE_GOAL - swipeCount);
+  const profileUnlocked = swipeCount >= PROFILE_GOAL;
 
   return (
     <>
@@ -151,18 +152,18 @@ export default function Matches() {
                     <p className="text-xs text-muted-foreground mt-1">
                       {profileUnlocked
                         ? "Below are the vibes, sets, and price tier PokeIQ has learned about your taste."
-                        : `Match ${remainingToProfile} more cards to unlock your Vibe Profile — your vibes, the sets you gravitate to, and the cards that actually feel like you.`}
+                        : `Swipe ${remainingToProfile} more cards to unlock your Vibe Profile — your vibes, the sets you gravitate to, and the cards that actually feel like you.`}
                     </p>
                     <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
                         className={`h-full ${profileUnlocked ? 'bg-amber-400' : 'bg-primary'}`}
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, (matchCount / PROFILE_GOAL) * 100)}%` }}
+                        animate={{ width: `${Math.min(100, (swipeCount / PROFILE_GOAL) * 100)}%` }}
                         transition={{ duration: 0.8, ease: 'easeOut' }}
                       />
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1 tabular-nums">
-                      {matchCount} / {PROFILE_GOAL} matches
+                      {swipeCount} / {PROFILE_GOAL} cards swiped
                     </p>
                   </div>
                 </div>
