@@ -446,7 +446,7 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid md:grid-cols-[286px_1fr] gap-5 items-start"
+              className="grid grid-cols-[200px_1fr] sm:grid-cols-[220px_1fr] gap-4 items-start"
             >
               {/* Card image */}
               <div className="space-y-2">
