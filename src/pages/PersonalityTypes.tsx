@@ -168,62 +168,62 @@ export default function PersonalityTypes() {
                   </div>
                 </DialogHeader>
 
-                <div className="space-y-5 text-sm">
+                <div className="space-y-5 text-base">
                   <p className="text-foreground/90">{info.tagline}</p>
 
                   <div className="flex flex-wrap gap-1.5">
                     {info.coreTraits.map((trait) => (
-                      <span key={trait} className="px-2 py-0.5 rounded-full bg-muted text-xs text-muted-foreground">
+                      <span key={trait} className="px-2 py-0.5 rounded-full bg-muted text-sm text-muted-foreground">
                         {trait}
                       </span>
                     ))}
                   </div>
 
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Summary</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1.5">Summary</h4>
                     <p className="text-foreground/80">{info.summary}</p>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="p-3 rounded-lg border border-success/20 bg-success/5">
-                      <h4 className="text-xs uppercase tracking-wider text-success mb-1">Strength</h4>
-                      <p className="text-foreground/80 text-xs">{info.strengthLong}</p>
+                      <h4 className="text-sm uppercase tracking-wider text-success mb-1">Strength</h4>
+                      <p className="text-foreground/80 text-sm">{info.strengthLong}</p>
                     </div>
                     <div className="p-3 rounded-lg border border-warning/20 bg-warning/5">
-                      <h4 className="text-xs uppercase tracking-wider text-warning mb-1">Weakness</h4>
-                      <p className="text-foreground/80 text-xs">{info.weaknessLong}</p>
+                      <h4 className="text-sm uppercase tracking-wider text-warning mb-1">Weakness</h4>
+                      <p className="text-foreground/80 text-sm">{info.weaknessLong}</p>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Core Identity</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1.5">Core Identity</h4>
                     <p className="text-foreground/80">{info.fullProfile.coreIdentity}</p>
                   </div>
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Collecting Mindset</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1.5">Collecting Mindset</h4>
                     <p className="text-foreground/80">{info.fullProfile.collectingMindset}</p>
                   </div>
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Inner World</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1.5">Inner World</h4>
                     <p className="text-foreground/80">{info.fullProfile.innerWorld}</p>
                   </div>
                   <div>
-                    <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1.5">Blind Spots</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1.5">Blind Spots</h4>
                     <p className="text-foreground/80">{info.fullProfile.blindSpots}</p>
                   </div>
                   <div className="p-3 rounded-lg border border-primary/20 bg-primary/5">
-                    <h4 className="text-xs uppercase tracking-wider text-primary mb-1.5">Growth Path</h4>
+                    <h4 className="text-sm uppercase tracking-wider text-primary mb-1.5">Growth Path</h4>
                     <p className="text-foreground/80">{info.fullProfile.growthPath}</p>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Famous Behavior</h4>
-                      <p className="text-foreground/80 text-xs italic">{info.famousBehavior}</p>
+                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Famous Behavior</h4>
+                      <p className="text-foreground/80 text-sm italic">{info.famousBehavior}</p>
                     </div>
                     <div>
-                      <h4 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Recommended Action</h4>
-                      <p className="text-foreground/80 text-xs">{info.recommendedAction}</p>
+                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Recommended Action</h4>
+                      <p className="text-foreground/80 text-sm">{info.recommendedAction}</p>
                     </div>
                   </div>
                 </div>
