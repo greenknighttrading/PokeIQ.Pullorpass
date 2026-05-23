@@ -40,6 +40,31 @@ function writeQuota(q: { date: string; used: number; bonus: number; lifetime: nu
   try { localStorage.setItem('pop_quota', JSON.stringify(q)); } catch {}
 }
 
+// ─── Resume state (remember where the user left off) ─────
+const RESUME_KEY = 'pop_resume_v1';
+type ResumeState = {
+  cards: SwipeCard[];
+  index: number;
+  records: SwipeRecord[];
+  roundId: string;
+};
+function readResume(): ResumeState | null {
+  try {
+    const raw = localStorage.getItem(RESUME_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    if (!v?.cards?.length) return null;
+    if (typeof v.index !== 'number' || v.index >= v.cards.length) return null;
+    return v as ResumeState;
+  } catch { return null; }
+}
+function writeResume(s: ResumeState) {
+  try { localStorage.setItem(RESUME_KEY, JSON.stringify(s)); } catch {}
+}
+function clearResume() {
+  try { localStorage.removeItem(RESUME_KEY); } catch {}
+}
+
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
   return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
