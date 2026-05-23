@@ -120,6 +120,7 @@ function AppRoutes() {
         <Route path="/pack-gains" element={<PackGainsCalculator />} />
         <Route path="/swipe" element={<PullOrPass />} />
         <Route path="/matches" element={<Matches />} />
+        <Route path="/matches/:category" element={<MatchesCollection />} />
         <Route path="/pokeyelp" element={<PokeYelp />} />
 
         {/* Standalone report pages - no layout */}
