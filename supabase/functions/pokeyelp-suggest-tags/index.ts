@@ -1,7 +1,7 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
 
 const TAG_VOCAB = {
-  'Emotional Tone': ['Nostalgic','Cozy','Peaceful','Exciting','Powerful','Dark','Chaotic','Joyful','Lonely','Adventurous','Mysterious','Relaxing','Hopeful','Intimidating'],
+  'Emotional Tone': ['Nostalgic','Cozy','Peaceful','Exciting','Powerful','Dark','Chaotic','Joyful','Lonely','Adventurous','Mysterious','Relaxing','Hopeful','Intimidating','Happy','Angry'],
   'Aesthetic Style': ['Cute','Beautiful','Colorful','Minimalist','Detailed','Clean','Cinematic','Playful','Epic','Dreamlike','Vintage','Modern','Soft','Aggressive'],
   'Action / Pose': ['Flying','Jumping','Sitting','Squatting','Running','Walking','Standing','Sleeping','Attacking','Floating','Swimming','Posing'],
   'Collector Appeal': ['Grail','Display piece','Binder card','Investment','Chase card','Sleeper','Underrated','Overrated','Personal favorite','Trade bait'],
