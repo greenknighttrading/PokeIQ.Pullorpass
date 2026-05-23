@@ -916,33 +916,72 @@ function OutOfSwipesView({
   onSignUp: () => void;
 }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center px-4">
+    <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center px-4 py-8">
       <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
         <Lock className="w-7 h-7 text-muted-foreground" />
       </div>
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-foreground">You're out of swipes today</h2>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Free players get {limit} swipes per day. Review 20 cards on Earn Credits to unlock <strong className="text-foreground">+10 more swipes</strong>, and help train PokeIQ to spot your taste.
+          Free players get {limit} swipes per day.
         </p>
       </div>
-      <div className="flex flex-col gap-2 w-full max-w-xs">
-        <Link to="/earn">
-          <Button size="lg" className="w-full gap-2">
-            <Sparkles className="w-4 h-4" /> Earn +10 swipes — train PokeIQ
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg">
+        {/* Earn swipes card */}
+        <Card className="p-5 text-left space-y-4 flex flex-col">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-foreground">Earn +10 Swipes</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Train PokeIQ by reviewing cards and unlock bonus swipes.
+            </p>
+          </div>
+          <ul className="space-y-2 text-sm text-muted-foreground flex-1">
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-primary mt-0.5 shrink-1" />
+              <span>Review 20 cards on Earn Credits</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-primary mt-0.5 shrink-1" />
+              <span>Helps train PokeIQ to spot your taste</span>
+            </li>
+          </ul>
+          <Link to="/earn">
+            <Button size="lg" className="w-full gap-2">
+              <Sparkles className="w-4 h-4" /> Earn +10 Swipes
+            </Button>
+          </Link>
+        </Card>
+
+        {/* Go Pro card */}
+        <Card className="p-5 text-left space-y-4 flex flex-col">
+          <div className="space-y-1">
+            <h3 className="text-base font-bold text-foreground">Go Pro</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Unlimited swipes and instant access to all premium features.
+            </p>
+          </div>
+          <ul className="space-y-2 text-sm text-muted-foreground flex-1">
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Unlimited swipes every day</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Just $5/month or $39/year</span>
+            </li>
+          </ul>
+          <Button
+            size="lg"
+            className="w-full gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400 font-semibold"
+            onClick={() => toast.success('PokeIQ Pro launches soon — you\'re on the early list.')}
+          >
+            <Trophy className="w-4 h-4" /> Upgrade to Pro
           </Button>
-        </Link>
-        <Button
-          size="lg"
-          variant="default"
-          className="w-full gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400 font-semibold"
-          onClick={() => toast.success('PokeIQ Pro launches soon — you\'re on the early list.')}
-        >
-          <Trophy className="w-4 h-4" /> Go Pro — unlimited swipes · $5/mo or $39/yr
-        </Button>
-        <p className="text-[11px] text-muted-foreground -mt-1">
-          Get instant access to all premium features.
-        </p>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-2 w-full max-w-xs">
         <Link to="/matches">
           <Button size="lg" variant="outline" className="w-full gap-2">
             <Heart className="w-4 h-4" /> See your Matches
