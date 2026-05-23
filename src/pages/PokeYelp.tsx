@@ -359,14 +359,34 @@ export default function PokeYelp() {
     await supabase.from('pokeiq_credits').upsert({
       user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
     });
-    toast.success('+1 PokeIQ credit');
-    setReviewedCount((c) => c + 1);
-    // Unlock +20 PullOrPass swipes for today
+    // Track lifetime review count → reward milestones
+    let lifetime = 0;
     try {
-      const d = new Date();
-      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-      localStorage.setItem('pokeyelp_done_' + key, '1');
+      lifetime = Number(localStorage.getItem('earn_reviews_total') || '0') + 1;
+      localStorage.setItem('earn_reviews_total', String(lifetime));
     } catch {}
+    setReviewedCount((c) => c + 1);
+
+    // Every 20 reviews → +10 PullOrPass swipes
+    if (lifetime > 0 && lifetime % REVIEWS_PER_SWIPE_BATCH === 0) {
+      grantSwipeBonus(SWIPES_PER_BATCH);
+      toast.success(`+${SWIPES_PER_BATCH} PullOrPass swipes unlocked!`, {
+        description: `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
+      });
+    } else {
+      const toNext = REVIEWS_PER_SWIPE_BATCH - (lifetime % REVIEWS_PER_SWIPE_BATCH);
+      toast.success('Review saved — PokeIQ just got smarter', {
+        description: `${toNext} more to unlock +${SWIPES_PER_BATCH} swipes.`,
+      });
+    }
+
+    // 200 reviews → 30 days of PokeIQ Premium
+    if (lifetime === REVIEWS_FOR_PREMIUM) {
+      grantPremium(PREMIUM_DAYS);
+      toast.success(`🎉 PokeIQ Premium unlocked — ${PREMIUM_DAYS} days!`, {
+        description: 'Unlimited swipes and premium features are now active.',
+      });
+    }
     if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
       setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
