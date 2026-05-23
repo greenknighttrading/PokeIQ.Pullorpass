@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ZoomIn } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
