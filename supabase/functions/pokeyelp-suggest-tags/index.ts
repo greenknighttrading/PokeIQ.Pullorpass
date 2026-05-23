@@ -40,6 +40,7 @@ IMPORTANT RULES:
   * Cool — if the Pokémon looks badass, sleek, stylish, or has a confident/intimidating aura.
   * Girly — if the card uses traditionally feminine colors (pink, pastel, purple, soft tones) or the Pokémon/art has a very cute, feminine, or lovely aesthetic.
   * Bug — if the Pokémon is a Bug-type or has strong insect/bug characteristics (e.g., Butterfree, Scyther, Caterpie).
+  * Colorful — if the card art has many colors, a vivid palette, or is particularly bright and multicolored.
 
 Preferred vocabulary by category:
 ${vocabList}
