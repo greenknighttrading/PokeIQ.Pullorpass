@@ -112,13 +112,16 @@ export default function PullOrPass() {
       }).then(({ error }) => { if (error) console.error('swipe insert', error); });
     }
 
-    if (index + 1 >= cards.length) {
-      finalizeRound(newRecords);
-    } else {
-      setIndex(index + 1);
-      setImgError(false);
-      setExitDir(null);
-    }
+    // Delay advancing so the freeze + exit animation can play.
+    window.setTimeout(() => {
+      if (index + 1 >= cards.length) {
+        finalizeRound(newRecords);
+      } else {
+        setIndex(index + 1);
+        setImgError(false);
+        setExitDir(null);
+      }
+    }, 800);
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
