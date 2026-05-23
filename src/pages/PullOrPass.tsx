@@ -300,10 +300,10 @@ export default function PullOrPass() {
         title="PULLorPASS — Discover Your Collector DNA | PokeIQ"
         description="React to Pokémon cards on instinct. PULLorPASS builds your Collector DNA so you discover what cards actually feel like you."
       />
-      <div className="h-screen overflow-hidden bg-background flex flex-col">
+      <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
         <GlobalNavBar />
 
-        <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none">
+        <main className={`flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto' : ''}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
@@ -312,16 +312,30 @@ export default function PullOrPass() {
             </div>
           )}
 
-          {stage === 'swiping' && current && (
+          {stage === 'swiping' && outOfSwipes && (
+            <OutOfSwipesView
+              limit={dailyLimit}
+              hasBonus={quota.bonus > 0}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth')}
+            />
+          )}
+
+          {stage === 'swiping' && !outOfSwipes && current && (
             <>
-              {/* Progress */}
-              <div className="flex items-center justify-between mb-2">
+              {/* Progress + Matches link + quota */}
+              <div className="flex items-center justify-between mb-2 gap-2">
                 <span className="text-xs font-medium text-muted-foreground tabular-nums">
                   Card {index + 1} / {cards.length}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {records.filter((r) => r.decision === 'pull').length} pulled
-                </span>
+                <div className="flex items-center gap-3">
+                  <Link to="/matches" className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Heart className="w-3 h-3 fill-primary" /> Matches
+                  </Link>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
+                    {remaining} left today
+                  </span>
+                </div>
               </div>
               <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-3">
                 <div
@@ -337,15 +351,14 @@ export default function PullOrPass() {
                   className="relative aspect-[2.5/3.5] w-auto"
                   style={{ touchAction: 'none', height: 'min(60vh, 420px)' }}
                 >
-                  {/* +2 card */}
+                  {/* Behind cards — stable keys so they smoothly promote forward */}
                   {after && (
-                    <StackCardShell offset={2}>
+                    <StackCardShell key={after.card_id} offset={2}>
                       <CardArt card={after} />
                     </StackCardShell>
                   )}
-                  {/* +1 card (visible shadow behind) */}
                   {next && (
-                    <StackCardShell offset={1}>
+                    <StackCardShell key={next.card_id} offset={1}>
                       <CardArt card={next} />
                     </StackCardShell>
                   )}
@@ -404,9 +417,22 @@ export default function PullOrPass() {
           )}
 
           {stage === 'results' && (
-            <ResultsView records={records} onPlayAgain={loadRound} isAuthed={!!userId} onSignUp={() => navigate('/auth')} />
+            <ResultsView
+              records={records}
+              onPlayAgain={() => { if (!outOfSwipes) loadRound(); }}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth')}
+              outOfSwipes={outOfSwipes}
+            />
           )}
         </main>
+
+        {/* Mid-session signup nudge after first 20 lifetime swipes */}
+        <AnimatePresence>
+          {showSignupPrompt && (
+            <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth')} />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
