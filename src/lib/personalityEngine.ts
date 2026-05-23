@@ -342,6 +342,72 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
       growthPath: 'The strongest Diplomats learn that balance is most powerful when it is paired with conviction.',
     },
   },
+  Gambler: {
+    emoji: '\uD83C\uDFB0',
+    philosophy: 'You miss every pack you don\u2019t rip.',
+    tagline: 'Gamblers are adrenaline-driven collectors who live for the thrill of the pull, the chase, and the long-shot upside.',
+    summary: "The Gambler is driven by excitement, risk, and the rush of possibility. You love ripping packs, chasing big hits, and taking long-shot bets. The hobby feels alive when the stakes are high \u2014 and a boring collection is worse than a risky one.",
+    coreTraits: ['Thrill-seeking', 'Impulsive', 'Optimistic', 'Risk-tolerant'],
+    strength: 'High energy and willingness to take real swings.',
+    weakness: 'Variance and impulse can quietly erode the collection.',
+    collectionStyle: ['Pack-heavy', 'Hit-chasing', 'High variance'],
+    famousBehavior: 'Bought one more booster box \u201Cjust to chase the chase card.\u201D',
+    dangerZone: 'Letting variance and dopamine make every buying decision \u2014 wins feel huge, losses get hidden.',
+    recommendedAction: 'Set a monthly \u201Cthrill budget\u201D and protect the rest of the collection from it.',
+    strengthLong: 'High energy and willingness to take real swings. Gamblers will pull the trigger on bets most collectors quietly walk away from \u2014 and sometimes that\u2019s exactly the right call.',
+    weaknessLong: 'Variance and impulse can quietly erode the collection. The same thrill that drives the wins can mask years of small losses if no guardrails exist.',
+    fullProfile: {
+      coreIdentity: 'Gamblers are wired for excitement. The hobby, for them, is at its best when there\u2019s something on the line \u2014 a pack to rip, a long-shot card to chase, a bold buy that could pay off in a big way. They are highly optimistic collectors who naturally focus on upside potential.',
+      collectingMindset: 'People with this personality type are drawn to anything with a hit-or-miss outcome: booster boxes, sealed cases, hyped releases, mystery products, and risk-on plays. They tend to make decisions quickly and intuitively, and they\u2019d rather act and miss than overthink and never try.',
+      innerWorld: 'For Gamblers, the dopamine of the chase is part of the joy. Even losing pulls are part of the experience. They\u2019re emotionally resilient in the short term and remarkably willing to swing again right after a miss.',
+      blindSpots: 'That same wiring can become a trap. Gamblers often underweight downside, underestimate how much they\u2019ve actually spent chasing the hit, and chase variance long after the math has stopped favoring them.',
+      growthPath: 'The strongest Gamblers learn to keep the thrill alive in a contained corner of their collection \u2014 protecting the long-term foundation while still letting themselves swing for the fences.',
+    },
+  },
+  Showman: {
+    emoji: '\uD83D\uDC51',
+    philosophy: 'A collection unseen is a collection wasted.',
+    tagline: 'Showmen are expressive, audience-aware collectors who build their collections to be admired, shared, and remembered.',
+    summary: "The Showman is energized by recognition and presence. You enjoy showing your pickups, sharing your collection, and owning pieces that other collectors immediately recognize. Your collection is part personal joy, part performance.",
+    coreTraits: ['Expressive', 'Social', 'Status-aware', 'Recognizable'],
+    strength: 'Builds collections that get noticed and remembered.',
+    weakness: 'Can prioritize impression over genuine fit.',
+    collectionStyle: ['Trophy slabs', 'Recognizable grails', 'Display-ready pieces'],
+    famousBehavior: 'Pickups are posted before they\u2019re even in a top loader.',
+    dangerZone: 'Buying for the reaction instead of the relationship \u2014 chasing applause more than the cards.',
+    recommendedAction: 'For every \u201Cposting card\u201D you buy, add one quiet card that\u2019s just for you.',
+    strengthLong: 'Builds collections that get noticed and remembered. Showmen have an instinct for which pieces resonate socially and how to present them.',
+    weaknessLong: 'Can prioritize impression over genuine fit. The pursuit of recognition can pull the collection away from what actually matters to them.',
+    fullProfile: {
+      coreIdentity: 'Showmen treat collecting as a form of expression. Their collections aren\u2019t just personal \u2014 they\u2019re a public statement of taste, status, and identity. They naturally gravitate toward pieces that other collectors immediately recognize and react to.',
+      collectingMindset: 'People with this personality type often think about presentation, social moments, and storytelling. They enjoy sharing pickups, building collections that look impressive on camera, and owning at least a few pieces that consistently spark a reaction.',
+      innerWorld: 'There\u2019s real joy here in being seen. Recognition isn\u2019t shallow for the Showman \u2014 it\u2019s how they connect to the wider hobby and feel part of the community.',
+      blindSpots: 'The drive for recognition can drift into status-chasing. Showmen may overpay for prestige pieces, neglect quieter cards they actually love, or let the audience shape their collection more than their own taste does.',
+      growthPath: 'The strongest Showmen learn that the most magnetic collections are also the most personal \u2014 recognition is a side effect of authenticity, not a substitute for it.',
+    },
+  },
+  Minimalist: {
+    emoji: '\uD83E\uDDD8',
+    philosophy: 'Less, but better.',
+    tagline: 'Minimalists are quietly intentional collectors who would rather own a few perfect cards than chase the noise of accumulation.',
+    summary: "The Minimalist is intentional, restrained, and quietly discerning. You keep your collection small on purpose, refine often, and would rather own a few perfect pieces than a wall of cards. Quality, focus, and clarity matter more than volume.",
+    coreTraits: ['Intentional', 'Restrained', 'Focused', 'Refined'],
+    strength: 'Clarity of taste and very high signal-to-noise.',
+    weakness: 'Can over-prune and lose pieces with future meaning.',
+    collectionStyle: ['Tight, curated set', 'Frequent refinement', 'Quality over quantity'],
+    famousBehavior: 'Owns 12 cards. All of them perfect.',
+    dangerZone: 'Restraint hardening into rigidity \u2014 saying no so often you stop discovering anything new.',
+    recommendedAction: 'Allow yourself one \u201Cunjustified\u201D card a quarter, purely because you love it.',
+    strengthLong: 'Clarity of taste and very high signal-to-noise. Minimalists collect with intention, and every card in their collection tends to earn its place.',
+    weaknessLong: 'Can over-prune and lose pieces with future meaning. The same discipline that creates clarity can also strip out the romance of the hobby.',
+    fullProfile: {
+      coreIdentity: 'Minimalists collect with restraint and intention. They are quietly selective, more interested in what to leave out than what to add. For them, a collection is defined as much by what it refuses as by what it contains.',
+      collectingMindset: 'People with this personality type prefer small, refined collections over volume. They regularly trim, consolidate, and upgrade \u2014 always pushing toward a tighter, clearer expression of what they actually love.',
+      innerWorld: 'There\u2019s a calm to this style of collecting. Minimalists rarely feel FOMO in the way other types do. They\u2019re comfortable watching hype cycles pass without engaging, and they often feel relief, not regret, after letting cards go.',
+      blindSpots: 'Restraint can quietly become rigidity. Minimalists may dismiss too many cards too quickly, miss opportunities that don\u2019t fit their current frame, or strip their collection of pieces that would have grown into meaning over time.',
+      growthPath: 'The strongest Minimalists learn that intentional collecting still leaves room for play \u2014 the goal is clarity, not austerity.',
+    },
+  },
 };
 
 // ---------- Scoring ----------
@@ -361,26 +427,35 @@ function computeTraits(answers: Answers): TraitScores {
     curiosity: clamp(avg([a(17), a(19), a(20)])),
     analysis: clamp(avg([a(18), a(20), a(22)])),
     balance: clamp(avg([a(10), a(21), a(23), a(24)])),
+    preservation: clamp(avg([a(3), a(15), a(23)])),
+    aesthetics: clamp(avg([a(13), a(16)])),
+    recognition: clamp(avg([a(29), a(30), a(15)])),
+    excitement: clamp(avg([a(25), a(26), a(27), a(28)])),
+    restraint: clamp(avg([a(31), a(32), a(3)])),
   };
 }
 
 const TIE_BREAK_ORDER: PersonalityType[] = [
-  'Investor', 'Archivist', 'Curator', 'Diplomat',
-  'Analyst', 'Dreamer', 'Hunter', 'Explorer', 'Flipper',
+  'Investor', 'Archivist', 'Curator', 'Diplomat', 'Minimalist',
+  'Analyst', 'Dreamer', 'Hunter', 'Explorer', 'Showman',
+  'Flipper', 'Gambler',
 ];
 
 function scoreType(t: TraitScores, type: PersonalityType): number {
   const inv = (v: number) => 100 - v;
   switch (type) {
     case 'Investor':  return t.patience * 1.2 + inv(t.activity) + t.balance * 0.8;
-    case 'Archivist': return t.structure + t.conviction * 0.9 + t.emotion * 0.7 + inv(t.curiosity) * 0.4;
+    case 'Archivist': return t.preservation * 1.2 + t.structure * 0.7 + t.conviction * 0.6 + inv(t.activity) * 0.4;
     case 'Dreamer':   return t.emotion * 1.5 + inv(t.analysis) * 0.6 + inv(t.activity) * 0.3;
-    case 'Flipper':   return t.activity * 1.3 + inv(t.patience) * 0.9 + t.curiosity * 0.3;
+    case 'Flipper':   return t.activity * 1.3 + inv(t.patience) * 0.9 + t.curiosity * 0.3 + inv(t.restraint) * 0.2;
     case 'Analyst':   return t.analysis * 1.2 + t.structure * 0.7 + t.curiosity * 0.6;
     case 'Hunter':    return t.conviction * 1.3 + t.activity * 0.6 + inv(t.balance) * 0.7;
     case 'Explorer':  return t.curiosity * 1.3 + t.activity * 0.5 + inv(t.patience) * 0.4;
-    case 'Curator':   return t.structure * 1.2 + t.emotion * 0.6 + t.balance * 0.5;
+    case 'Curator':   return t.aesthetics * 1.2 + t.structure * 1.0 + t.emotion * 0.4;
     case 'Diplomat':  return t.balance * 1.3 + t.patience * 0.5 + inv(t.conviction) * 0.5;
+    case 'Gambler':   return t.excitement * 1.5 + inv(t.patience) * 0.6 + inv(t.restraint) * 0.6 + t.activity * 0.3;
+    case 'Showman':   return t.recognition * 1.4 + t.aesthetics * 0.5 + t.activity * 0.3;
+    case 'Minimalist':return t.restraint * 1.4 + t.structure * 0.5 + inv(t.activity) * 0.5 + inv(t.excitement) * 0.4;
   }
 }
 
@@ -406,6 +481,9 @@ const PRODUCT_BASELINES: Record<PersonalityType, ProductAllocation> = {
   Explorer:  { sealedPct: 45, gradedPct: 20, rawPct: 35 },
   Curator:   { sealedPct: 25, gradedPct: 45, rawPct: 30 },
   Diplomat:  { sealedPct: 35, gradedPct: 35, rawPct: 30 },
+  Gambler:   { sealedPct: 60, gradedPct: 15, rawPct: 25 },
+  Showman:   { sealedPct: 15, gradedPct: 70, rawPct: 15 },
+  Minimalist:{ sealedPct: 20, gradedPct: 55, rawPct: 25 },
 };
 
 const ERA_BASELINES: Record<PersonalityType, EraAllocation> = {
@@ -418,6 +496,9 @@ const ERA_BASELINES: Record<PersonalityType, EraAllocation> = {
   Explorer:  { vintage: 5,  classic: 10, modern: 20, ultraModern: 40, current: 25 },
   Curator:   { vintage: 25, classic: 25, modern: 25, ultraModern: 20, current: 5 },
   Diplomat:  { vintage: 20, classic: 20, modern: 20, ultraModern: 20, current: 20 },
+  Gambler:   { vintage: 5,  classic: 10, modern: 20, ultraModern: 35, current: 30 },
+  Showman:   { vintage: 35, classic: 25, modern: 20, ultraModern: 15, current: 5 },
+  Minimalist:{ vintage: 30, classic: 30, modern: 20, ultraModern: 15, current: 5 },
 };
 
 function normalize100<T extends Record<string, number>>(obj: T): T {
