@@ -103,6 +103,38 @@ export default function Matches() {
   const remainingToProfile = Math.max(0, PROFILE_GOAL - swipeCount);
   const profileUnlocked = swipeCount >= PROFILE_GOAL;
 
+  // Build a written Vibe Profile narrative from the user's data
+  const vibeProfile = React.useMemo(() => {
+    if (!profileUnlocked) return null;
+    const topVibes = vibes.slice(0, 3).map((v) => v.tag);
+    const secondaryVibes = vibes.slice(3, 6).map((v) => v.tag);
+    const favSet = topSets[0]?.[0];
+    const secondSet = topSets[1]?.[0];
+    const matchRate = swipes.length > 0 ? Math.round((matches.length / swipes.length) * 100) : 0;
+    const pullRate = swipes.length > 0 ? Math.round(((matches.length + likes.length) / swipes.length) * 100) : 0;
+
+    // Archetype based on price tier + vibes
+    let archetype = 'The Balanced Collector';
+    let archetypeBlurb = "You like a mix of beauty and value — not chasing chase cards, not bottom-feeding either.";
+    if (avgPrice >= 150) {
+      archetype = 'The Chase Hunter';
+      archetypeBlurb = "You go straight for the grails. Premium pulls, alt arts, and the cards everyone wants on the wall.";
+    } else if (avgPrice >= 50) {
+      archetype = 'The Tastemaker';
+      archetypeBlurb = "You have an eye for cards that are genuinely beautiful — not just expensive, not just cheap.";
+    } else if (avgPrice > 0 && avgPrice < 15) {
+      archetype = 'The Hidden Gem Digger';
+      archetypeBlurb = "You find the cards everyone else scrolled past. Aesthetic over price tag, every time.";
+    }
+
+    // Selectivity tone
+    let selectivity = 'balanced';
+    if (pullRate >= 70) selectivity = 'open-hearted — you find something to love in most pulls';
+    else if (pullRate <= 30) selectivity = 'highly selective — you wait for the card that really hits';
+
+    return { topVibes, secondaryVibes, favSet, secondSet, matchRate, pullRate, archetype, archetypeBlurb, selectivity };
+  }, [profileUnlocked, vibes, topSets, swipes.length, matches.length, likes.length, avgPrice]);
+
   return (
     <>
       <Seo title="Your Matches — Vibe Profile | PokeIQ" description="See the Pokémon cards that matched your taste and unlock your Vibe Profile." />
@@ -167,6 +199,43 @@ export default function Matches() {
                     </p>
                   </div>
                 </div>
+
+                {vibeProfile && (
+                  <div className="mt-5 pt-5 border-t border-amber-400/20 space-y-4">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-amber-400/80 font-semibold">Your Archetype</p>
+                      <h4 className="text-xl font-bold text-foreground mt-1">{vibeProfile.archetype}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{vibeProfile.archetypeBlurb}</p>
+                    </div>
+
+                    <div className="text-sm text-foreground leading-relaxed space-y-2">
+                      <p>
+                        Across <span className="font-semibold text-foreground tabular-nums">{swipes.length}</span> cards, PokeIQ has matched you on{' '}
+                        <span className="font-semibold text-primary tabular-nums">{matches.length}</span> ({vibeProfile.matchRate}% match rate)
+                        and you're {vibeProfile.selectivity}.
+                      </p>
+                      {vibeProfile.topVibes.length > 0 && (
+                        <p>
+                          Your taste leans <span className="font-semibold text-foreground">{vibeProfile.topVibes.join(', ')}</span>
+                          {vibeProfile.secondaryVibes.length > 0 && <> — with a soft spot for <span className="text-foreground">{vibeProfile.secondaryVibes.join(', ')}</span></>}.
+                        </p>
+                      )}
+                      {vibeProfile.favSet && (
+                        <p>
+                          You gravitate to <span className="font-semibold text-foreground">{vibeProfile.favSet}</span>
+                          {vibeProfile.secondSet && <> and <span className="font-semibold text-foreground">{vibeProfile.secondSet}</span></>}
+                          {' '}— that's where your eye keeps landing.
+                        </p>
+                      )}
+                      {avgPrice > 0 && (
+                        <p>
+                          Your average match sits around <span className="font-semibold text-primary tabular-nums">${avgPrice.toFixed(0)}</span>,
+                          which tells us where your collecting sweet spot lives.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </Card>
 
               {/* Aesthetic insights (always show what we have) */}
