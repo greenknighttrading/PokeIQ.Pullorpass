@@ -631,8 +631,9 @@ function DraggableCard({
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       onDragEnd={handleDragEnd}
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={{ opacity: 0.85, scale: 0.95, y: 14 }}
       animate={buildExitAnimate()}
+      transition={{ type: 'spring', stiffness: 260, damping: 26, mass: 0.6 }}
       whileTap={{ cursor: 'grabbing' }}
     >
       <CardArt card={card} />
