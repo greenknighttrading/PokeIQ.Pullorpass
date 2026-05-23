@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
@@ -18,6 +18,27 @@ type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
 
 const SWIPE_THRESHOLD = 110;
+
+// ─── Daily swipe quota (free tier) ───────────────────────
+const DAILY_BASE_LIMIT = 20;
+const POKEYELP_BONUS   = 20;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+function readQuota() {
+  try {
+    const raw = localStorage.getItem('pop_quota');
+    if (!raw) return { date: todayKey(), used: 0, bonus: 0, lifetime: 0 };
+    const q = JSON.parse(raw);
+    if (q.date !== todayKey()) return { date: todayKey(), used: 0, bonus: 0, lifetime: q.lifetime ?? 0 };
+    return { date: q.date, used: q.used ?? 0, bonus: q.bonus ?? 0, lifetime: q.lifetime ?? 0 };
+  } catch { return { date: todayKey(), used: 0, bonus: 0, lifetime: 0 }; }
+}
+function writeQuota(q: { date: string; used: number; bonus: number; lifetime: number }) {
+  try { localStorage.setItem('pop_quota', JSON.stringify(q)); } catch {}
+}
 
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
@@ -38,6 +59,12 @@ export default function PullOrPass() {
   const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
   const [matchCount, setMatchCount] = useState(0);
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
+  const [quota, setQuota] = useState(() => readQuota());
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+
+  const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
+  const remaining = Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = remaining <= 0;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -45,6 +72,18 @@ export default function PullOrPass() {
       if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
     });
     loadRound();
+    // Detect PokéYelp completion for bonus swipes
+    try {
+      const yelp = localStorage.getItem('pokeyelp_done_' + todayKey());
+      if (yelp) {
+        setQuota((q) => {
+          if (q.bonus >= POKEYELP_BONUS) return q;
+          const next = { ...q, bonus: POKEYELP_BONUS };
+          writeQuota(next);
+          return next;
+        });
+      }
+    } catch {}
   }, []);
 
   const loadRound = useCallback(async () => {
@@ -97,9 +136,10 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 800) => {
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 650) => {
     const newRecords = [...records, rec];
     setRecords(newRecords);
+    bumpQuota();
 
     if (userId) {
       supabase.from('pullorpass_swipes').insert({
@@ -126,6 +166,18 @@ export default function PullOrPass() {
         setExitDir(null);
       }
     }, advanceDelay);
+  };
+
+  const bumpQuota = () => {
+    setQuota((q) => {
+      const next = { ...q, used: q.used + 1, lifetime: q.lifetime + 1 };
+      writeQuota(next);
+      // After 20 lifetime swipes, nudge unauthed users to sign up
+      if (!userId && next.lifetime === 20) {
+        setShowSignupPrompt(true);
+      }
+      return next;
+    });
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
@@ -183,6 +235,7 @@ export default function PullOrPass() {
       const rec: SwipeRecord = { card: pulledCard, decision: 'pull', tags: ['Match'] };
       const newRecords = [...records, rec];
       setRecords(newRecords);
+      bumpQuota();
       if (userId) {
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
@@ -247,10 +300,10 @@ export default function PullOrPass() {
         title="PULLorPASS — Discover Your Collector DNA | PokeIQ"
         description="React to Pokémon cards on instinct. PULLorPASS builds your Collector DNA so you discover what cards actually feel like you."
       />
-      <div className="h-screen overflow-hidden bg-background flex flex-col">
+      <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
         <GlobalNavBar />
 
-        <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none">
+        <main className={`flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto' : ''}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
@@ -259,16 +312,30 @@ export default function PullOrPass() {
             </div>
           )}
 
-          {stage === 'swiping' && current && (
+          {stage === 'swiping' && outOfSwipes && (
+            <OutOfSwipesView
+              limit={dailyLimit}
+              hasBonus={quota.bonus > 0}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth')}
+            />
+          )}
+
+          {stage === 'swiping' && !outOfSwipes && current && (
             <>
-              {/* Progress */}
-              <div className="flex items-center justify-between mb-2">
+              {/* Progress + Matches link + quota */}
+              <div className="flex items-center justify-between mb-2 gap-2">
                 <span className="text-xs font-medium text-muted-foreground tabular-nums">
                   Card {index + 1} / {cards.length}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {records.filter((r) => r.decision === 'pull').length} pulled
-                </span>
+                <div className="flex items-center gap-3">
+                  <Link to="/matches" className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Heart className="w-3 h-3 fill-primary" /> Matches
+                  </Link>
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
+                    {remaining} left today
+                  </span>
+                </div>
               </div>
               <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-3">
                 <div
@@ -284,15 +351,14 @@ export default function PullOrPass() {
                   className="relative aspect-[2.5/3.5] w-auto"
                   style={{ touchAction: 'none', height: 'min(60vh, 420px)' }}
                 >
-                  {/* +2 card */}
+                  {/* Behind cards — stable keys so they smoothly promote forward */}
                   {after && (
-                    <StackCardShell offset={2}>
+                    <StackCardShell key={after.card_id} offset={2}>
                       <CardArt card={after} />
                     </StackCardShell>
                   )}
-                  {/* +1 card (visible shadow behind) */}
                   {next && (
-                    <StackCardShell offset={1}>
+                    <StackCardShell key={next.card_id} offset={1}>
                       <CardArt card={next} />
                     </StackCardShell>
                   )}
@@ -351,9 +417,22 @@ export default function PullOrPass() {
           )}
 
           {stage === 'results' && (
-            <ResultsView records={records} onPlayAgain={loadRound} isAuthed={!!userId} onSignUp={() => navigate('/auth')} />
+            <ResultsView
+              records={records}
+              onPlayAgain={() => { if (!outOfSwipes) loadRound(); }}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth')}
+              outOfSwipes={outOfSwipes}
+            />
           )}
         </main>
+
+        {/* Mid-session signup nudge after first 20 lifetime swipes */}
+        <AnimatePresence>
+          {showSignupPrompt && (
+            <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth')} />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
@@ -437,21 +516,21 @@ function SwipeAnimationLayer({ anim }: { anim: { type: 'pull' | 'love' | 'pass';
 // ─────────────────────────────────────────────────────────
 
 function StackCardShell({ offset, children }: { offset: number; children: React.ReactNode }) {
-  // Behind cards: scaled down, pushed down, dimmed
+  // Behind cards: scaled down, pushed down, dimmed.
+  // Animated so when index advances they smoothly glide forward.
   const scale = 1 - offset * 0.05;
   const y = offset * 14;
-  const opacity = offset === 1 ? 0.85 : 0.55;
+  const opacity = offset === 1 ? 0.9 : 0.6;
   return (
-    <div
+    <motion.div
       className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-xl"
-      style={{
-        transform: `translateY(${y}px) scale(${scale})`,
-        opacity,
-        zIndex: 10 - offset,
-      }}
+      initial={{ scale: scale - 0.04, y: y + 10, opacity: 0 }}
+      animate={{ scale, y, opacity }}
+      transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.6 }}
+      style={{ zIndex: 10 - offset }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }
 
@@ -552,8 +631,9 @@ function DraggableCard({
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       onDragEnd={handleDragEnd}
-      initial={{ opacity: 0, scale: 0.96 }}
+      initial={{ opacity: 0.85, scale: 0.95, y: 14 }}
       animate={buildExitAnimate()}
+      transition={{ type: 'spring', stiffness: 260, damping: 26, mass: 0.6 }}
       whileTap={{ cursor: 'grabbing' }}
     >
       <CardArt card={card} />
@@ -586,15 +666,18 @@ function ResultsView({
   onPlayAgain,
   isAuthed,
   onSignUp,
+  outOfSwipes,
 }: {
   records: SwipeRecord[];
   onPlayAgain: () => void;
   isAuthed: boolean;
   onSignUp: () => void;
+  outOfSwipes?: boolean;
 }) {
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
   const passed = records.filter((r) => r.decision === 'pass');
+  const superLikes = records.filter((r) => r.tags.includes('Loved') || r.tags.includes('Match'));
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -624,6 +707,27 @@ function ResultsView({
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg Pull</p>
         </Card>
       </div>
+
+      {/* Super Likes (loved + matches) */}
+      <Card className="p-4 border-amber-400/30 bg-amber-400/[0.04]">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs uppercase tracking-wide text-amber-400 font-semibold flex items-center gap-1.5">
+            <Star className="w-3.5 h-3.5 fill-amber-400" /> Super Likes
+          </p>
+          <Link to="/matches" className="text-xs text-primary hover:underline">View all matches →</Link>
+        </div>
+        {superLikes.length === 0 ? (
+          <p className="text-xs text-muted-foreground text-center py-3">
+            No Super Likes this round. Tap ★ on cards you really love.
+          </p>
+        ) : (
+          <div className="grid grid-cols-6 gap-1.5">
+            {superLikes.map((r) => (
+              <ResultThumb key={r.card.card_id} card={r.card} loved />
+            ))}
+          </div>
+        )}
+      </Card>
 
       {/* Liked vs Disliked side by side */}
       <div className="grid grid-cols-2 gap-3">
@@ -693,12 +797,14 @@ function ResultsView({
       )}
 
       <div className="flex flex-col gap-2 pt-2">
-        <Button onClick={onPlayAgain} size="lg" className="gap-2">
+        <Button onClick={onPlayAgain} size="lg" className="gap-2" disabled={outOfSwipes}>
           <RotateCw className="w-4 h-4" />
-          New 20-Card Round
+          {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'New 20-Card Round'}
         </Button>
         <p className="text-[11px] text-center text-muted-foreground">
-          Come back tomorrow to sharpen your Collector DNA.
+          {outOfSwipes
+            ? 'Complete PokéYelp to unlock +20 more swipes today.'
+            : 'Come back tomorrow to sharpen your Collector DNA.'}
         </p>
       </div>
     </motion.div>
@@ -727,5 +833,101 @@ function ResultThumb({ card, loved }: { card: SwipeCard; loved?: boolean }) {
         </div>
       )}
     </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Out-of-swipes + signup nudge
+// ─────────────────────────────────────────────────────────
+function OutOfSwipesView({
+  limit,
+  hasBonus,
+  isAuthed,
+  onSignUp,
+}: {
+  limit: number;
+  hasBonus: boolean;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center px-4">
+      <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+        <Lock className="w-7 h-7 text-muted-foreground" />
+      </div>
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold text-foreground">You're out of swipes today</h2>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Free players get {limit} swipes per day.
+          {!hasBonus && ' Complete a PokéYelp review to unlock +20 more right now.'}
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 w-full max-w-xs">
+        {!hasBonus && (
+          <Link to="/pokeyelp">
+            <Button size="lg" className="w-full gap-2">
+              <Sparkles className="w-4 h-4" /> Do PokéYelp for +20 swipes
+            </Button>
+          </Link>
+        )}
+        <Link to="/matches">
+          <Button size="lg" variant="outline" className="w-full gap-2">
+            <Heart className="w-4 h-4" /> See your Matches
+          </Button>
+        </Link>
+        {!isAuthed && (
+          <Button size="lg" variant="ghost" className="w-full gap-2" onClick={onSignUp}>
+            <LogIn className="w-4 h-4" /> Sign up to save progress
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SignupNudge({ onClose, onSignUp }: { onClose: () => void; onSignUp: () => void }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-md w-full"
+      >
+        <Card className="p-6 border-primary/40 bg-card relative">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="text-center space-y-3">
+            <Sparkles className="w-8 h-8 mx-auto text-primary" />
+            <h3 className="text-lg font-bold text-foreground">You're 20 swipes in — nice taste.</h3>
+            <p className="text-sm text-muted-foreground">
+              Create a free account to start building your <strong className="text-foreground">Collector Profile</strong> —
+              your vibes, your favorite sets, and the cards that actually feel like you.
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={onSignUp} size="lg" className="gap-2">
+                <LogIn className="w-4 h-4" /> Build my Collector Profile
+              </Button>
+              <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">
+                Keep swiping for now
+              </button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }
