@@ -571,6 +571,47 @@ export default function PokeYelp() {
               </div>
             </motion.div>
           )}
+
+          {/* Enlarged card modal */}
+          <AnimatePresence>
+            {enlarged && current && (
+              <motion.div
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 1 }}
+                onClick={() => setEnlarged(false)}
+                className="fixed inset-1.5 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+              >
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 1 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 1 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative max-w-lg w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden shadow-2xl"
+                >
+                  {current.image_url && !imgErr ? (
+                    <img
+                      src={current.image_url}
+                      alt={current.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted/30">
+                      <ImageOff className="w-10 h-10" />
+                      <span className="text-sm">No image</span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setEnlarged(false)}
+                    className="absolute top-3 right-3 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    aria-label="Close"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </main>
       </div>
     </>
