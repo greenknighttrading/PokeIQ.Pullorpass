@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,7 @@ export default function PullOrPass() {
   const [roundId, setRoundId] = useState<string>('');
   const [imgError, setImgError] = useState(false);
   const [flyAnim, setFlyAnim] = useState<{ type: 'pull' | 'love' | 'pass'; key: number } | null>(null);
+  const [exitDir, setExitDir] = useState<SwipeDir | null>(null);
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -116,6 +117,7 @@ export default function PullOrPass() {
     } else {
       setIndex(index + 1);
       setImgError(false);
+      setExitDir(null);
     }
   };
 
@@ -153,18 +155,21 @@ export default function PullOrPass() {
   const handlePull = () => {
     if (!current) return;
     triggerAnim('pull');
+    setExitDir('right');
     recordSwipe({ card: current, decision: 'pull', tags: [] });
   };
 
   const handlePass = () => {
     if (!current) return;
     triggerAnim('pass');
+    setExitDir('left');
     recordSwipe({ card: current, decision: 'pass', tags: [] });
   };
 
   const handleLove = () => {
     if (!current) return;
     triggerAnim('love');
+    setExitDir('up');
     recordSwipe({ card: current, decision: 'pull', tags: ['Loved'] });
   };
 
@@ -230,6 +235,7 @@ export default function PullOrPass() {
                     key={current.card_id + '-' + index}
                     card={current}
                     onSwipe={handleSwipeDir}
+                    exitDir={exitDir}
                   />
                 </div>
 
