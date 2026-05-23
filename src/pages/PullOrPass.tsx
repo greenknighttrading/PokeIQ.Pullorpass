@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
   SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
@@ -18,6 +18,27 @@ type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
 
 const SWIPE_THRESHOLD = 110;
+
+// ─── Daily swipe quota (free tier) ───────────────────────
+const DAILY_BASE_LIMIT = 20;
+const POKEYELP_BONUS   = 20;
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+function readQuota() {
+  try {
+    const raw = localStorage.getItem('pop_quota');
+    if (!raw) return { date: todayKey(), used: 0, bonus: 0, lifetime: 0 };
+    const q = JSON.parse(raw);
+    if (q.date !== todayKey()) return { date: todayKey(), used: 0, bonus: 0, lifetime: q.lifetime ?? 0 };
+    return { date: q.date, used: q.used ?? 0, bonus: q.bonus ?? 0, lifetime: q.lifetime ?? 0 };
+  } catch { return { date: todayKey(), used: 0, bonus: 0, lifetime: 0 }; }
+}
+function writeQuota(q: { date: string; used: number; bonus: number; lifetime: number }) {
+  try { localStorage.setItem('pop_quota', JSON.stringify(q)); } catch {}
+}
 
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
@@ -38,6 +59,12 @@ export default function PullOrPass() {
   const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
   const [matchCount, setMatchCount] = useState(0);
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
+  const [quota, setQuota] = useState(() => readQuota());
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+
+  const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
+  const remaining = Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = remaining <= 0;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -45,6 +72,18 @@ export default function PullOrPass() {
       if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
     });
     loadRound();
+    // Detect PokéYelp completion for bonus swipes
+    try {
+      const yelp = localStorage.getItem('pokeyelp_done_' + todayKey());
+      if (yelp) {
+        setQuota((q) => {
+          if (q.bonus >= POKEYELP_BONUS) return q;
+          const next = { ...q, bonus: POKEYELP_BONUS };
+          writeQuota(next);
+          return next;
+        });
+      }
+    } catch {}
   }, []);
 
   const loadRound = useCallback(async () => {
@@ -97,9 +136,10 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 800) => {
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 650) => {
     const newRecords = [...records, rec];
     setRecords(newRecords);
+    bumpQuota();
 
     if (userId) {
       supabase.from('pullorpass_swipes').insert({
@@ -126,6 +166,18 @@ export default function PullOrPass() {
         setExitDir(null);
       }
     }, advanceDelay);
+  };
+
+  const bumpQuota = () => {
+    setQuota((q) => {
+      const next = { ...q, used: q.used + 1, lifetime: q.lifetime + 1 };
+      writeQuota(next);
+      // After 20 lifetime swipes, nudge unauthed users to sign up
+      if (!userId && next.lifetime === 20) {
+        setShowSignupPrompt(true);
+      }
+      return next;
+    });
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
@@ -183,6 +235,7 @@ export default function PullOrPass() {
       const rec: SwipeRecord = { card: pulledCard, decision: 'pull', tags: ['Match'] };
       const newRecords = [...records, rec];
       setRecords(newRecords);
+      bumpQuota();
       if (userId) {
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
