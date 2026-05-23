@@ -37,6 +37,7 @@ export default function PullOrPass() {
   const [exitDir, setExitDir] = useState<SwipeDir | null>(null);
   const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
   const [matchCount, setMatchCount] = useState(0);
+  const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -178,12 +179,45 @@ export default function PullOrPass() {
     const pulledCard = current;
     if (matched) {
       setMatchCount((c) => c + 1);
-      // Show match overlay shortly after the card freezes, give it room to breathe.
+      // Persist record immediately but DO NOT advance until user dismisses overlay.
+      const rec: SwipeRecord = { card: pulledCard, decision: 'pull', tags: ['Match'] };
+      const newRecords = [...records, rec];
+      setRecords(newRecords);
+      if (userId) {
+        supabase.from('pullorpass_swipes').insert({
+          user_id: userId,
+          round_id: roundId,
+          card_id: rec.card.card_id,
+          card_name: rec.card.name,
+          card_set: rec.card.set_name,
+          card_image: rec.card.image_url,
+          card_price: rec.card.price,
+          card_rarity: rec.card.rarity,
+          decision: rec.decision,
+          tags: rec.tags,
+        }).then(({ error }) => { if (error) console.error('swipe insert', error); });
+      }
       window.setTimeout(() => setMatchCard(pulledCard), 450);
-      window.setTimeout(() => setMatchCard(null), 2700);
-      recordSwipe({ card: pulledCard, decision: 'pull', tags: ['Match'] }, 2700);
+      // Queue the advance for dismissal
+      setPendingMatchAdvance(() => () => {
+        if (index + 1 >= cards.length) {
+          finalizeRound(newRecords);
+        } else {
+          setIndex(index + 1);
+          setImgError(false);
+          setExitDir(null);
+        }
+      });
     } else {
       recordSwipe({ card: pulledCard, decision: 'pull', tags: [] });
+    }
+  };
+
+  const dismissMatch = () => {
+    setMatchCard(null);
+    if (pendingMatchAdvance) {
+      pendingMatchAdvance();
+      setPendingMatchAdvance(null);
     }
   };
 
@@ -217,7 +251,7 @@ export default function PullOrPass() {
         <GlobalNavBar />
 
         <main className="flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none">
-          <MatchOverlay card={matchCard} />
+          <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
