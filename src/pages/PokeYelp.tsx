@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, ThumbsUp, ThumbsDown, Wand2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,14 @@ interface YelpCard {
   price: number;
   rarity: string | null;
 }
+
+interface Suggestion {
+  tag: string;
+  category: string;
+  reason: string;
+}
+
+type Vote = 'agree' | 'disagree';
 
 // Curated review-tag vocabulary — optimized for fast, low-thought tagging
 const TAG_GROUPS: { label: string; description: string; tags: string[] }[] = [
@@ -45,8 +53,8 @@ const TAG_GROUPS: { label: string; description: string; tags: string[] }[] = [
 ];
 
 const ALL_TAGS = TAG_GROUPS.flatMap((g) => g.tags);
-const MIN_TAGS = 3;
-const MAX_TAGS = 10;
+const MIN_VOTES = 3;
+const MAX_CUSTOM = 5;
 
 function tcgImage(id: string | null): string | null {
   if (!id) return null;
@@ -60,7 +68,9 @@ export default function PokeYelp() {
   const [index, setIndex] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(0);
-  const [selected, setSelected] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [votes, setVotes] = useState<Record<string, Vote>>({});
+  const [suggestLoading, setSuggestLoading] = useState(false);
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
   const [comment, setComment] = useState('');
@@ -107,6 +117,30 @@ export default function PokeYelp() {
     setLoading(false);
   }, []);
 
+  const fetchSuggestions = useCallback(async (card: YelpCard) => {
+    setSuggestLoading(true);
+    setSuggestions([]);
+    setVotes({});
+    try {
+      const { data, error } = await supabase.functions.invoke('pokeyelp-suggest-tags', {
+        body: {
+          name: card.name,
+          set_name: card.set_name,
+          rarity: card.rarity,
+          price: card.price,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      setSuggestions(Array.isArray(data?.suggestions) ? data.suggestions : []);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? 'Could not generate tags');
+    } finally {
+      setSuggestLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) {
@@ -118,30 +152,31 @@ export default function PokeYelp() {
   }, [loadPool, fetchCredits]);
 
   const current = pool[index];
-  const totalTags = selected.length + custom.length;
-  const remaining = Math.max(0, MIN_TAGS - totalTags);
-  const atMax = totalTags >= MAX_TAGS;
 
-  const toggle = (t: string) => {
-    setSelected((p) => {
-      if (p.includes(t)) return p.filter((x) => x !== t);
-      if (totalTags >= MAX_TAGS) {
-        toast.message(`Max ${MAX_TAGS} tags per review`);
-        return p;
-      }
-      return [...p, t];
-    });
+  // Auto-fetch suggestions when card changes
+  useEffect(() => {
+    if (current) fetchSuggestions(current);
+  }, [current?.card_id, fetchSuggestions]);
+
+  const votedCount = Object.keys(votes).length;
+  const agreedTags = suggestions.filter((s) => votes[s.tag] === 'agree').map((s) => s.tag);
+  const disagreedTags = suggestions.filter((s) => votes[s.tag] === 'disagree').map((s) => s.tag);
+  const allVoted = suggestions.length > 0 && votedCount >= suggestions.length;
+  const enoughVoted = votedCount >= MIN_VOTES;
+
+  const vote = (tag: string, v: Vote) => {
+    setVotes((p) => ({ ...p, [tag]: p[tag] === v ? (undefined as any) : v }));
   };
 
   const addCustom = () => {
     const v = customInput.trim();
     if (!v) return;
-    if (custom.includes(v) || ALL_TAGS.map((s) => s.toLowerCase()).includes(v.toLowerCase())) {
+    if (custom.includes(v)) {
       setCustomInput('');
       return;
     }
-    if (totalTags >= MAX_TAGS) {
-      toast.message(`Max ${MAX_TAGS} tags per review`);
+    if (custom.length >= MAX_CUSTOM) {
+      toast.message(`Max ${MAX_CUSTOM} custom tags`);
       return;
     }
     setCustom((p) => [...p, v]);
@@ -152,8 +187,8 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
-    if (totalTags < MIN_TAGS) {
-      toast.error(`Pick at least ${MIN_TAGS} tags to submit`);
+    if (!enoughVoted) {
+      toast.error(`Vote on at least ${MIN_VOTES} tags to submit`);
       return;
     }
     if (!userId) {
@@ -164,8 +199,19 @@ export default function PokeYelp() {
       nextCard();
       return;
     }
-    // +1 base, +1 per custom tag (cap 3), +1 if a comment was left
-    const earned = 1 + Math.min(custom.length, 3) + (comment.trim().length >= 8 ? 1 : 0);
+    // +1 base, +1 if voted on all suggestions, +1 per custom tag (cap 3), +1 if comment
+    const earned =
+      1 +
+      (allVoted ? 1 : 0) +
+      Math.min(custom.length, 3) +
+      (comment.trim().length >= 8 ? 1 : 0);
+
+    const tagPayload = [
+      ...agreedTags.map((t) => `agree:${t}`),
+      ...disagreedTags.map((t) => `disagree:${t}`),
+      ...(comment.trim() ? [`__comment__:${comment.trim().slice(0, 500)}`] : []),
+    ];
+
     const { error } = await supabase.from('pokeyelp_reviews').insert({
       user_id: userId,
       card_id: current.card_id,
@@ -173,7 +219,7 @@ export default function PokeYelp() {
       card_set: current.set_name,
       card_image: current.image_url,
       card_price: current.price,
-      tags: comment.trim() ? [...selected, `__comment__:${comment.trim().slice(0, 500)}`] : selected,
+      tags: tagPayload,
       custom_tags: custom,
       credits_awarded: earned,
     });
@@ -192,7 +238,8 @@ export default function PokeYelp() {
   };
 
   const nextCard = () => {
-    setSelected([]);
+    setVotes({});
+    setSuggestions([]);
     setCustom([]);
     setCustomInput('');
     setComment('');
@@ -282,55 +329,96 @@ export default function PokeYelp() {
                 <Card className="p-4">
                   <div className="flex items-center justify-between mb-1 gap-2">
                     <p className="text-sm font-semibold text-foreground">
-                      Tap how this card feels
+                      AI suggested tags — agree or disagree
                     </p>
                     <span
                       className={`text-[10px] font-bold tabular-nums px-2 py-0.5 rounded-full ${
-                        totalTags >= MIN_TAGS
+                        enoughVoted
                           ? 'bg-primary/15 text-primary'
                           : 'bg-muted text-muted-foreground'
                       }`}
                     >
-                      {totalTags}/{MAX_TAGS}
+                      {votedCount}/{suggestions.length || '—'}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Pick {MIN_TAGS}–{MAX_TAGS} tags across any category. Trust your gut — first reaction is best.
+                    Vote on at least {MIN_VOTES}. Bonus credit if you vote on all.
                   </p>
 
-                  <div className="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
-                    {TAG_GROUPS.map((g) => (
-                      <div key={g.label}>
-                        <div className="flex items-baseline gap-2 mb-1.5">
-                          <p className="text-[10px] uppercase tracking-wide text-foreground/80 font-semibold">
-                            {g.label}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground">{g.description}</p>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {g.tags.map((t) => {
-                            const on = selected.includes(t);
-                            const disabled = !on && atMax;
-                            return (
-                              <button
-                                key={t}
-                                onClick={() => toggle(t)}
-                                disabled={disabled}
-                                className={`px-2.5 py-1 text-xs rounded-full border transition-all active:scale-95 ${
-                                  on
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : disabled
-                                      ? 'bg-background text-muted-foreground/50 border-border/50 cursor-not-allowed'
-                                      : 'bg-background text-foreground border-border hover:bg-muted'
-                                }`}
-                              >
-                                {t}
-                              </button>
-                            );
-                          })}
-                        </div>
+                  <div className="space-y-2 max-h-[44vh] overflow-y-auto pr-1">
+                    {suggestLoading && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-6 justify-center">
+                        <Wand2 className="w-4 h-4 animate-pulse text-primary" />
+                        AI is reading the card…
                       </div>
-                    ))}
+                    )}
+
+                    {!suggestLoading && suggestions.length === 0 && (
+                      <div className="text-xs text-muted-foreground py-6 text-center">
+                        No suggestions yet.
+                        <Button
+                          variant="link"
+                          size="sm"
+                          className="ml-1 h-auto p-0"
+                          onClick={() => current && fetchSuggestions(current)}
+                        >
+                          Try again
+                        </Button>
+                      </div>
+                    )}
+
+                    <AnimatePresence initial={false}>
+                      {suggestions.map((s) => {
+                        const v = votes[s.tag];
+                        return (
+                          <motion.div
+                            key={s.tag}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0 }}
+                            className={`flex items-center gap-2 p-2 rounded-lg border transition-colors ${
+                              v === 'agree'
+                                ? 'bg-primary/10 border-primary/40'
+                                : v === 'disagree'
+                                  ? 'bg-destructive/10 border-destructive/40'
+                                  : 'bg-background border-border'
+                            }`}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-sm font-medium text-foreground">{s.tag}</span>
+                                <span className="text-[9px] uppercase tracking-wide text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                                  {s.category}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted-foreground mt-0.5 truncate">{s.reason}</p>
+                            </div>
+                            <button
+                              onClick={() => vote(s.tag, 'agree')}
+                              aria-label={`Agree with ${s.tag}`}
+                              className={`p-2 rounded-md border transition-all active:scale-90 ${
+                                v === 'agree'
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'bg-background border-border hover:bg-muted text-muted-foreground'
+                              }`}
+                            >
+                              <ThumbsUp className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => vote(s.tag, 'disagree')}
+                              aria-label={`Disagree with ${s.tag}`}
+                              className={`p-2 rounded-md border transition-all active:scale-90 ${
+                                v === 'disagree'
+                                  ? 'bg-destructive text-destructive-foreground border-destructive'
+                                  : 'bg-background border-border hover:bg-muted text-muted-foreground'
+                              }`}
+                            >
+                              <ThumbsDown className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
                   </div>
 
                   {/* Custom tags */}
@@ -346,9 +434,8 @@ export default function PokeYelp() {
                         placeholder="e.g. Mona Lisa Pose"
                         maxLength={40}
                         className="h-9 text-sm"
-                        disabled={atMax}
                       />
-                      <Button onClick={addCustom} size="sm" variant="outline" className="gap-1" disabled={atMax}>
+                      <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
                         <Plus className="w-3.5 h-3.5" /> Add
                       </Button>
                     </div>
@@ -391,11 +478,11 @@ export default function PokeYelp() {
                   <Button variant="ghost" onClick={skip} className="flex-1 gap-1">
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
-                  <Button onClick={submit} className="flex-[2] gap-1.5" disabled={totalTags < MIN_TAGS}>
+                  <Button onClick={submit} className="flex-[2] gap-1.5" disabled={!enoughVoted}>
                     <Coins className="w-4 h-4" />
-                    {totalTags < MIN_TAGS
-                      ? `Pick ${remaining} more tag${remaining === 1 ? '' : 's'}`
-                      : `Submit Review (+${1 + Math.min(custom.length, 3) + (comment.trim().length >= 8 ? 1 : 0)})`}
+                    {!enoughVoted
+                      ? `Vote on ${Math.max(0, MIN_VOTES - votedCount)} more`
+                      : `Submit (+${1 + (allVoted ? 1 : 0) + Math.min(custom.length, 3) + (comment.trim().length >= 8 ? 1 : 0)})`}
                   </Button>
                 </div>
 
