@@ -29,11 +29,15 @@ Deno.serve(async (req) => {
     const systemPrompt = `You are a Pokémon card taste expert. Suggest 6-8 BROAD, simple one-word tags that describe the vibe, art, and collector appeal.
 
 IMPORTANT RULES:
-- Use single common adjectives like: Cute, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Vintage, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
+- Use single common adjectives like: Cute, Cool, Girly, Beautiful, Colorful, Minimalist, Detailed, Clean, Cinematic, Playful, Epic, Dreamlike, Vintage, Modern, Soft, Aggressive, Nostalgic, Cozy, Peaceful, Powerful, Dark, Chaotic, Joyful, Mysterious, Relaxing, Hopeful, Intimidating.
 - Prefer broad, universally understood words over niche or compound phrases.
 - Avoid overly specific phrases like "Main character energy" or "Anime opening vibes".
 - Each tag should be 1 word (max 2). No descriptions, no card-specific wording.
 - ALWAYS include exactly one Action / Pose tag describing what the Pokémon is doing in the art if visually identifiable (Flying, Jumping, Sitting, Squatting, Running, Walking, Standing, Sleeping, Attacking, Floating, Swimming, Posing). Skip only if truly not applicable (e.g. abstract art, item-only card).
+- PRIORITIZE these tags when applicable:
+  * Cute — if the Pokémon or art style is adorable, charming, or has a sweet/child-friendly feel.
+  * Cool — if the Pokémon looks badass, sleek, stylish, or has a confident/intimidating aura.
+  * Girly — if the card uses traditionally feminine colors (pink, pastel, purple, soft tones) or the Pokémon/art has a very cute, feminine, or lovely aesthetic.
 
 Preferred vocabulary by category:
 ${vocabList}
