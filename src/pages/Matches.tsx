@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
@@ -215,6 +215,7 @@ export default function Matches() {
                 emptyText="No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste."
                 badge="match"
                 category="matches"
+                renderBinder
               />
               <Section
                 title="Likes"
