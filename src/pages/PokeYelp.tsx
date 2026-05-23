@@ -70,6 +70,9 @@ export default function PokeYelp() {
   const [reviewedCount, setReviewedCount] = useState(0);
   const [imgErr, setImgErr] = useState(false);
 
+  // Enlarge modal
+  const [enlarged, setEnlarged] = useState(false);
+
   // Filters
   const [showFilters, setShowFilters] = useState(false);
   const [minPrice, setMinPrice] = useState<string>('5');
