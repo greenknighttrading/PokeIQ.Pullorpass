@@ -96,7 +96,17 @@ export default function PullOrPass() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
     });
-    loadRound();
+    // Try to resume an in-progress round first
+    const resume = readResume();
+    if (resume) {
+      setCards(resume.cards);
+      setIndex(resume.index);
+      setRecords(resume.records || []);
+      setRoundId(resume.roundId);
+      setStage('swiping');
+    } else {
+      loadRound();
+    }
     // Detect PokéYelp completion for bonus swipes
     try {
       const yelp = localStorage.getItem('pokeyelp_done_' + todayKey());
@@ -110,6 +120,14 @@ export default function PullOrPass() {
       }
     } catch {}
   }, []);
+
+  // Persist in-progress round so users can leave and come back
+  useEffect(() => {
+    if (stage !== 'swiping') return;
+    if (!cards.length) return;
+    if (index >= cards.length) return;
+    writeResume({ cards, index, records, roundId });
+  }, [stage, cards, index, records, roundId]);
 
   const loadRound = useCallback(async () => {
     setStage('loading');
@@ -207,6 +225,7 @@ export default function PullOrPass() {
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
     setStage('results');
+    clearResume();
     if (!userId) return;
     const analysis = analyzeRound(allRecords);
 
