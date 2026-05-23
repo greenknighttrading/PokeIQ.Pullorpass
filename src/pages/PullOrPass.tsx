@@ -932,6 +932,17 @@ function OutOfSwipesView({
             <Sparkles className="w-4 h-4" /> Earn +10 swipes — train PokeIQ
           </Button>
         </Link>
+        <Button
+          size="lg"
+          variant="default"
+          className="w-full gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400 font-semibold"
+          onClick={() => toast.success('PokeIQ Pro launches soon — you\'re on the early list.')}
+        >
+          <Trophy className="w-4 h-4" /> Go Pro — unlimited swipes · $5/mo or $39/yr
+        </Button>
+        <p className="text-[11px] text-muted-foreground -mt-1">
+          Get instant access to all premium features.
+        </p>
         <Link to="/matches">
           <Button size="lg" variant="outline" className="w-full gap-2">
             <Heart className="w-4 h-4" /> See your Matches

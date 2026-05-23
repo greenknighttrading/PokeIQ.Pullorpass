@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
@@ -207,15 +207,7 @@ export default function Matches() {
               )}
 
               {/* Matches → Likes → Passes */}
-              <Section
-                title="Matches"
-                subtitle="Cards PokeIQ flagged as a pattern in your taste"
-                icon={<Heart className="w-4 h-4 text-primary fill-primary" />}
-                items={matches}
-                emptyText="No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste."
-                badge="match"
-                category="matches"
-              />
+              <BinderView items={matches} />
               <Section
                 title="Likes"
                 subtitle="Cards you pulled or super-liked"
@@ -350,6 +342,164 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
       <p className="text-[10px] text-muted-foreground truncate">
         {m.card_set ?? '—'}{m.card_price ? ` · $${Number(m.card_price).toFixed(0)}` : ''}
       </p>
+    </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Binder view — 3x3 two-page spread with page flipping
+// ─────────────────────────────────────────────────────────
+const CARDS_PER_PAGE = 9;
+const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
+
+function BinderView({ items }: { items: Swipe[] }) {
+  const [spread, setSpread] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
+  const totalSpreads = Math.max(1, Math.ceil(items.length / CARDS_PER_SPREAD));
+  const start = spread * CARDS_PER_SPREAD;
+  const leftCards = items.slice(start, start + CARDS_PER_PAGE);
+  const rightCards = items.slice(start + CARDS_PER_PAGE, start + CARDS_PER_SPREAD);
+
+  const go = (delta: 1 | -1) => {
+    setDir(delta);
+    setSpread((s) => Math.min(Math.max(0, s + delta), totalSpreads - 1));
+  };
+
+  return (
+    <section className="mb-10">
+      <div className="flex items-end justify-between mb-2 gap-3">
+        <div className="flex items-center gap-2">
+          <Heart className="w-4 h-4 text-primary fill-primary" />
+          <h2 className="text-base font-semibold text-foreground">Matches</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
+        </div>
+        <Link to="/matches/matches" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+          See all <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">Your matched cards, organized like a real binder. Flip through the pages.</p>
+
+      {items.length === 0 ? (
+        <Card className="p-6 text-center text-xs text-muted-foreground">
+          No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste.
+        </Card>
+      ) : (
+        <div className="relative">
+          {/* Binder frame */}
+          <div
+            className="relative rounded-2xl p-3 sm:p-5 shadow-2xl border border-border/60"
+            style={{
+              background:
+                'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)/0.6) 100%)',
+              perspective: '1800px',
+            }}
+          >
+            {/* Spine */}
+            <div className="hidden sm:block absolute top-3 bottom-3 left-1/2 -translate-x-1/2 w-2 rounded-full bg-gradient-to-b from-border/40 via-border to-border/40 shadow-inner pointer-events-none z-10" />
+
+            <AnimatePresence mode="wait" custom={dir}>
+              <motion.div
+                key={spread}
+                custom={dir}
+                initial={{ rotateY: dir === 1 ? 35 : -35, opacity: 0 }}
+                animate={{ rotateY: 0, opacity: 1 }}
+                exit={{ rotateY: dir === 1 ? -35 : 35, opacity: 0 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5"
+                style={{ transformStyle: 'preserve-3d' }}
+              >
+                <BinderPage cards={leftCards} pageNumber={spread * 2 + 1} side="left" />
+                <BinderPage cards={rightCards} pageNumber={spread * 2 + 2} side="right" />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Page controls */}
+          <div className="flex items-center justify-between mt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => go(-1)}
+              disabled={spread === 0}
+              className="gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </Button>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              Pages {spread * 2 + 1}–{Math.min(spread * 2 + 2, Math.ceil(items.length / CARDS_PER_PAGE))} of {Math.max(1, Math.ceil(items.length / CARDS_PER_PAGE))}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => go(1)}
+              disabled={spread >= totalSpreads - 1}
+              className="gap-1"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function BinderPage({ cards, pageNumber, side }: { cards: Swipe[]; pageNumber: number; side: 'left' | 'right' }) {
+  // Pad to 9 slots so the grid stays consistent
+  const slots = Array.from({ length: CARDS_PER_PAGE }, (_, i) => cards[i] ?? null);
+  return (
+    <div
+      className="relative rounded-xl p-2.5 sm:p-3 bg-background/60 ring-1 ring-border/50 shadow-inner"
+      style={{
+        backgroundImage:
+          'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)',
+        backgroundSize: '14px 14px',
+      }}
+    >
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
+        {slots.map((s, i) => (
+          <BinderSlot key={s?.id ?? `empty-${pageNumber}-${i}`} swipe={s} />
+        ))}
+      </div>
+      <p className={`text-[10px] text-muted-foreground tabular-nums mt-2 ${side === 'left' ? 'text-left' : 'text-right'}`}>
+        Page {pageNumber}
+      </p>
+    </div>
+  );
+}
+
+function BinderSlot({ swipe }: { swipe: Swipe | null }) {
+  const [err, setErr] = useState(false);
+  if (!swipe) {
+    return (
+      <div className="aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed ring-border/40" />
+    );
+  }
+  const superLiked = (swipe.tags || []).includes('Loved');
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05, y: -3, zIndex: 5 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 ring-border/40 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] hover:ring-primary/50"
+      title={`${swipe.card_name}${swipe.card_set ? ' · ' + swipe.card_set : ''}`}
+    >
+      {swipe.card_image && !err ? (
+        <img
+          src={swipe.card_image}
+          alt={swipe.card_name}
+          className="w-full h-full object-cover"
+          onError={() => setErr(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <ImageOff className="w-4 h-4 text-muted-foreground" />
+        </div>
+      )}
+      {superLiked && (
+        <div className="absolute top-1 right-1 bg-background/70 backdrop-blur-sm rounded-full p-0.5 ring-1 ring-amber-400/50">
+          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+        </div>
+      )}
     </motion.div>
   );
 }
