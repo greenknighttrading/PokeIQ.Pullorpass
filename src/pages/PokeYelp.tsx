@@ -398,10 +398,10 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid md:grid-cols-[1fr_200px] gap-5 items-start"
+              className="grid grid-cols-1 md:grid-cols-[200px_minmax(0,1fr)] gap-5 items-start"
             >
-              {/* Card image (right on desktop, top on mobile) */}
-              <div className="space-y-2 order-first md:order-last md:w-[200px]">
+              {/* Card image (left on desktop, top on mobile) */}
+              <div className="space-y-2 w-full md:w-[200px] md:col-start-1 md:row-start-1">
                 <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
                   {current.image_url && !imgErr ? (
                     <img
@@ -427,7 +427,7 @@ export default function PokeYelp() {
               </div>
 
               {/* Tag picker */}
-              <div className="space-y-4">
+              <div className="space-y-4 min-w-0 md:col-start-2 md:row-start-1">
                 <Card className="p-4">
                   <div className="flex items-center justify-between mb-1 gap-2">
                     <p className="text-sm font-semibold text-foreground">
