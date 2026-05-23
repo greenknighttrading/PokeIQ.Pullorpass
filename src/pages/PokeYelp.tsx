@@ -401,26 +401,34 @@ export default function PokeYelp() {
             <motion.div
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="grid md:grid-cols-[260px_1fr] gap-5 items-start"
+              animate={{ opacity: 1, y: 1 }}
+              className="grid md:grid-cols-[320px_1fr] gap-5 items-start"
             >
               {/* Card image */}
               <div className="space-y-2">
-                <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
+                <button
+                  onClick={() => setEnlarged(true)}
+                  className="w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl block relative group cursor-zoom-in"
+                >
                   {current.image_url && !imgErr ? (
-                    <img
-                      src={current.image_url}
-                      alt={current.name}
-                      className="w-full h-full object-cover"
-                      onError={() => setImgErr(true)}
-                    />
+                    <>
+                      <img
+                        src={current.image_url}
+                        alt={current.name}
+                        className="w-full h-full object-cover"
+                        onError={() => setImgErr(true)}
+                      />
+                      <div className="absolute inset-1.5 bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl flex items-center justify-center">
+                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
+                      </div>
+                    </>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
                       <ImageOff className="w-8 h-8" />
                       <span className="text-xs">No image</span>
                     </div>
                   )}
-                </div>
+                </button>
                 <div>
                   <p className="text-sm font-semibold text-foreground truncate">{current.name}</p>
                   <p className="text-[11px] text-muted-foreground">
