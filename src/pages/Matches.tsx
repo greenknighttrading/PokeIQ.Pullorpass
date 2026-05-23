@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Seo } from '@/components/seo/Seo';
 
-const PROFILE_GOAL = 20;
+const PROFILE_GOAL = 60;
 const INITIAL_VISIBLE = 12;   // ~2 rows × 6 on desktop
 const LOAD_MORE_STEP = 12;
 const PAGE_CAP = 50;          // overflow → dedicated collection page
@@ -104,7 +104,7 @@ export default function Matches() {
 
   return (
     <>
-      <Seo title="Your Matches — Collector Aesthetic | PokeIQ" description="See the Pokémon cards that matched your taste and unlock your Collector Aesthetic Profile." />
+      <Seo title="Your Matches — Vibe Profile | PokeIQ" description="See the Pokémon cards that matched your taste and unlock your Vibe Profile." />
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
         <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6">
@@ -146,12 +146,12 @@ export default function Matches() {
                   {profileUnlocked ? <Trophy className="w-8 h-8 text-amber-400 flex-shrink-0" /> : <Sparkles className="w-8 h-8 text-primary flex-shrink-0" />}
                   <div className="flex-1 min-w-0">
                     <h3 className="text-base font-bold text-foreground">
-                      {profileUnlocked ? 'Your Collector Aesthetic is unlocked' : 'Your Collector Aesthetic Profile'}
+                      {profileUnlocked ? 'Your Vibe Profile is unlocked' : 'Your Vibe Profile'}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
                       {profileUnlocked
                         ? "Below are the vibes, sets, and price tier PokeIQ has learned about your taste."
-                        : `Do ${remainingToProfile} more matches to unlock your Collector Aesthetic Profile — your vibes, the sets you gravitate to, and the cards that actually feel like you.`}
+                        : `Match ${remainingToProfile} more cards to unlock your Vibe Profile — your vibes, the sets you gravitate to, and the cards that actually feel like you.`}
                     </p>
                     <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
