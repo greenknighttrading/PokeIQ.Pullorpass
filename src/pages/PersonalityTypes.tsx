@@ -113,23 +113,23 @@ export default function PersonalityTypes() {
                       <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/85 to-transparent" />
 
                       {/* Name + tagline overlay on art */}
-                      <div className="absolute inset-x-0 bottom-0 p-5 pb-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary/20 border border-primary/40 backdrop-blur-sm">
-                            <Icon className="w-4 h-4 text-primary" />
+                      <div className="absolute inset-x-0 bottom-0 p-4 pb-3">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 border border-primary/40 backdrop-blur-sm">
+                            <Icon className="w-3.5 h-3.5 text-primary" />
                           </div>
-                          <h3 className="text-3xl md:text-[2rem] font-extrabold tracking-tight leading-none text-foreground">
+                          <h3 className="text-2xl md:text-[1.6rem] font-extrabold tracking-tight leading-none text-foreground">
                             {type}
                           </h3>
                         </div>
-                        <p className="text-base italic text-primary font-medium leading-snug">
+                        <p className="text-sm italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem]">
                           "{t.philosophy}"
                         </p>
                       </div>
                     </div>
 
-                    <div className="px-5 pt-4 pb-6">
-                      <p className="text-sm md:text-[15px] leading-relaxed text-foreground/80 line-clamp-3">
+                    <div className="px-4 pt-3 pb-5">
+                      <p className="text-[13px] leading-relaxed text-foreground/80 line-clamp-3 min-h-[4.2rem]">
                         {t.tagline}
                       </p>
                     </div>
