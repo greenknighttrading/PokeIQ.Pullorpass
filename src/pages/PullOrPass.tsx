@@ -942,44 +942,67 @@ function OutOfSwipesView({
         {/* Earn swipes card */}
         <Card className="p-5 text-left space-y-4 flex flex-col">
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-foreground">Earn +10 Swipes</h3>
+            <h3 className="text-base font-bold text-foreground">Earn More Swipes</h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Train PokeIQ by reviewing cards and unlock bonus swipes.
+              Review cards to earn credits, train PokeIQ, and unlock cards you'll actually love.
             </p>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground flex-1">
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-primary mt-0.5 shrink-1" />
-              <span>Review 20 cards on Earn Credits</span>
+              <span>Review cards to earn credits for more swipes</span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-primary mt-0.5 shrink-1" />
-              <span>Helps train PokeIQ to spot your taste</span>
+              <span>Help train PokeIQ to spot your taste</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-primary mt-0.5 shrink-1" />
+              <span>Curate and surface cards you'll love</span>
             </li>
           </ul>
           <Link to="/earn">
             <Button size="lg" className="w-full gap-2">
-              <Sparkles className="w-4 h-4" /> Earn +10 Swipes
+              <Sparkles className="w-4 h-4" /> Earn Swipes
             </Button>
           </Link>
         </Card>
 
         {/* Go Pro card */}
-        <Card className="p-5 text-left space-y-4 flex flex-col">
+        <Card className="p-5 text-left space-y-4 flex flex-col border-amber-400/40 bg-gradient-to-br from-amber-500/5 to-transparent">
           <div className="space-y-1">
-            <h3 className="text-base font-bold text-foreground">Go Pro</h3>
+            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+              Go Pro
+              <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">Best Value</span>
+            </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Unlimited swipes and instant access to all premium features.
+              Unlock the full power of PokeIQ — unlimited swipes and every premium tool.
             </p>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground flex-1">
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
-              <span>Unlimited swipes every day</span>
+              <span>Unlimited swipes, every single day</span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
-              <span>Just $5/month or $39/year</span>
+              <span>Full PokeIQ suite — every premium feature unlocked</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Advanced analytics, buy signals & market movers</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Custom Smart Feed tuned to your collection</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Priority access to new tools & beta features</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
+              <span>Just $5/mo or $39/yr — cancel anytime</span>
             </li>
           </ul>
           <Button
