@@ -189,6 +189,21 @@ export default function PullOrPass() {
     const newRecords = [...records, rec];
     setRecords(newRecords);
     bumpQuota();
+    // Track today's swiped cards so the Earn page can prioritize them
+    try {
+      const key = 'pop_today_swiped_' + todayKey();
+      const prev = JSON.parse(localStorage.getItem(key) || '[]');
+      prev.push({
+        card_id: rec.card.card_id,
+        name: rec.card.name,
+        set_name: rec.card.set_name,
+        image_url: rec.card.image_url,
+        price: rec.card.price,
+        rarity: rec.card.rarity,
+        decision: rec.decision,
+      });
+      localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
+    } catch {}
 
     if (userId) {
       supabase.from('pullorpass_swipes').insert({

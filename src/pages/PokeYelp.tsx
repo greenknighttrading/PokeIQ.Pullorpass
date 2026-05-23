@@ -127,9 +127,9 @@ export default function PokeYelp() {
   const [setQuery, setSetQuery] = useState<string>('');
   const [eraId, setEraId] = useState<string>('');
 
-  // Force user to review Pack Gains cards first — filters stay locked until done
-  const [packGainsMode, setPackGainsMode] = useState(true);
-  const [packGainsRemaining, setPackGainsRemaining] = useState<number | null>(null);
+  // Prioritize cards the user PullOrPassed today — filters locked until done
+  const [todaysMode, setTodaysMode] = useState(true);
+  const [todaysRemaining, setTodaysRemaining] = useState<number | null>(null);
 
   const fetchCredits = useCallback(async (uid: string) => {
     const { data } = await supabase
@@ -140,61 +140,57 @@ export default function PokeYelp() {
   const loadPool = useCallback(async () => {
     setLoading(true);
 
-    // === Pack Gains First mode ===
-    if (packGainsMode) {
-      let reviewedIds: string[] = [];
-      if (userId) {
+    // === Today's PullOrPass swipes First mode ===
+    if (todaysMode) {
+      let swiped: YelpCard[] = [];
+      try {
+        const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+        const arr = raw ? JSON.parse(raw) : [];
+        swiped = (Array.isArray(arr) ? arr : []).map((c: any) => ({
+          card_id: c.card_id,
+          name: c.name,
+          set_name: c.set_name ?? null,
+          image_url: c.image_url ?? null,
+          price: Number(c.price) || 0,
+          rarity: c.rarity ?? null,
+        }));
+      } catch { swiped = []; }
+
+      // Drop cards already reviewed this session/account
+      let reviewedIds = new Set<string>();
+      if (userId && swiped.length) {
         const { data: revs } = await supabase
           .from('pokeyelp_reviews')
           .select('card_id')
           .eq('user_id', userId)
-          .in('card_set', PACK_GAINS_SETS);
-        reviewedIds = Array.from(new Set((revs ?? []).map((r: any) => r.card_id)));
+          .in('card_id', swiped.map((c) => c.card_id));
+        reviewedIds = new Set((revs ?? []).map((r: any) => r.card_id));
       } else {
         try {
-          reviewedIds = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
-        } catch { reviewedIds = []; }
+          const prev = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
+          reviewedIds = new Set(prev);
+        } catch {}
       }
 
-      const { data, error } = await supabase
-        .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, price, rarity')
-        .eq('game', 'Pokemon')
-        .eq('product_type', 'card')
-        .in('set_name', PACK_GAINS_SETS)
-        .in('rarity', PACK_GAINS_HIT_RARITIES)
-        .gt('price', 0)
-        .not('tcgplayer_id', 'is', null)
-        .limit(1000);
+      // De-dupe by card_id, preserve order (most recent first)
+      const seen = new Set<string>();
+      const items = swiped
+        .slice()
+        .reverse()
+        .filter((c) => c.card_id && !seen.has(c.card_id) && !reviewedIds.has(c.card_id) && (seen.add(c.card_id), true));
 
-      if (!error && data) {
-        const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
-        const reviewedSet = new Set(reviewedIds);
-        const items: YelpCard[] = data
-          .filter((c: any) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name) && !reviewedSet.has(c.card_id))
-          .map((c: any) => ({
-            card_id: c.card_id,
-            name: c.name,
-            set_name: c.set_name,
-            image_url: tcgImage(c.tcgplayer_id),
-            price: Number(c.price),
-            rarity: c.rarity,
-          }));
+      setTodaysRemaining(items.length);
 
-        setPackGainsRemaining(items.length);
-
-        if (items.length > 0) {
-          setPool(items.sort(() => Math.random() - 0.5));
-          setIndex(0);
-          setLoading(false);
-          return;
-        }
+      if (items.length > 0) {
+        setPool(items);
+        setIndex(0);
+        setLoading(false);
+        return;
       }
 
-      // Pack Gains exhausted — unlock filters and fall through to normal load
-      setPackGainsMode(false);
-      setPackGainsRemaining(0);
-      toast.success('Pack Gains complete — filters unlocked!');
+      // No today's swipes to review — unlock filters and fall through
+      setTodaysMode(false);
+      setTodaysRemaining(0);
     }
 
     const minP = Number(minPrice) || 5;
@@ -239,7 +235,7 @@ export default function PokeYelp() {
     setPool(items);
     setIndex(0);
     setLoading(false);
-  }, [packGainsMode, userId, minPrice, maxPrice, setQuery, eraId]);
+  }, [todaysMode, userId, minPrice, maxPrice, setQuery, eraId]);
 
   const fetchSuggestions = useCallback(async (card: YelpCard) => {
     setSuggestLoading(true);
@@ -312,17 +308,17 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
-    const isPackGainsCard = PACK_GAINS_SETS.includes(current.set_name ?? '');
+    const isPriorityCard = todaysMode;
     if (!userId) {
-      // Track anon-reviewed pack-gains cards so they don't repeat in the locked pool
-      if (isPackGainsCard) {
+      // Track anon-reviewed priority cards so they don't repeat in the locked pool
+      if (isPriorityCard) {
         try {
           const prev: string[] = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
           if (!prev.includes(current.card_id)) {
             localStorage.setItem(ANON_REVIEWED_KEY, JSON.stringify([...prev, current.card_id]));
           }
         } catch { /* ignore */ }
-        if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+        if (todaysMode) setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
       }
       toast.message('Sign up to keep training PokeIQ', {
         description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
@@ -389,8 +385,8 @@ export default function PokeYelp() {
         description: 'Unlimited swipes and premium features are now active.',
       });
     }
-    if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
-      setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+    if (todaysMode) {
+      setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
     nextCard();
   };
@@ -426,26 +422,26 @@ export default function PokeYelp() {
               <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
                 Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
-                {packGainsMode && packGainsRemaining != null && ` · ${packGainsRemaining} priority cards left`}
+                {todaysMode && todaysRemaining != null && todaysRemaining > 0 && ` · ${todaysRemaining} of today's swipes left to tag`}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline" size="sm"
                 onClick={() => {
-                  if (packGainsMode) {
+                  if (todaysMode && (todaysRemaining ?? 0) > 0) {
                     toast.message('Filters locked', {
-                      description: `Review the ${packGainsRemaining ?? ''} remaining Pack Gains cards first.`,
+                      description: `Tag the ${todaysRemaining ?? ''} cards you swiped today first to teach PokeIQ your vibe.`,
                     });
                     return;
                   }
                   setShowFilters((s) => !s);
                 }}
                 className="gap-1.5 h-8"
-                aria-disabled={packGainsMode}
+                aria-disabled={todaysMode && (todaysRemaining ?? 0) > 0}
               >
                 <Filter className="w-3.5 h-3.5" />
-                {packGainsMode ? 'Filters 🔒' : 'Filters'}
+                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters 🔒' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                     {activeFiltersCount}
