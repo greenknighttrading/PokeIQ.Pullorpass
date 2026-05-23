@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ZoomIn } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -69,9 +69,6 @@ export default function PokeYelp() {
   const [comment, setComment] = useState('');
   const [reviewedCount, setReviewedCount] = useState(0);
   const [imgErr, setImgErr] = useState(false);
-
-  // Enlarge modal
-  const [enlarged, setEnlarged] = useState(false);
 
   // Filters
   const [showFilters, setShowFilters] = useState(false);
@@ -197,7 +194,6 @@ export default function PokeYelp() {
     setCustomInput('');
     setComment('');
     setImgErr(false);
-    setEnlarged(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
   }, [index, pool.length, loadPool]);
@@ -401,34 +397,26 @@ export default function PokeYelp() {
             <motion.div
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 1 }}
+              animate={{ opacity: 1, y: 0 }}
               className="grid md:grid-cols-[260px_1fr] gap-5 items-start"
             >
               {/* Card image */}
               <div className="space-y-2">
-                <button
-                  onClick={() => setEnlarged(true)}
-                  className="w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl block relative group cursor-zoom-in"
-                >
+                <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
                   {current.image_url && !imgErr ? (
-                    <>
-                      <img
-                        src={current.image_url}
-                        alt={current.name}
-                        className="w-full h-full object-cover"
-                        onError={() => setImgErr(true)}
-                      />
-                      <div className="absolute inset-1.5 bg-black/0 group-hover:bg-black/20 transition-colors rounded-xl flex items-center justify-center">
-                        <ZoomIn className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-lg" />
-                      </div>
-                    </>
+                    <img
+                      src={current.image_url}
+                      alt={current.name}
+                      className="w-full h-full object-cover"
+                      onError={() => setImgErr(true)}
+                    />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
                       <ImageOff className="w-8 h-8" />
                       <span className="text-xs">No image</span>
                     </div>
                   )}
-                </button>
+                </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground truncate">{current.name}</p>
                   <p className="text-[11px] text-muted-foreground">
@@ -571,47 +559,6 @@ export default function PokeYelp() {
               </div>
             </motion.div>
           )}
-
-          {/* Enlarged card modal */}
-          <AnimatePresence>
-            {enlarged && current && (
-              <motion.div
-                initial={{ opacity: 1 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 1 }}
-                onClick={() => setEnlarged(false)}
-                className="fixed inset-1.5 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-              >
-                <motion.div
-                  initial={{ scale: 0.9, opacity: 1 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 1 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="relative max-w-lg w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden shadow-2xl"
-                >
-                  {current.image_url && !imgErr ? (
-                    <img
-                      src={current.image_url}
-                      alt={current.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2 bg-muted/30">
-                      <ImageOff className="w-10 h-10" />
-                      <span className="text-sm">No image</span>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => setEnlarged(false)}
-                    className="absolute top-3 right-3 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-                    aria-label="Close"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </main>
       </div>
     </>
