@@ -834,3 +834,99 @@ function ResultThumb({ card, loved }: { card: SwipeCard; loved?: boolean }) {
     </div>
   );
 }
+
+// ─────────────────────────────────────────────────────────
+// Out-of-swipes + signup nudge
+// ─────────────────────────────────────────────────────────
+function OutOfSwipesView({
+  limit,
+  hasBonus,
+  isAuthed,
+  onSignUp,
+}: {
+  limit: number;
+  hasBonus: boolean;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
+  return (
+    <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center px-4">
+      <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
+        <Lock className="w-7 h-7 text-muted-foreground" />
+      </div>
+      <div className="space-y-1">
+        <h2 className="text-xl font-bold text-foreground">You're out of swipes today</h2>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Free players get {limit} swipes per day.
+          {!hasBonus && ' Complete a PokéYelp review to unlock +20 more right now.'}
+        </p>
+      </div>
+      <div className="flex flex-col gap-2 w-full max-w-xs">
+        {!hasBonus && (
+          <Link to="/pokeyelp">
+            <Button size="lg" className="w-full gap-2">
+              <Sparkles className="w-4 h-4" /> Do PokéYelp for +20 swipes
+            </Button>
+          </Link>
+        )}
+        <Link to="/matches">
+          <Button size="lg" variant="outline" className="w-full gap-2">
+            <Heart className="w-4 h-4" /> See your Matches
+          </Button>
+        </Link>
+        {!isAuthed && (
+          <Button size="lg" variant="ghost" className="w-full gap-2" onClick={onSignUp}>
+            <LogIn className="w-4 h-4" /> Sign up to save progress
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SignupNudge({ onClose, onSignUp }: { onClose: () => void; onSignUp: () => void }) {
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-md w-full"
+      >
+        <Card className="p-6 border-primary/40 bg-card relative">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 text-muted-foreground hover:text-foreground"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="text-center space-y-3">
+            <Sparkles className="w-8 h-8 mx-auto text-primary" />
+            <h3 className="text-lg font-bold text-foreground">You're 20 swipes in — nice taste.</h3>
+            <p className="text-sm text-muted-foreground">
+              Create a free account to start building your <strong className="text-foreground">Collector Profile</strong> —
+              your vibes, your favorite sets, and the cards that actually feel like you.
+            </p>
+            <div className="flex flex-col gap-2 pt-2">
+              <Button onClick={onSignUp} size="lg" className="gap-2">
+                <LogIn className="w-4 h-4" /> Build my Collector Profile
+              </Button>
+              <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">
+                Keep swiping for now
+              </button>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+    </motion.div>
+  );
+}
