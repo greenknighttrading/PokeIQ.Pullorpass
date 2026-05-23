@@ -325,6 +325,12 @@ export default function PokeYelp() {
     });
     toast.success('+1 PokeIQ credit');
     setReviewedCount((c) => c + 1);
+    // Unlock +20 PullOrPass swipes for today
+    try {
+      const d = new Date();
+      const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+      localStorage.setItem('pokeyelp_done_' + key, '1');
+    } catch {}
     if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
       setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
