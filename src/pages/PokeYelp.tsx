@@ -314,6 +314,9 @@ export default function PokeYelp() {
     });
     toast.success('+1 PokeIQ credit');
     setReviewedCount((c) => c + 1);
+    if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
+      setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+    }
     nextCard();
   };
 
@@ -353,11 +356,20 @@ export default function PokeYelp() {
             <div className="flex items-center gap-2">
               <Button
                 variant="outline" size="sm"
-                onClick={() => setShowFilters((s) => !s)}
+                onClick={() => {
+                  if (packGainsMode) {
+                    toast.message('Filters locked', {
+                      description: `Review the ${packGainsRemaining ?? ''} remaining Pack Gains cards first.`,
+                    });
+                    return;
+                  }
+                  setShowFilters((s) => !s);
+                }}
                 className="gap-1.5 h-8"
+                aria-disabled={packGainsMode}
               >
                 <Filter className="w-3.5 h-3.5" />
-                Filters
+                {packGainsMode ? 'Filters 🔒' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                     {activeFiltersCount}
