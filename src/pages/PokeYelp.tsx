@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -70,12 +70,6 @@ export default function PokeYelp() {
   const [reviewedCount, setReviewedCount] = useState(0);
   const [imgErr, setImgErr] = useState(false);
 
-  // History of past per-card state so users can navigate back and edit.
-  type CardState = { selected: string[]; custom: string[]; comment: string };
-  const [history, setHistory] = useState<Record<string, CardState>>({});
-  // Map card_id -> submitted review id so we can update on resubmit instead of inserting twice.
-  const [submittedReviews, setSubmittedReviews] = useState<Record<string, string>>({});
-
   // Filters
   const [showFilters, setShowFilters] = useState(false);
   const [minPrice, setMinPrice] = useState<string>('5');
@@ -138,9 +132,10 @@ export default function PokeYelp() {
   const fetchSuggestions = useCallback(async (card: YelpCard) => {
     setSuggestLoading(true);
     setSuggestions([]);
+    setSelected(new Set());
     try {
       const { data, error } = await supabase.functions.invoke('pokeyelp-suggest-tags', {
-        body: { name: card.name, set_name: card.set_name, rarity: card.rarity, price: card.price, card_id: card.card_id },
+        body: { name: card.name, set_name: card.set_name, rarity: card.rarity, price: card.price },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -167,17 +162,8 @@ export default function PokeYelp() {
   const current = pool[index];
 
   useEffect(() => {
-    if (!current) return;
-    fetchSuggestions(current);
-    // Restore any previously-entered state for this card (back navigation / edit).
-    const prev = history[current.card_id];
-    setSelected(new Set(prev?.selected ?? []));
-    setCustom(prev?.custom ?? []);
-    setComment(prev?.comment ?? '');
-    setCustomInput('');
-    setImgErr(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current?.card_id]);
+    if (current) fetchSuggestions(current);
+  }, [current?.card_id, fetchSuggestions]);
 
   const toggleTag = (t: string) => {
     setSelected((p) => {
@@ -202,29 +188,15 @@ export default function PokeYelp() {
   const removeCustom = (t: string) => setCustom((p) => p.filter((x) => x !== t));
 
   const nextCard = useCallback(() => {
+    setSelected(new Set());
     setSuggestions([]);
+    setCustom([]);
+    setCustomInput('');
+    setComment('');
+    setImgErr(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
   }, [index, pool.length, loadPool]);
-
-  const saveCurrentToHistory = useCallback(() => {
-    if (!current) return;
-    setHistory((h) => ({
-      ...h,
-      [current.card_id]: {
-        selected: Array.from(selected),
-        custom: [...custom],
-        comment,
-      },
-    }));
-  }, [current, selected, custom, comment]);
-
-  const goBack = () => {
-    if (index === 0) return;
-    saveCurrentToHistory();
-    setSuggestions([]);
-    setIndex(index - 1);
-  };
 
   const submit = async () => {
     if (!current) return;
@@ -237,6 +209,8 @@ export default function PokeYelp() {
       return;
     }
 
+    // 1 credit per card reviewed
+    const earned = 1;
     const applicableTags = Array.from(selected);
 
     const tagPayload = [
@@ -244,54 +218,32 @@ export default function PokeYelp() {
       ...(comment.trim() ? [`__comment__:${comment.trim().slice(0, 500)}`] : []),
     ];
 
-    const existingId = submittedReviews[current.card_id];
-
-    if (existingId) {
-      // Editing a previously submitted review — delete + re-insert (no extra credit).
-      await supabase.from('pokeyelp_reviews').delete().eq('id', existingId);
-      const { data: inserted, error } = await supabase.from('pokeyelp_reviews').insert({
-        user_id: userId,
-        card_id: current.card_id,
-        card_name: current.name,
-        card_set: current.set_name,
-        card_image: current.image_url,
-        card_price: current.price,
-        tags: tagPayload,
-        custom_tags: custom,
-        credits_awarded: 0,
-      }).select('id').single();
-      if (error) { toast.error('Could not update review'); return; }
-      if (inserted) setSubmittedReviews((m) => ({ ...m, [current.card_id]: inserted.id }));
-      toast.success('Review updated');
-    } else {
-      const earned = 1;
-      const { data: inserted, error } = await supabase.from('pokeyelp_reviews').insert({
-        user_id: userId,
-        card_id: current.card_id,
-        card_name: current.name,
-        card_set: current.set_name,
-        card_image: current.image_url,
-        card_price: current.price,
-        tags: tagPayload,
-        custom_tags: custom,
-        credits_awarded: earned,
-      }).select('id').single();
-      if (error) { toast.error('Could not save review'); return; }
-      if (inserted) setSubmittedReviews((m) => ({ ...m, [current.card_id]: inserted.id }));
-      const newCredits = credits + earned;
-      setCredits(newCredits);
-      await supabase.from('pokeiq_credits').upsert({
-        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
-      });
-      toast.success('+1 PokeIQ credit');
-      setReviewedCount((c) => c + 1);
+    const { error } = await supabase.from('pokeyelp_reviews').insert({
+      user_id: userId,
+      card_id: current.card_id,
+      card_name: current.name,
+      card_set: current.set_name,
+      card_image: current.image_url,
+      card_price: current.price,
+      tags: tagPayload,
+      custom_tags: custom,
+      credits_awarded: earned,
+    });
+    if (error) {
+      toast.error('Could not save review');
+      return;
     }
-
-    saveCurrentToHistory();
+    const newCredits = credits + earned;
+    setCredits(newCredits);
+    await supabase.from('pokeiq_credits').upsert({
+      user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
+    });
+    toast.success('+1 PokeIQ credit');
+    setReviewedCount((c) => c + 1);
     nextCard();
   };
 
-  const skip = () => { saveCurrentToHistory(); nextCard(); };
+  const skip = () => nextCard();
 
   const activeFiltersCount = useMemo(() => {
     let n = 0;
@@ -446,22 +398,22 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-[120px_1fr] md:grid-cols-[140px_1fr] gap-3 items-start"
+              className="grid md:grid-cols-[260px_1fr] gap-5 items-start"
             >
               {/* Card image */}
-              <div className="space-y-1.5">
-                <div className="aspect-[63/88] rounded-xl overflow-hidden bg-black/40 shadow-md">
+              <div className="space-y-2">
+                <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
                   {current.image_url && !imgErr ? (
                     <img
                       src={current.image_url}
                       alt={current.name}
-                      className="w-full h-full object-contain"
+                      className="w-full h-full object-cover"
                       onError={() => setImgErr(true)}
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground gap-2">
-                      <ImageOff className="w-6 h-6" />
-                      <span className="text-[10px]">No image</span>
+                      <ImageOff className="w-8 h-8" />
+                      <span className="text-xs">No image</span>
                     </div>
                   )}
                 </div>
@@ -585,21 +537,12 @@ export default function PokeYelp() {
                 </Card>
 
                 <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={goBack}
-                    disabled={index === 0}
-                    className="gap-1"
-                    aria-label="Previous card"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" /> Back
-                  </Button>
                   <Button variant="ghost" onClick={skip} className="flex-1 gap-1">
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
                   <Button onClick={submit} className="flex-[2] gap-1.5">
                     <Coins className="w-4 h-4" />
-                    {submittedReviews[current.card_id] ? 'Update review' : 'Submit (+1 credit)'}
+                    Submit (+1 credit)
                   </Button>
                 </div>
 

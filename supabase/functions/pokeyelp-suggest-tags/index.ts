@@ -1,5 +1,4 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
-import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const TAG_VOCAB = {
   'Emotional Tone': ['Nostalgic','Cozy','Peaceful','Exciting','Powerful','Dark','Chaotic','Joyful','Lonely','Adventurous','Mysterious','Relaxing','Hopeful','Intimidating','Happy','Angry'],
@@ -14,7 +13,7 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const { name, set_name, rarity, price, card_id } = await req.json();
+    const { name, set_name, rarity, price } = await req.json();
     if (!name) {
       return new Response(JSON.stringify({ error: 'name required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -23,40 +22,6 @@ Deno.serve(async (req) => {
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) throw new Error('LOVABLE_API_KEY not configured');
-
-    // Aggregate community-submitted tags for this card so they surface as suggestions.
-    let communityTags: { tag: string; count: number }[] = [];
-    if (card_id) {
-      try {
-        const supaUrl = Deno.env.get('SUPABASE_URL')!;
-        const supaKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-        const supa = createClient(supaUrl, supaKey);
-        const { data: reviews } = await supa
-          .from('pokeyelp_reviews')
-          .select('tags, custom_tags')
-          .eq('card_id', card_id)
-          .limit(500);
-        const counts = new Map<string, number>();
-        for (const r of reviews ?? []) {
-          const all = [...(r.tags ?? []), ...(r.custom_tags ?? [])];
-          for (const raw of all) {
-            if (!raw || typeof raw !== 'string') continue;
-            if (raw.startsWith('__comment__:')) continue;
-            const t = raw.trim();
-            if (!t) continue;
-            const key = t.toLowerCase();
-            counts.set(key, (counts.get(key) ?? 0) + 1);
-          }
-        }
-        communityTags = [...counts.entries()]
-          .map(([k, count]) => ({ tag: k.replace(/\b\w/g, (c) => c.toUpperCase()), count }))
-          .filter((x) => x.count >= 1)
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 5);
-      } catch (err) {
-        console.error('community tag fetch failed', err);
-      }
-    }
 
     const vocabList = Object.entries(TAG_VOCAB)
       .map(([cat, tags]) => `${cat}: ${tags.join(', ')}`)
@@ -154,27 +119,7 @@ Price: $${price ?? '?'}`;
     const call = data.choices?.[0]?.message?.tool_calls?.[0];
     const args = call ? JSON.parse(call.function.arguments) : { suggestions: [] };
 
-    // Merge community tags (prepended, deduped) so popular real-user tags show first.
-    const seen = new Set<string>();
-    const merged: any[] = [];
-    for (const c of communityTags) {
-      const k = c.tag.toLowerCase();
-      if (seen.has(k)) continue;
-      seen.add(k);
-      merged.push({
-        tag: c.tag,
-        category: 'Community',
-        reason: `${c.count} ${c.count === 1 ? 'reviewer' : 'reviewers'} agreed`,
-      });
-    }
-    for (const s of (args.suggestions ?? [])) {
-      const k = String(s.tag ?? '').toLowerCase();
-      if (!k || seen.has(k)) continue;
-      seen.add(k);
-      merged.push(s);
-    }
-
-    return new Response(JSON.stringify({ suggestions: merged }), {
+    return new Response(JSON.stringify(args), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
