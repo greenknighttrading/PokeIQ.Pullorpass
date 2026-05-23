@@ -163,7 +163,7 @@ export default function PersonalityTypes() {
                     </div>
                     <div>
                       <DialogTitle className="text-2xl">{selected}</DialogTitle>
-                      <p className="text-xs italic text-primary/80">"{info.philosophy}"</p>
+                      <p className="text-base italic text-primary/80">"{info.philosophy}"</p>
                     </div>
                   </div>
                 </DialogHeader>
