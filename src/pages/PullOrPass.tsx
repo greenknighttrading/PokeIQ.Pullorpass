@@ -410,16 +410,20 @@ function DraggableCard({
   card,
   onSwipe,
   disabled,
+  exitDir,
 }: {
   card: SwipeCard;
   onSwipe: (dir: SwipeDir) => void;
   disabled?: boolean;
+  exitDir?: SwipeDir | null;
 }) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const rotate = useTransform(x, [-200, 0, 200], [-18, 0, 18]);
-  const passOpacity = useTransform(x, [-150, -40, 0], [1, 0.4, 0]);
-  const pullOpacity = useTransform(x, [0, 40, 150], [0, 0.4, 1]);
+  const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
+  const passOpacity = useTransform(x, [-150, -30, 0], [1, 0.2, 0]);
+  const passScale = useTransform(x, [-200, -30, 0], [1.4, 0.7, 0.5]);
+  const pullOpacity = useTransform(x, [0, 30, 150], [0, 0.2, 1]);
+  const pullScale = useTransform(x, [0, 30, 200], [0.5, 0.7, 1.4]);
   const loveOpacity = useTransform(y, [-150, -40, 0], [1, 0.4, 0]);
 
   const handleDragEnd = (_: any, info: PanInfo) => {
@@ -440,36 +444,43 @@ function DraggableCard({
     // else snap back (framer handles it)
   };
 
+  const exitX = exitDir === 'right' ? 600 : exitDir === 'left' ? -600 : 0;
+  const exitY = exitDir === 'up' ? -700 : 0;
+
   return (
     <motion.div
       className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-2xl cursor-grab active:cursor-grabbing"
       style={{ x, y, rotate, zIndex: 20, touchAction: 'none' }}
-      drag={disabled ? false : true}
+      drag={disabled || exitDir ? false : true}
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       onDragEnd={handleDragEnd}
       initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={
+        exitDir
+          ? { x: exitX, y: exitY, opacity: 0, rotate: exitDir === 'right' ? 25 : exitDir === 'left' ? -25 : 0, transition: { duration: 0.45, ease: 'easeIn', delay: 0.25 } }
+          : { opacity: 1, scale: 1 }
+      }
       whileTap={{ cursor: 'grabbing' }}
     >
       <CardArt card={card} />
 
-      {/* Overlays */}
+      {/* Directional drag overlays */}
       <motion.div
-        style={{ opacity: pullOpacity }}
-        className="absolute top-6 left-6 px-3 py-1 rounded-md border-2 border-primary text-primary font-bold tracking-widest rotate-[-12deg] bg-background/50 backdrop-blur-sm"
+        style={{ opacity: pullOpacity, scale: pullScale }}
+        className="absolute top-1/2 right-6 -translate-y-1/2 w-20 h-20 rounded-full bg-emerald-500 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.7)] pointer-events-none"
       >
-        PULL
+        <Check className="w-12 h-12 text-white" strokeWidth={4} />
       </motion.div>
       <motion.div
-        style={{ opacity: passOpacity }}
-        className="absolute top-6 right-6 px-3 py-1 rounded-md border-2 border-destructive text-destructive font-bold tracking-widest rotate-[12deg] bg-background/50 backdrop-blur-sm"
+        style={{ opacity: passOpacity, scale: passScale }}
+        className="absolute top-1/2 left-6 -translate-y-1/2 w-20 h-20 rounded-full bg-red-500 flex items-center justify-center shadow-[0_0_40px_rgba(239,68,68,0.7)] pointer-events-none"
       >
-        PASS
+        <X className="w-12 h-12 text-white" strokeWidth={4} />
       </motion.div>
       <motion.div
         style={{ opacity: loveOpacity }}
-        className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md border-2 border-amber-400 text-amber-400 font-bold tracking-widest bg-background/50 backdrop-blur-sm"
+        className="absolute top-6 left-1/2 -translate-x-1/2 px-3 py-1 rounded-md border-2 border-amber-400 text-amber-400 font-bold tracking-widest bg-background/50 backdrop-blur-sm pointer-events-none"
       >
         LOVE
       </motion.div>
