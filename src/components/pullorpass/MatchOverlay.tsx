@@ -71,6 +71,12 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
   };
   const handleLeave = () => { mx.set(0); my.set(0); };
 
+  const sheenBg = useTransform(
+    [mx, my],
+    ([px, py]: number[]) =>
+      `radial-gradient(circle at ${50 + px * 40}% ${50 + py * 40}%, hsl(var(--primary) / 0.25), transparent 55%)`,
+  );
+
   // Dismiss on Escape
   React.useEffect(() => {
     if (!card) return;
@@ -162,13 +168,7 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               {/* Holographic sheen following cursor */}
               <motion.div
                 className="pointer-events-none absolute inset-0"
-                style={{
-                  background: useTransform(
-                    [mx, my],
-                    ([px, py]: number[]) =>
-                      `radial-gradient(circle at ${50 + px * 40}% ${50 + py * 40}%, hsl(var(--primary) / 0.25), transparent 55%)`,
-                  ),
-                }}
+                style={{ background: sheenBg }}
               />
               <motion.div
                 className="absolute inset-0 rounded-2xl"
