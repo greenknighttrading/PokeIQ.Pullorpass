@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,11 @@ import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
 import { useNavigate } from 'react-router-dom';
 import {
-  SwipeCard, SwipeRecord, TAG_GROUPS, analyzeRound, pickDiverse20,
+  SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
 import { toast } from 'sonner';
 
-type Stage = 'loading' | 'swiping' | 'tagging' | 'results' | 'auth';
+type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
 
 const SWIPE_THRESHOLD = 110;
@@ -30,27 +30,22 @@ export default function PullOrPass() {
   const [cards, setCards] = useState<SwipeCard[]>([]);
   const [index, setIndex] = useState(0);
   const [records, setRecords] = useState<SwipeRecord[]>([]);
-  const [pendingTags, setPendingTags] = useState<string[]>([]);
   const [roundId, setRoundId] = useState<string>('');
   const [imgError, setImgError] = useState(false);
+  const [flyAnim, setFlyAnim] = useState<{ type: 'pull' | 'love' | 'pass'; key: number } | null>(null);
 
-  // Auth + initial load
+  // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user || session.user.is_anonymous) {
-        setStage('auth');
-      } else {
-        setUserId(session.user.id);
-        loadRound();
-      }
+      if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
     });
+    loadRound();
   }, []);
 
   const loadRound = useCallback(async () => {
     setStage('loading');
     setIndex(0);
     setRecords([]);
-    setPendingTags([]);
     setImgError(false);
     setRoundId(crypto.randomUUID());
 
@@ -117,7 +112,6 @@ export default function PullOrPass() {
     }
 
     if (index + 1 >= cards.length) {
-      // End of round
       finalizeRound(newRecords);
     } else {
       setIndex(index + 1);
@@ -151,19 +145,26 @@ export default function PullOrPass() {
     });
   };
 
+  const triggerAnim = (type: 'pull' | 'love' | 'pass') => {
+    setFlyAnim({ type, key: Date.now() });
+    setTimeout(() => setFlyAnim(null), 700);
+  };
+
   const handlePull = () => {
-    setStage('tagging');
-    setPendingTags([]);
+    if (!current) return;
+    triggerAnim('pull');
+    recordSwipe({ card: current, decision: 'pull', tags: [] });
   };
 
   const handlePass = () => {
     if (!current) return;
+    triggerAnim('pass');
     recordSwipe({ card: current, decision: 'pass', tags: [] });
   };
 
   const handleLove = () => {
-    // "Love" = strong pull, auto-tagged, skips tag picker
     if (!current) return;
+    triggerAnim('love');
     recordSwipe({ card: current, decision: 'pull', tags: ['Loved'] });
   };
 
@@ -171,24 +172,6 @@ export default function PullOrPass() {
     if (dir === 'left') handlePass();
     else if (dir === 'right') handlePull();
     else handleLove();
-  };
-
-  const confirmTags = () => {
-    if (!current) return;
-    recordSwipe({ card: current, decision: 'pull', tags: pendingTags });
-    setStage('swiping');
-  };
-
-  const skipTags = () => {
-    if (!current) return;
-    recordSwipe({ card: current, decision: 'pull', tags: [] });
-    setStage('swiping');
-  };
-
-  const toggleTag = (t: string) => {
-    setPendingTags((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : prev.length >= 3 ? prev : [...prev, t]
-    );
   };
 
   return (
@@ -208,18 +191,7 @@ export default function PullOrPass() {
             </div>
           )}
 
-          {stage === 'auth' && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center">
-              <Heart className="w-12 h-12 text-primary" />
-              <h1 className="text-3xl font-bold">PULLorPASS</h1>
-              <p className="text-muted-foreground max-w-md">
-                Sign in to start a round. We'll build your Collector DNA from your swipes.
-              </p>
-              <Button onClick={() => navigate('/auth')}>Sign in to play</Button>
-            </div>
-          )}
-
-          {(stage === 'swiping' || stage === 'tagging') && current && (
+          {stage === 'swiping' && current && (
             <>
               {/* Progress */}
               <div className="flex items-center justify-between mb-4">
@@ -238,7 +210,8 @@ export default function PullOrPass() {
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 flex flex-col items-center justify-center gap-6">
+              <div className="flex-1 flex flex-col items-center justify-center gap-6 relative">
+                <SwipeAnimationLayer anim={flyAnim} />
                 <div className="relative w-full max-w-xs aspect-[2.5/3.5]" style={{ touchAction: 'none' }}>
                   {/* +2 card */}
                   {after && (
@@ -257,7 +230,6 @@ export default function PullOrPass() {
                     key={current.card_id + '-' + index}
                     card={current}
                     onSwipe={handleSwipeDir}
-                    disabled={stage === 'tagging'}
                   />
                 </div>
 
@@ -269,9 +241,8 @@ export default function PullOrPass() {
                   </p>
                 </div>
 
-                {stage === 'swiping' && (
-                  <>
-                    <div className="flex items-center gap-4">
+                <>
+                  <div className="flex items-center gap-4">
                       <Button
                         onClick={handlePass}
                         size="lg"
@@ -298,68 +269,90 @@ export default function PullOrPass() {
                       >
                         <Heart className="w-6 h-6 fill-current" />
                       </Button>
-                    </div>
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Swipe ← Pass · ↑ Love · Pull →
-                    </p>
-                  </>
-                )}
+                  </div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Swipe ← Pass · ↑ Love · Pull →
+                  </p>
+                </>
               </div>
-
-              {/* Tag overlay */}
-              {stage === 'tagging' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 p-4 rounded-2xl border border-border bg-card"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-foreground">
-                      What does this card feel like? <span className="text-xs text-muted-foreground font-normal">(pick up to 3)</span>
-                    </p>
-                  </div>
-                  <div className="space-y-3 max-h-64 overflow-y-auto">
-                    {TAG_GROUPS.map((g) => (
-                      <div key={g.label}>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">{g.label}</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {g.tags.map((t) => {
-                            const on = pendingTags.includes(t);
-                            return (
-                              <button
-                                key={t}
-                                onClick={() => toggleTag(t)}
-                                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
-                                  on
-                                    ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-background text-foreground border-border hover:bg-muted'
-                                }`}
-                              >
-                                {t}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <Button variant="ghost" onClick={skipTags} className="flex-1">Skip</Button>
-                    <Button onClick={confirmTags} className="flex-1" disabled={pendingTags.length === 0}>
-                      Continue
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
             </>
           )}
 
           {stage === 'results' && (
-            <ResultsView records={records} onPlayAgain={loadRound} />
+            <ResultsView records={records} onPlayAgain={loadRound} isAuthed={!!userId} onSignUp={() => navigate('/auth')} />
           )}
         </main>
       </div>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// Swipe direction animations (heart / super-star / X)
+// ─────────────────────────────────────────────────────────
+function SwipeAnimationLayer({ anim }: { anim: { type: 'pull' | 'love' | 'pass'; key: number } | null }) {
+  return (
+    <AnimatePresence>
+      {anim && (
+        <motion.div
+          key={anim.key}
+          className="absolute inset-0 pointer-events-none z-30 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {anim.type === 'pull' && (
+            <motion.div
+              initial={{ scale: 0, rotate: -20 }}
+              animate={{ scale: [0, 1.3, 1.1], rotate: [0, 10, 0] }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+            >
+              <Heart className="w-32 h-32 text-primary fill-primary drop-shadow-[0_0_30px_hsl(var(--primary)/0.6)]" />
+            </motion.div>
+          )}
+          {anim.type === 'love' && (
+            <>
+              <motion.div
+                initial={{ scale: 0, rotate: -40 }}
+                animate={{ scale: [0, 1.8, 1.5], rotate: [0, 20, -10, 0] }}
+                exit={{ scale: [1.5, 2.5], opacity: 0, y: -120 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+              >
+                <Star className="w-44 h-44 text-amber-400 fill-amber-400 drop-shadow-[0_0_60px_rgba(251,191,36,0.9)]" />
+              </motion.div>
+              {/* sparkle burst */}
+              {[...Array(8)].map((_, i) => {
+                const angle = (i / 8) * Math.PI * 2;
+                const dx = Math.cos(angle) * 140;
+                const dy = Math.sin(angle) * 140;
+                return (
+                  <motion.div
+                    key={i}
+                    className="absolute"
+                    initial={{ opacity: 1, x: 0, y: 0, scale: 0 }}
+                    animate={{ opacity: 0, x: dx, y: dy, scale: 1.2 }}
+                    transition={{ duration: 0.7, ease: 'easeOut' }}
+                  >
+                    <Sparkles className="w-6 h-6 text-amber-300" />
+                  </motion.div>
+                );
+              })}
+            </>
+          )}
+          {anim.type === 'pass' && (
+            <motion.div
+              initial={{ scale: 0.6, opacity: 0 }}
+              animate={{ scale: 1, opacity: 0.85 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <X className="w-20 h-20 text-muted-foreground" strokeWidth={2.5} />
+            </motion.div>
+          )}
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
@@ -478,8 +471,20 @@ function DraggableCard({
   );
 }
 
-function ResultsView({ records, onPlayAgain }: { records: SwipeRecord[]; onPlayAgain: () => void }) {
+function ResultsView({
+  records,
+  onPlayAgain,
+  isAuthed,
+  onSignUp,
+}: {
+  records: SwipeRecord[];
+  onPlayAgain: () => void;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
   const a = analyzeRound(records);
+  const pulled = records.filter((r) => r.decision === 'pull');
+  const passed = records.filter((r) => r.decision === 'pass');
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -510,19 +515,41 @@ function ResultsView({ records, onPlayAgain }: { records: SwipeRecord[]; onPlayA
         </Card>
       </div>
 
-      {a.topTags.length > 0 && (
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Your top vibes</p>
-          <div className="flex flex-wrap gap-2">
-            {a.topTags.map((t) => (
-              <Badge key={t.tag} variant="secondary" className="gap-1">
-                <Sparkles className="w-3 h-3" />
-                {t.tag} <span className="opacity-60">×{t.count}</span>
-              </Badge>
+      {/* Liked vs Disliked side by side */}
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs uppercase tracking-wide text-primary font-semibold flex items-center gap-1.5">
+              <Heart className="w-3.5 h-3.5 fill-primary" /> Liked
+            </p>
+            <span className="text-xs text-muted-foreground tabular-nums">{pulled.length}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {pulled.length === 0 && (
+              <p className="col-span-3 text-xs text-muted-foreground text-center py-4">No pulls</p>
+            )}
+            {pulled.map((r) => (
+              <ResultThumb key={r.card.card_id} card={r.card} loved={r.tags.includes('Loved')} />
             ))}
           </div>
         </Card>
-      )}
+        <Card className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold flex items-center gap-1.5">
+              <X className="w-3.5 h-3.5" /> Disliked
+            </p>
+            <span className="text-xs text-muted-foreground tabular-nums">{passed.length}</span>
+          </div>
+          <div className="grid grid-cols-3 gap-1.5">
+            {passed.length === 0 && (
+              <p className="col-span-3 text-xs text-muted-foreground text-center py-4">No passes</p>
+            )}
+            {passed.map((r) => (
+              <ResultThumb key={r.card.card_id} card={r.card} />
+            ))}
+          </div>
+        </Card>
+      </div>
 
       {a.favoriteSets.length > 0 && (
         <Card className="p-4">
@@ -538,6 +565,23 @@ function ResultsView({ records, onPlayAgain }: { records: SwipeRecord[]; onPlayA
         </Card>
       )}
 
+      {!isAuthed && (
+        <Card className="p-5 border-primary/40 bg-primary/5">
+          <div className="text-center space-y-3">
+            <Sparkles className="w-8 h-8 mx-auto text-primary" />
+            <h3 className="text-lg font-bold text-foreground">Save your Collector DNA</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              Sign up free to keep track of every card you've liked, sharpen your taste profile,
+              and unlock a smarter PokeIQ portfolio tailored to you.
+            </p>
+            <Button onClick={onSignUp} size="lg" className="gap-2 w-full sm:w-auto">
+              <LogIn className="w-4 h-4" />
+              Sign up to save your results
+            </Button>
+          </div>
+        </Card>
+      )}
+
       <div className="flex flex-col gap-2 pt-2">
         <Button onClick={onPlayAgain} size="lg" className="gap-2">
           <RotateCw className="w-4 h-4" />
@@ -548,5 +592,30 @@ function ResultsView({ records, onPlayAgain }: { records: SwipeRecord[]; onPlayA
         </p>
       </div>
     </motion.div>
+  );
+}
+
+function ResultThumb({ card, loved }: { card: SwipeCard; loved?: boolean }) {
+  const [err, setErr] = useState(false);
+  return (
+    <div className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/30">
+      {card.image_url && !err ? (
+        <img
+          src={card.image_url}
+          alt={card.name}
+          className="w-full h-full object-cover"
+          onError={() => setErr(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <ImageOff className="w-4 h-4 text-muted-foreground" />
+        </div>
+      )}
+      {loved && (
+        <div className="absolute top-0.5 right-0.5">
+          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow" />
+        </div>
+      )}
+    </div>
   );
 }

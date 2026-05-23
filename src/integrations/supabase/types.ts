@@ -680,6 +680,66 @@ export type Database = {
           },
         ]
       }
+      pokeiq_credits: {
+        Row: {
+          credits: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          credits?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          credits?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pokeyelp_reviews: {
+        Row: {
+          card_id: string
+          card_image: string | null
+          card_name: string
+          card_price: number | null
+          card_set: string | null
+          created_at: string
+          credits_awarded: number
+          custom_tags: string[]
+          id: string
+          tags: string[]
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          card_image?: string | null
+          card_name: string
+          card_price?: number | null
+          card_set?: string | null
+          created_at?: string
+          credits_awarded?: number
+          custom_tags?: string[]
+          id?: string
+          tags?: string[]
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          card_image?: string | null
+          card_name?: string
+          card_price?: number | null
+          card_set?: string | null
+          created_at?: string
+          credits_awarded?: number
+          custom_tags?: string[]
+          id?: string
+          tags?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       portfolio_value_snapshots: {
         Row: {
           created_at: string
