@@ -197,6 +197,7 @@ export default function PokeYelp() {
     setCustomInput('');
     setComment('');
     setImgErr(false);
+    setEnlarged(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
   }, [index, pool.length, loadPool]);
