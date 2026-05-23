@@ -764,6 +764,84 @@ export type Database = {
         }
         Relationships: []
       }
+      pullorpass_dna: {
+        Row: {
+          archetype: string | null
+          pass_count: number
+          pull_count: number
+          rounds_completed: number
+          tag_counts: Json
+          traits: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archetype?: string | null
+          pass_count?: number
+          pull_count?: number
+          rounds_completed?: number
+          tag_counts?: Json
+          traits?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archetype?: string | null
+          pass_count?: number
+          pull_count?: number
+          rounds_completed?: number
+          tag_counts?: Json
+          traits?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pullorpass_swipes: {
+        Row: {
+          card_id: string
+          card_image: string | null
+          card_name: string
+          card_price: number | null
+          card_rarity: string | null
+          card_set: string | null
+          created_at: string
+          decision: string
+          id: string
+          round_id: string
+          tags: string[]
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          card_image?: string | null
+          card_name: string
+          card_price?: number | null
+          card_rarity?: string | null
+          card_set?: string | null
+          created_at?: string
+          decision: string
+          id?: string
+          round_id: string
+          tags?: string[]
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          card_image?: string | null
+          card_name?: string
+          card_price?: number | null
+          card_rarity?: string | null
+          card_set?: string | null
+          created_at?: string
+          decision?: string
+          id?: string
+          round_id?: string
+          tags?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
       sealed_ppt: {
         Row: {
           category: string | null
