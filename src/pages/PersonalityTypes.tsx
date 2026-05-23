@@ -81,7 +81,7 @@ export default function PersonalityTypes() {
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
           <div className="text-center mb-8 space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              Collector Types
+              Collector Personality Types
             </h1>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Every collector has a tribe. Tap any type to explore the psychology, strengths, blind spots, and growth path behind it.
