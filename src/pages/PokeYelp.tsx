@@ -446,11 +446,11 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="grid grid-cols-[160px_1fr] md:grid-cols-[180px_1fr] gap-3 items-start"
+              className="grid grid-cols-[120px_1fr] md:grid-cols-[140px_1fr] gap-3 items-start"
             >
               {/* Card image */}
-              <div className="space-y-2">
-                <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
+              <div className="space-y-1.5">
+                <div className="aspect-[63/88] rounded-xl overflow-hidden bg-muted/30 shadow-md">
                   {current.image_url && !imgErr ? (
                     <img
                       src={current.image_url}
