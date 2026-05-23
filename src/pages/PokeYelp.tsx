@@ -235,7 +235,7 @@ export default function PokeYelp() {
     setPool(items);
     setIndex(0);
     setLoading(false);
-  }, [packGainsMode, userId, minPrice, maxPrice, setQuery, eraId]);
+  }, [todaysMode, userId, minPrice, maxPrice, setQuery, eraId]);
 
   const fetchSuggestions = useCallback(async (card: YelpCard) => {
     setSuggestLoading(true);
@@ -318,7 +318,7 @@ export default function PokeYelp() {
             localStorage.setItem(ANON_REVIEWED_KEY, JSON.stringify([...prev, current.card_id]));
           }
         } catch { /* ignore */ }
-        if (packGainsMode) setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+        if (todaysMode) setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
       }
       toast.message('Sign up to keep training PokeIQ', {
         description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
@@ -385,8 +385,8 @@ export default function PokeYelp() {
         description: 'Unlimited swipes and premium features are now active.',
       });
     }
-    if (packGainsMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
-      setPackGainsRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
+    if (todaysMode && PACK_GAINS_SETS.includes(current.set_name ?? '')) {
+      setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
     nextCard();
   };
@@ -422,26 +422,26 @@ export default function PokeYelp() {
               <h1 className="text-2xl font-bold text-foreground">Earn — Help train PokeIQ</h1>
               <p className="text-xs text-muted-foreground">
                 Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
-                {packGainsMode && packGainsRemaining != null && ` · ${packGainsRemaining} priority cards left`}
+                {todaysMode && todaysRemaining != null && ` · ${todaysRemaining} priority cards left`}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline" size="sm"
                 onClick={() => {
-                  if (packGainsMode) {
+                  if (todaysMode) {
                     toast.message('Filters locked', {
-                      description: `Review the ${packGainsRemaining ?? ''} remaining Pack Gains cards first.`,
+                      description: `Review the ${todaysRemaining ?? ''} remaining Pack Gains cards first.`,
                     });
                     return;
                   }
                   setShowFilters((s) => !s);
                 }}
                 className="gap-1.5 h-8"
-                aria-disabled={packGainsMode}
+                aria-disabled={todaysMode}
               >
                 <Filter className="w-3.5 h-3.5" />
-                {packGainsMode ? 'Filters 🔒' : 'Filters'}
+                {todaysMode ? 'Filters 🔒' : 'Filters'}
                 {activeFiltersCount > 0 && (
                   <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
                     {activeFiltersCount}
