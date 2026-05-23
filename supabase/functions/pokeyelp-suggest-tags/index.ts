@@ -4,6 +4,7 @@ const TAG_VOCAB = {
   'Emotional Tone': ['Nostalgic','Cozy','Peaceful','Exciting','Powerful','Dark','Chaotic','Joyful','Lonely','Adventurous','Mysterious','Relaxing','Hopeful','Intimidating','Happy','Angry'],
   'Aesthetic Style': ['Cute','Cool','Girly','Beautiful','Colorful','Minimalist','Detailed','Clean','Cinematic','Playful','Epic','Dreamlike','Vintage','Modern','Soft','Aggressive'],
   'Action / Pose': ['Flying','Jumping','Sitting','Squatting','Running','Walking','Standing','Sleeping','Attacking','Floating','Swimming','Posing'],
+  'Type / Species': ['Bug'],
   'Collector Appeal': ['Grail','Display piece','Binder card','Investment','Chase card','Sleeper','Underrated','Overrated','Personal favorite','Trade bait'],
   'Vibe / Cultural Energy': ['Main character energy','Childhood vibes','Rich collector energy','Anime opening vibes','Rainy day vibes','Sunday morning vibes','Cozy collector vibes','Casino energy'],
 };
@@ -38,6 +39,7 @@ IMPORTANT RULES:
   * Cute — if the Pokémon or art style is adorable, charming, or has a sweet/child-friendly feel.
   * Cool — if the Pokémon looks badass, sleek, stylish, or has a confident/intimidating aura.
   * Girly — if the card uses traditionally feminine colors (pink, pastel, purple, soft tones) or the Pokémon/art has a very cute, feminine, or lovely aesthetic.
+  * Bug — if the Pokémon is a Bug-type or has strong insect/bug characteristics (e.g., Butterfree, Scyther, Caterpie).
 
 Preferred vocabulary by category:
 ${vocabList}
@@ -77,7 +79,7 @@ Price: $${price ?? '?'}`;
                     type: 'object',
                     properties: {
                       tag: { type: 'string', description: 'Short tag, 1-3 words' },
-                      category: { type: 'string', enum: ['Emotional Tone','Aesthetic Style','Action / Pose','Collector Appeal','Vibe / Cultural Energy','Custom'] },
+                      category: { type: 'string', enum: ['Emotional Tone','Aesthetic Style','Action / Pose','Type / Species','Collector Appeal','Vibe / Cultural Energy','Custom'] },
                       reason: { type: 'string', description: 'One short phrase (max 8 words) why it fits' },
                     },
                     required: ['tag','category','reason'],
