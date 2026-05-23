@@ -1,5 +1,5 @@
-// PokeIQ Collector Personality Engine — V4
-// Identity-first: 9 archetypes, 24 questions, no modifiers.
+// PokeIQ Collector Personality Engine — V5
+// Identity-first: 12 archetypes, 32 questions, no modifiers.
 
 export interface QuizQuestion {
   id: number;
@@ -43,6 +43,18 @@ export const QUIZ_QUESTIONS: QuizQuestion[] = [
   { id: 22, text: "I usually think about how new purchases fit into my collection as a whole.", section: "Structure & Balance" },
   { id: 23, text: "I see my Pokémon collection as something I'm building long-term.", section: "Structure & Balance" },
   { id: 24, text: "I enjoy refining and improving my collection over time.", section: "Structure & Balance" },
+
+  // Section 7 — Thrill & Risk Appetite
+  { id: 25, text: "Ripping packs is one of my favorite parts of the hobby.", section: "Thrill & Risk Appetite" },
+  { id: 26, text: "I love the unpredictability of chasing a big hit.", section: "Thrill & Risk Appetite" },
+  { id: 27, text: "I'll take a long-shot bet on a card if the payoff feels exciting enough.", section: "Thrill & Risk Appetite" },
+  { id: 28, text: "A boring collection is worse than a risky one.", section: "Thrill & Risk Appetite" },
+
+  // Section 8 — Identity, Presence & Restraint
+  { id: 29, text: "I enjoy sharing my pickups and showing my collection to others.", section: "Identity, Presence & Restraint" },
+  { id: 30, text: "I love owning cards that other collectors immediately recognize.", section: "Identity, Presence & Restraint" },
+  { id: 31, text: "I'd rather own fewer truly meaningful cards than a large collection.", section: "Identity, Presence & Restraint" },
+  { id: 32, text: "I regularly trim or refine my collection to keep it intentional.", section: "Identity, Presence & Restraint" },
 ];
 
 export type LikertValue = 1 | 2 | 3 | 4 | 5;
@@ -57,7 +69,10 @@ export type PersonalityType =
   | 'Hunter'
   | 'Explorer'
   | 'Curator'
-  | 'Diplomat';
+  | 'Diplomat'
+  | 'Gambler'
+  | 'Showman'
+  | 'Minimalist';
 
 export interface TraitScores {
   patience: number;
@@ -68,6 +83,11 @@ export interface TraitScores {
   structure: number;
   curiosity: number;
   balance: number;
+  preservation: number;
+  aesthetics: number;
+  recognition: number;
+  excitement: number;
+  restraint: number;
 }
 
 export interface ProductAllocation {
