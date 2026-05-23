@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home, Users } from 'lucide-react';
+import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home, Users, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useTheme } from '@/hooks/useTheme';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
 import {
   DropdownMenu,
@@ -42,6 +43,7 @@ export function GlobalNavBar({
 }: GlobalNavBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [alerts, setAlerts] = useState<WatchlistAlert[]>([]);
   const [alertsLoading, setAlertsLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
@@ -385,6 +387,10 @@ export function GlobalNavBar({
                     </p>
                   </div>
                 )}
+                <DropdownMenuItem onClick={(e) => { e.preventDefault(); toggleTheme(); }}>
+                  {theme === 'dark' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                  {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/home')}>
                   <TrendingUp className="w-4 h-4 mr-2" />
                   My Portfolio
@@ -396,10 +402,25 @@ export function GlobalNavBar({
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button variant="ghost" size="sm" className="gap-2 shrink-0" onClick={() => navigate('/auth')}>
-              <LogIn className="w-4 h-4" />
-              <span className="hidden sm:inline">Sign In</span>
-            </Button>
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="shrink-0">
+                    <User className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[180px]">
+                  <DropdownMenuItem onClick={(e) => { e.preventDefault(); toggleTheme(); }}>
+                    {theme === 'dark' ? <Sun className="w-4 h-4 mr-2" /> : <Moon className="w-4 h-4 mr-2" />}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/auth')}>
+                    <LogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           )}
         </div>
       </div>
