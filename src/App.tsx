@@ -56,6 +56,7 @@ const PackGainsCalculator = lazy(() => import("./pages/PackGainsCalculator"));
 const MintdDaily = lazy(() => import("./pages/MintdDaily"));
 const PullOrPass = lazy(() => import("./pages/PullOrPass"));
 const Matches = lazy(() => import("./pages/Matches"));
+const MatchesCollection = lazy(() => import("./pages/MatchesCollection"));
 const PokeYelp = lazy(() => import("./pages/PokeYelp"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
