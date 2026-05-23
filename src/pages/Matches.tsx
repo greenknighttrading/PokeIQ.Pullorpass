@@ -207,16 +207,7 @@ export default function Matches() {
               )}
 
               {/* Matches → Likes → Passes */}
-              <Section
-                title="Matches"
-                subtitle="Cards PokeIQ flagged as a pattern in your taste"
-                icon={<Heart className="w-4 h-4 text-primary fill-primary" />}
-                items={matches}
-                emptyText="No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste."
-                badge="match"
-                category="matches"
-                renderBinder
-              />
+              <BinderView items={matches} />
               <Section
                 title="Likes"
                 subtitle="Cards you pulled or super-liked"
