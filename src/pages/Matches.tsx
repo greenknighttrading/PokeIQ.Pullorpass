@@ -174,7 +174,7 @@ export default function Matches() {
                   <Card className="p-4">
                     <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Vibes you love</p>
                     {vibes.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Review more cards on Earn to teach PokeIQ your vibe</p>
+                      <p className="text-xs text-muted-foreground">Review more cards on Earn Credits to teach PokeIQ your vibe</p>
                     ) : (
                       <div className="flex flex-wrap gap-1.5">
                         {vibes.map((v) => (

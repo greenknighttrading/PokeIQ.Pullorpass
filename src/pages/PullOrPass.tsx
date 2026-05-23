@@ -362,8 +362,8 @@ export default function PullOrPass() {
   return (
     <>
       <Seo
-        title="PULLorPASS — Discover Your Collector DNA | PokeIQ"
-        description="React to Pokémon cards on instinct. PULLorPASS builds your Collector DNA so you discover what cards actually feel like you."
+        title="Pull or Pass — Discover Your Collector DNA | PokeIQ"
+        description="React to Pokémon cards on instinct. Pull or Pass builds your Collector DNA so you discover what cards actually feel like you."
       />
       <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
         <GlobalNavBar />
@@ -923,7 +923,7 @@ function OutOfSwipesView({
       <div className="space-y-1">
         <h2 className="text-xl font-bold text-foreground">You're out of swipes today</h2>
         <p className="text-sm text-muted-foreground max-w-sm">
-          Free players get {limit} swipes per day. Review 20 cards on Earn to unlock <strong className="text-foreground">+10 more swipes</strong>, and help train PokeIQ to spot your taste.
+          Free players get {limit} swipes per day. Review 20 cards on Earn Credits to unlock <strong className="text-foreground">+10 more swipes</strong>, and help train PokeIQ to spot your taste.
         </p>
       </div>
       <div className="flex flex-col gap-2 w-full max-w-xs">
