@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home } from 'lucide-react';
+import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
@@ -61,7 +61,11 @@ export function GlobalNavBar({
 
   const navItems = [
     { label: 'Home', href: '/pokeiq-daily', icon: Home, requiresAuth: false },
-    { label: 'DNA', href: '/test', icon: Sparkles, requiresAuth: false },
+  ];
+
+  const personalityItems = [
+    { label: 'Personality Test', href: '/test', icon: Sparkles },
+    { label: 'All 12 Types', href: '/personality-types', icon: Users },
   ];
 
   const discoverItems = [
@@ -80,6 +84,7 @@ export function GlobalNavBar({
 
   const isDiscoverActive = discoverItems.some(i => location.pathname.startsWith(i.href));
   const isToolsActive = toolsItems.some(i => location.pathname.startsWith(i.href));
+  const isPersonalityActive = personalityItems.some(i => location.pathname.startsWith(i.href));
   const isCollectActive = location.pathname.startsWith('/home') || location.pathname.startsWith('/collection') || location.pathname.startsWith('/winners') || location.pathname.startsWith('/insights') || location.pathname.startsWith('/rebalance') || location.pathname.startsWith('/era-allocation') || location.pathname.startsWith('/report') || location.pathname.startsWith('/smart-feed') || location.pathname.startsWith('/simulator');
 
   // Fetch watchlist alerts
@@ -174,6 +179,14 @@ export function GlobalNavBar({
                   </Link>
                 );
               })}
+              <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Personality</div>
+              {personalityItems.map((item) => (
+                <Link key={item.href} to={item.href}>
+                  <div className={cn('flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors', location.pathname === item.href ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted/50')}>
+                    <item.icon className="w-4 h-4" />{item.label}
+                  </div>
+                </Link>
+              ))}
               <div className="px-3 pt-3 pb-1 text-[10px] uppercase tracking-wider text-muted-foreground">Discover</div>
               {discoverItems.map((item) => (
                 <Link key={item.href} to={item.href}>
@@ -233,6 +246,28 @@ export function GlobalNavBar({
               </Link>
             );
           })}
+
+          {/* Personality dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant={isPersonalityActive ? 'secondary' : 'ghost'}
+                size="sm"
+                className={cn('gap-1.5 shrink-0', isPersonalityActive && 'bg-primary/10 text-primary')}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span className="hidden sm:inline">Personality</span>
+                <ChevronDown className="w-3 h-3" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {personalityItems.map((item) => (
+                <DropdownMenuItem key={item.href} onClick={() => navigate(item.href)}>
+                  <item.icon className="w-4 h-4 mr-2" />{item.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* Discover dropdown */}
           <DropdownMenu>
