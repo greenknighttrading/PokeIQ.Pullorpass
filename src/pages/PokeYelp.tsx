@@ -127,9 +127,9 @@ export default function PokeYelp() {
   const [setQuery, setSetQuery] = useState<string>('');
   const [eraId, setEraId] = useState<string>('');
 
-  // Force user to review Pack Gains cards first — filters stay locked until done
-  const [packGainsMode, setPackGainsMode] = useState(true);
-  const [packGainsRemaining, setPackGainsRemaining] = useState<number | null>(null);
+  // Prioritize cards the user PullOrPassed today — filters locked until done
+  const [todaysMode, setTodaysMode] = useState(true);
+  const [todaysRemaining, setTodaysRemaining] = useState<number | null>(null);
 
   const fetchCredits = useCallback(async (uid: string) => {
     const { data } = await supabase
@@ -140,61 +140,57 @@ export default function PokeYelp() {
   const loadPool = useCallback(async () => {
     setLoading(true);
 
-    // === Pack Gains First mode ===
-    if (packGainsMode) {
-      let reviewedIds: string[] = [];
-      if (userId) {
+    // === Today's PullOrPass swipes First mode ===
+    if (todaysMode) {
+      let swiped: YelpCard[] = [];
+      try {
+        const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+        const arr = raw ? JSON.parse(raw) : [];
+        swiped = (Array.isArray(arr) ? arr : []).map((c: any) => ({
+          card_id: c.card_id,
+          name: c.name,
+          set_name: c.set_name ?? null,
+          image_url: c.image_url ?? null,
+          price: Number(c.price) || 0,
+          rarity: c.rarity ?? null,
+        }));
+      } catch { swiped = []; }
+
+      // Drop cards already reviewed this session/account
+      let reviewedIds = new Set<string>();
+      if (userId && swiped.length) {
         const { data: revs } = await supabase
           .from('pokeyelp_reviews')
           .select('card_id')
           .eq('user_id', userId)
-          .in('card_set', PACK_GAINS_SETS);
-        reviewedIds = Array.from(new Set((revs ?? []).map((r: any) => r.card_id)));
+          .in('card_id', swiped.map((c) => c.card_id));
+        reviewedIds = new Set((revs ?? []).map((r: any) => r.card_id));
       } else {
         try {
-          reviewedIds = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
-        } catch { reviewedIds = []; }
+          const prev = JSON.parse(localStorage.getItem(ANON_REVIEWED_KEY) || '[]');
+          reviewedIds = new Set(prev);
+        } catch {}
       }
 
-      const { data, error } = await supabase
-        .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, price, rarity')
-        .eq('game', 'Pokemon')
-        .eq('product_type', 'card')
-        .in('set_name', PACK_GAINS_SETS)
-        .in('rarity', PACK_GAINS_HIT_RARITIES)
-        .gt('price', 0)
-        .not('tcgplayer_id', 'is', null)
-        .limit(1000);
+      // De-dupe by card_id, preserve order (most recent first)
+      const seen = new Set<string>();
+      const items = swiped
+        .slice()
+        .reverse()
+        .filter((c) => c.card_id && !seen.has(c.card_id) && !reviewedIds.has(c.card_id) && (seen.add(c.card_id), true));
 
-      if (!error && data) {
-        const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
-        const reviewedSet = new Set(reviewedIds);
-        const items: YelpCard[] = data
-          .filter((c: any) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name) && !reviewedSet.has(c.card_id))
-          .map((c: any) => ({
-            card_id: c.card_id,
-            name: c.name,
-            set_name: c.set_name,
-            image_url: tcgImage(c.tcgplayer_id),
-            price: Number(c.price),
-            rarity: c.rarity,
-          }));
+      setTodaysRemaining(items.length);
 
-        setPackGainsRemaining(items.length);
-
-        if (items.length > 0) {
-          setPool(items.sort(() => Math.random() - 0.5));
-          setIndex(0);
-          setLoading(false);
-          return;
-        }
+      if (items.length > 0) {
+        setPool(items);
+        setIndex(0);
+        setLoading(false);
+        return;
       }
 
-      // Pack Gains exhausted — unlock filters and fall through to normal load
-      setPackGainsMode(false);
-      setPackGainsRemaining(0);
-      toast.success('Pack Gains complete — filters unlocked!');
+      // No today's swipes to review — unlock filters and fall through
+      setTodaysMode(false);
+      setTodaysRemaining(0);
     }
 
     const minP = Number(minPrice) || 5;
