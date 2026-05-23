@@ -95,6 +95,17 @@ export default function PullOrPass() {
   const [quota, setQuota] = useState(() => readQuota());
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
+  // DEV: grant Pro membership for testing (unlimited swipes on this device).
+  useEffect(() => {
+    try {
+      const FAR_FUTURE = new Date('2099-12-31').getTime();
+      const current = Number(localStorage.getItem('pokeiq_premium_until') || '0');
+      if (current < FAR_FUTURE) {
+        localStorage.setItem('pokeiq_premium_until', String(FAR_FUTURE));
+      }
+    } catch {}
+  }, []);
+
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
