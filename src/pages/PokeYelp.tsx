@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Seo } from '@/components/seo/Seo';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -19,16 +20,33 @@ interface YelpCard {
   rarity: string | null;
 }
 
-// Curated review-tag vocabulary
-const TAG_GROUPS: { label: string; tags: string[] }[] = [
-  { label: 'Art & Aesthetics', tags: ['Stunning Art', 'Iconic Pose', 'Beautiful Background', 'Full Art', 'Alt Art', 'Textured', 'Holographic'] },
-  { label: 'Vibe', tags: ['Cozy', 'Powerful', 'Cute', 'Epic', 'Nostalgic', 'Dreamy', 'Funny', 'Chaotic'] },
-  { label: 'Collectibility', tags: ['Chase Card', 'Investment', 'Long-term Hold', 'Set Staple', 'Underrated', 'Overrated', 'Sleeper'] },
-  { label: 'Condition / Print', tags: ['Print-Quality', 'Centering Issues', 'Hard to Grade', 'PSA 10 Worthy'] },
-  { label: 'Audience', tags: ['Casual Friendly', 'Whale Bait', 'Tournament Worthy', 'Display-Worthy'] },
+// Curated review-tag vocabulary — optimized for fast, low-thought tagging
+const TAG_GROUPS: { label: string; description: string; tags: string[] }[] = [
+  {
+    label: 'Emotional Tone',
+    description: 'How the card emotionally feels',
+    tags: ['Nostalgic', 'Cozy', 'Peaceful', 'Exciting', 'Powerful', 'Dark', 'Chaotic', 'Joyful', 'Lonely', 'Adventurous', 'Mysterious', 'Relaxing', 'Hopeful', 'Intimidating'],
+  },
+  {
+    label: 'Aesthetic Style',
+    description: 'How the artwork visually feels',
+    tags: ['Cute', 'Beautiful', 'Colorful', 'Minimalist', 'Detailed', 'Clean', 'Cinematic', 'Playful', 'Epic', 'Dreamlike', 'Vintage', 'Modern', 'Soft', 'Aggressive'],
+  },
+  {
+    label: 'Collector Appeal',
+    description: 'What type of collector appeal it has',
+    tags: ['Grail', 'Display piece', 'Binder card', 'Investment', 'Chase card', 'Sleeper', 'Underrated', 'Overrated', 'Personal favorite', 'Trade bait'],
+  },
+  {
+    label: 'Vibe / Cultural Energy',
+    description: 'Social and emotional identity',
+    tags: ['Main character energy', 'Childhood vibes', 'Rich collector energy', 'Anime opening vibes', 'Rainy day vibes', 'Sunday morning vibes', 'Cozy collector vibes', 'Casino energy'],
+  },
 ];
 
 const ALL_TAGS = TAG_GROUPS.flatMap((g) => g.tags);
+const MIN_TAGS = 3;
+const MAX_TAGS = 10;
 
 function tcgImage(id: string | null): string | null {
   if (!id) return null;
@@ -45,6 +63,7 @@ export default function PokeYelp() {
   const [selected, setSelected] = useState<string[]>([]);
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
+  const [comment, setComment] = useState('');
   const [reviewedCount, setReviewedCount] = useState(0);
   const [imgErr, setImgErr] = useState(false);
 
@@ -99,14 +118,30 @@ export default function PokeYelp() {
   }, [loadPool, fetchCredits]);
 
   const current = pool[index];
+  const totalTags = selected.length + custom.length;
+  const remaining = Math.max(0, MIN_TAGS - totalTags);
+  const atMax = totalTags >= MAX_TAGS;
 
-  const toggle = (t: string) =>
-    setSelected((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
+  const toggle = (t: string) => {
+    setSelected((p) => {
+      if (p.includes(t)) return p.filter((x) => x !== t);
+      if (totalTags >= MAX_TAGS) {
+        toast.message(`Max ${MAX_TAGS} tags per review`);
+        return p;
+      }
+      return [...p, t];
+    });
+  };
 
   const addCustom = () => {
     const v = customInput.trim();
-    if (!v || custom.includes(v) || ALL_TAGS.map(s => s.toLowerCase()).includes(v.toLowerCase())) {
+    if (!v) return;
+    if (custom.includes(v) || ALL_TAGS.map((s) => s.toLowerCase()).includes(v.toLowerCase())) {
       setCustomInput('');
+      return;
+    }
+    if (totalTags >= MAX_TAGS) {
+      toast.message(`Max ${MAX_TAGS} tags per review`);
       return;
     }
     setCustom((p) => [...p, v]);
@@ -117,8 +152,8 @@ export default function PokeYelp() {
 
   const submit = async () => {
     if (!current) return;
-    if (selected.length === 0 && custom.length === 0) {
-      toast.error('Add at least one tag to review this card');
+    if (totalTags < MIN_TAGS) {
+      toast.error(`Pick at least ${MIN_TAGS} tags to submit`);
       return;
     }
     if (!userId) {
@@ -129,7 +164,8 @@ export default function PokeYelp() {
       nextCard();
       return;
     }
-    const earned = 1 + Math.min(custom.length, 2);
+    // +1 base, +1 per custom tag (cap 3), +1 if a comment was left
+    const earned = 1 + Math.min(custom.length, 3) + (comment.trim().length >= 8 ? 1 : 0);
     const { error } = await supabase.from('pokeyelp_reviews').insert({
       user_id: userId,
       card_id: current.card_id,
@@ -137,7 +173,7 @@ export default function PokeYelp() {
       card_set: current.set_name,
       card_image: current.image_url,
       card_price: current.price,
-      tags: selected,
+      tags: comment.trim() ? [...selected, `__comment__:${comment.trim().slice(0, 500)}`] : selected,
       custom_tags: custom,
       credits_awarded: earned,
     });
@@ -159,6 +195,7 @@ export default function PokeYelp() {
     setSelected([]);
     setCustom([]);
     setCustomInput('');
+    setComment('');
     setImgErr(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
@@ -243,30 +280,48 @@ export default function PokeYelp() {
               {/* Tag picker */}
               <div className="space-y-4">
                 <Card className="p-4">
-                  <p className="text-sm font-semibold text-foreground mb-1">
-                    How would you review this card?
-                  </p>
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <p className="text-sm font-semibold text-foreground">
+                      Tap how this card feels
+                    </p>
+                    <span
+                      className={`text-[10px] font-bold tabular-nums px-2 py-0.5 rounded-full ${
+                        totalTags >= MIN_TAGS
+                          ? 'bg-primary/15 text-primary'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {totalTags}/{MAX_TAGS}
+                    </span>
+                  </div>
                   <p className="text-xs text-muted-foreground mb-3">
-                    Pick any tags that fit. Or add your own — custom tags earn extra credits.
+                    Pick {MIN_TAGS}–{MAX_TAGS} tags across any category. Trust your gut — first reaction is best.
                   </p>
 
                   <div className="space-y-3 max-h-[44vh] overflow-y-auto pr-1">
                     {TAG_GROUPS.map((g) => (
                       <div key={g.label}>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
-                          {g.label}
-                        </p>
+                        <div className="flex items-baseline gap-2 mb-1.5">
+                          <p className="text-[10px] uppercase tracking-wide text-foreground/80 font-semibold">
+                            {g.label}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">{g.description}</p>
+                        </div>
                         <div className="flex flex-wrap gap-1.5">
                           {g.tags.map((t) => {
                             const on = selected.includes(t);
+                            const disabled = !on && atMax;
                             return (
                               <button
                                 key={t}
                                 onClick={() => toggle(t)}
-                                className={`px-2.5 py-1 text-xs rounded-full border transition-colors ${
+                                disabled={disabled}
+                                className={`px-2.5 py-1 text-xs rounded-full border transition-all active:scale-95 ${
                                   on
                                     ? 'bg-primary text-primary-foreground border-primary'
-                                    : 'bg-background text-foreground border-border hover:bg-muted'
+                                    : disabled
+                                      ? 'bg-background text-muted-foreground/50 border-border/50 cursor-not-allowed'
+                                      : 'bg-background text-foreground border-border hover:bg-muted'
                                 }`}
                               >
                                 {t}
@@ -291,8 +346,9 @@ export default function PokeYelp() {
                         placeholder="e.g. Mona Lisa Pose"
                         maxLength={40}
                         className="h-9 text-sm"
+                        disabled={atMax}
                       />
-                      <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
+                      <Button onClick={addCustom} size="sm" variant="outline" className="gap-1" disabled={atMax}>
                         <Plus className="w-3.5 h-3.5" /> Add
                       </Button>
                     </div>
@@ -312,6 +368,22 @@ export default function PokeYelp() {
                         ))}
                       </div>
                     )}
+
+                    {/* Optional comment */}
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1">
+                          <MessageSquare className="w-3 h-3" /> Optional comment
+                        </p>
+                        <span className="text-[10px] text-muted-foreground">+1 credit if 8+ chars</span>
+                      </div>
+                      <Textarea
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value.slice(0, 500))}
+                        placeholder="Any extra thoughts? (optional)"
+                        className="text-sm min-h-[60px]"
+                      />
+                    </div>
                   </div>
                 </Card>
 
@@ -319,9 +391,11 @@ export default function PokeYelp() {
                   <Button variant="ghost" onClick={skip} className="flex-1 gap-1">
                     <RotateCw className="w-3.5 h-3.5" /> Skip
                   </Button>
-                  <Button onClick={submit} className="flex-[2] gap-1.5">
+                  <Button onClick={submit} className="flex-[2] gap-1.5" disabled={totalTags < MIN_TAGS}>
                     <Coins className="w-4 h-4" />
-                    Submit Review (+{1 + Math.min(custom.length, 2)})
+                    {totalTags < MIN_TAGS
+                      ? `Pick ${remaining} more tag${remaining === 1 ? '' : 's'}`
+                      : `Submit Review (+${1 + Math.min(custom.length, 3) + (comment.trim().length >= 8 ? 1 : 0)})`}
                   </Button>
                 </div>
 
