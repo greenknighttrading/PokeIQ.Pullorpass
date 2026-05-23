@@ -361,7 +361,9 @@ export default function PokeYelp() {
             <div>
               <h1 className="text-2xl font-bold text-foreground">PokeYelp</h1>
               <p className="text-xs text-muted-foreground">
-                Tap any AI tag that fits. Earn 1 credit per card reviewed.
+                {packGainsMode
+                  ? `Reviewing Pack Gains sets first${packGainsRemaining != null ? ` · ${packGainsRemaining} left` : ''}`
+                  : 'Tap any AI tag that fits. Earn 1 credit per card reviewed.'}
               </p>
             </div>
             <div className="flex items-center gap-2">
