@@ -273,6 +273,57 @@ export type Database = {
         }
         Relationships: []
       }
+      card_tag_aggregates: {
+        Row: {
+          card_id: string
+          last_voted_at: string
+          tag: string
+          unique_users: number
+          vote_count: number
+        }
+        Insert: {
+          card_id: string
+          last_voted_at?: string
+          tag: string
+          unique_users?: number
+          vote_count?: number
+        }
+        Update: {
+          card_id?: string
+          last_voted_at?: string
+          tag?: string
+          unique_users?: number
+          vote_count?: number
+        }
+        Relationships: []
+      }
+      card_tag_votes: {
+        Row: {
+          card_id: string
+          created_at: string
+          id: string
+          source: string
+          tag: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          created_at?: string
+          id?: string
+          source?: string
+          tag: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          created_at?: string
+          id?: string
+          source?: string
+          tag?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       cards_justtcg: {
         Row: {
           created_at: string
