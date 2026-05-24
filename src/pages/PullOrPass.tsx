@@ -795,7 +795,6 @@ function ResultsView({
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
   const passed = records.filter((r) => r.decision === 'pass');
-  const superLikes = records.filter((r) => r.tags.includes('Loved') || r.tags.includes('Match'));
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
