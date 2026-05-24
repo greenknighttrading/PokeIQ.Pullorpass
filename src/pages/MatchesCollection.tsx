@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Star, X, ArrowLeft, ImageOff, Search } from 'lucide-react';
+import { Heart, Star, X, ArrowLeft, ImageOff, Search, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
@@ -28,8 +28,8 @@ type Swipe = {
 type Category = 'matches' | 'likes' | 'passes';
 
 const CONFIG: Record<Category, { title: string; subtitle: string; badge: 'match' | 'like' | 'pass'; icon: React.ReactNode }> = {
-  matches: { title: 'All Matches',  subtitle: 'Every card PokeIQ has flagged as on-taste for you.', badge: 'match', icon: <Heart className="w-5 h-5 text-primary fill-primary" /> },
-  likes:   { title: 'All Likes',    subtitle: 'Every card you pulled or super-liked.',               badge: 'like',  icon: <Heart className="w-5 h-5 text-primary" /> },
+  matches: { title: 'All Matches',  subtitle: 'Every card PokeIQ has flagged as on-taste for you.', badge: 'match', icon: <Sparkles className="w-5 h-5 text-primary" /> },
+  likes:   { title: 'All Likes',    subtitle: 'Every card you pulled or super-liked.',               badge: 'like',  icon: <Heart className="w-5 h-5 text-primary fill-primary" /> },
   passes:  { title: 'All Passes',   subtitle: "Cards that didn't speak to you.",                     badge: 'pass',  icon: <X className="w-5 h-5 text-muted-foreground" /> },
 };
 
@@ -170,7 +170,7 @@ function Thumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }) {
         )}
         {badge === 'match' && (
           <div className={`absolute ${superLiked ? 'top-1.5 left-1.5' : 'top-1.5 right-1.5'} bg-primary/90 rounded-full p-1 shadow-md`}>
-            <Heart className="w-3 h-3 text-white fill-white" />
+            <Sparkles className="w-3 h-3 text-white" />
           </div>
         )}
         {badge === 'like' && !superLiked && (
