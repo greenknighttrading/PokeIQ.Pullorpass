@@ -183,19 +183,35 @@ export default function PullOrPass() {
       if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
     } catch {}
 
-    // Pool of value cards. image_url is empty in DB so we build TCGPlayer CDN URLs.
-    // Exclude unwanted variants per project rules.
-    const { data, error } = await supabase
-      .from('market_snapshots')
-      .select('card_id, tcgplayer_id, name, set_name, price, rarity')
-      .eq('game', 'Pokemon')
-      .eq('product_type', 'card')
-      .gt('price', 5)
-      .not('tcgplayer_id', 'is', null)
-      .order('price', { ascending: false })
-      .limit(1500);
+    // Pool of value cards. We sample across multiple random price tiers so
+    // every round draws from a different slice of the 10k+ unique card pool —
+    // otherwise we'd keep dipping into the same top-priced rows every round.
+    const TIERS: Array<[number, number]> = [
+      [5, 15], [15, 40], [40, 100], [100, 300], [300, 1000], [1000, 100000],
+    ];
+    // Shuffle tier order + use a random offset within each tier for variety.
+    const shuffledTiers = [...TIERS].sort(() => Math.random() - 0.5);
+    const rows: any[] = [];
+    let lastError: any = null;
+    for (const [lo, hi] of shuffledTiers) {
+      const offset = Math.floor(Math.random() * 400);
+      const { data: chunk, error: e } = await supabase
+        .from('market_snapshots')
+        .select('card_id, tcgplayer_id, name, set_name, price, rarity')
+        .eq('game', 'Pokemon')
+        .eq('product_type', 'card')
+        .gte('price', lo)
+        .lt('price', hi)
+        .not('tcgplayer_id', 'is', null)
+        .order('card_id')
+        .range(offset, offset + 499);
+      if (e) { lastError = e; continue; }
+      if (chunk) rows.push(...chunk);
+      if (rows.length > 2500) break;
+    }
 
-    if (error || !data || data.length === 0) {
+    if (rows.length === 0) {
+      const error = lastError;
       console.error('pullorpass load error', error);
       toast.error('Could not load cards for this round');
       setStage('swiping');
@@ -203,8 +219,16 @@ export default function PullOrPass() {
     }
 
     const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
-    const pool: SwipeCard[] = data
-      .filter((c) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name) && !seen.has(c.card_id))
+    // Dedup by card_id — market_snapshots has multiple rows per card (one per
+    // condition/printing) and we only want to consider each card once.
+    const byId = new Map<string, any>();
+    for (const c of rows) {
+      if (!c.tcgplayer_id || !c.price) continue;
+      if (EXCLUDE.test(c.name)) continue;
+      if (seen.has(c.card_id)) continue;
+      if (!byId.has(c.card_id)) byId.set(c.card_id, c);
+    }
+    const pool: SwipeCard[] = Array.from(byId.values())
       .map((c) => ({
         card_id: c.card_id,
         name: c.name,
