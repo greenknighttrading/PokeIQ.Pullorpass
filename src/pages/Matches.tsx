@@ -146,7 +146,7 @@ export default function Matches() {
               <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
             </Link>
             <div className="flex items-center gap-2 mt-2">
-              <Heart className="w-6 h-6 text-primary fill-primary" />
+              <Sparkles className="w-6 h-6 text-primary" />
               <h1 className="text-2xl font-bold text-foreground">Your Matches</h1>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
@@ -281,7 +281,7 @@ export default function Matches() {
               <Section
                 title="Likes"
                 subtitle="Cards you pulled or super-liked"
-                icon={<Star className="w-4 h-4 text-amber-400 fill-amber-400" />}
+                icon={<Heart className="w-4 h-4 text-primary fill-primary" />}
                 items={likes}
                 emptyText="No likes yet."
                 badge="like"
@@ -394,7 +394,7 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
         )}
         {badge === 'match' && (
           <div className="absolute top-1.5 right-1.5 bg-primary/90 rounded-full p-1 shadow-md">
-            <Heart className="w-3 h-3 text-white fill-white" />
+            <Sparkles className="w-3 h-3 text-white" />
           </div>
         )}
         {badge === 'like' && !superLiked && (
