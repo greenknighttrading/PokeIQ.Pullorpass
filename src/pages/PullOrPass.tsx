@@ -246,6 +246,18 @@ export default function PullOrPass() {
       localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
     } catch {}
 
+    // Persistently remember every card_id this device has ever swiped so
+    // guests never see the same card twice across rounds.
+    try {
+      const seenKey = 'pop_seen_card_ids';
+      const seenPrev: string[] = JSON.parse(localStorage.getItem(seenKey) || '[]');
+      if (!seenPrev.includes(rec.card.card_id)) {
+        seenPrev.push(rec.card.card_id);
+        // Cap to avoid unbounded growth
+        localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
+      }
+    } catch {}
+
     if (userId) {
       supabase.from('pullorpass_swipes').insert({
         user_id: userId,
