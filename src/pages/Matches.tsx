@@ -439,7 +439,7 @@ function BinderView({ items }: { items: Swipe[] }) {
     <section className="mb-10">
       <div className="flex items-end justify-between mb-2 gap-3">
         <div className="flex items-center gap-2">
-          <Heart className="w-4 h-4 text-primary fill-primary" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <h2 className="text-base font-semibold text-foreground">Matches</h2>
           <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
         </div>

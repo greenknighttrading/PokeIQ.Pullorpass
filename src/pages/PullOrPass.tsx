@@ -795,7 +795,6 @@ function ResultsView({
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
   const passed = records.filter((r) => r.decision === 'pass');
-  const superLikes = records.filter((r) => r.tags.includes('Loved') || r.tags.includes('Match'));
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -825,27 +824,6 @@ function ResultsView({
           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg Pull</p>
         </Card>
       </div>
-
-      {/* Super Likes (loved + matches) */}
-      <Card className="p-4 border-amber-400/30 bg-amber-400/[0.04]">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs uppercase tracking-wide text-amber-400 font-semibold flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 fill-amber-400" /> Super Likes
-          </p>
-          <Link to="/matches" className="text-xs text-primary hover:underline">View all matches →</Link>
-        </div>
-        {superLikes.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-3">
-            No Super Likes this round. Tap ★ on cards you really love.
-          </p>
-        ) : (
-          <div className="grid grid-cols-6 gap-1.5">
-            {superLikes.map((r) => (
-              <ResultThumb key={r.card.card_id} card={r.card} loved />
-            ))}
-          </div>
-        )}
-      </Card>
 
       {/* Liked vs Disliked side by side */}
       <div className="grid grid-cols-2 gap-3">
