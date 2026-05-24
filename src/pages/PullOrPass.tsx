@@ -153,6 +153,36 @@ export default function PullOrPass() {
     setImgError(false);
     setRoundId(crypto.randomUUID());
 
+    // Build an exclusion set of every card this user has ever swiped, so we
+    // never show the same card twice. For signed-in users we pull from the
+    // DB; for anon/guest users we fall back to localStorage history.
+    const seen = new Set<string>();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && !session.user.is_anonymous) {
+        let from = 0;
+        const PAGE = 1000;
+        // Paginate to bypass the 1000-row default cap
+        while (true) {
+          const { data: prior } = await supabase
+            .from('pullorpass_swipes')
+            .select('card_id')
+            .eq('user_id', session.user.id)
+            .range(from, from + PAGE - 1);
+          if (!prior || prior.length === 0) break;
+          prior.forEach((r: any) => r.card_id && seen.add(r.card_id));
+          if (prior.length < PAGE) break;
+          from += PAGE;
+        }
+      }
+    } catch (e) {
+      console.warn('seen-history load failed', e);
+    }
+    try {
+      const local = JSON.parse(localStorage.getItem('pop_seen_card_ids') || '[]');
+      if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
+    } catch {}
+
     // Pool of value cards. image_url is empty in DB so we build TCGPlayer CDN URLs.
     // Exclude unwanted variants per project rules.
     const { data, error } = await supabase
@@ -174,7 +204,7 @@ export default function PullOrPass() {
 
     const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
     const pool: SwipeCard[] = data
-      .filter((c) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name))
+      .filter((c) => c.tcgplayer_id && c.price && !EXCLUDE.test(c.name) && !seen.has(c.card_id))
       .map((c) => ({
         card_id: c.card_id,
         name: c.name,
@@ -186,7 +216,7 @@ export default function PullOrPass() {
 
     const picked = pickDiverse20(pool);
     if (picked.length === 0) {
-      toast.error('No cards available right now');
+      toast.error("You've swiped every card we have — new ones drop daily!");
     }
     setCards(picked);
     setStage('swiping');
@@ -214,6 +244,18 @@ export default function PullOrPass() {
         decision: rec.decision,
       });
       localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
+    } catch {}
+
+    // Persistently remember every card_id this device has ever swiped so
+    // guests never see the same card twice across rounds.
+    try {
+      const seenKey = 'pop_seen_card_ids';
+      const seenPrev: string[] = JSON.parse(localStorage.getItem(seenKey) || '[]');
+      if (!seenPrev.includes(rec.card.card_id)) {
+        seenPrev.push(rec.card.card_id);
+        // Cap to avoid unbounded growth
+        localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
+      }
     } catch {}
 
     if (userId) {
