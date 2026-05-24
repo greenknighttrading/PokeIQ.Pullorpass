@@ -439,8 +439,8 @@ export default function PullOrPass() {
   return (
     <>
       <Seo
-        title="Pull or Pass — Discover Your Collector DNA | PokeIQ"
-        description="React to Pokémon cards on instinct. Pull or Pass builds your Collector DNA so you discover what cards actually feel like you."
+        title="Pull or Pass — Train Your Taste Profile | PokeIQ"
+        description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving Taste Profile."
       />
       <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
         <GlobalNavBar />
@@ -829,9 +829,11 @@ function ResultsView({
         <Trophy className="w-10 h-10 mx-auto text-primary" />
         <p className="text-xs uppercase tracking-widest text-muted-foreground">Round Complete</p>
         <h1 className="text-3xl font-bold text-foreground">
-          {a.archetype?.name ?? 'Your Collector DNA'}
+          PokeIQ is learning your eye
         </h1>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">{a.summary}</p>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          Every swipe shapes your Taste Profile — what you naturally love, not how you collect.
+        </p>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
@@ -903,10 +905,10 @@ function ResultsView({
         <Card className="p-5 border-primary/40 bg-primary/5">
           <div className="text-center space-y-3">
             <Sparkles className="w-8 h-8 mx-auto text-primary" />
-            <h3 className="text-lg font-bold text-foreground">Save your Collector DNA</h3>
+            <h3 className="text-lg font-bold text-foreground">Save your Taste Profile</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Sign up free to keep track of every card you've liked, sharpen your taste profile,
-              and unlock a smarter PokeIQ portfolio tailored to you.
+              Sign up free to keep every swipe, watch your Taste Profile evolve over time,
+              and unlock smarter PokeIQ recommendations tailored to your eye.
             </p>
             <Button onClick={onSignUp} size="lg" className="gap-2 w-full sm:w-auto">
               <LogIn className="w-4 h-4" />
@@ -924,7 +926,7 @@ function ResultsView({
         <p className="text-[11px] text-center text-muted-foreground">
           {outOfSwipes
             ? 'Complete PokéYelp to unlock +20 more swipes today.'
-            : 'Come back tomorrow to sharpen your Collector DNA.'}
+            : 'Come back tomorrow — your Taste Profile evolves with every swipe.'}
         </p>
       </div>
     </motion.div>
