@@ -145,39 +145,39 @@ serve(async (req) => {
         if (q.length < 2) return json({ data: [], totalCount: 0 });
 
         const params = new URLSearchParams({
-          search: q,
-          per_page: String(Math.min(pageSize, 50)),
+          q: `name:\"${escapeQueryValue(q)}\"*`,
+          pageSize: String(Math.min(pageSize, 50)),
           page: String(page),
-          sort: "relevance",
+          orderBy: "name",
         });
 
-        const result = await rapidApiFetch(`/cards?${params.toString()}`);
+        const result = await pokemonTcgFetch(`/cards?${params.toString()}`);
         return json({
           data: (result.data ?? []).map(formatCard).filter(Boolean),
-          totalCount: result.results ?? 0,
-          page: result.paging?.current ?? page,
-          pageSize: result.paging?.per_page ?? pageSize,
+          totalCount: result.totalCount ?? 0,
+          page: result.page ?? page,
+          pageSize: result.pageSize ?? pageSize,
         });
       }
 
       case "getCard": {
         if (!cardId) return json({ data: null });
-        const result = await rapidApiFetch(`/cards/${encodeURIComponent(cardId)}`);
+        const result = await pokemonTcgFetch(`/cards/${encodeURIComponent(cardId)}`);
         const cardData = result.data ?? result;
         return json({ data: formatCard(cardData) });
       }
 
       case "getSets": {
-        const result = await rapidApiFetch(`/sets?per_page=250&page=1`);
+        const result = await pokemonTcgFetch(`/sets?pageSize=250&page=1&orderBy=-releaseDate`);
         return json({
           // deno-lint-ignore no-explicit-any
           data: (result.data ?? []).map((s: any) => ({
-            id: s.slug ?? String(s.id ?? ""),
+            id: String(s.id ?? ""),
             name: s.name ?? "",
-            series: s.series?.name ?? "",
-            code: s.code ?? "",
-            releaseDate: s.released_at ?? "",
-            images: { logo: s.logo ?? null },
+            series: s.series ?? "",
+            code: s.ptcgoCode ?? "",
+            releaseDate: s.releaseDate ?? "",
+            images: { logo: s.images?.logo ?? null, symbol: s.images?.symbol ?? null },
           })),
         });
       }
@@ -194,26 +194,28 @@ serve(async (req) => {
         const setName = (parsed.setName ?? "").trim();
         if (cardName.length < 2 && setName.length < 2) return json({ data: [], totalCount: 0 });
 
-        const searchTerm = cardName || setName;
+        const searchParts: string[] = [];
+        if (cardName) searchParts.push(`name:\"${escapeQueryValue(cardName)}\"*`);
+        if (setName) searchParts.push(`set.name:\"${escapeQueryValue(setName)}\"`);
         const params = new URLSearchParams({
-          search: searchTerm,
-          per_page: String(Math.min(pageSize, 50)),
+          q: searchParts.join(" "),
+          pageSize: String(Math.min(pageSize, 50)),
           page: String(page),
-          sort: "relevance",
+          orderBy: "name",
         });
 
-        const result = await rapidApiFetch(`/cards?${params.toString()}`);
+        const result = await pokemonTcgFetch(`/cards?${params.toString()}`);
         let cards = (result.data ?? []).map(formatCard).filter(Boolean);
 
         if (cardName && setName) {
-          const setLower = setName.toLowerCase();
+          const setLower = normalizeText(setName);
           // deno-lint-ignore no-explicit-any
           cards = cards.filter((c: any) =>
-            c.set.name.toLowerCase().includes(setLower)
+            normalizeText(c.set.name).includes(setLower) || setLower.includes(normalizeText(c.set.name))
           );
         }
 
-        return json({ data: cards, totalCount: result.results ?? 0 });
+        return json({ data: cards, totalCount: result.totalCount ?? 0 });
       }
 
       default:
