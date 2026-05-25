@@ -5,8 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const RAPIDAPI_HOST = "pokemon-tcg-api.p.rapidapi.com";
-const RAPIDAPI_BASE = `https://${RAPIDAPI_HOST}`;
+const API_BASE = "https://api.pokemontcg.io/v2";
 
 // ── Simple in-memory rate limiter ──
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
@@ -38,28 +37,42 @@ function json(data: unknown, status = 200) {
   });
 }
 
+function normalizeText(value: string) {
+  return value.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function escapeQueryValue(value: string) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function nameQuery(value: string) {
+  const cleaned = value.trim();
+  if (!cleaned) return "";
+  return cleaned.includes(" ")
+    ? `name:\"${escapeQueryValue(cleaned)}\"`
+    : `name:${escapeQueryValue(cleaned)}*`;
+}
+
 // deno-lint-ignore no-explicit-any
-async function rapidApiFetch<T = any>(path: string, timeoutMs = 12000): Promise<T> {
-  const RAPIDAPI_KEY = Deno.env.get("RAPIDAPI_KEY");
-  if (!RAPIDAPI_KEY) throw new Error("RAPIDAPI_KEY is not configured");
+async function pokemonTcgFetch<T = any>(path: string, timeoutMs = 12000): Promise<T> {
+  const apiKey = Deno.env.get("POKEMON_TCG_API_KEY");
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const resp = await fetch(`${RAPIDAPI_BASE}${path}`, {
+    const resp = await fetch(`${API_BASE}${path}`, {
       method: "GET",
       headers: {
-        "x-rapidapi-host": RAPIDAPI_HOST,
-        "x-rapidapi-key": RAPIDAPI_KEY,
+        ...(apiKey ? { "X-Api-Key": apiKey.trim() } : {}),
       },
       signal: controller.signal,
     });
 
     if (!resp.ok) {
       const text = await resp.text().catch(() => "");
-      console.error("RapidAPI error:", resp.status, path, text.slice(0, 300));
-      throw new Error(`RapidAPI error: ${resp.status}`);
+      console.error("PokemonTCG API error:", resp.status, path, text.slice(0, 300));
+      throw new Error(`PokemonTCG API error: ${resp.status}`);
     }
 
     return (await resp.json()) as T;
@@ -72,45 +85,52 @@ async function rapidApiFetch<T = any>(path: string, timeoutMs = 12000): Promise<
 function formatCard(card: any) {
   if (!card) return null;
 
-  const prices = card.prices ?? {};
-  const tcgPlayer = prices.tcg_player;
-  const cardmarket = prices.cardmarket;
+  const tcgPrices = card.tcgplayer?.prices ?? {};
+  const firstTcgPrice = Object.values(tcgPrices)[0] as any;
+  const cardmarket = card.cardmarket?.prices;
+  const marketPrice =
+    firstTcgPrice?.market ??
+    firstTcgPrice?.mid ??
+    firstTcgPrice?.low ??
+    cardmarket?.averageSellPrice ??
+    cardmarket?.trendPrice ??
+    null;
 
   return {
-    id: card.tcgid ?? String(card.id ?? ""),
+    id: String(card.id ?? ""),
     internalId: card.id,
     name: card.name ?? "",
-    nameNumbered: card.name_numbered ?? "",
+    nameNumbered: card.name ? `${card.name}${card.number ? ` #${card.number}` : ""}` : "",
     supertype: card.supertype ?? "",
     hp: card.hp ?? "",
-    number: String(card.card_number ?? ""),
-    artist: typeof card.artist === "object" ? card.artist?.name ?? "" : card.artist ?? "",
+    number: String(card.number ?? ""),
+    artist: card.artist ?? "",
     rarity: card.rarity ?? "",
-    slug: card.slug ?? "",
-    cardType: card.type ?? "singles",
+    slug: card.id ?? "",
+    cardType: card.supertype ?? "singles",
     set: {
-      id: card.episode?.slug ?? "",
-      name: card.episode?.name ?? "",
-      series: card.episode?.series?.name ?? "",
-      code: card.episode?.code ?? "",
-      releaseDate: card.episode?.released_at ?? "",
-      images: { logo: card.episode?.logo ?? null },
+      id: card.set?.id ?? "",
+      name: card.set?.name ?? "",
+      series: card.set?.series ?? "",
+      code: card.set?.ptcgoCode ?? "",
+      releaseDate: card.set?.releaseDate ?? "",
+      images: { logo: card.set?.images?.logo ?? null, symbol: card.set?.images?.symbol ?? null },
     },
-    images: { small: card.image ?? null, large: card.image ?? null },
-    tcgplayer: tcgPlayer ? {
-      marketPrice: tcgPlayer.market_price ?? null,
-      midPrice: tcgPlayer.mid_price ?? null,
-      currency: tcgPlayer.currency ?? "USD",
+    images: { small: card.images?.small ?? null, large: card.images?.large ?? null },
+    tcgplayer: firstTcgPrice ? {
+      marketPrice: firstTcgPrice.market ?? null,
+      midPrice: firstTcgPrice.mid ?? null,
+      currency: "USD",
     } : null,
     cardmarket: cardmarket ? {
-      lowestNearMint: cardmarket.lowest_near_mint ?? null,
-      avg30: cardmarket["30d_average"] ?? null,
-      avg7: cardmarket["7d_average"] ?? null,
-      currency: cardmarket.currency ?? "EUR",
+      lowestNearMint: cardmarket.avg1 ?? null,
+      avg30: cardmarket.avg30 ?? null,
+      avg7: cardmarket.avg7 ?? null,
+      currency: "EUR",
     } : null,
-    marketPrice: tcgPlayer?.market_price ?? cardmarket?.lowest_near_mint ?? null,
+    marketPrice,
     links: card.links ?? {},
-    tcggoUrl: card.tcggo_url ?? null,
+    tcggoUrl: card.tcgplayer?.url ?? null,
   };
 }
 
@@ -133,39 +153,39 @@ serve(async (req) => {
         if (q.length < 2) return json({ data: [], totalCount: 0 });
 
         const params = new URLSearchParams({
-          search: q,
-          per_page: String(Math.min(pageSize, 50)),
+          q: nameQuery(q),
+          pageSize: String(Math.min(pageSize, 50)),
           page: String(page),
-          sort: "relevance",
+          orderBy: "name",
         });
 
-        const result = await rapidApiFetch(`/cards?${params.toString()}`);
+        const result = await pokemonTcgFetch(`/cards?${params.toString()}`);
         return json({
           data: (result.data ?? []).map(formatCard).filter(Boolean),
-          totalCount: result.results ?? 0,
-          page: result.paging?.current ?? page,
-          pageSize: result.paging?.per_page ?? pageSize,
+          totalCount: result.totalCount ?? 0,
+          page: result.page ?? page,
+          pageSize: result.pageSize ?? pageSize,
         });
       }
 
       case "getCard": {
         if (!cardId) return json({ data: null });
-        const result = await rapidApiFetch(`/cards/${encodeURIComponent(cardId)}`);
+        const result = await pokemonTcgFetch(`/cards/${encodeURIComponent(cardId)}`);
         const cardData = result.data ?? result;
         return json({ data: formatCard(cardData) });
       }
 
       case "getSets": {
-        const result = await rapidApiFetch(`/sets?per_page=250&page=1`);
+        const result = await pokemonTcgFetch(`/sets?pageSize=250&page=1&orderBy=-releaseDate`);
         return json({
           // deno-lint-ignore no-explicit-any
           data: (result.data ?? []).map((s: any) => ({
-            id: s.slug ?? String(s.id ?? ""),
+            id: String(s.id ?? ""),
             name: s.name ?? "",
-            series: s.series?.name ?? "",
-            code: s.code ?? "",
-            releaseDate: s.released_at ?? "",
-            images: { logo: s.logo ?? null },
+            series: s.series ?? "",
+            code: s.ptcgoCode ?? "",
+            releaseDate: s.releaseDate ?? "",
+            images: { logo: s.images?.logo ?? null, symbol: s.images?.symbol ?? null },
           })),
         });
       }
@@ -182,26 +202,28 @@ serve(async (req) => {
         const setName = (parsed.setName ?? "").trim();
         if (cardName.length < 2 && setName.length < 2) return json({ data: [], totalCount: 0 });
 
-        const searchTerm = cardName || setName;
+        const searchParts: string[] = [];
+        if (cardName) searchParts.push(nameQuery(cardName));
+        if (setName) searchParts.push(`set.name:\"${escapeQueryValue(setName)}\"`);
         const params = new URLSearchParams({
-          search: searchTerm,
-          per_page: String(Math.min(pageSize, 50)),
+          q: searchParts.join(" "),
+          pageSize: String(Math.min(pageSize, 50)),
           page: String(page),
-          sort: "relevance",
+          orderBy: "name",
         });
 
-        const result = await rapidApiFetch(`/cards?${params.toString()}`);
+        const result = await pokemonTcgFetch(`/cards?${params.toString()}`);
         let cards = (result.data ?? []).map(formatCard).filter(Boolean);
 
         if (cardName && setName) {
-          const setLower = setName.toLowerCase();
+          const setLower = normalizeText(setName);
           // deno-lint-ignore no-explicit-any
           cards = cards.filter((c: any) =>
-            c.set.name.toLowerCase().includes(setLower)
+            normalizeText(c.set.name).includes(setLower) || setLower.includes(normalizeText(c.set.name))
           );
         }
 
-        return json({ data: cards, totalCount: result.results ?? 0 });
+        return json({ data: cards, totalCount: result.totalCount ?? 0 });
       }
 
       default:
