@@ -749,6 +749,87 @@ export type Database = {
         }
         Relationships: []
       }
+      pokeiq_likes: {
+        Row: {
+          artist: string | null
+          card_id: string
+          card_name: string
+          card_number: string | null
+          card_type: string | null
+          created_at: string
+          era: string | null
+          id: string
+          image_url: string | null
+          language: string | null
+          liked_at: string
+          pokemon_name: string | null
+          pokemon_type: string | null
+          price: number | null
+          price_tier: string | null
+          product_category: string | null
+          rarity: string | null
+          release_year: number | null
+          set_id: string | null
+          set_name: string | null
+          source: string
+          updated_at: string
+          user_id: string
+          variant: string | null
+        }
+        Insert: {
+          artist?: string | null
+          card_id: string
+          card_name: string
+          card_number?: string | null
+          card_type?: string | null
+          created_at?: string
+          era?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          liked_at?: string
+          pokemon_name?: string | null
+          pokemon_type?: string | null
+          price?: number | null
+          price_tier?: string | null
+          product_category?: string | null
+          rarity?: string | null
+          release_year?: number | null
+          set_id?: string | null
+          set_name?: string | null
+          source?: string
+          updated_at?: string
+          user_id: string
+          variant?: string | null
+        }
+        Update: {
+          artist?: string | null
+          card_id?: string
+          card_name?: string
+          card_number?: string | null
+          card_type?: string | null
+          created_at?: string
+          era?: string | null
+          id?: string
+          image_url?: string | null
+          language?: string | null
+          liked_at?: string
+          pokemon_name?: string | null
+          pokemon_type?: string | null
+          price?: number | null
+          price_tier?: string | null
+          product_category?: string | null
+          rarity?: string | null
+          release_year?: number | null
+          set_id?: string | null
+          set_name?: string | null
+          source?: string
+          updated_at?: string
+          user_id?: string
+          variant?: string | null
+        }
+        Relationships: []
+      }
       pokeyelp_reviews: {
         Row: {
           card_id: string

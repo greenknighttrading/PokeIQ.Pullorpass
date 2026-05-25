@@ -1,195 +1,81 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
+import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Brain, Palette, Layers, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Seo } from '@/components/seo/Seo';
-import { buildTasteProfile } from '@/lib/tasteProfile';
+import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
+import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL } from '@/lib/likesService';
+import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 
-const PROFILE_GOAL = 40;
-const INITIAL_VISIBLE = 12;   // ~2 rows × 6 on desktop
-const LOAD_MORE_STEP = 12;
-const PAGE_CAP = 50;          // overflow → dedicated collection page
-
-type Swipe = {
-  id: string;
-  card_id: string;
-  card_name: string;
-  card_set: string | null;
-  card_image: string | null;
-  card_price: number | null;
-  card_rarity: string | null;
-  tags: string[];
-  decision: 'pull' | 'pass';
-  created_at: string;
-};
+type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
+const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
+  { key: 'all',       label: 'All',         icon: <Layers className="w-3 h-3" /> },
+  { key: 'artist',    label: 'Artist',      icon: <Palette className="w-3 h-3" /> },
+  { key: 'set',       label: 'Set',         icon: <Layers className="w-3 h-3" /> },
+  { key: 'era',       label: 'Era',         icon: <Layers className="w-3 h-3" /> },
+  { key: 'type',      label: 'Type',        icon: <Zap className="w-3 h-3" /> },
+  { key: 'rarity',    label: 'Rarity',      icon: <Sparkles className="w-3 h-3" /> },
+  { key: 'priceTier', label: 'Price tier',  icon: <Layers className="w-3 h-3" /> },
+];
 
 export default function Matches() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [swipes, setSwipes] = useState<Swipe[]>([]);
-  const [vibes, setVibes] = useState<{ tag: string; count: number }[]>([]);
-  const [personalityType, setPersonalityType] = useState<string | null>(null);
-  const [recommendations, setRecommendations] = useState<Swipe[]>([]);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('personalityResult');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed?.type) setPersonalityType(parsed.type);
-      }
-    } catch { /* ignore */ }
-  }, []);
+  const [likes, setLikes] = useState<LikedCard[]>([]);
+  const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
 
   useEffect(() => {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || session.user.is_anonymous) {
-        setLoading(false);
-        return;
-      }
+      if (!session?.user || session.user.is_anonymous) { setLoading(false); return; }
       setUserId(session.user.id);
-      // All swipes for this user (we segment client-side into matches / likes / passes)
-      const { data: swipeRows } = await supabase
-        .from('pullorpass_swipes')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false });
-      setSwipes((swipeRows as any[]) || []);
-
-      // Vibes = adjective tags. Pull from Collector DNA tag_counts (PullOrPass aggregate)
-      // and supplement with PokéYelp review tags (which are adjectives like Cozy, Cute…).
-      const tagTotals: Record<string, number> = {};
-      const RESERVED = new Set(['Match', 'Loved']);
-      const { data: dna } = await supabase
-        .from('pullorpass_dna')
-        .select('tag_counts')
-        .eq('user_id', session.user.id)
-        .maybeSingle();
-      const tc = (dna?.tag_counts as Record<string, number> | null) || {};
-      Object.entries(tc).forEach(([t, n]) => {
-        if (!RESERVED.has(t)) tagTotals[t] = (tagTotals[t] ?? 0) + (Number(n) || 0);
-      });
-      const { data: yelp } = await supabase
-        .from('pokeyelp_reviews')
-        .select('tags, custom_tags')
-        .eq('user_id', session.user.id);
-      (yelp || []).forEach((r: any) => {
-        [...(r.tags || []), ...(r.custom_tags || [])].forEach((t: string) => {
-          if (!t || RESERVED.has(t)) return;
-          tagTotals[t] = (tagTotals[t] ?? 0) + 1;
-        });
-      });
-      const topVibes = Object.entries(tagTotals)
-        .map(([tag, count]) => ({ tag, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-      setVibes(topVibes);
-
-      // PokeIQ recommendations: cards other users pulled that share the user's top vibes,
-      // excluding cards this user has already swiped on.
-      const topTags = topVibes.slice(0, 5).map((v) => v.tag);
-      const swipedIds = new Set(((swipeRows as any[]) || []).map((s) => s.card_id));
-      if (topTags.length > 0) {
-        const { data: recs } = await supabase
-          .from('pullorpass_swipes')
-          .select('*')
-          .neq('user_id', session.user.id)
-          .eq('decision', 'pull')
-          .overlaps('tags', topTags)
-          .order('created_at', { ascending: false })
-          .limit(200);
-        const seen = new Set<string>();
-        const unique: Swipe[] = [];
-        for (const r of (recs as any[]) || []) {
-          if (!r.card_id || swipedIds.has(r.card_id) || seen.has(r.card_id)) continue;
-          seen.add(r.card_id);
-          unique.push(r as Swipe);
-          if (unique.length >= 20) break;
-        }
-        setRecommendations(unique);
+      const liked = await fetchLikes(session.user.id);
+      setLikes(liked);
+      if (liked.length > 0) {
+        try { setRecommendations(await recommendForUser(liked, 12)); }
+        catch (e) { console.warn('recommend failed', e); }
       }
       setLoading(false);
     })();
   }, []);
 
-  // Segment swipes
-  // All "pulled" swipes now live in a single Likes binder (PokeIQ matches included, filterable).
-  const matches = swipes.filter((s) => (s.tags || []).includes('Match'));
-  const likes   = swipes.filter((s) => s.decision === 'pull');
-  const passes  = swipes.filter((s) => s.decision === 'pass');
-
-  // Aggregate aesthetic insights from matched cards
-  const setCounts: Record<string, number> = {};
-  let totalPrice = 0;
-  let priced = 0;
-  matches.forEach((m) => {
-    if (m.card_set) setCounts[m.card_set] = (setCounts[m.card_set] ?? 0) + 1;
-    if (m.card_price) { totalPrice += Number(m.card_price); priced++; }
-  });
-  const topSets = Object.entries(setCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const avgPrice = priced > 0 ? totalPrice / priced : 0;
-
-  // Taste Profile unlocks based on TOTAL individual cards swiped
-  const swipeCount = swipes.length;
-  const remainingToProfile = Math.max(0, PROFILE_GOAL - swipeCount);
-  const profileUnlocked = swipeCount >= PROFILE_GOAL;
-
-  // Layered Taste Profile (descriptive — never an archetype)
-  const tasteProfile = React.useMemo(() => {
-    if (!profileUnlocked) return null;
-    return buildTasteProfile({
-      vibes,
-      topSets,
-      avgPrice,
-      swipesCount: swipes.length,
-      matchesCount: matches.length,
-      likesCount: likes.length,
-      matchRarities: matches.map((m) => m.card_rarity || '').filter(Boolean),
-      personalityType,
-    });
-  }, [profileUnlocked, vibes, topSets, swipes.length, matches.length, likes.length, avgPrice, personalityType]);
-
-  const matchRate = swipes.length > 0 ? Math.round((matches.length / swipes.length) * 100) : 0;
+  const taste = useMemo(() => buildTasteProfile(likes), [likes]);
 
   return (
     <>
-      <Seo title="Your Matches — Taste Profile | PokeIQ" description="See the Pokémon cards that matched your taste and watch your Taste Profile evolve." />
+      <Seo title="Your Likes — Taste Profile | PokeIQ" description="Every card you've liked, with a taste profile built from real card metadata." />
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
-        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6">
+        <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-6">
           <div className="mb-6">
             <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
               <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
             </Link>
             <div className="flex items-center gap-2 mt-2">
-              <Sparkles className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold text-foreground">Your Matches</h1>
+              <Heart className="w-6 h-6 text-primary fill-primary" />
+              <h1 className="text-2xl font-bold text-foreground">Your Likes</h1>
+              <span className="text-sm text-muted-foreground tabular-nums">· {likes.length}</span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              What you naturally love — your evolving taste profile. PokeIQ learns more about you with every swipe.{' '}
-              <Link to="/earn" className="text-primary hover:underline font-medium">
-                Earn more swipes to help train the AI →
-              </Link>
+              Every card you've liked. PokeIQ learns from the real metadata — artist, set, era, type, rarity — to build a grounded taste profile.{' '}
+              <Link to="/earn" className="text-primary hover:underline font-medium">Earn more swipes →</Link>
             </p>
           </div>
 
-          {loading && (
-            <Card className="p-10 text-center text-muted-foreground text-sm">Loading your matches…</Card>
-          )}
+          {loading && <Card className="p-10 text-center text-muted-foreground text-sm">Loading your likes…</Card>}
 
           {!loading && !userId && (
             <Card className="p-8 text-center space-y-4 border-primary/30 bg-primary/5">
               <Lock className="w-8 h-8 mx-auto text-primary" />
-              <h3 className="text-lg font-bold text-foreground">Sign up to see your Matches</h3>
+              <h3 className="text-lg font-bold text-foreground">Sign up to see your Likes</h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Your matches are saved to your Collector Profile. Create a free account to start building yours.
+                Your likes are saved to your Collector Profile. Create a free account to start building yours.
               </p>
               <Button onClick={() => navigate('/auth')} size="lg" className="gap-2">
                 <LogIn className="w-4 h-4" /> Sign up free
@@ -199,61 +85,9 @@ export default function Matches() {
 
           {!loading && userId && (
             <>
-              {/* PokeIQ recommendations banner */}
-              {recommendations.length > 0 && (
-                <RecommendationsBanner items={recommendations} />
-              )}
-
-              {/* Aesthetic insights (always show what we have) */}
-              {(matches.length > 0 || vibes.length > 0) && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-                  <Card className="p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Your top vibes</p>
-                    <p className="text-[10px] text-muted-foreground mb-2">Aggregated across all your swipes &amp; reviews</p>
-                    {vibes.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Review more cards on Earn Credits to teach PokeIQ your taste</p>
-                    ) : (
-                      <div className="flex flex-wrap gap-1.5">
-                        {vibes.map((v) => (
-                          <Badge key={v.tag} variant="secondary" className="text-[10px]">{v.tag} · {v.count}</Badge>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                  <Card className="p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Sets you gravitate to</p>
-                    {topSets.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Match more cards to learn</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {topSets.map(([s, n]) => (
-                          <div key={s} className="flex items-center justify-between text-xs">
-                            <span className="text-foreground truncate pr-2">{s}</span>
-                            <span className="text-muted-foreground tabular-nums">{n}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </Card>
-                  <Card className="p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Your price tier</p>
-                    <p className="text-2xl font-bold text-primary tabular-nums">${avgPrice.toFixed(0)}</p>
-                    <p className="text-[10px] text-muted-foreground">avg per match</p>
-                  </Card>
-                </div>
-              )}
-
-              {/* Likes (binder, filterable — includes PokeIQ Matches) → Passes */}
-              <BinderView items={likes} vibes={vibes} />
-              <Section
-                title="Passes"
-                subtitle="Cards that didn't speak to you"
-                icon={<X className="w-4 h-4 text-muted-foreground" />}
-                items={passes}
-                emptyText="No passes yet."
-                badge="pass"
-                category="passes"
-              />
+              {recommendations.length > 0 && <RecommendationsBanner items={recommendations} />}
+              <TasteProfilePanel taste={taste} />
+              <BinderView likes={likes} taste={taste} />
             </>
           )}
         </main>
@@ -262,193 +96,167 @@ export default function Matches() {
   );
 }
 
-// ─────────────────────────────────────────────────────────
-// PokeIQ recommendations — horizontal scroll banner
-// ─────────────────────────────────────────────────────────
-function RecommendationsBanner({ items }: { items: Swipe[] }) {
+function TasteProfilePanel({ taste }: { taste: TasteProfile }) {
+  const { totalLikes, stage, nextThreshold, insights, avgPrice } = taste;
+  if (totalLikes === 0) {
+    return (
+      <Card className="p-6 mb-5 border-primary/20 bg-primary/5">
+        <div className="flex items-center gap-2 mb-1">
+          <Brain className="w-4 h-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">Taste Profile</h2>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          Like a card on swipe and PokeIQ will start learning your collecting patterns — artist, set, era, type, rarity. No vibes, just facts.
+        </p>
+      </Card>
+    );
+  }
+  const stageLabel: Record<string, string> = { seedling: 'Seedling', sprouting: 'Sprouting', established: 'Established', expert: 'Expert' };
+  return (
+    <section className="mb-6">
+      <Card className="p-5">
+        <div className="flex items-start justify-between gap-3 flex-wrap mb-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Brain className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Your Taste Profile</h2>
+              <Badge variant="secondary" className="text-[10px]">{stageLabel[stage]}</Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Built from <span className="text-foreground font-medium">{totalLikes}</span> liked card{totalLikes === 1 ? '' : 's'}
+              {avgPrice > 0 && <> · avg ${avgPrice.toFixed(0)}</>}
+              {nextThreshold && totalLikes < nextThreshold && <> · {nextThreshold - totalLikes} more to next stage</>}
+            </p>
+          </div>
+        </div>
+        {insights.length > 0 && (
+          <ul className="space-y-1.5 mb-4">
+            {insights.map((i, k) => (
+              <li key={k} className="text-sm text-foreground flex gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0" /><span>{i}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <AttrBlock title="Top artists"  icon={<Palette className="w-3 h-3" />} items={taste.topArtists} />
+          <AttrBlock title="Top sets"     icon={<Layers className="w-3 h-3" />}  items={taste.topSets} />
+          <AttrBlock title="Top eras"     icon={<Layers className="w-3 h-3" />}  items={taste.topEras} />
+          <AttrBlock title="Top types"    icon={<Zap className="w-3 h-3" />}     items={taste.topPokemonTypes} />
+          <AttrBlock title="Top rarities" icon={<Sparkles className="w-3 h-3" />} items={taste.topRarities} />
+          <AttrBlock title="Price tier"   icon={<Layers className="w-3 h-3" />}  items={taste.priceDistribution} />
+        </div>
+        {stage === 'seedling' && (
+          <p className="text-[11px] text-muted-foreground mt-3 italic">
+            PokeIQ is learning — like {Math.max(1, 20 - totalLikes)} more card{20 - totalLikes === 1 ? '' : 's'} to unlock your first full taste profile.
+          </p>
+        )}
+        {stage === 'expert' && (
+          <p className="text-[11px] text-primary mt-3 italic">
+            Vibe-based AI taste analysis unlocking soon — your profile has enough signal.
+          </p>
+        )}
+      </Card>
+    </section>
+  );
+}
+
+function AttrBlock({ title, icon, items }: { title: string; icon: React.ReactNode; items: AttrCount[] }) {
+  return (
+    <div className="rounded-lg border border-border/60 bg-background/40 p-3">
+      <div className="flex items-center gap-1.5 mb-2 text-[10px] uppercase tracking-wider text-muted-foreground">
+        {icon}<span>{title}</span>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-[11px] text-muted-foreground">Not enough data yet</p>
+      ) : (
+        <ul className="space-y-1">
+          {items.slice(0, 4).map((a) => (
+            <li key={a.key} className="flex items-center justify-between text-xs gap-2">
+              <span className="text-foreground truncate">{a.label}</span>
+              <span className="text-muted-foreground tabular-nums shrink-0">{a.count} · {a.pct}%</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function RecommendationsBanner({ items }: { items: RecommendedCard[] }) {
   return (
     <section className="mb-5">
       <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-lg">
         <div className="flex items-center gap-2 mb-1">
           <Wand2 className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">PokeIQ thinks you'll like these</h2>
+          <h2 className="text-sm font-semibold text-foreground">Recommended for you</h2>
         </div>
         <p className="text-[11px] text-muted-foreground mb-3">
-          Hand-picked from your top vibes — cards other collectors with your taste love.
+          Picked by matching the artists, sets, types, and rarities you keep liking.
         </p>
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:thin]">
-          {items.map((r) => <RecCard key={r.id} m={r} />)}
+          {items.map((r) => <RecCard key={r.card_id} r={r} />)}
         </div>
       </div>
     </section>
   );
 }
 
-function RecCard({ m }: { m: Swipe }) {
+function RecCard({ r }: { r: RecommendedCard }) {
   const [err, setErr] = useState(false);
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.04 }}
-      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-      className="shrink-0 w-[110px] space-y-1.5"
-    >
+    <motion.div whileHover={{ y: -4, scale: 1.04 }} transition={{ type: 'spring', stiffness: 280, damping: 20 }} className="shrink-0 w-[120px] space-y-1.5">
       <div className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/30 shadow-md">
-        {m.card_image && !err ? (
-          <img src={m.card_image} alt={m.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        {r.image_url && !err ? (
+          <img src={r.image_url} alt={r.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
       </div>
-      <p className="text-[11px] text-foreground truncate font-medium">{m.card_name}</p>
-      <p className="text-[10px] text-muted-foreground truncate">
-        {m.card_set ?? '—'}{m.card_price ? ` · $${Number(m.card_price).toFixed(0)}` : ''}
-      </p>
+      <p className="text-[11px] text-foreground truncate font-medium">{r.card_name}</p>
+      <p className="text-[10px] text-muted-foreground truncate">{r.set_name ?? '—'}{r.price ? ` · $${Number(r.price).toFixed(0)}` : ''}</p>
+      <p className="text-[9px] text-primary/80 truncate italic">{r.reason}</p>
     </motion.div>
   );
 }
 
-function Section({
-  title, subtitle, icon, items, emptyText, badge, category,
-}: {
-  title: string;
-  subtitle: string;
-  icon: React.ReactNode;
-  items: Swipe[];
-  emptyText: string;
-  badge: 'match' | 'like' | 'pass';
-  category: 'matches' | 'likes' | 'passes';
-}) {
-  const [visible, setVisible] = useState(INITIAL_VISIBLE);
-  const cappedTotal = Math.min(items.length, PAGE_CAP);
-  const shown = items.slice(0, Math.min(visible, cappedTotal));
-  const canLoadMore = visible < cappedTotal;
-  const hasOverflow = items.length > PAGE_CAP;
-  return (
-    <section className="mb-10">
-      <div className="flex items-end justify-between mb-2 gap-3">
-        <div className="flex items-center gap-2">
-          {icon}
-          <h2 className="text-base font-semibold text-foreground">{title}</h2>
-          <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
-        </div>
-        {hasOverflow && (
-          <Link to={`/matches/${category}`} className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-            See complete {category} <ArrowRight className="w-3 h-3" />
-          </Link>
-        )}
-      </div>
-      <p className="text-xs text-muted-foreground mb-3">{subtitle}</p>
-      {items.length === 0 ? (
-        <Card className="p-6 text-center text-xs text-muted-foreground">{emptyText}</Card>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-            {shown.map((m) => <SwipeThumb key={m.id} m={m} badge={badge} />)}
-          </div>
-          {(canLoadMore || hasOverflow) && (
-            <div className="flex items-center justify-center gap-3 mt-5">
-              {canLoadMore && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setVisible((v) => Math.min(v + LOAD_MORE_STEP, cappedTotal))}
-                >
-                  Load more · {Math.min(LOAD_MORE_STEP, cappedTotal - visible)} more
-                </Button>
-              )}
-              {!canLoadMore && hasOverflow && (
-                <Link to={`/matches/${category}`}>
-                  <Button size="sm" className="gap-2">
-                    See complete {category} <ArrowRight className="w-3.5 h-3.5" />
-                  </Button>
-                </Link>
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </section>
-  );
-}
-
-function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }) {
-  const [err, setErr] = useState(false);
-  const dim = badge === 'pass';
-  const superLiked = (m.tags || []).includes('Loved');
-  return (
-    <motion.div
-      whileHover={{ y: -6, scale: 1.03 }}
-      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-      className="space-y-1.5 group"
-    >
-      <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 shadow-md transition-shadow duration-300 group-hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.45)] ring-1 ring-border/40 group-hover:ring-primary/40 ${dim ? 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0' : ''}`}>
-        {m.card_image && !err ? (
-          <img src={m.card_image} alt={m.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
-        )}
-        {/* Super Like star (only in Likes section) */}
-        {badge === 'like' && superLiked && (
-          <div className="absolute top-1.5 right-1.5 z-10">
-            <div className="bg-background/70 backdrop-blur-sm rounded-full p-1 shadow-lg ring-1 ring-amber-400/50">
-              <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.7)]" />
-            </div>
-          </div>
-        )}
-        {badge === 'match' && (
-          <div className="absolute top-1.5 right-1.5 bg-primary/90 rounded-full p-1 shadow-md">
-            <Sparkles className="w-3 h-3 text-white" />
-          </div>
-        )}
-        {badge === 'like' && !superLiked && (
-          <div className="absolute top-1.5 right-1.5 bg-primary/80 rounded-full p-1 shadow-md">
-            <Heart className="w-3 h-3 text-white fill-white" />
-          </div>
-        )}
-        {badge === 'pass' && (
-          <div className="absolute top-1.5 right-1.5 bg-muted-foreground/80 rounded-full p-1 shadow-md">
-            <X className="w-3 h-3 text-background" />
-          </div>
-        )}
-      </div>
-      <p className="text-xs text-foreground truncate font-medium">{m.card_name}</p>
-      <p className="text-[10px] text-muted-foreground truncate">
-        {m.card_set ?? '—'}{m.card_price ? ` · $${Number(m.card_price).toFixed(0)}` : ''}
-      </p>
-    </motion.div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────
-// Binder view — 3x3 two-page spread with page flipping
-// ─────────────────────────────────────────────────────────
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; count: number }[] }) {
+function BinderView({ likes, taste }: { likes: LikedCard[]; taste: TasteProfile }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
-  const [filter, setFilter] = useState<string>('all'); // 'all' | 'match' | vibe tag
+  const [facet, setFacet] = useState<FacetKey>('all');
+  const [value, setValue] = useState<string>('');
 
-  // Reset to first spread when filter changes
-  React.useEffect(() => { setSpread(0); setDir(1); }, [filter]);
+  React.useEffect(() => { setSpread(0); setDir(1); }, [facet, value]);
 
-  const filtered = React.useMemo(() => {
-    if (filter === 'all') return items;
-    if (filter === 'match') return items.filter((s) => (s.tags || []).includes('Match'));
-    return items.filter((s) => (s.tags || []).includes(filter));
-  }, [items, filter]);
+  const facetOptions: AttrCount[] = useMemo(() => {
+    switch (facet) {
+      case 'artist':    return taste.topArtists;
+      case 'set':       return taste.topSets;
+      case 'era':       return taste.topEras;
+      case 'type':      return taste.topPokemonTypes;
+      case 'rarity':    return taste.topRarities;
+      case 'priceTier': return taste.priceDistribution;
+      default: return [];
+    }
+  }, [facet, taste]);
 
-  const matchCount = items.filter((s) => (s.tags || []).includes('Match')).length;
-  const filterChips: { key: string; label: string; count: number; isMatch?: boolean }[] = [
-    { key: 'all', label: 'All', count: items.length },
-    { key: 'match', label: 'PokeIQ Match', count: matchCount, isMatch: true },
-    ...vibes.map((v) => ({
-      key: v.tag,
-      label: v.tag,
-      count: items.filter((s) => (s.tags || []).includes(v.tag)).length,
-    })),
-  ].filter((c) => c.count > 0 || c.key === 'all');
+  const filtered = useMemo(() => {
+    if (facet === 'all' || !value) return likes;
+    return likes.filter((c) => {
+      switch (facet) {
+        case 'artist':    return c.artist === value;
+        case 'set':       return c.set_name === value;
+        case 'era':       return c.era === value;
+        case 'type':      return c.pokemon_type === value;
+        case 'rarity':    return c.rarity === value;
+        case 'priceTier': return c.price_tier === value;
+      }
+      return true;
+    });
+  }, [likes, facet, value]);
 
   const totalSpreads = Math.max(1, Math.ceil(filtered.length / CARDS_PER_SPREAD));
   const start = spread * CARDS_PER_SPREAD;
@@ -460,45 +268,64 @@ function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; co
     setSpread((s) => Math.min(Math.max(0, s + delta), totalSpreads - 1));
   };
 
+  const labelFor = (v: string) => {
+    if (facet === 'era')       return ERA_LABELS[v] ?? v;
+    if (facet === 'priceTier') return PRICE_TIER_LABEL[v] ?? v;
+    return v;
+  };
+
   return (
     <section className="mb-10">
-      <div className="flex items-end justify-between mb-2 gap-3">
+      <div className="flex items-end justify-between mb-2 gap-3 flex-wrap">
         <div className="flex items-center gap-2">
           <Heart className="w-4 h-4 text-primary fill-primary" />
-          <h2 className="text-base font-semibold text-foreground">Likes</h2>
-          <span className="text-xs text-muted-foreground tabular-nums">· {filtered.length}{filter !== 'all' ? ` of ${items.length}` : ''}</span>
+          <h2 className="text-base font-semibold text-foreground">Your binder</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            · {filtered.length}{value ? ` of ${likes.length}` : ''}
+          </span>
         </div>
-        <Link to="/matches/likes" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-          See all <ArrowRight className="w-3 h-3" />
-        </Link>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">Every card you pulled or super-liked — organized like a real binder. Filter by PokeIQ Match or by vibe.</p>
+      <p className="text-xs text-muted-foreground mb-3">Every card you've liked — organized like a real binder. Filter by any hard attribute.</p>
 
-      {/* Filter chips */}
-      {items.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-3">
-          {filterChips.map((c) => {
-            const active = filter === c.key;
+      {likes.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {FACETS.map((f) => {
+            const active = facet === f.key;
             return (
               <button
-                key={c.key}
-                onClick={() => setFilter(c.key)}
-                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors inline-flex items-center gap-1 ${
-                  active
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
+                key={f.key}
+                onClick={() => { setFacet(f.key); setValue(''); }}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors inline-flex items-center gap-1.5 ${
+                  active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
                 }`}
               >
-                {c.isMatch && <Sparkles className="w-3 h-3" />}
-                {c.label}
-                <span className="tabular-nums opacity-70">· {c.count}</span>
+                {f.icon}{f.label}
               </button>
             );
           })}
         </div>
       )}
 
-      {items.length === 0 ? (
+      {facet !== 'all' && facetOptions.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {facetOptions.map((o) => {
+            const active = value === o.key;
+            return (
+              <button
+                key={o.key}
+                onClick={() => setValue(active ? '' : o.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors ${
+                  active ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/40 text-foreground/80 border-border hover:border-primary/40'
+                }`}
+              >
+                {labelFor(o.key)} <span className="tabular-nums opacity-70">· {o.count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {likes.length === 0 ? (
         <Card className="p-6 text-center text-xs text-muted-foreground">
           No likes yet. Start swiping to build your binder.
         </Card>
@@ -508,22 +335,12 @@ function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; co
         </Card>
       ) : (
         <div className="relative">
-          {/* Binder frame */}
-          <div
-            className="relative rounded-2xl p-3 sm:p-5 shadow-2xl border border-border/60"
-            style={{
-              background:
-                'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)/0.6) 100%)',
-              perspective: '1800px',
-            }}
-          >
-            {/* Spine */}
+          <div className="relative rounded-2xl p-3 sm:p-5 shadow-2xl border border-border/60"
+               style={{ background: 'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)/0.6) 100%)', perspective: '1800px' }}>
             <div className="hidden sm:block absolute top-3 bottom-3 left-1/2 -translate-x-1/2 w-2 rounded-full bg-gradient-to-b from-border/40 via-border to-border/40 shadow-inner pointer-events-none z-10" />
-
             <AnimatePresence mode="wait" custom={dir}>
               <motion.div
-                key={spread}
-                custom={dir}
+                key={spread} custom={dir}
                 initial={{ rotateY: dir === 1 ? 35 : -35, opacity: 0 }}
                 animate={{ rotateY: 0, opacity: 1 }}
                 exit={{ rotateY: dir === 1 ? -35 : 35, opacity: 0 }}
@@ -536,28 +353,14 @@ function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; co
               </motion.div>
             </AnimatePresence>
           </div>
-
-          {/* Page controls */}
           <div className="flex items-center justify-between mt-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => go(-1)}
-              disabled={spread === 0}
-              className="gap-1"
-            >
+            <Button variant="outline" size="sm" onClick={() => go(-1)} disabled={spread === 0} className="gap-1">
               <ChevronLeft className="w-4 h-4" /> Prev
             </Button>
             <span className="text-xs text-muted-foreground tabular-nums">
-              Pages {spread * 2 + 1}–{Math.min(spread * 2 + 2, Math.ceil(items.length / CARDS_PER_PAGE))} of {Math.max(1, Math.ceil(items.length / CARDS_PER_PAGE))}
+              Pages {spread * 2 + 1}–{Math.min(spread * 2 + 2, Math.ceil(filtered.length / CARDS_PER_PAGE))} of {Math.max(1, Math.ceil(filtered.length / CARDS_PER_PAGE))}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => go(1)}
-              disabled={spread >= totalSpreads - 1}
-              className="gap-1"
-            >
+            <Button variant="outline" size="sm" onClick={() => go(1)} disabled={spread >= totalSpreads - 1} className="gap-1">
               Next <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
@@ -567,61 +370,33 @@ function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; co
   );
 }
 
-function BinderPage({ cards, pageNumber, side }: { cards: Swipe[]; pageNumber: number; side: 'left' | 'right' }) {
-  // Pad to 9 slots so the grid stays consistent
+function BinderPage({ cards, pageNumber, side }: { cards: LikedCard[]; pageNumber: number; side: 'left' | 'right' }) {
   const slots = Array.from({ length: CARDS_PER_PAGE }, (_, i) => cards[i] ?? null);
   return (
-    <div
-      className="relative rounded-xl p-2.5 sm:p-3 bg-background/60 ring-1 ring-border/50 shadow-inner"
-      style={{
-        backgroundImage:
-          'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)',
-        backgroundSize: '14px 14px',
-      }}
-    >
+    <div className="relative rounded-xl p-2.5 sm:p-3 bg-background/60 ring-1 ring-border/50 shadow-inner"
+         style={{ backgroundImage: 'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
       <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-        {slots.map((s, i) => (
-          <BinderSlot key={s?.id ?? `empty-${pageNumber}-${i}`} swipe={s} />
-        ))}
+        {slots.map((c, i) => <BinderSlot key={c?.id ?? `empty-${pageNumber}-${i}`} like={c} />)}
       </div>
-      <p className={`text-[10px] text-muted-foreground tabular-nums mt-2 ${side === 'left' ? 'text-left' : 'text-right'}`}>
-        Page {pageNumber}
-      </p>
+      <p className={`text-[10px] text-muted-foreground tabular-nums mt-2 ${side === 'left' ? 'text-left' : 'text-right'}`}>Page {pageNumber}</p>
     </div>
   );
 }
 
-function BinderSlot({ swipe }: { swipe: Swipe | null }) {
+function BinderSlot({ like }: { like: LikedCard | null }) {
   const [err, setErr] = useState(false);
-  if (!swipe) {
-    return (
-      <div className="aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed ring-border/40" />
-    );
-  }
-  const superLiked = (swipe.tags || []).includes('Loved');
+  if (!like) return <div className="aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed ring-border/40" />;
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -3, zIndex: 5 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
       className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 ring-border/40 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] hover:ring-primary/50"
-      title={`${swipe.card_name}${swipe.card_set ? ' · ' + swipe.card_set : ''}`}
+      title={[like.card_name, like.set_name, like.artist && `by ${like.artist}`].filter(Boolean).join(' · ')}
     >
-      {swipe.card_image && !err ? (
-        <img
-          src={swipe.card_image}
-          alt={swipe.card_name}
-          className="w-full h-full object-cover"
-          onError={() => setErr(true)}
-        />
+      {like.image_url && !err ? (
+        <img src={like.image_url} alt={like.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
-          <ImageOff className="w-4 h-4 text-muted-foreground" />
-        </div>
-      )}
-      {superLiked && (
-        <div className="absolute top-1 right-1 bg-background/70 backdrop-blur-sm rounded-full p-0.5 ring-1 ring-amber-400/50">
-          <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-        </div>
+        <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-4 h-4 text-muted-foreground" /></div>
       )}
     </motion.div>
   );

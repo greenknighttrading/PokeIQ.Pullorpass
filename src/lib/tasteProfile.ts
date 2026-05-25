@@ -1,218 +1,155 @@
-// Taste Profile builder — PokeIQ
+// Taste Profile — MVP hard-attribute engine.
 //
-// PHILOSOPHY:
-//   Collector Personality (the quiz) = "How you collect."
-//   Taste Profile (this file)        = "What your eye naturally gravitates toward."
-//
-// We deliberately do NOT output an archetype name here. Output is layered,
-// descriptive, behavior-driven — Spotify-Wrapped-style observations that
-// evolve with every swipe.
+// Only objective metadata from the user's liked cards. No vibes, no
+// archetype names, no AI inference. Insights are emitted only when a
+// pattern crosses a confidence threshold so the profile feels grounded.
 
-export interface TasteInputs {
-  vibes: { tag: string; count: number }[]; // user's adjective tag totals
-  topSets: [string, number][];              // [setName, count]
-  avgPrice: number;                         // avg match price
-  swipesCount: number;
-  matchesCount: number;
-  likesCount: number;
-  matchRarities?: string[];                 // optional — rarities of matched cards
-  personalityType?: string | null;          // e.g. "Investor", "Gambler"
+import { LikedCard, ERA_LABELS, PRICE_TIER_LABEL } from './likesService';
+
+export interface AttrCount {
+  key: string;
+  label: string;
+  count: number;
+  pct: number; // 0..100
 }
+
+export type TasteStage = 'seedling' | 'sprouting' | 'established' | 'expert';
 
 export interface TasteProfile {
-  headline: string;                 // descriptive sentence (NOT an archetype name)
-  descriptors: string[];            // layered taste descriptors
-  priceTier: { label: string; avg: number };
-  setLean: string[];                // 1-2 sets the eye keeps landing on
-  selectivityNote: string;
-  paragraphs: string[];             // observational, evolving prose
-  insights: string[];               // contradictions / sharp observations
+  totalLikes: number;
+  stage: TasteStage;
+  nextThreshold: number | null;
+  topArtists: AttrCount[];
+  topSets: AttrCount[];
+  topEras: AttrCount[];
+  topPokemonTypes: AttrCount[];
+  topRarities: AttrCount[];
+  topPokemon: AttrCount[];
+  priceDistribution: AttrCount[];
+  languageMix: AttrCount[];
+  productMix: AttrCount[];
+  avgPrice: number;
+  insights: string[];
 }
 
-// ───────────────────────────────────────────────────────────
-// Approved descriptor pool (no archetype names allowed).
-// ───────────────────────────────────────────────────────────
-const DESCRIPTORS = {
-  Mysterious: 'Mysterious',
-  Warm: 'Warm',
-  Relaxing: 'Relaxing',
-  Colorful: 'Colorful',
-  Atmospheric: 'Atmospheric',
-  GrailOriented: 'Grail-Oriented',
-  Minimalist: 'Minimalist',
-  Cute: 'Cute',
-  Powerful: 'Powerful',
-  Nostalgic: 'Nostalgic',
-  VintageLeaning: 'Vintage-Leaning',
-  AltArtFocused: 'Alt-Art Focused',
-} as const;
-
-// Map raw emotional tags → descriptor(s).
-const TAG_TO_DESCRIPTORS: Record<string, string[]> = {
-  Cozy: ['Warm', 'Relaxing'],
-  Peaceful: ['Relaxing', 'Atmospheric'],
-  Relaxing: ['Relaxing'],
-  Warm: ['Warm'],
-  Safe: ['Warm'],
-  Cute: ['Cute'],
-  Funny: ['Colorful', 'Cute'],
-  Wholesome: ['Warm', 'Cute'],
-  Silly: ['Colorful', 'Cute'],
-  Joyful: ['Colorful'],
-  Aggressive: ['Powerful'],
-  Powerful: ['Powerful'],
-  Chaotic: ['Powerful', 'Colorful'],
-  Competitive: ['Powerful'],
-  Intense: ['Powerful', 'Atmospheric'],
-  Adventurous: ['Atmospheric'],
-  Magical: ['Atmospheric', 'Mysterious'],
-  Dreamlike: ['Mysterious', 'Atmospheric'],
-  Mysterious: ['Mysterious'],
-  Epic: ['Powerful', 'Atmospheric'],
-  Nostalgic: ['Nostalgic'],
-  Emotional: ['Nostalgic', 'Warm'],
-  Lonely: ['Mysterious', 'Atmospheric'],
-  Hopeful: ['Warm'],
-  Encouraging: ['Warm'],
-  'Main Character': ['Powerful', 'Colorful'],
-  'Gremlin Energy': ['Colorful', 'Cute'],
-  'Goblin Mode': ['Colorful', 'Cute'],
-  Sleepy: ['Cute', 'Relaxing'],
-  Hungry: ['Cute'],
-};
-
-const VINTAGE_SET_HINTS = [
-  'Base Set', 'Jungle', 'Fossil', 'Team Rocket', 'Gym ',
-  'Neo ', 'Expedition', 'Aquapolis', 'Skyridge',
-  'Ruby & Sapphire', 'EX ', 'Crystal',
+const STAGE_THRESHOLDS: { stage: TasteStage; min: number; next: number | null }[] = [
+  { stage: 'seedling',    min: 0,   next: 20 },
+  { stage: 'sprouting',   min: 20,  next: 50 },
+  { stage: 'established', min: 50,  next: 100 },
+  { stage: 'expert',      min: 100, next: null },
 ];
 
-const ALT_ART_HINTS = [
-  'illustration rare', 'special illustration', 'hyper rare',
-  'alt art', 'alternate art', 'art rare', 'secret rare',
-];
-
-function isVintageSet(set: string): boolean {
-  return VINTAGE_SET_HINTS.some((h) => set.toLowerCase().includes(h.toLowerCase()));
+function stageFor(n: number): { stage: TasteStage; next: number | null } {
+  let cur = STAGE_THRESHOLDS[0];
+  for (const s of STAGE_THRESHOLDS) if (n >= s.min) cur = s;
+  return { stage: cur.stage, next: cur.next };
 }
 
-function priceTierLabel(avg: number): string {
-  if (avg <= 0) return 'still learning';
-  if (avg < 15) return 'hidden-gem territory';
-  if (avg < 50) return 'mid-tier sweet spot';
-  if (avg < 150) return 'premium pulls';
-  return 'grail territory';
+function tally(
+  cards: LikedCard[],
+  pick: (c: LikedCard) => string | null | undefined,
+  labelMap?: Record<string, string>,
+  limit = 6
+): AttrCount[] {
+  const counts = new Map<string, number>();
+  let total = 0;
+  for (const c of cards) {
+    const v = pick(c);
+    if (!v) continue;
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+    total++;
+  }
+  return Array.from(counts.entries())
+    .map(([key, count]) => ({
+      key,
+      label: labelMap?.[key] ?? key,
+      count,
+      pct: total > 0 ? Math.round((count / total) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit);
 }
 
-// Light-touch personality grouping for contradiction lines.
-function personalityFlavor(t?: string | null) {
-  if (!t) return null;
-  const conservative = ['Investor', 'Analyst', 'Minimalist'];
-  const emotional    = ['Dreamer', 'Curator', 'Showman'];
-  const fast         = ['Flipper', 'Gambler', 'Hunter', 'Explorer'];
-  if (conservative.includes(t)) return 'conservative';
-  if (emotional.includes(t))    return 'emotional';
-  if (fast.includes(t))         return 'fast';
-  return 'balanced';
-}
+export function buildTasteProfile(likes: LikedCard[]): TasteProfile {
+  const total = likes.length;
+  const { stage, next } = stageFor(total);
 
-export function buildTasteProfile(input: TasteInputs): TasteProfile {
-  const {
-    vibes, topSets, avgPrice, swipesCount, matchesCount, likesCount,
-    matchRarities = [], personalityType,
-  } = input;
-
-  // 1. Descriptor scoring from tag votes.
-  const score: Record<string, number> = {};
-  vibes.forEach((v) => {
-    const ds = TAG_TO_DESCRIPTORS[v.tag];
-    if (!ds) return;
-    ds.forEach((d) => { score[d] = (score[d] ?? 0) + v.count; });
+  const topArtists      = tally(likes, (c) => c.artist?.trim() || null);
+  const topSets         = tally(likes, (c) => c.set_name?.trim() || null);
+  const topEras         = tally(likes, (c) => c.era || null, ERA_LABELS);
+  const topPokemonTypes = tally(likes, (c) => c.pokemon_type || null);
+  const topRarities     = tally(likes, (c) => c.rarity || null);
+  const topPokemon      = tally(likes, (c) => c.pokemon_name || null);
+  const priceDistribution = tally(
+    likes,
+    (c) => c.price_tier || null,
+    PRICE_TIER_LABEL,
+    5
+  );
+  const languageMix = tally(likes, (c) => c.language || null);
+  const productMix  = tally(likes, (c) => c.product_category || null, {
+    single: 'Singles',
+    sealed: 'Sealed',
+    graded: 'Graded',
   });
 
-  // 2. Behavioral descriptors layered on top.
-  if (avgPrice >= 150) score[DESCRIPTORS.GrailOriented] = (score[DESCRIPTORS.GrailOriented] ?? 0) + 5;
-  const pullRate = swipesCount > 0 ? (matchesCount + likesCount) / swipesCount : 0;
-  if (pullRate > 0 && pullRate <= 0.3) score[DESCRIPTORS.Minimalist] = (score[DESCRIPTORS.Minimalist] ?? 0) + 4;
-  if (topSets.some(([s]) => isVintageSet(s))) score[DESCRIPTORS.VintageLeaning] = (score[DESCRIPTORS.VintageLeaning] ?? 0) + 4;
-  if (matchRarities.some((r) => ALT_ART_HINTS.some((h) => (r || '').toLowerCase().includes(h)))) {
-    score[DESCRIPTORS.AltArtFocused] = (score[DESCRIPTORS.AltArtFocused] ?? 0) + 5;
-  }
+  const priced = likes.filter((c) => c.price && c.price > 0);
+  const avgPrice = priced.length
+    ? priced.reduce((s, c) => s + Number(c.price), 0) / priced.length
+    : 0;
 
-  const descriptors = Object.entries(score)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6)
-    .map(([d]) => d);
-
-  // 3. Headline — descriptive sentence, not a label.
-  const top2 = descriptors.slice(0, 2).map((d) => d.toLowerCase());
-  const headline =
-    descriptors.length === 0
-      ? 'PokeIQ is still learning your eye.'
-      : top2.length === 1
-      ? `Your eye leans ${top2[0]}.`
-      : `Your eye leans ${top2[0]} and ${top2[1]}.`;
-
-  // 4. Selectivity tone.
-  let selectivityNote = 'balanced — you reward cards that earn it';
-  if (pullRate >= 0.7) selectivityNote = 'open-hearted — you find something to love in most pulls';
-  else if (pullRate > 0 && pullRate <= 0.3) selectivityNote = 'highly selective — you wait for the card that really hits';
-
-  // 5. Paragraphs — Spotify Wrapped voice, evolving.
-  const paragraphs: string[] = [];
-  const topSet = topSets[0]?.[0];
-  const secondSet = topSets[1]?.[0];
-  if (descriptors.length > 0) {
-    const adj = descriptors.slice(0, 3).join(', ').toLowerCase();
-    paragraphs.push(
-      `So far your taste reads as ${adj}${descriptors[3] ? `, with quieter notes of ${descriptors.slice(3).join(', ').toLowerCase()}` : ''}.`
-    );
-  }
-  if (topSet) {
-    paragraphs.push(
-      `Your eye keeps landing on ${topSet}${secondSet ? ` and ${secondSet}` : ''} — that's where the pull is strongest.`
-    );
-  }
-  if (avgPrice > 0) {
-    paragraphs.push(
-      `You live in ${priceTierLabel(avgPrice)} (around $${avgPrice.toFixed(0)} per match), and you're ${selectivityNote}.`
-    );
-  }
-  paragraphs.push('This profile is alive — every swipe nudges it.');
-
-  // 6. Insights — contradictions vs personality, sharp observations.
+  // Insights — only emit when a pattern is statistically meaningful.
   const insights: string[] = [];
-  const flavor = personalityFlavor(personalityType);
+  const MIN_OCCURRENCES = 3;
+  const STRONG_PCT = 30;
 
-  if (flavor === 'conservative' && (avgPrice >= 150 || descriptors.includes(DESCRIPTORS.GrailOriented))) {
-    insights.push(`You collect conservatively as ${personalityType}, but your swipes lean hard into grails and chase cards.`);
+  const a = topArtists[0];
+  if (a && a.count >= MIN_OCCURRENCES && a.pct >= STRONG_PCT) {
+    insights.push(`You frequently like cards illustrated by ${a.label}.`);
   }
-  if (flavor === 'conservative' && (descriptors.includes(DESCRIPTORS.Nostalgic) || descriptors.includes(DESCRIPTORS.Warm))) {
-    insights.push(`Your personality is analytical, but your eye keeps drifting toward calming, nostalgic artwork.`);
+  const e = topEras[0];
+  if (e && e.count >= MIN_OCCURRENCES && e.pct >= STRONG_PCT) {
+    insights.push(`You tend to prefer ${e.label} cards.`);
   }
-  if (flavor === 'fast' && descriptors.includes(DESCRIPTORS.Minimalist)) {
-    insights.push(`You read as a fast, opportunistic ${personalityType}, yet your taste is unusually restrained — you pass on more than most.`);
+  const t = topPokemonTypes[0];
+  if (t && t.count >= MIN_OCCURRENCES && t.pct >= STRONG_PCT) {
+    insights.push(`You often like ${t.label}-type Pokémon.`);
   }
-  if (flavor === 'emotional' && descriptors.includes(DESCRIPTORS.Powerful) && !descriptors.includes(DESCRIPTORS.Warm)) {
-    insights.push(`You skew emotional in how you collect, but visually you gravitate toward bold and powerful — not soft.`);
+  const r = topRarities[0];
+  if (r && r.count >= MIN_OCCURRENCES && r.pct >= STRONG_PCT) {
+    insights.push(`You consistently like ${r.label.toLowerCase()} cards.`);
   }
-  if (descriptors.includes(DESCRIPTORS.VintageLeaning) && descriptors.includes(DESCRIPTORS.AltArtFocused)) {
-    insights.push(`Vintage warmth meets modern alt-art — an unusual taste split most collectors don't share.`);
+  const p = topPokemon[0];
+  if (p && p.count >= MIN_OCCURRENCES) {
+    insights.push(`${p.label} shows up the most in your likes (${p.count} cards).`);
   }
-  if (descriptors.includes(DESCRIPTORS.GrailOriented) && descriptors.includes(DESCRIPTORS.Minimalist)) {
-    insights.push(`You're picky and expensive — you don't pull often, but when you do, it's a big one.`);
+  const s = topSets[0];
+  if (s && s.count >= MIN_OCCURRENCES && s.pct >= 20) {
+    insights.push(`Your eye keeps landing on ${s.label}.`);
   }
-  if (insights.length === 0 && descriptors.length >= 3) {
-    insights.push(`Your taste is consistent — the more you swipe, the more confident PokeIQ gets at recommending for you.`);
+  const lang = languageMix[0];
+  if (lang && lang.key === 'Japanese' && lang.pct >= 40) {
+    insights.push(`You lean toward Japanese cards (${lang.pct}% of your likes).`);
+  }
+  const tier = priceDistribution[0];
+  if (tier && tier.pct >= 40 && tier.key !== 'unknown') {
+    insights.push(`Your likes skew toward ${tier.label.toLowerCase()}.`);
   }
 
   return {
-    headline,
-    descriptors,
-    priceTier: { label: priceTierLabel(avgPrice), avg: avgPrice },
-    setLean: [topSet, secondSet].filter(Boolean) as string[],
-    selectivityNote,
-    paragraphs,
+    totalLikes: total,
+    stage,
+    nextThreshold: next,
+    topArtists,
+    topSets,
+    topEras,
+    topPokemonTypes,
+    topRarities,
+    topPokemon,
+    priceDistribution,
+    languageMix,
+    productMix,
+    avgPrice,
     insights,
   };
 }
