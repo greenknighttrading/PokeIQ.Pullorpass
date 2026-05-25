@@ -52,7 +52,7 @@ export type PersonalityType =
   | 'Hunter'
   | 'Explorer'
   | 'Curator'
-  | 'Diplomat'
+  | 'Monk'
   | 'Gambler'
   | 'Showman'
   | 'Minimalist';
@@ -419,7 +419,7 @@ function computeTraits(answers: Answers): TraitScores {
 }
 
 const TIE_BREAK_ORDER: PersonalityType[] = [
-  'Investor', 'Archivist', 'Curator', 'Diplomat', 'Minimalist',
+  'Investor', 'Archivist', 'Curator', 'Monk', 'Minimalist',
   'Analyst', 'Dreamer', 'Hunter', 'Explorer', 'Showman',
   'Flipper', 'Gambler',
 ];
@@ -435,7 +435,7 @@ function scoreType(t: TraitScores, type: PersonalityType): number {
     case 'Hunter':    return t.conviction * 1.3 + t.activity * 0.6 + inv(t.balance) * 0.7;
     case 'Explorer':  return t.curiosity * 1.3 + t.activity * 0.5 + inv(t.patience) * 0.4;
     case 'Curator':   return t.aesthetics * 1.2 + t.structure * 1.0 + t.emotion * 0.4;
-    case 'Diplomat':  return t.balance * 1.3 + t.patience * 0.5 + inv(t.conviction) * 0.5;
+    case 'Monk':      return t.balance * 1.3 + t.patience * 0.5 + inv(t.conviction) * 0.5;
     case 'Gambler':   return t.excitement * 1.5 + inv(t.patience) * 0.6 + inv(t.restraint) * 0.6 + t.activity * 0.3;
     case 'Showman':   return t.recognition * 1.4 + t.aesthetics * 0.5 + t.activity * 0.3;
     case 'Minimalist':return t.restraint * 1.4 + t.structure * 0.5 + inv(t.activity) * 0.5 + inv(t.excitement) * 0.4;
@@ -463,7 +463,7 @@ const PRODUCT_BASELINES: Record<PersonalityType, ProductAllocation> = {
   Hunter:    { sealedPct: 20, gradedPct: 60, rawPct: 20 },
   Explorer:  { sealedPct: 45, gradedPct: 20, rawPct: 35 },
   Curator:   { sealedPct: 25, gradedPct: 45, rawPct: 30 },
-  Diplomat:  { sealedPct: 35, gradedPct: 35, rawPct: 30 },
+  Monk:      { sealedPct: 35, gradedPct: 35, rawPct: 30 },
   Gambler:   { sealedPct: 60, gradedPct: 15, rawPct: 25 },
   Showman:   { sealedPct: 15, gradedPct: 70, rawPct: 15 },
   Minimalist:{ sealedPct: 20, gradedPct: 55, rawPct: 25 },
@@ -478,7 +478,7 @@ const ERA_BASELINES: Record<PersonalityType, EraAllocation> = {
   Hunter:    { vintage: 25, classic: 20, modern: 20, ultraModern: 25, current: 10 },
   Explorer:  { vintage: 5,  classic: 10, modern: 20, ultraModern: 40, current: 25 },
   Curator:   { vintage: 25, classic: 25, modern: 25, ultraModern: 20, current: 5 },
-  Diplomat:  { vintage: 20, classic: 20, modern: 20, ultraModern: 20, current: 20 },
+  Monk:      { vintage: 20, classic: 20, modern: 20, ultraModern: 20, current: 20 },
   Gambler:   { vintage: 5,  classic: 10, modern: 20, ultraModern: 35, current: 30 },
   Showman:   { vintage: 35, classic: 25, modern: 20, ultraModern: 15, current: 5 },
   Minimalist:{ vintage: 30, classic: 30, modern: 20, ultraModern: 15, current: 5 },
