@@ -153,6 +153,12 @@ export default function PullOrPass() {
     setIndex(0);
     setRecords([]);
     setImgError(false);
+    setExitDir(null);
+    setFlyAnim(null);
+    setMatchPulse(null);
+    setMatchCard(null);
+    setPendingMatchAdvance(null);
+    setMatchCount(0);
     setRoundId(crypto.randomUUID());
 
     // Build an exclusion set of every card this user has ever swiped, so we
@@ -252,7 +258,7 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 650) => {
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 320) => {
     const newRecords = [...records, rec];
     setRecords(newRecords);
     bumpQuota();
@@ -352,7 +358,7 @@ export default function PullOrPass() {
 
   const triggerAnim = (type: 'pull' | 'love' | 'pass') => {
     setFlyAnim({ type, key: Date.now() });
-    setTimeout(() => setFlyAnim(null), 700);
+    setTimeout(() => setFlyAnim(null), 400);
   };
 
   const shouldTriggerMatch = () => {
@@ -770,7 +776,6 @@ function DraggableCard({
   const exitY = exitDir === 'up' ? -900 : 0;
   const exitRot = exitDir === 'right' ? 25 : exitDir === 'left' ? -25 : 0;
 
-  // Build a keyframe animation: hold at the frozen release pose, then fly off.
   const buildExitAnimate = () => {
     if (!exitDir) return { opacity: 1, scale: 1 };
     const fx = frozen?.x ?? 0;
@@ -782,8 +787,8 @@ function DraggableCard({
       rotate: [fr, fr, exitRot],
       opacity: [1, 1, 0],
       transition: {
-        duration: 0.75,
-        times: [0, 0.45, 1],
+        duration: 0.38,
+        times: [0, 0.2, 1],
         ease: 'easeIn',
       },
     } as any;
