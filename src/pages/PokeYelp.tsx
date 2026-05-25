@@ -11,6 +11,7 @@ import { Seo } from '@/components/seo/Seo';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PACK_ODDS_REGISTRY } from '@/lib/packOdds';
+import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 
 // ── Reward constants ────────────────────────────────────
 // Every 20 reviews → +10 PullOrPass swipes
@@ -119,6 +120,7 @@ export default function PokeYelp() {
     try { return Number(localStorage.getItem('earn_reviews_total') || '0'); } catch { return 0; }
   });
   const [imgErr, setImgErr] = useState(false);
+  const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
 
   // Filters
   const [showFilters, setShowFilters] = useState(false);
@@ -603,7 +605,19 @@ export default function PokeYelp() {
             >
               {/* Card image and info: left column on tablet/desktop */}
               <div className="space-y-2 w-full max-w-[260px] mx-auto sm:mx-0 sm:max-w-none sm:w-[260px] lg:w-[280px] sm:shrink-0">
-                <div className="aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl">
+                <button
+                  type="button"
+                  onClick={() => setDetailSeed({
+                    card_id: current.card_id,
+                    card_name: current.name,
+                    set_name: current.set_name,
+                    image_url: current.image_url,
+                    price: current.price,
+                    rarity: current.rarity,
+                  })}
+                  aria-label="View card details"
+                  className="block w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl hover:ring-2 hover:ring-primary/50 transition-shadow"
+                >
                   {current.image_url && !imgErr ? (
                     <img
                       src={current.image_url}
@@ -617,7 +631,7 @@ export default function PokeYelp() {
                       <span className="text-xs">No image</span>
                     </div>
                   )}
-                </div>
+                </button>
                 <div>
                   <p className="text-sm font-semibold text-foreground truncate">{current.name}</p>
                   <p className="text-[11px] text-muted-foreground">
@@ -780,6 +794,7 @@ export default function PokeYelp() {
           )}
         </main>
       </div>
+      <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
     </>
   );
 }

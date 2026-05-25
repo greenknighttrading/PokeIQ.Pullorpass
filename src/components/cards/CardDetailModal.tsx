@@ -1,0 +1,533 @@
+import React, { useEffect, useMemo, useState, useCallback, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Heart, Bookmark, Sparkles, ImageOff, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useWatchlist } from '@/hooks/useWatchlist';
+import { saveLike } from '@/lib/likesService';
+import { classifyEra } from '@/lib/likesService';
+import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
+
+const PriceHistoryChart = lazy(() => import('@/components/buylist/PriceHistoryChart'));
+
+export interface CardDetailSeed {
+  card_id: string;
+  card_name: string;
+  set_name?: string | null;
+  image_url?: string | null;
+  price?: number | null;
+  rarity?: string | null;
+  artist?: string | null;
+  pokemon_type?: string | null;
+  card_number?: string | null;
+  tcgplayer_id?: string | null;
+}
+
+interface FullDetails {
+  artist: string | null;
+  card_number: string | null;
+  rarity: string | null;
+  pokemon_type: string | null;
+  set_name: string | null;
+  set_id: string | null;
+  release_year: number | null;
+  image_url: string | null;
+  // price snapshot
+  price: number | null;
+  price_change_7d: number | null;
+  price_change_30d: number | null;
+  price_change_90d: number | null;
+  max_price_30d: number | null;
+  min_price_30d: number | null;
+  snapshot_date: string | null;
+  tcgplayer_id: string | null;
+  language: string;
+  variant: string | null;
+}
+
+interface HistoryPoint { p: number; t: number }
+interface HistoryStats {
+  history: HistoryPoint[];
+  allTimeHigh: number | null;
+  allTimeLow: number | null;
+}
+
+// In-memory caches — survive between opens within a session.
+const detailCache = new Map<string, FullDetails>();
+const historyCache = new Map<string, HistoryStats>();
+const likedCache = new Map<string, boolean>();
+
+async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
+  if (detailCache.has(seed.card_id)) return detailCache.get(seed.card_id)!;
+
+  const base: FullDetails = {
+    artist: seed.artist ?? null,
+    card_number: seed.card_number ?? null,
+    rarity: seed.rarity ?? null,
+    pokemon_type: seed.pokemon_type ?? null,
+    set_name: seed.set_name ?? null,
+    set_id: null,
+    release_year: null,
+    image_url: seed.image_url ?? null,
+    price: seed.price ?? null,
+    price_change_7d: null,
+    price_change_30d: null,
+    price_change_90d: null,
+    max_price_30d: null,
+    min_price_30d: null,
+    snapshot_date: null,
+    tcgplayer_id: seed.tcgplayer_id ?? null,
+    language: /\(JP\)|japanese/i.test(`${seed.card_name} ${seed.set_name ?? ''}`) ? 'Japanese' : 'English',
+    variant: null,
+  };
+
+  // Snapshot — pick freshest row for this card_id
+  try {
+    const { data: snaps } = await supabase
+      .from('market_snapshots')
+      .select('price, price_change_7d, price_change_30d, price_change_90d, max_price_30d, min_price_30d, snapshot_date, tcgplayer_id, artist, pokemon_type, rarity, set_name, set_id, image_url, printing')
+      .eq('card_id', seed.card_id)
+      .eq('game', 'Pokemon')
+      .order('snapshot_date', { ascending: false })
+      .limit(1);
+    const s = snaps?.[0];
+    if (s) {
+      base.price = s.price ?? base.price;
+      base.price_change_7d = s.price_change_7d ?? null;
+      base.price_change_30d = s.price_change_30d ?? null;
+      base.price_change_90d = s.price_change_90d ?? null;
+      base.max_price_30d = s.max_price_30d ?? null;
+      base.min_price_30d = s.min_price_30d ?? null;
+      base.snapshot_date = s.snapshot_date ?? null;
+      base.tcgplayer_id = s.tcgplayer_id ?? base.tcgplayer_id;
+      base.artist = base.artist ?? s.artist ?? null;
+      base.pokemon_type = base.pokemon_type ?? (Array.isArray(s.pokemon_type) ? s.pokemon_type[0] : (s.pokemon_type as any)) ?? null;
+      base.rarity = base.rarity ?? s.rarity ?? null;
+      base.set_name = base.set_name ?? s.set_name ?? null;
+      base.set_id = s.set_id ?? null;
+      base.image_url = base.image_url ?? s.image_url ?? null;
+      base.variant = (s.printing as any) ?? null;
+    }
+  } catch {/* noop */}
+
+  // PPT fallback for artist/type/number/image when still missing
+  if (!base.artist || !base.card_number || !base.image_url || !base.pokemon_type) {
+    try {
+      const { data: rows } = await supabase
+        .from('cards_ppt')
+        .select('artist, card_number, rarity, pokemon_type, card_type, image_cdn_url_400, set_name')
+        .eq('ppt_id', seed.card_id)
+        .limit(1);
+      const ppt = rows?.[0];
+      if (ppt) {
+        base.artist = base.artist ?? ppt.artist ?? null;
+        base.card_number = base.card_number ?? ppt.card_number ?? null;
+        base.rarity = base.rarity ?? ppt.rarity ?? null;
+        base.pokemon_type = base.pokemon_type ?? (Array.isArray(ppt.pokemon_type) ? ppt.pokemon_type[0] : (ppt.pokemon_type as any)) ?? null;
+        base.image_url = base.image_url ?? ppt.image_cdn_url_400 ?? null;
+      }
+    } catch {/* noop */}
+  }
+
+  // Release year from sets_ppt
+  if (base.set_name && !base.release_year) {
+    try {
+      const { data: sets } = await supabase
+        .from('sets_ppt')
+        .select('id, release_date')
+        .ilike('name', base.set_name)
+        .limit(1);
+      const s = sets?.[0];
+      if (s) {
+        base.set_id = base.set_id ?? s.id ?? null;
+        const m = (s.release_date || '').match(/(\d{4})/);
+        if (m) base.release_year = parseInt(m[1], 10);
+      }
+    } catch {/* noop */}
+  }
+
+  detailCache.set(seed.card_id, base);
+  return base;
+}
+
+async function fetchHistory(cardId: string): Promise<HistoryStats> {
+  if (historyCache.has(cardId)) return historyCache.get(cardId)!;
+  const result: HistoryStats = { history: [], allTimeHigh: null, allTimeLow: null };
+  try {
+    const { data } = await supabase.functions.invoke('justtcg', {
+      body: { action: 'getCard', cardId, game: 'pokemon' },
+    });
+    const card = (data as any)?.data;
+    if (card) {
+      const variant = Array.isArray(card.variants) ? card.variants[0] : null;
+      const history = (variant?.priceHistory ?? []) as HistoryPoint[];
+      if (history.length) result.history = history;
+      const stats = variant?.priceStats?.allTime ?? card?.priceStats?.allTime;
+      if (stats) {
+        result.allTimeHigh = stats.max ?? stats.highestPrice ?? null;
+        result.allTimeLow = stats.min ?? stats.lowestPrice ?? null;
+      }
+      // Fallback: derive ATH/ATL from history
+      if (result.history.length && (result.allTimeHigh == null || result.allTimeLow == null)) {
+        const prices = result.history.map((p) => p.p);
+        result.allTimeHigh = result.allTimeHigh ?? Math.max(...prices);
+        result.allTimeLow = result.allTimeLow ?? Math.min(...prices);
+      }
+    }
+  } catch (e) {
+    console.warn('history fetch failed', e);
+  }
+  historyCache.set(cardId, result);
+  return result;
+}
+
+export function CardDetailModal({
+  open,
+  seed,
+  onClose,
+}: {
+  open: boolean;
+  seed: CardDetailSeed | null;
+  onClose: () => void;
+}) {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [details, setDetails] = useState<FullDetails | null>(null);
+  const [history, setHistory] = useState<HistoryStats | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgErr, setImgErr] = useState(false);
+  const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
+  const [liked, setLiked] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Esc to close
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  // Load details + history when seed changes
+  useEffect(() => {
+    if (!open || !seed) return;
+    setImgLoaded(false);
+    setImgErr(false);
+    setDetails(detailCache.get(seed.card_id) ?? null);
+    setHistory(historyCache.get(seed.card_id) ?? null);
+
+    let cancelled = false;
+    fetchFullDetails(seed).then((d) => { if (!cancelled) setDetails(d); });
+
+    // Lazy: defer history slightly so the modal paints first
+    setHistoryLoading(true);
+    const t = window.setTimeout(() => {
+      fetchHistory(seed.card_id).then((h) => { if (!cancelled) { setHistory(h); setHistoryLoading(false); } });
+    }, 80);
+
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const uid = session?.user?.is_anonymous ? null : session?.user?.id ?? null;
+      if (cancelled) return;
+      setUserId(uid);
+      if (uid) {
+        const cached = likedCache.get(uid + ':' + seed.card_id);
+        if (cached != null) setLiked(cached);
+        else {
+          const { data } = await supabase
+            .from('pokeiq_likes')
+            .select('id')
+            .eq('user_id', uid)
+            .eq('card_id', seed.card_id)
+            .limit(1);
+          const isLiked = !!data?.length;
+          likedCache.set(uid + ':' + seed.card_id, isLiked);
+          if (!cancelled) setLiked(isLiked);
+        }
+      }
+    })();
+
+    return () => { cancelled = true; window.clearTimeout(t); };
+  }, [open, seed?.card_id]);
+
+  const era = useMemo(() => {
+    if (!details?.set_name) return null;
+    return classifyEra(details.set_name);
+  }, [details?.set_name]);
+
+  const handleToggleLike = useCallback(async () => {
+    if (!seed) return;
+    if (!userId) { navigate('/auth'); return; }
+    if (liked) {
+      await supabase.from('pokeiq_likes').delete().eq('user_id', userId).eq('card_id', seed.card_id);
+      likedCache.set(userId + ':' + seed.card_id, false);
+      setLiked(false);
+      toast.success('Removed from Likes');
+    } else {
+      await saveLike(userId, {
+        card_id: seed.card_id,
+        card_name: seed.card_name,
+        set_name: details?.set_name ?? seed.set_name ?? null,
+        image_url: details?.image_url ?? seed.image_url ?? null,
+        price: details?.price ?? seed.price ?? null,
+        rarity: details?.rarity ?? seed.rarity ?? null,
+        source: 'manual',
+      });
+      likedCache.set(userId + ':' + seed.card_id, true);
+      setLiked(true);
+      toast.success('Added to Likes');
+    }
+  }, [seed, userId, liked, details, navigate]);
+
+  const handleToggleWatch = useCallback(async () => {
+    if (!seed) return;
+    if (!userId) { navigate('/auth'); return; }
+    if (isInWatchlist(seed.card_id)) {
+      await removeFromWatchlist(seed.card_id);
+    } else {
+      await addToWatchlist({
+        card_id: seed.card_id,
+        name: seed.card_name,
+        set_name: details?.set_name ?? seed.set_name ?? null,
+        tcgplayer_id: details?.tcgplayer_id ?? seed.tcgplayer_id ?? null,
+        rarity: details?.rarity ?? seed.rarity ?? null,
+      });
+    }
+  }, [seed, userId, isInWatchlist, addToWatchlist, removeFromWatchlist, details, navigate]);
+
+  if (!open || !seed) return null;
+
+  const img = details?.image_url ?? seed.image_url ?? null;
+  const inWatch = userId ? isInWatchlist(seed.card_id) : false;
+
+  const body = (
+    <motion.div
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.18 }}
+    >
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
+
+      <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-label={seed.card_name}
+        className="relative w-full sm:max-w-3xl max-h-[95vh] sm:max-h-[88vh] bg-card border border-border/60 rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+        initial={isMobile ? { y: '100%' } : { scale: 0.96, opacity: 0, y: 8 }}
+        animate={isMobile ? { y: 0 } : { scale: 1, opacity: 1, y: 0 }}
+        exit={isMobile ? { y: '100%' } : { scale: 0.96, opacity: 0 }}
+        transition={{ type: 'spring', stiffness: 320, damping: 30 }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="absolute top-3 right-3 z-20 w-9 h-9 rounded-full bg-background/80 backdrop-blur border border-border/60 flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+        >
+          <X className="w-4 h-4" />
+        </button>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 pb-[88px] sm:pb-0">
+          <div className="flex flex-col sm:flex-row gap-5 p-4 sm:p-6">
+            {/* IMAGE */}
+            <div className="w-full sm:w-[260px] shrink-0 mx-auto sm:mx-0 max-w-[260px]">
+              <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/40 shadow-lg ring-1 ring-border/50">
+                {!imgLoaded && !imgErr && <Skeleton className="absolute inset-0 rounded-xl" />}
+                {img && !imgErr ? (
+                  <img
+                    src={img}
+                    alt={seed.card_name}
+                    className={`w-full h-full object-cover transition-opacity duration-200 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setImgLoaded(true)}
+                    onError={() => { setImgErr(true); setImgLoaded(true); }}
+                  />
+                ) : imgErr ? (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <ImageOff className="w-8 h-8 text-muted-foreground" />
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            {/* DETAILS */}
+            <div className="flex-1 min-w-0 space-y-4">
+              {/* Header */}
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">{seed.card_name}</h2>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {details?.set_name ?? seed.set_name ?? '—'}
+                  {details?.card_number ? ` · #${details.card_number}` : ''}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {details?.rarity && <Badge variant="secondary" className="text-[10px]">{details.rarity}</Badge>}
+                  {details?.pokemon_type && <Badge variant="outline" className="text-[10px]">{details.pokemon_type}</Badge>}
+                  {details?.language && <Badge variant="outline" className="text-[10px]">{details.language}</Badge>}
+                  {details?.variant && <Badge variant="outline" className="text-[10px]">{details.variant}</Badge>}
+                </div>
+              </div>
+
+              {/* Basic details */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                <DetailRow label="Artist" value={details?.artist} loading={!details} />
+                <DetailRow label="Era" value={era?.label ?? null} loading={!details} />
+                <DetailRow label="Released" value={details?.release_year?.toString() ?? null} loading={!details} />
+                <DetailRow label="Number" value={details?.card_number ?? null} loading={!details} />
+              </div>
+
+              {/* Price snapshot */}
+              <div className="rounded-xl border border-border/60 bg-background/40 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Market price</p>
+                  {details?.snapshot_date && (
+                    <p className="text-[10px] text-muted-foreground">
+                      Updated {new Date(details.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-baseline gap-2">
+                  {details?.price != null ? (
+                    <p className="text-2xl font-bold text-foreground tabular-nums">${details.price.toFixed(2)}</p>
+                  ) : (
+                    <Skeleton className="h-7 w-24" />
+                  )}
+                </div>
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <ChangeStat label="7D"  value={details?.price_change_7d} loading={!details} />
+                  <ChangeStat label="30D" value={details?.price_change_30d} loading={!details} />
+                  <ChangeStat label="90D" value={details?.price_change_90d} loading={!details} />
+                </div>
+                {details && (details.max_price_30d != null || details.min_price_30d != null || history?.allTimeHigh != null || history?.allTimeLow != null) && (
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                    {(history?.allTimeHigh ?? details.max_price_30d) != null && (
+                      <div className="text-muted-foreground">
+                        ATH <span className="text-foreground font-medium tabular-nums">${(history?.allTimeHigh ?? details.max_price_30d!).toFixed(2)}</span>
+                      </div>
+                    )}
+                    {(history?.allTimeLow ?? details.min_price_30d) != null && (
+                      <div className="text-muted-foreground">
+                        Recent low <span className="text-foreground font-medium tabular-nums">${(history?.allTimeLow ?? details.min_price_30d!).toFixed(2)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Chart (lazy) */}
+              <div>
+                {historyLoading && !history ? (
+                  <Skeleton className="h-44 w-full rounded-xl" />
+                ) : history && history.history.length > 1 ? (
+                  <Suspense fallback={<Skeleton className="h-44 w-full rounded-xl" />}>
+                    <PriceHistoryChart priceHistory={history.history} />
+                  </Suspense>
+                ) : history && history.history.length <= 1 ? (
+                  <p className="text-[11px] text-muted-foreground italic">No price history available.</p>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sticky action bar */}
+        <div className="absolute sm:relative bottom-0 left-0 right-0 border-t border-border/60 bg-card/95 backdrop-blur px-3 py-2 sm:px-4 sm:py-3 flex items-center gap-2">
+          <Button
+            variant={liked ? 'default' : 'outline'}
+            size="sm"
+            onClick={handleToggleLike}
+            className="flex-1 gap-1.5"
+          >
+            <Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} />
+            {liked ? 'Liked' : 'Like'}
+          </Button>
+          <Button
+            variant={inWatch ? 'default' : 'outline'}
+            size="sm"
+            onClick={handleToggleWatch}
+            className="flex-1 gap-1.5"
+          >
+            <Bookmark className={`w-4 h-4 ${inWatch ? 'fill-current' : ''}`} />
+            {inWatch ? 'Watching' : 'Watchlist'}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { onClose(); navigate('/matches'); }}
+            className="hidden sm:inline-flex gap-1.5"
+          >
+            <Sparkles className="w-4 h-4" /> Similar
+          </Button>
+          {details?.tcgplayer_id && (
+            <a
+              href={`https://www.tcgplayer.com/product/${details.tcgplayer_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex"
+            >
+              <Button variant="ghost" size="sm" className="gap-1.5">
+                <ExternalLink className="w-4 h-4" /> TCGplayer
+              </Button>
+            </a>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+
+  return createPortal(<AnimatePresence>{body}</AnimatePresence>, document.body);
+}
+
+function DetailRow({ label, value, loading }: { label: string; value: string | null | undefined; loading?: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5 min-w-0">
+      <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</span>
+      {loading && value == null ? (
+        <Skeleton className="h-3.5 w-20" />
+      ) : (
+        <span className="text-foreground truncate">{value ?? '—'}</span>
+      )}
+    </div>
+  );
+}
+
+function ChangeStat({ label, value, loading }: { label: string; value: number | null | undefined; loading?: boolean }) {
+  if (loading && value == null) {
+    return (
+      <div className="space-y-1">
+        <div className="text-[10px] text-muted-foreground">{label}</div>
+        <Skeleton className="h-4 w-12" />
+      </div>
+    );
+  }
+  if (value == null) {
+    return (
+      <div className="space-y-0.5">
+        <div className="text-[10px] text-muted-foreground">{label}</div>
+        <div className="text-xs text-muted-foreground">—</div>
+      </div>
+    );
+  }
+  const up = value >= 0;
+  return (
+    <div className="space-y-0.5">
+      <div className="text-[10px] text-muted-foreground">{label}</div>
+      <div className={`text-xs font-semibold tabular-nums inline-flex items-center gap-0.5 ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+        {up ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+        {up ? '+' : ''}{value.toFixed(1)}%
+      </div>
+    </div>
+  );
+}

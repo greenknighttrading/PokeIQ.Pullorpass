@@ -11,6 +11,7 @@ import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
+import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
@@ -29,6 +30,7 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikedCard[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
+  const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -85,12 +87,13 @@ export default function Matches() {
 
           {!loading && userId && (
             <>
-              {recommendations.length > 0 && <RecommendationsBanner items={recommendations} />}
+              {recommendations.length > 0 && <RecommendationsBanner items={recommendations} onOpen={setOpenSeed} />}
               <TasteProfilePanel taste={taste} />
-              <BinderView likes={likes} taste={taste} />
+              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
             </>
           )}
         </main>
+        <CardDetailModal open={!!openSeed} seed={openSeed} onClose={() => setOpenSeed(null)} />
       </div>
     </>
   );
@@ -183,7 +186,7 @@ function AttrBlock({ title, icon, items }: { title: string; icon: React.ReactNod
   );
 }
 
-function RecommendationsBanner({ items }: { items: RecommendedCard[] }) {
+function RecommendationsBanner({ items, onOpen }: { items: RecommendedCard[]; onOpen: (s: CardDetailSeed) => void }) {
   return (
     <section className="mb-5">
       <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-lg">
@@ -195,17 +198,31 @@ function RecommendationsBanner({ items }: { items: RecommendedCard[] }) {
           Picked by matching the artists, sets, types, and rarities you keep liking.
         </p>
         <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:thin]">
-          {items.map((r) => <RecCard key={r.card_id} r={r} />)}
+          {items.map((r) => <RecCard key={r.card_id} r={r} onOpen={onOpen} />)}
         </div>
       </div>
     </section>
   );
 }
 
-function RecCard({ r }: { r: RecommendedCard }) {
+function RecCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailSeed) => void }) {
   const [err, setErr] = useState(false);
   return (
-    <motion.div whileHover={{ y: -4, scale: 1.04 }} transition={{ type: 'spring', stiffness: 280, damping: 20 }} className="shrink-0 w-[120px] space-y-1.5">
+    <motion.div
+      whileHover={{ y: -4, scale: 1.04 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="shrink-0 w-[120px] space-y-1.5 cursor-pointer"
+      onClick={() => onOpen({
+        card_id: r.card_id,
+        card_name: r.card_name,
+        set_name: r.set_name,
+        image_url: r.image_url,
+        price: r.price,
+        rarity: r.rarity,
+        artist: r.artist,
+        pokemon_type: r.pokemon_type,
+      })}
+    >
       <div className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/30 shadow-md">
         {r.image_url && !err ? (
           <img src={r.image_url} alt={r.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
@@ -223,7 +240,7 @@ function RecCard({ r }: { r: RecommendedCard }) {
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ likes, taste }: { likes: LikedCard[]; taste: TasteProfile }) {
+function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [facet, setFacet] = useState<FacetKey>('all');
@@ -348,8 +365,8 @@ function BinderView({ likes, taste }: { likes: LikedCard[]; taste: TasteProfile 
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <BinderPage cards={leftCards} pageNumber={spread * 2 + 1} side="left" />
-                <BinderPage cards={rightCards} pageNumber={spread * 2 + 2} side="right" />
+                <BinderPage cards={leftCards} pageNumber={spread * 2 + 1} side="left" onOpen={onOpen} />
+                <BinderPage cards={rightCards} pageNumber={spread * 2 + 2} side="right" onOpen={onOpen} />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -370,28 +387,39 @@ function BinderView({ likes, taste }: { likes: LikedCard[]; taste: TasteProfile 
   );
 }
 
-function BinderPage({ cards, pageNumber, side }: { cards: LikedCard[]; pageNumber: number; side: 'left' | 'right' }) {
+function BinderPage({ cards, pageNumber, side, onOpen }: { cards: LikedCard[]; pageNumber: number; side: 'left' | 'right'; onOpen: (s: CardDetailSeed) => void }) {
   const slots = Array.from({ length: CARDS_PER_PAGE }, (_, i) => cards[i] ?? null);
   return (
     <div className="relative rounded-xl p-2.5 sm:p-3 bg-background/60 ring-1 ring-border/50 shadow-inner"
          style={{ backgroundImage: 'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
       <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
-        {slots.map((c, i) => <BinderSlot key={c?.id ?? `empty-${pageNumber}-${i}`} like={c} />)}
+        {slots.map((c, i) => <BinderSlot key={c?.id ?? `empty-${pageNumber}-${i}`} like={c} onOpen={onOpen} />)}
       </div>
       <p className={`text-[10px] text-muted-foreground tabular-nums mt-2 ${side === 'left' ? 'text-left' : 'text-right'}`}>Page {pageNumber}</p>
     </div>
   );
 }
 
-function BinderSlot({ like }: { like: LikedCard | null }) {
+function BinderSlot({ like, onOpen }: { like: LikedCard | null; onOpen: (s: CardDetailSeed) => void }) {
   const [err, setErr] = useState(false);
   if (!like) return <div className="aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed ring-border/40" />;
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -3, zIndex: 5 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 ring-border/40 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] hover:ring-primary/50"
+      className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 ring-border/40 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] hover:ring-primary/50 cursor-pointer"
       title={[like.card_name, like.set_name, like.artist && `by ${like.artist}`].filter(Boolean).join(' · ')}
+      onClick={() => onOpen({
+        card_id: like.card_id,
+        card_name: like.card_name,
+        set_name: like.set_name,
+        image_url: like.image_url,
+        price: like.price,
+        rarity: like.rarity,
+        artist: like.artist,
+        pokemon_type: like.pokemon_type,
+        card_number: like.card_number,
+      })}
     >
       {like.image_url && !err ? (
         <img src={like.image_url} alt={like.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
