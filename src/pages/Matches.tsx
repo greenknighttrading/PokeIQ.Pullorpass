@@ -557,7 +557,55 @@ function BinderSlot({ like, onOpen }: { like: LikedCard | null; onOpen: (s: Card
 // Recommendations (kept between Binder and Deep Insights)
 // ─────────────────────────────────────────────────────────────
 
-function RecommendationsBanner({ items, onOpen }: { items: RecommendedCard[]; onOpen: (s: CardDetailSeed) => void }) {
+function RecommendedRow({ items, onOpen }: { items: RecommendedCard[]; onOpen: (s: CardDetailSeed) => void }) {
+  return (
+    <section>
+      <div className="mb-5">
+        <div className="flex items-center gap-2">
+          <Wand2 className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold text-foreground">Recommended for you</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          Picked by matching the artists, sets, types, and rarities you keep liking.
+        </p>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:thin]">
+        {items.map((r) => <RecRowCard key={r.card_id} r={r} onOpen={onOpen} />)}
+      </div>
+    </section>
+  );
+}
+
+function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailSeed) => void }) {
+  const [err, setErr] = useState(false);
+  return (
+    <motion.button
+      whileHover={{ y: -6 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 22 }}
+      onClick={() => onOpen({
+        card_id: r.card_id, card_name: r.card_name, set_name: r.set_name,
+        image_url: r.image_url, price: r.price, rarity: r.rarity,
+        artist: r.artist, pokemon_type: r.pokemon_type,
+      })}
+      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left"
+    >
+      <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
+        {r.image_url && !err ? (
+          <img src={r.image_url} alt={r.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
+        )}
+      </div>
+      <p className="mt-2.5 text-sm text-foreground font-medium truncate">{r.card_name}</p>
+      <p className="text-xs text-muted-foreground truncate">
+        {r.set_name ?? '—'}{r.price ? ` · $${Number(r.price).toFixed(0)}` : ''}
+      </p>
+      <p className="text-[11px] text-primary/80 truncate italic mt-0.5">{r.reason}</p>
+    </motion.button>
+  );
+}
+
+function _UnusedRecommendationsBanner({ items, onOpen }: { items: RecommendedCard[]; onOpen: (s: CardDetailSeed) => void }) {
   return (
     <section>
       <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 shadow-lg">
