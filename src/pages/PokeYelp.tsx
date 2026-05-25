@@ -721,7 +721,7 @@ export default function PokeYelp() {
                   </Button>
                   <Button onClick={submit} className="flex-[2] gap-1.5">
                     <Sparkles className="w-4 h-4" />
-                    Train PokeIQ
+                    Submit
                   </Button>
                 </div>
 
