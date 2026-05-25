@@ -206,3 +206,98 @@ export async function fetchLikes(userId: string): Promise<LikedCard[]> {
   }
   return (data ?? []) as LikedCard[];
 }
+
+// ──────────────────────────────────────────────────────────
+// Backfill pokemon_type / artist for older likes that were
+// saved before the cards_ppt table was populated. Uses the
+// official Pokémon TCG API via the pokemon-tcg edge function.
+// ──────────────────────────────────────────────────────────
+function normalize(s: string) {
+  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+async function lookupTypesFromPokemonTcg(
+  cardName: string,
+  setName: string | null,
+  cardNumber: string | null
+): Promise<{ pokemon_type: string | null; artist: string | null; card_number: string | null } | null> {
+  try {
+    const clean = cardName.replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim();
+    const { data } = await supabase.functions.invoke('pokemon-tcg', {
+      body: {
+        action: 'searchBySetAndName',
+        query: JSON.stringify({ cardName: clean, setName: setName || '' }),
+        pageSize: 20,
+      },
+    });
+    const cards: any[] = data?.data ?? [];
+    if (!cards.length) return null;
+
+    const wantedSet = normalize(setName || '');
+    const wantedNum = (cardNumber || '').replace(/^0+/, '');
+    let best = cards[0];
+    if (wantedNum) {
+      const numMatch = cards.find(c => String(c.number || '').replace(/^0+/, '') === wantedNum);
+      if (numMatch) best = numMatch;
+    } else if (wantedSet) {
+      const setMatch = cards.find(c => normalize(c.set?.name || '') === wantedSet);
+      if (setMatch) best = setMatch;
+    }
+    return {
+      pokemon_type: Array.isArray(best.types) && best.types.length ? best.types[0] : null,
+      artist: best.artist || null,
+      card_number: best.number ? String(best.number) : null,
+    };
+  } catch (e) {
+    console.warn('lookupTypesFromPokemonTcg failed', e);
+    return null;
+  }
+}
+
+/**
+ * Backfill missing pokemon_type/artist for a user's likes.
+ * Runs in small batches and updates pokeiq_likes in-place.
+ * Returns the updated likes (or the original list if no changes).
+ */
+export async function backfillMissingTypes(
+  userId: string,
+  likes: LikedCard[],
+  opts: { max?: number } = {}
+): Promise<LikedCard[]> {
+  if (!userId) return likes;
+  const missing = likes.filter(l => !l.pokemon_type && l.product_category !== 'sealed');
+  if (!missing.length) return likes;
+
+  const max = opts.max ?? 40;
+  const batch = missing.slice(0, max);
+  const updates = new Map<string, Partial<LikedCard>>();
+
+  // Small concurrency to avoid hammering the edge function
+  const CONCURRENCY = 4;
+  let idx = 0;
+  async function worker() {
+    while (idx < batch.length) {
+      const i = idx++;
+      const l = batch[i];
+      const meta = await lookupTypesFromPokemonTcg(l.card_name, l.set_name, l.card_number);
+      if (!meta) continue;
+      const patch: Partial<LikedCard> = {};
+      if (meta.pokemon_type && !l.pokemon_type) patch.pokemon_type = meta.pokemon_type;
+      if (meta.artist && !l.artist) patch.artist = meta.artist;
+      if (meta.card_number && !l.card_number) patch.card_number = meta.card_number;
+      if (Object.keys(patch).length) updates.set(l.id, patch);
+    }
+  }
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+
+  if (!updates.size) return likes;
+
+  // Persist updates one row at a time (small batch, simple & safe).
+  await Promise.all(
+    Array.from(updates.entries()).map(([id, patch]) =>
+      supabase.from('pokeiq_likes').update(patch).eq('id', id).eq('user_id', userId)
+    )
+  );
+
+  return likes.map(l => (updates.has(l.id) ? { ...l, ...updates.get(l.id)! } : l));
+}

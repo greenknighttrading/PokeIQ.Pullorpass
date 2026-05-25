@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
-import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL } from '@/lib/likesService';
+import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 
@@ -45,6 +45,16 @@ export default function Matches() {
         catch (e) { console.warn('recommend failed', e); }
       }
       setLoading(false);
+
+      // Background backfill — populate pokemon_type/artist for older likes
+      // that were saved before cards_ppt had data. Refreshes the UI when done.
+      if (liked.length > 0) {
+        backfillMissingTypes(session.user.id, liked, { max: 60 })
+          .then(updated => {
+            if (updated !== liked) setLikes(updated);
+          })
+          .catch(e => console.warn('backfillMissingTypes failed', e));
+      }
     })();
   }, []);
 

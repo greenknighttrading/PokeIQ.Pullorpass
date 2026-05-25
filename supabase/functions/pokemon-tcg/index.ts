@@ -106,6 +106,7 @@ function formatCard(card: any) {
     number: String(card.number ?? ""),
     artist: card.artist ?? "",
     rarity: card.rarity ?? "",
+    types: Array.isArray(card.types) ? card.types : [],
     slug: card.id ?? "",
     cardType: card.supertype ?? "singles",
     set: {
