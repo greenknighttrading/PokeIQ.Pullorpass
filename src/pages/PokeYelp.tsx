@@ -794,6 +794,7 @@ export default function PokeYelp() {
           )}
         </main>
       </div>
+      <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
     </>
   );
 }
