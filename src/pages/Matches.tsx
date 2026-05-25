@@ -605,52 +605,6 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
   );
 }
 
-function _UnusedRecommendationsBanner({ items, onOpen }: { items: RecommendedCard[]; onOpen: (s: CardDetailSeed) => void }) {
-  return (
-    <section>
-      <div className="rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 shadow-lg">
-        <div className="flex items-center gap-2 mb-2">
-          <Wand2 className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Recommended for you</h2>
-        </div>
-        <p className="text-sm text-muted-foreground mb-5">
-          Picked by matching the artists, sets, types, and rarities you keep liking.
-        </p>
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:thin]">
-          {items.map((r) => <RecCard key={r.card_id} r={r} onOpen={onOpen} />)}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function RecCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailSeed) => void }) {
-  const [err, setErr] = useState(false);
-  return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.04 }}
-      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-      className="shrink-0 w-[140px] space-y-1.5 cursor-pointer"
-      onClick={() => onOpen({
-        card_id: r.card_id, card_name: r.card_name, set_name: r.set_name,
-        image_url: r.image_url, price: r.price, rarity: r.rarity,
-        artist: r.artist, pokemon_type: r.pokemon_type,
-      })}
-    >
-      <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-primary/30 shadow-md">
-        {r.image_url && !err ? (
-          <img src={r.image_url} alt={r.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
-        )}
-      </div>
-      <p className="text-xs text-foreground truncate font-medium">{r.card_name}</p>
-      <p className="text-[11px] text-muted-foreground truncate">{r.set_name ?? '—'}{r.price ? ` · $${Number(r.price).toFixed(0)}` : ''}</p>
-      <p className="text-[10px] text-primary/80 truncate italic">{r.reason}</p>
-    </motion.div>
-  );
-}
-
 // ─────────────────────────────────────────────────────────────
 // SECTION 4 — Deep Taste Insights (tabbed)
 // ─────────────────────────────────────────────────────────────
