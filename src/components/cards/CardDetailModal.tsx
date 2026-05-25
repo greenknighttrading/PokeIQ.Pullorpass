@@ -55,6 +55,9 @@ interface HistoryStats {
   history: HistoryPoint[];
   allTimeHigh: number | null;
   allTimeLow: number | null;
+  number: string | null;
+  rarity: string | null;
+  set_name: string | null;
 }
 
 // In-memory caches — survive between opens within a session.
@@ -118,11 +121,21 @@ async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
   // PPT fallback for artist/type/number/image when still missing
   if (!base.artist || !base.card_number || !base.image_url || !base.pokemon_type) {
     try {
-      const { data: rows } = await supabase
+      let { data: rows } = await supabase
         .from('cards_ppt')
         .select('artist, card_number, rarity, pokemon_type, card_type, image_cdn_url_400, set_name')
         .eq('ppt_id', seed.card_id)
         .limit(1);
+      // market_snapshots.card_id often isn't a ppt_id, so retry by name + set
+      if ((!rows || rows.length === 0) && seed.card_name) {
+        const q = supabase
+          .from('cards_ppt')
+          .select('artist, card_number, rarity, pokemon_type, card_type, image_cdn_url_400, set_name')
+          .ilike('name', seed.card_name);
+        if (base.set_name) q.ilike('set_name', base.set_name);
+        const { data: r2 } = await q.limit(1);
+        rows = r2 ?? null;
+      }
       const ppt = rows?.[0];
       if (ppt) {
         base.artist = base.artist ?? ppt.artist ?? null;
@@ -157,22 +170,29 @@ async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
 
 async function fetchHistory(cardId: string): Promise<HistoryStats> {
   if (historyCache.has(cardId)) return historyCache.get(cardId)!;
-  const result: HistoryStats = { history: [], allTimeHigh: null, allTimeLow: null };
+  const result: HistoryStats = { history: [], allTimeHigh: null, allTimeLow: null, number: null, rarity: null, set_name: null };
   try {
     const { data } = await supabase.functions.invoke('justtcg', {
       body: { action: 'getCard', cardId, game: 'pokemon' },
     });
-    const card = (data as any)?.data;
+    const raw = (data as any)?.data;
+    const card = Array.isArray(raw) ? raw[0] : raw;
     if (card) {
-      const variant = Array.isArray(card.variants) ? card.variants[0] : null;
-      const history = (variant?.priceHistory ?? []) as HistoryPoint[];
-      if (history.length) result.history = history;
-      const stats = variant?.priceStats?.allTime ?? card?.priceStats?.allTime;
-      if (stats) {
-        result.allTimeHigh = stats.max ?? stats.highestPrice ?? null;
-        result.allTimeLow = stats.min ?? stats.lowestPrice ?? null;
+      result.number = card.number ?? null;
+      result.rarity = card.rarity ?? null;
+      result.set_name = card.set_name ?? null;
+      // Pick Near Mint variant with the richest history
+      const variants: any[] = Array.isArray(card.variants) ? card.variants : [];
+      const ranked = variants
+        .map((v) => ({ v, score: (v.condition === 'Near Mint' ? 10 : 0) + (v.priceHistory?.length ?? 0) }))
+        .sort((a, b) => b.score - a.score);
+      const best = ranked[0]?.v ?? variants[0];
+      if (best) {
+        const history = (best.priceHistory ?? []) as HistoryPoint[];
+        if (history.length) result.history = history;
+        result.allTimeHigh = best.maxPriceAllTime ?? best.maxPrice1y ?? null;
+        result.allTimeLow = best.minPriceAllTime ?? best.minPrice1y ?? null;
       }
-      // Fallback: derive ATH/ATL from history
       if (result.history.length && (result.allTimeHigh == null || result.allTimeLow == null)) {
         const prices = result.history.map((p) => p.p);
         result.allTimeHigh = result.allTimeHigh ?? Math.max(...prices);
@@ -264,6 +284,17 @@ export function CardDetailModal({
     if (!details?.set_name) return null;
     return classifyEra(details.set_name);
   }, [details?.set_name]);
+
+  // Merge JustTCG card-level metadata into details for display
+  const display = useMemo(() => {
+    if (!details) return null;
+    return {
+      ...details,
+      card_number: details.card_number ?? history?.number ?? null,
+      rarity: details.rarity ?? history?.rarity ?? null,
+      set_name: details.set_name ?? history?.set_name ?? null,
+    };
+  }, [details, history]);
 
   const handleToggleLike = useCallback(async () => {
     if (!seed) return;
@@ -369,23 +400,23 @@ export function CardDetailModal({
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">{seed.card_name}</h2>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {details?.set_name ?? seed.set_name ?? '—'}
-                  {details?.card_number ? ` · #${details.card_number}` : ''}
+                  {display?.set_name ?? seed.set_name ?? '—'}
+                  {display?.card_number ? ` · #${display.card_number}` : ''}
                 </p>
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {details?.rarity && <Badge variant="secondary" className="text-[10px]">{details.rarity}</Badge>}
-                  {details?.pokemon_type && <Badge variant="outline" className="text-[10px]">{details.pokemon_type}</Badge>}
-                  {details?.language && <Badge variant="outline" className="text-[10px]">{details.language}</Badge>}
-                  {details?.variant && <Badge variant="outline" className="text-[10px]">{details.variant}</Badge>}
+                  {display?.rarity && <Badge variant="secondary" className="text-[10px]">{display.rarity}</Badge>}
+                  {display?.pokemon_type && <Badge variant="outline" className="text-[10px]">{display.pokemon_type}</Badge>}
+                  {display?.language && <Badge variant="outline" className="text-[10px]">{display.language}</Badge>}
+                  {display?.variant && <Badge variant="outline" className="text-[10px]">{display.variant}</Badge>}
                 </div>
               </div>
 
               {/* Basic details */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                <DetailRow label="Artist" value={details?.artist} loading={!details} />
+                <DetailRow label="Artist" value={display?.artist} loading={!details} />
                 <DetailRow label="Era" value={era?.label ?? null} loading={!details} />
-                <DetailRow label="Released" value={details?.release_year?.toString() ?? null} loading={!details} />
-                <DetailRow label="Number" value={details?.card_number ?? null} loading={!details} />
+                <DetailRow label="Released" value={display?.release_year?.toString() ?? null} loading={!details} />
+                <DetailRow label="Number" value={display?.card_number ?? null} loading={!details} />
               </div>
 
               {/* Price snapshot */}
