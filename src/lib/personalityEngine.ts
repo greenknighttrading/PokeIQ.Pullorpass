@@ -303,10 +303,10 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
       growthPath: 'The strongest Curators learn that the purpose of a collection is not just to look beautiful, but to be lived with and enjoyed.',
     },
   },
-  Diplomat: {
+  Monk: {
     emoji: '\u2696\uFE0F',
     philosophy: 'Balance survives.',
-    tagline: 'Diplomats are balanced, adaptable collectors who build resilient portfolios designed to weather every market mood the hobby throws at them.',
+    tagline: 'Monks are balanced, adaptable collectors who build resilient portfolios designed to weather every market mood the hobby throws at them.',
     summary: "The Diplomat values flexibility, resilience, and diversification. You prefer balanced allocations, multiple eras, and multiple product types — and you rarely go all-in on a single strategy. You\u2019re built to weather every market mood.",
     coreTraits: ['Balanced', 'Adaptable', 'Diversified', 'Stable'],
     strength: 'Strong resilience across changing markets.',
@@ -315,14 +315,14 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
     famousBehavior: 'Owns a little bit of everything.',
     dangerZone: 'Spreading so thin no single position ever meaningfully wins.',
     recommendedAction: 'Pick one era or product type to overweight slightly for the next 6 months.',
-    strengthLong: 'Strong resilience across changing markets. Diplomats are built to weather every market mood because they’re never fully exposed to a single trend.',
+    strengthLong: 'Strong resilience across changing markets. Monks are built to weather every market mood because they’re never fully exposed to a single trend.',
     weaknessLong: 'Can struggle to fully commit to one direction, leaving the collection balanced but without any breakout positions.',
     fullProfile: {
-      coreIdentity: 'Diplomats are adaptable, balanced, and highly flexible collectors. Rather than committing fully to one philosophy, they naturally prefer diversification, moderation, and maintaining stability across multiple approaches.',
+      coreIdentity: 'Monks are adaptable, balanced, and highly flexible collectors. Rather than committing fully to one philosophy, they naturally prefer diversification, moderation, and maintaining stability across multiple approaches.',
       collectingMindset: 'People with this personality type are often comfortable navigating different parts of the hobby simultaneously. They may appreciate vintage while still enjoying modern, collect sealed while also enjoying raw cards, or balance emotional purchases alongside strategic ones.',
-      innerWorld: 'Diplomats rarely feel comfortable living at extremes. Instead, they value resilience and flexibility, preferring collections capable of adapting as the hobby changes over time.',
-      blindSpots: 'Because they can see value in many different approaches, Diplomats may hesitate to fully commit to one direction or feel stretched across too many interests at once.',
-      growthPath: 'The strongest Diplomats learn that balance is most powerful when it is paired with conviction.',
+      innerWorld: 'Monks rarely feel comfortable living at extremes. Instead, they value resilience and flexibility, preferring collections capable of adapting as the hobby changes over time.',
+      blindSpots: 'Because they can see value in many different approaches, Monks may hesitate to fully commit to one direction or feel stretched across too many interests at once.',
+      growthPath: 'The strongest Monks learn that balance is most powerful when it is paired with conviction.',
     },
   },
   Gambler: {
