@@ -42,7 +42,7 @@ export default function Matches() {
       const liked = await fetchLikes(session.user.id);
       setLikes(liked);
       if (liked.length > 0) {
-        try { setRecommendations(await recommendForUser(liked, 12)); }
+        try { setRecommendations(await recommendForUser(liked, 10)); }
         catch (e) { console.warn('recommend failed', e); }
       }
       setLoading(false);
@@ -90,8 +90,8 @@ export default function Matches() {
             <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} />
               {likes.length > 0 && <RecentlyLiked likes={likes} onOpen={setOpenSeed} />}
+              {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
-              {recommendations.length > 0 && <RecommendationsBanner items={recommendations} onOpen={setOpenSeed} />}
               <DeepTasteInsights taste={taste} />
             </div>
           )}
