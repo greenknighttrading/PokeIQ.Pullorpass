@@ -6,7 +6,7 @@ import {
 } from '@/lib/personalityEngine';
 import {
   PiggyBank, ScrollText, Heart, Zap, Calculator, Target,
-  Compass, LayoutGrid, Scale, Dice5, Crown, Leaf,
+  Compass, LayoutGrid, Mountain, Dice5, Crown, Leaf,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import {
@@ -26,7 +26,7 @@ import analystImg from '@/assets/personalities/analyst.jpg';
 import hunterImg from '@/assets/personalities/hunter.jpg';
 import explorerImg from '@/assets/personalities/explorer.jpg';
 import curatorImg from '@/assets/personalities/curator.jpg';
-import diplomatImg from '@/assets/personalities/diplomat.jpg';
+import monkImg from '@/assets/personalities/monk.jpg';
 import gamblerImg from '@/assets/personalities/gambler.jpg';
 import showmanImg from '@/assets/personalities/showman.jpg';
 import minimalistImg from '@/assets/personalities/minimalist.jpg';
@@ -40,7 +40,7 @@ const TYPE_IMAGES: Record<PersonalityType, string> = {
   Hunter: hunterImg,
   Explorer: explorerImg,
   Curator: curatorImg,
-  Diplomat: diplomatImg,
+  Monk: monkImg,
   Gambler: gamblerImg,
   Showman: showmanImg,
   Minimalist: minimalistImg,
@@ -55,7 +55,7 @@ const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: stri
   Hunter: Target,
   Explorer: Compass,
   Curator: LayoutGrid,
-  Diplomat: Scale,
+  Monk: Mountain,
   Gambler: Dice5,
   Showman: Crown,
   Minimalist: Leaf,
