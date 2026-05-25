@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
+import { saveLike } from '@/lib/likesService';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
@@ -303,6 +304,17 @@ export default function PullOrPass() {
         decision: rec.decision,
         tags: rec.tags,
       }).then(({ error }) => { if (error) console.error('swipe insert', error); });
+      if (rec.decision === 'pull') {
+        saveLike(userId, {
+          card_id: rec.card.card_id,
+          card_name: rec.card.name,
+          set_name: rec.card.set_name,
+          image_url: rec.card.image_url,
+          price: rec.card.price,
+          rarity: rec.card.rarity,
+          source: (rec.tags || []).includes('Loved') ? 'super_like' : 'swipe',
+        }).catch((e) => console.warn('saveLike failed', e));
+      }
     }
 
     // Delay advancing so the freeze + exit animation can play.
@@ -398,6 +410,15 @@ export default function PullOrPass() {
           decision: rec.decision,
           tags: rec.tags,
         }).then(({ error }) => { if (error) console.error('swipe insert', error); });
+        saveLike(userId, {
+          card_id: rec.card.card_id,
+          card_name: rec.card.name,
+          set_name: rec.card.set_name,
+          image_url: rec.card.image_url,
+          price: rec.card.price,
+          rarity: rec.card.rarity,
+          source: 'swipe',
+        }).catch((e) => console.warn('saveLike failed', e));
       }
 
       // First match of the day → full celebratory overlay (tutorial moment).
