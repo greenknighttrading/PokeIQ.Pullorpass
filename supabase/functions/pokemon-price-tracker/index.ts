@@ -176,6 +176,20 @@ serve(async (req) => {
 
     if (!resp.ok) {
       console.error(`API error ${resp.status}:`, JSON.stringify(data).slice(0, 300));
+      // Return 200 with fallback signal for rate-limits / upstream errors so the
+      // client doesn't throw a runtime error. Callers should check `fallback`.
+      const isFallbackable = resp.status === 429 || resp.status >= 500;
+      if (isFallbackable) {
+        return new Response(
+          JSON.stringify({
+            error: data?.message || data?.error || `API returned ${resp.status}`,
+            status: resp.status,
+            fallback: true,
+            data: null,
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       return new Response(
         JSON.stringify({ error: data?.message || data?.error || `API returned ${resp.status}`, status: resp.status }),
         { status: resp.status, headers: { ...corsHeaders, "Content-Type": "application/json" } }
