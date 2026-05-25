@@ -156,12 +156,67 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
 
+  // Top stats for the 4 aligned boxes below the hero
+  const topEra = taste.topEras[0];
+  const topType = taste.topPokemonTypes[0];
+  const topArtist = taste.topArtists[0];
+  const topRarity = taste.topRarities[0];
+  const stats: { label: string; value: string; sub?: string }[] = [
+    {
+      label: 'Collection Likes',
+      value: totalLikes.toLocaleString(),
+      sub: `${STAGE_LABEL[stage]} collector`,
+    },
+    {
+      label: 'Avg Card Value',
+      value: avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—',
+      sub: avgPrice > 0 ? 'across your likes' : 'no priced cards yet',
+    },
+    {
+      label: 'Top Era',
+      value: topEra ? topEra.label.split(' (')[0] : '—',
+      sub: topEra ? `${topEra.pct}% of likes` : 'keep swiping',
+    },
+    {
+      label: 'Top Type',
+      value: topType ? topType.label : (topRarity ? topRarity.label : (topArtist ? topArtist.label : '—')),
+      sub: topType
+        ? `${topType.pct}% of likes`
+        : topRarity
+          ? `${topRarity.count} cards`
+          : topArtist
+            ? `by ${topArtist.label}`
+            : 'keep swiping',
+    },
+  ];
+
   return (
-    <section className="relative">
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-8 sm:p-12">
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
-        <div className="relative">
+    <section className="relative space-y-4">
+      {/* Hero card with split content/art layout */}
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
+        </div>
+
+        {/* Art layer — right side, fades into the card on the left */}
+        <div className="absolute inset-y-0 right-0 w-full md:w-[55%] pointer-events-none">
+          <img
+            src={tasteHeroArt}
+            alt=""
+            aria-hidden="true"
+            width={1280}
+            height={896}
+            loading="lazy"
+            className="absolute inset-0 w-full h-full object-cover object-center opacity-60 md:opacity-90"
+          />
+          {/* Left-to-right fade so text stays readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/40 to-transparent" />
+          {/* Top/bottom polish */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
+        </div>
+
+        <div className="relative p-8 sm:p-12 md:max-w-[58%]">
           <div className="flex items-center gap-2 mb-4">
             <Badge variant="secondary" className="text-[10px] uppercase tracking-widest">
               {STAGE_LABEL[stage]} collector
@@ -175,7 +230,7 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
             Your Collector Taste
           </h1>
-          <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed max-w-3xl">
+          <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed">
             {sentence}
           </p>
 
@@ -222,6 +277,29 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* 4 aligned stat boxes */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        {stats.map((s, i) => (
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 + i * 0.05 }}
+            className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6"
+          >
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
+              {s.label}
+            </p>
+            <p className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums truncate">
+              {s.value}
+            </p>
+            {s.sub && (
+              <p className="mt-1 text-xs text-muted-foreground truncate">{s.sub}</p>
+            )}
+          </motion.div>
+        ))}
       </div>
     </section>
   );
