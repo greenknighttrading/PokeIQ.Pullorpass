@@ -73,6 +73,13 @@ const detailCache = new Map<string, FullDetails>();
 const historyCache = new Map<string, HistoryStats>();
 const likedCache = new Map<string, boolean>();
 
+const cleanLookupName = (value: string) =>
+  value
+    .replace(/\s*\([^)]*\)\s*/g, ' ')
+    .replace(/\s+-\s+[A-Z0-9/]+$/i, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
   if (detailCache.has(seed.card_id)) return detailCache.get(seed.card_id)!;
 
@@ -188,6 +195,42 @@ async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
       }
     } catch (e) {
       console.warn('PPT API artist fallback failed', e);
+    }
+  }
+
+  // Pokémon TCG API fallback for illustrator/artist. PPT often has price data
+  // but returns `artist: null` for older e-Reader/ex-era cards.
+  if (!base.artist) {
+    try {
+      const { data: tcgRes } = await supabase.functions.invoke('pokemon-tcg', {
+        body: {
+          action: 'searchBySetAndName',
+          query: JSON.stringify({ cardName: cleanLookupName(seed.card_name), setName: base.set_name ?? seed.set_name ?? '' }),
+          pageSize: 10,
+        },
+      });
+      const list: any[] = Array.isArray(tcgRes?.data) ? tcgRes.data : [];
+      const norm = (s?: string | null) => (s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+      const wantSet = norm(base.set_name ?? seed.set_name);
+      const wantName = norm(cleanLookupName(seed.card_name));
+      const wantNum = norm(base.card_number);
+      let best = list.find((c) =>
+        norm(c.set?.name) === wantSet &&
+        (!wantNum || norm(c.number) === wantNum) &&
+        norm(c.name) === wantName
+      );
+      if (!best && wantSet) best = list.find((c) => norm(c.set?.name) === wantSet && norm(c.name) === wantName);
+      if (!best) best = list.find((c) => norm(c.name) === wantName);
+      if (!best) best = list.find((c) => c.artist);
+      if (best) {
+        base.artist = best.artist || null;
+        base.card_number = base.card_number ?? best.number ?? null;
+        base.rarity = base.rarity ?? best.rarity ?? null;
+        base.set_name = base.set_name ?? best.set?.name ?? null;
+        base.image_url = base.image_url ?? best.images?.large ?? best.images?.small ?? null;
+      }
+    } catch (e) {
+      console.warn('Pokemon TCG artist fallback failed', e);
     }
   }
 
