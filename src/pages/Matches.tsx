@@ -76,7 +76,7 @@ export default function Matches() {
           )}
 
           {!loading && userId && (
-            <div className="space-y-16 sm:space-y-20">
+            <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} />
               {likes.length > 0 && <RecentlyLiked likes={likes} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
@@ -341,14 +341,19 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
         <div className="flex gap-2 mb-3 overflow-x-auto pb-1 -mx-5 px-5 sm:-mx-8 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {FACETS.map((f) => {
             const active = facet === f.key;
+            const isType = f.key === 'type';
             return (
               <button
                 key={f.key}
                 onClick={() => { setFacet(f.key); setValue(''); }}
                 className={`shrink-0 text-sm px-4 py-2 rounded-full border transition-all inline-flex items-center gap-1.5 font-medium ${
                   active
-                    ? 'bg-primary text-primary-foreground border-primary shadow-md'
-                    : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
+                    ? isType
+                      ? 'bg-red-500 text-white border-red-500 shadow-md'
+                      : 'bg-primary text-primary-foreground border-primary shadow-md'
+                    : isType
+                      ? 'bg-red-500/10 text-red-400 border-red-500/40 hover:text-red-300 hover:border-red-500/70'
+                      : 'bg-card text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
                 }`}
               >
                 {f.icon}{f.label}
@@ -362,14 +367,19 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
         <div className="flex gap-2 mb-5 overflow-x-auto pb-2 -mx-5 px-5 sm:-mx-8 sm:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {facetOptions.map((o) => {
             const active = value === o.key;
+            const isType = facet === 'type';
             return (
               <button
                 key={o.key}
                 onClick={() => setValue(active ? '' : o.key)}
                 className={`shrink-0 text-sm px-4 py-2 rounded-full border transition-all font-medium ${
                   active
-                    ? 'bg-primary text-primary-foreground border-primary shadow-md'
-                    : 'bg-background/40 text-foreground/85 border-border hover:border-primary/40'
+                    ? isType
+                      ? 'bg-red-500 text-white border-red-500 shadow-md'
+                      : 'bg-primary text-primary-foreground border-primary shadow-md'
+                    : isType
+                      ? 'bg-red-500/10 text-red-400 border-red-500/40 hover:border-red-500/70'
+                      : 'bg-background/40 text-foreground/85 border-border hover:border-primary/40'
                 }`}
               >
                 {labelFor(o.key)} <span className="tabular-nums opacity-70 ml-1">{o.count}</span>
@@ -392,7 +402,7 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
         </Card>
       ) : (
         <div className="relative">
-          <div className="relative rounded-3xl p-4 sm:p-8 shadow-2xl border border-border/60"
+          <div className="relative rounded-3xl p-3 sm:p-4 shadow-2xl border border-border/60"
                style={{ background: 'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)/0.6) 100%)', perspective: '1800px' }}>
             <div className="hidden sm:block absolute top-3 bottom-3 left-1/2 -translate-x-1/2 w-2 rounded-full bg-gradient-to-b from-border/40 via-border to-border/40 shadow-inner pointer-events-none z-10" />
             <AnimatePresence mode="wait" custom={dir}>
@@ -402,7 +412,7 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
                 animate={{ rotateY: 0, opacity: 1 }}
                 exit={{ rotateY: dir === 1 ? -35 : 35, opacity: 0 }}
                 transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-7"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                 style={{ transformStyle: 'preserve-3d' }}
               >
                 <BinderPage cards={leftCards} pageNumber={spread * 2 + 1} side="left" onOpen={onOpen} />
@@ -430,12 +440,12 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
 function BinderPage({ cards, pageNumber, side, onOpen }: { cards: LikedCard[]; pageNumber: number; side: 'left' | 'right'; onOpen: (s: CardDetailSeed) => void }) {
   const slots = Array.from({ length: CARDS_PER_PAGE }, (_, i) => cards[i] ?? null);
   return (
-    <div className="relative rounded-2xl p-3 sm:p-4 bg-background/60 ring-1 ring-border/50 shadow-inner"
+    <div className="relative rounded-2xl p-2 sm:p-2.5 bg-background/60 ring-1 ring-border/50 shadow-inner"
          style={{ backgroundImage: 'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
-      <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
         {slots.map((c, i) => <BinderSlot key={c?.id ?? `empty-${pageNumber}-${i}`} like={c} onOpen={onOpen} />)}
       </div>
-      <p className={`text-[10px] text-muted-foreground tabular-nums mt-2.5 ${side === 'left' ? 'text-left' : 'text-right'}`}>Page {pageNumber}</p>
+      <p className={`text-[10px] text-muted-foreground tabular-nums mt-1.5 ${side === 'left' ? 'text-left' : 'text-right'}`}>Page {pageNumber}</p>
     </div>
   );
 }
