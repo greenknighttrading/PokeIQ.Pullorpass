@@ -155,6 +155,42 @@ async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
     } catch {/* noop */}
   }
 
+  // Live PPT API fallback — our local cards_ppt mirror is missing artists
+  // for most cards, so hit the edge function to pull the canonical record.
+  if (!base.artist || !base.card_number || !base.pokemon_type) {
+    try {
+      const { data: pptRes } = await supabase.functions.invoke('pokemon-price-tracker', {
+        body: {
+          action: 'searchCards',
+          params: { search: seed.card_name, limit: 10, language: 'english' },
+        },
+      });
+      const list: any[] = Array.isArray(pptRes?.data) ? pptRes.data : [];
+      // Best match: same set name (case-insensitive), then same card number if known
+      const norm = (s?: string | null) => (s ?? '').toLowerCase().trim();
+      const wantSet = norm(base.set_name);
+      const wantNum = norm(base.card_number);
+      let best = list.find((c) =>
+        norm(c.setName) === wantSet &&
+        (!wantNum || norm(c.cardNumber) === wantNum)
+      );
+      if (!best && wantSet) best = list.find((c) => norm(c.setName) === wantSet);
+      if (!best) best = list.find((c) => norm(c.name) === norm(seed.card_name));
+      if (!best) best = list[0];
+      if (best) {
+        base.artist = base.artist ?? best.artist ?? null;
+        base.card_number = base.card_number ?? best.cardNumber ?? null;
+        base.rarity = base.rarity ?? best.rarity ?? null;
+        base.pokemon_type = base.pokemon_type ?? (Array.isArray(best.pokemonType) ? best.pokemonType[0] : best.pokemonType) ?? null;
+        base.image_url = base.image_url ?? best.imageCdnUrl400 ?? best.imageCdnUrl ?? null;
+        base.set_name = base.set_name ?? best.setName ?? null;
+        base.tcgplayer_id = base.tcgplayer_id ?? best.tcgPlayerId ?? null;
+      }
+    } catch (e) {
+      console.warn('PPT API artist fallback failed', e);
+    }
+  }
+
   // Release year from sets_ppt
   if (base.set_name && !base.release_year) {
     try {
