@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Heart, Sparkles, ArrowLeft, ImageOff, LogIn, Lock, Trophy, X, Star, ArrowRight, ChevronLeft, ChevronRight, Wand2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
@@ -35,6 +35,7 @@ export default function Matches() {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const [vibes, setVibes] = useState<{ tag: string; count: number }[]>([]);
   const [personalityType, setPersonalityType] = useState<string | null>(null);
+  const [recommendations, setRecommendations] = useState<Swipe[]>([]);
 
   useEffect(() => {
     try {
@@ -90,13 +91,38 @@ export default function Matches() {
         .sort((a, b) => b.count - a.count)
         .slice(0, 10);
       setVibes(topVibes);
+
+      // PokeIQ recommendations: cards other users pulled that share the user's top vibes,
+      // excluding cards this user has already swiped on.
+      const topTags = topVibes.slice(0, 5).map((v) => v.tag);
+      const swipedIds = new Set(((swipeRows as any[]) || []).map((s) => s.card_id));
+      if (topTags.length > 0) {
+        const { data: recs } = await supabase
+          .from('pullorpass_swipes')
+          .select('*')
+          .neq('user_id', session.user.id)
+          .eq('decision', 'pull')
+          .overlaps('tags', topTags)
+          .order('created_at', { ascending: false })
+          .limit(200);
+        const seen = new Set<string>();
+        const unique: Swipe[] = [];
+        for (const r of (recs as any[]) || []) {
+          if (!r.card_id || swipedIds.has(r.card_id) || seen.has(r.card_id)) continue;
+          seen.add(r.card_id);
+          unique.push(r as Swipe);
+          if (unique.length >= 20) break;
+        }
+        setRecommendations(unique);
+      }
       setLoading(false);
     })();
   }, []);
 
   // Segment swipes
+  // All "pulled" swipes now live in a single Likes binder (PokeIQ matches included, filterable).
   const matches = swipes.filter((s) => (s.tags || []).includes('Match'));
-  const likes   = swipes.filter((s) => s.decision === 'pull' && !(s.tags || []).includes('Match'));
+  const likes   = swipes.filter((s) => s.decision === 'pull');
   const passes  = swipes.filter((s) => s.decision === 'pass');
 
   // Aggregate aesthetic insights from matched cards
@@ -173,11 +199,17 @@ export default function Matches() {
 
           {!loading && userId && (
             <>
+              {/* PokeIQ recommendations banner */}
+              {recommendations.length > 0 && (
+                <RecommendationsBanner items={recommendations} />
+              )}
+
               {/* Aesthetic insights (always show what we have) */}
               {(matches.length > 0 || vibes.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
                   <Card className="p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Vibes you like today</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1">Your top vibes</p>
+                    <p className="text-[10px] text-muted-foreground mb-2">Aggregated across all your swipes &amp; reviews</p>
                     {vibes.length === 0 ? (
                       <p className="text-xs text-muted-foreground">Review more cards on Earn Credits to teach PokeIQ your taste</p>
                     ) : (
@@ -211,17 +243,8 @@ export default function Matches() {
                 </div>
               )}
 
-              {/* Matches → Likes → Passes */}
-              <BinderView items={matches} />
-              <Section
-                title="Likes"
-                subtitle="Cards you pulled or super-liked"
-                icon={<Heart className="w-4 h-4 text-primary fill-primary" />}
-                items={likes}
-                emptyText="No likes yet."
-                badge="like"
-                category="likes"
-              />
+              {/* Likes (binder, filterable — includes PokeIQ Matches) → Passes */}
+              <BinderView items={likes} vibes={vibes} />
               <Section
                 title="Passes"
                 subtitle="Cards that didn't speak to you"
@@ -236,6 +259,51 @@ export default function Matches() {
         </main>
       </div>
     </>
+  );
+}
+
+// ─────────────────────────────────────────────────────────
+// PokeIQ recommendations — horizontal scroll banner
+// ─────────────────────────────────────────────────────────
+function RecommendationsBanner({ items }: { items: Swipe[] }) {
+  return (
+    <section className="mb-5">
+      <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-4 shadow-lg">
+        <div className="flex items-center gap-2 mb-1">
+          <Wand2 className="w-4 h-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">PokeIQ thinks you'll like these</h2>
+        </div>
+        <p className="text-[11px] text-muted-foreground mb-3">
+          Hand-picked from your top vibes — cards other collectors with your taste love.
+        </p>
+        <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 [scrollbar-width:thin]">
+          {items.map((r) => <RecCard key={r.id} m={r} />)}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RecCard({ m }: { m: Swipe }) {
+  const [err, setErr] = useState(false);
+  return (
+    <motion.div
+      whileHover={{ y: -4, scale: 1.04 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="shrink-0 w-[110px] space-y-1.5"
+    >
+      <div className="relative aspect-[2.5/3.5] rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/30 shadow-md">
+        {m.card_image && !err ? (
+          <img src={m.card_image} alt={m.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
+        )}
+      </div>
+      <p className="text-[11px] text-foreground truncate font-medium">{m.card_name}</p>
+      <p className="text-[10px] text-muted-foreground truncate">
+        {m.card_set ?? '—'}{m.card_price ? ` · $${Number(m.card_price).toFixed(0)}` : ''}
+      </p>
+    </motion.div>
   );
 }
 
@@ -357,13 +425,35 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ items }: { items: Swipe[] }) {
+function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; count: number }[] }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
-  const totalSpreads = Math.max(1, Math.ceil(items.length / CARDS_PER_SPREAD));
+  const [filter, setFilter] = useState<string>('all'); // 'all' | 'match' | vibe tag
+
+  // Reset to first spread when filter changes
+  React.useEffect(() => { setSpread(0); setDir(1); }, [filter]);
+
+  const filtered = React.useMemo(() => {
+    if (filter === 'all') return items;
+    if (filter === 'match') return items.filter((s) => (s.tags || []).includes('Match'));
+    return items.filter((s) => (s.tags || []).includes(filter));
+  }, [items, filter]);
+
+  const matchCount = items.filter((s) => (s.tags || []).includes('Match')).length;
+  const filterChips: { key: string; label: string; count: number; isMatch?: boolean }[] = [
+    { key: 'all', label: 'All', count: items.length },
+    { key: 'match', label: 'PokeIQ Match', count: matchCount, isMatch: true },
+    ...vibes.slice(0, 6).map((v) => ({
+      key: v.tag,
+      label: v.tag,
+      count: items.filter((s) => (s.tags || []).includes(v.tag)).length,
+    })),
+  ].filter((c) => c.count > 0 || c.key === 'all');
+
+  const totalSpreads = Math.max(1, Math.ceil(filtered.length / CARDS_PER_SPREAD));
   const start = spread * CARDS_PER_SPREAD;
-  const leftCards = items.slice(start, start + CARDS_PER_PAGE);
-  const rightCards = items.slice(start + CARDS_PER_PAGE, start + CARDS_PER_SPREAD);
+  const leftCards = filtered.slice(start, start + CARDS_PER_PAGE);
+  const rightCards = filtered.slice(start + CARDS_PER_PAGE, start + CARDS_PER_SPREAD);
 
   const go = (delta: 1 | -1) => {
     setDir(delta);
@@ -374,19 +464,47 @@ function BinderView({ items }: { items: Swipe[] }) {
     <section className="mb-10">
       <div className="flex items-end justify-between mb-2 gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="text-base font-semibold text-foreground">Matches</h2>
-          <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
+          <Heart className="w-4 h-4 text-primary fill-primary" />
+          <h2 className="text-base font-semibold text-foreground">Likes</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">· {filtered.length}{filter !== 'all' ? ` of ${items.length}` : ''}</span>
         </div>
-        <Link to="/matches/matches" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+        <Link to="/matches/likes" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
           See all <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">Your matched cards, organized like a real binder. Flip through the pages.</p>
+      <p className="text-xs text-muted-foreground mb-3">Every card you pulled or super-liked — organized like a real binder. Filter by PokeIQ Match or by vibe.</p>
+
+      {/* Filter chips */}
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {filterChips.map((c) => {
+            const active = filter === c.key;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setFilter(c.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors inline-flex items-center gap-1 ${
+                  active
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
+                }`}
+              >
+                {c.isMatch && <Sparkles className="w-3 h-3" />}
+                {c.label}
+                <span className="tabular-nums opacity-70">· {c.count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <Card className="p-6 text-center text-xs text-muted-foreground">
-          No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste.
+          No likes yet. Start swiping to build your binder.
+        </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="p-6 text-center text-xs text-muted-foreground">
+          No cards match this filter yet.
         </Card>
       ) : (
         <div className="relative">
