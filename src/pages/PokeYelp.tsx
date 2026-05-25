@@ -193,6 +193,46 @@ export default function PokeYelp() {
       setTodaysRemaining(0);
     }
 
+    // === Liked cards next: anything the user pulled before, not yet reviewed ===
+    if (userId) {
+      const { data: liked } = await supabase
+        .from('pullorpass_swipes')
+        .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
+        .eq('user_id', userId)
+        .eq('decision', 'pull')
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      if (liked && liked.length) {
+        const likedIds = liked.map((r: any) => r.card_id).filter(Boolean);
+        const { data: revs } = await supabase
+          .from('pokeyelp_reviews')
+          .select('card_id')
+          .eq('user_id', userId)
+          .in('card_id', likedIds);
+        const reviewedIds = new Set((revs ?? []).map((r: any) => r.card_id));
+
+        const seen = new Set<string>();
+        const items: YelpCard[] = liked
+          .filter((r: any) => r.card_id && !reviewedIds.has(r.card_id) && !seen.has(r.card_id) && (seen.add(r.card_id), true))
+          .map((r: any) => ({
+            card_id: r.card_id,
+            name: r.card_name,
+            set_name: r.card_set ?? null,
+            image_url: r.card_image ?? null,
+            price: Number(r.card_price) || 0,
+            rarity: r.card_rarity ?? null,
+          }));
+
+        if (items.length > 0) {
+          setPool(items);
+          setIndex(0);
+          setLoading(false);
+          return;
+        }
+      }
+    }
+
     const minP = Number(minPrice) || 5;
     const maxP = Number(maxPrice) || 0;
     let q = supabase
