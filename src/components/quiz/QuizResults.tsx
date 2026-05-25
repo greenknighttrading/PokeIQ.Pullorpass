@@ -9,7 +9,7 @@ import {
 } from '@/lib/personalityEngine';
 import {
   PiggyBank, ScrollText, Heart, Zap, Calculator, Target,
-  Compass, LayoutGrid, Scale,
+  Compass, LayoutGrid, Mountain,
   Lock, TrendingUp, PieChart, BarChart3, ChevronRight,
   CheckCircle2, AlertCircle, AlertTriangle, Sparkles, ExternalLink,
   Dice5, Crown, Leaf,
@@ -36,7 +36,7 @@ const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: stri
   Hunter: Target,
   Explorer: Compass,
   Curator: LayoutGrid,
-  Diplomat: Scale,
+  Monk: Mountain,
   Gambler: Dice5,
   Showman: Crown,
   Minimalist: Leaf,

@@ -52,7 +52,7 @@ export type PersonalityType =
   | 'Hunter'
   | 'Explorer'
   | 'Curator'
-  | 'Diplomat'
+  | 'Monk'
   | 'Gambler'
   | 'Showman'
   | 'Minimalist';
@@ -303,26 +303,26 @@ export const PERSONALITY_INFO: Record<PersonalityType, PersonalityInfo> = {
       growthPath: 'The strongest Curators learn that the purpose of a collection is not just to look beautiful, but to be lived with and enjoyed.',
     },
   },
-  Diplomat: {
-    emoji: '\u2696\uFE0F',
-    philosophy: 'Balance survives.',
-    tagline: 'Diplomats are balanced, adaptable collectors who build resilient portfolios designed to weather every market mood the hobby throws at them.',
-    summary: "The Diplomat values flexibility, resilience, and diversification. You prefer balanced allocations, multiple eras, and multiple product types — and you rarely go all-in on a single strategy. You\u2019re built to weather every market mood.",
-    coreTraits: ['Balanced', 'Adaptable', 'Diversified', 'Stable'],
-    strength: 'Strong resilience across changing markets.',
-    weakness: 'Can struggle to fully commit to one direction.',
+  Monk: {
+    emoji: '⛪',
+    philosophy: 'Stillness reveals value.',
+    tagline: 'Monks are patient, balanced collectors who move deliberately, avoid extremes, and find quiet conviction in moderation and long-term harmony.',
+    summary: "The Monk values discipline, balance, and intentional patience. You avoid extremes, prefer steady accumulation, and trust that consistency over time outperforms dramatic bets. Your collection reflects inner calm — diversified, purposeful, and quietly resilient.",
+    coreTraits: ['Balanced', 'Patient', 'Disciplined', 'Steady'],
+    strength: 'Emotional steadiness and resilience across market cycles.',
+    weakness: 'Can hesitate too long before decisive action.',
     collectionStyle: ['Diversified holdings', 'Balanced allocations', 'Multi-era exposure'],
-    famousBehavior: 'Owns a little bit of everything.',
-    dangerZone: 'Spreading so thin no single position ever meaningfully wins.',
-    recommendedAction: 'Pick one era or product type to overweight slightly for the next 6 months.',
-    strengthLong: 'Strong resilience across changing markets. Diplomats are built to weather every market mood because they’re never fully exposed to a single trend.',
-    weaknessLong: 'Can struggle to fully commit to one direction, leaving the collection balanced but without any breakout positions.',
+    famousBehavior: 'Buys a little every month and never checks prices.',
+    dangerZone: 'Spreading so evenly that no position ever meaningfully wins.',
+    recommendedAction: 'Pick one high-conviction area to slightly overweight for the next 6 months.',
+    strengthLong: 'Emotional steadiness and resilience across market cycles. Monks are built to weather volatility because they never panic and never chase — they simply stay the course.',
+    weaknessLong: 'Can hesitate too long before decisive action, letting conviction fade into permanent deliberation.',
     fullProfile: {
-      coreIdentity: 'Diplomats are adaptable, balanced, and highly flexible collectors. Rather than committing fully to one philosophy, they naturally prefer diversification, moderation, and maintaining stability across multiple approaches.',
-      collectingMindset: 'People with this personality type are often comfortable navigating different parts of the hobby simultaneously. They may appreciate vintage while still enjoying modern, collect sealed while also enjoying raw cards, or balance emotional purchases alongside strategic ones.',
-      innerWorld: 'Diplomats rarely feel comfortable living at extremes. Instead, they value resilience and flexibility, preferring collections capable of adapting as the hobby changes over time.',
-      blindSpots: 'Because they can see value in many different approaches, Diplomats may hesitate to fully commit to one direction or feel stretched across too many interests at once.',
-      growthPath: 'The strongest Diplomats learn that balance is most powerful when it is paired with conviction.',
+      coreIdentity: 'Monks are contemplative, balanced collectors who find strength in restraint and clarity in moderation. Rather than chasing hype or swinging between extremes, they cultivate steady, intentional collections that grow quietly over time.',
+      collectingMindset: 'People with this personality type move deliberately. They appreciate multiple eras and product types not out of indecision, but from a genuine belief that balance itself is a form of conviction. They collect sealed alongside slabs, vintage alongside modern — not because they fear commitment, but because they see value everywhere and trust the long arc.',
+      innerWorld: 'Monks rarely feel swept up by market emotions. They experience a calm confidence that comes from knowing their collection is built to endure — not just the next trend, but the next decade. Their satisfaction comes from the process itself: steady accumulation, patient observation, and quiet refinement.',
+      blindSpots: 'Because they see merit in many approaches, Monks may delay bold moves, spread too thin, or let opportunities pass while seeking the perfect balance. Their patience is a gift, but it can become a waiting room with no exit.',
+      growthPath: 'The strongest Monks learn that balance without conviction is just hesitation wearing a mask — and that true harmony comes from pairing stillness with the courage to choose.',
     },
   },
   Gambler: {
@@ -419,7 +419,7 @@ function computeTraits(answers: Answers): TraitScores {
 }
 
 const TIE_BREAK_ORDER: PersonalityType[] = [
-  'Investor', 'Archivist', 'Curator', 'Diplomat', 'Minimalist',
+  'Investor', 'Archivist', 'Curator', 'Monk', 'Minimalist',
   'Analyst', 'Dreamer', 'Hunter', 'Explorer', 'Showman',
   'Flipper', 'Gambler',
 ];
@@ -435,7 +435,7 @@ function scoreType(t: TraitScores, type: PersonalityType): number {
     case 'Hunter':    return t.conviction * 1.3 + t.activity * 0.6 + inv(t.balance) * 0.7;
     case 'Explorer':  return t.curiosity * 1.3 + t.activity * 0.5 + inv(t.patience) * 0.4;
     case 'Curator':   return t.aesthetics * 1.2 + t.structure * 1.0 + t.emotion * 0.4;
-    case 'Diplomat':  return t.balance * 1.3 + t.patience * 0.5 + inv(t.conviction) * 0.5;
+    case 'Monk':      return t.balance * 1.3 + t.patience * 0.5 + inv(t.conviction) * 0.5;
     case 'Gambler':   return t.excitement * 1.5 + inv(t.patience) * 0.6 + inv(t.restraint) * 0.6 + t.activity * 0.3;
     case 'Showman':   return t.recognition * 1.4 + t.aesthetics * 0.5 + t.activity * 0.3;
     case 'Minimalist':return t.restraint * 1.4 + t.structure * 0.5 + inv(t.activity) * 0.5 + inv(t.excitement) * 0.4;
@@ -463,7 +463,7 @@ const PRODUCT_BASELINES: Record<PersonalityType, ProductAllocation> = {
   Hunter:    { sealedPct: 20, gradedPct: 60, rawPct: 20 },
   Explorer:  { sealedPct: 45, gradedPct: 20, rawPct: 35 },
   Curator:   { sealedPct: 25, gradedPct: 45, rawPct: 30 },
-  Diplomat:  { sealedPct: 35, gradedPct: 35, rawPct: 30 },
+  Monk:      { sealedPct: 35, gradedPct: 35, rawPct: 30 },
   Gambler:   { sealedPct: 60, gradedPct: 15, rawPct: 25 },
   Showman:   { sealedPct: 15, gradedPct: 70, rawPct: 15 },
   Minimalist:{ sealedPct: 20, gradedPct: 55, rawPct: 25 },
@@ -478,7 +478,7 @@ const ERA_BASELINES: Record<PersonalityType, EraAllocation> = {
   Hunter:    { vintage: 25, classic: 20, modern: 20, ultraModern: 25, current: 10 },
   Explorer:  { vintage: 5,  classic: 10, modern: 20, ultraModern: 40, current: 25 },
   Curator:   { vintage: 25, classic: 25, modern: 25, ultraModern: 20, current: 5 },
-  Diplomat:  { vintage: 20, classic: 20, modern: 20, ultraModern: 20, current: 20 },
+  Monk:      { vintage: 20, classic: 20, modern: 20, ultraModern: 20, current: 20 },
   Gambler:   { vintage: 5,  classic: 10, modern: 20, ultraModern: 35, current: 30 },
   Showman:   { vintage: 35, classic: 25, modern: 20, ultraModern: 15, current: 5 },
   Minimalist:{ vintage: 30, classic: 30, modern: 20, ultraModern: 15, current: 5 },

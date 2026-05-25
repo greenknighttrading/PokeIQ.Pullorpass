@@ -144,7 +144,7 @@ export function buildPortfolioReportHtml({
   // Map portfolio-derived archetype keys to the 9 PokeIQ personality profiles.
   const OLD_TO_NEW_TYPE: Record<string, PersonalityType> = {
     sentinel: 'Investor',
-    politician: 'Diplomat',
+    politician: 'Monk',
     purist: 'Dreamer',
     hustler: 'Flipper',
     archivist: 'Archivist',
@@ -1845,7 +1845,7 @@ export function buildPortfolioReportText({
 
   // Determine collector type
   // Match to one of the 9 PokeIQ collector personality profiles based on portfolio shape.
-  let collectorType = "The Diplomat";
+  let collectorType = "The Monk";
   if (sealed >= 50) collectorType = "The Investor";
   else if (slabs >= 50) collectorType = "The Archivist";
   else if (raw >= 50) collectorType = "The Dreamer";
