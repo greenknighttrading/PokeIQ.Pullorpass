@@ -13,7 +13,7 @@ import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
-import tasteHeroArt from '@/assets/taste-hero-art.png';
+import tasteHeroArt from '@/assets/taste-hero-art.jpg';
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
@@ -199,21 +199,21 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
           <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        {/* Art layer — right side, fades into the card on the left */}
-        <div className="absolute inset-y-0 right-0 w-full md:w-[55%] pointer-events-none">
+        {/* Art layer — fills the entire widget */}
+        <div className="absolute inset-0 pointer-events-none">
           <img
             src={tasteHeroArt}
             alt=""
             aria-hidden="true"
-            width={1280}
-            height={896}
+            width={1920}
+            height={1080}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover object-center opacity-60 md:opacity-90"
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Left-to-right fade so text stays readable */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/40 to-transparent" />
-          {/* Top/bottom polish */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
+          {/* Left-to-right dark fade so text stays readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/80 md:via-card/60 to-transparent" />
+          {/* Bottom vignette for polish */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card/70 via-transparent to-card/20" />
         </div>
 
         <div className="relative p-8 sm:p-12 md:max-w-[58%]">
