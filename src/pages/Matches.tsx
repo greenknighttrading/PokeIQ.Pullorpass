@@ -320,7 +320,7 @@ function RecentlyLiked({ likes, onOpen }: { likes: LikedCard[]; onOpen: (s: Card
         </div>
         <p className="text-sm text-muted-foreground mt-1">The latest cards that caught your eye.</p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 -mx-5 px-5 sm:-mx-8 sm:px-8 snap-x [scrollbar-width:thin]">
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:thin]">
         {recent.map((c) => <RecentCard key={c.id} like={c} onOpen={onOpen} />)}
       </div>
     </section>
