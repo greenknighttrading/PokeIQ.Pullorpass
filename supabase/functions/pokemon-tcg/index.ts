@@ -45,6 +45,14 @@ function escapeQueryValue(value: string) {
   return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
+function nameQuery(value: string) {
+  const cleaned = value.trim();
+  if (!cleaned) return "";
+  return cleaned.includes(" ")
+    ? `name:\"${escapeQueryValue(cleaned)}\"`
+    : `name:${escapeQueryValue(cleaned)}*`;
+}
+
 // deno-lint-ignore no-explicit-any
 async function pokemonTcgFetch<T = any>(path: string, timeoutMs = 12000): Promise<T> {
   const apiKey = Deno.env.get("POKEMON_TCG_API_KEY");
@@ -145,7 +153,7 @@ serve(async (req) => {
         if (q.length < 2) return json({ data: [], totalCount: 0 });
 
         const params = new URLSearchParams({
-          q: `name:\"${escapeQueryValue(q)}\"*`,
+          q: nameQuery(q),
           pageSize: String(Math.min(pageSize, 50)),
           page: String(page),
           orderBy: "name",
@@ -195,7 +203,7 @@ serve(async (req) => {
         if (cardName.length < 2 && setName.length < 2) return json({ data: [], totalCount: 0 });
 
         const searchParts: string[] = [];
-        if (cardName) searchParts.push(`name:\"${escapeQueryValue(cardName)}\"*`);
+        if (cardName) searchParts.push(nameQuery(cardName));
         if (setName) searchParts.push(`set.name:\"${escapeQueryValue(setName)}\"`);
         const params = new URLSearchParams({
           q: searchParts.join(" "),
