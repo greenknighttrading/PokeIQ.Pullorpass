@@ -147,7 +147,10 @@ export default function Matches() {
               <h1 className="text-2xl font-bold text-foreground">Your Matches</h1>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
-              What you naturally love — your evolving Taste Profile.
+              What you naturally love — your evolving taste profile. PokeIQ learns more about you with every swipe.{' '}
+              <Link to="/earn" className="text-primary hover:underline font-medium">
+                Earn more swipes to help train the AI →
+              </Link>
             </p>
           </div>
 
@@ -170,95 +173,11 @@ export default function Matches() {
 
           {!loading && userId && (
             <>
-              {/* Aesthetic profile progress */}
-              <Card className={`p-5 mb-5 ${profileUnlocked ? 'border-amber-400/40 bg-amber-400/5' : 'border-primary/30 bg-primary/5'}`}>
-                <div className="flex items-start gap-4">
-                  {profileUnlocked ? <Trophy className="w-8 h-8 text-amber-400 flex-shrink-0" /> : <Sparkles className="w-8 h-8 text-primary flex-shrink-0" />}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                      Taste Profile · What You Naturally Love
-                    </p>
-                    <h3 className="text-base font-bold text-foreground">
-                      {profileUnlocked ? 'PokeIQ is learning your eye' : 'Your Taste Profile'}
-                    </h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {profileUnlocked
-                        ? "This is what your eye keeps gravitating toward. It evolves with every swipe — never locked, never static."
-                        : `Swipe ${remainingToProfile} more cards to unlock your Taste Profile — the descriptors, sets, and price tier PokeIQ is learning about your eye.`}
-                    </p>
-                    <div className="mt-3 h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        className={`h-full ${profileUnlocked ? 'bg-amber-400' : 'bg-primary'}`}
-                        initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, (swipeCount / PROFILE_GOAL) * 100)}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                      />
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-1 tabular-nums">
-                      {swipeCount} / {PROFILE_GOAL} cards swiped
-                    </p>
-                  </div>
-                </div>
-
-                {tasteProfile && (
-                  <div className="mt-5 pt-5 border-t border-amber-400/20 space-y-4">
-                    <div>
-                      <h4 className="text-xl font-semibold text-foreground leading-snug">
-                        {tasteProfile.headline}
-                      </h4>
-                      {tasteProfile.descriptors.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-3">
-                          {tasteProfile.descriptors.map((d, i) => (
-                            <Badge
-                              key={d}
-                              variant={i < 2 ? 'default' : 'secondary'}
-                              className="text-[11px]"
-                            >
-                              {d}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="text-sm text-foreground/90 leading-relaxed space-y-2">
-                      {tasteProfile.paragraphs.map((p, i) => (
-                        <p key={i}>{p}</p>
-                      ))}
-                      <p className="text-xs text-muted-foreground pt-1">
-                        Across <span className="font-semibold text-foreground tabular-nums">{swipes.length}</span> cards, PokeIQ has matched you on{' '}
-                        <span className="font-semibold text-primary tabular-nums">{matches.length}</span> ({matchRate}% match rate).
-                      </p>
-                    </div>
-
-                    {tasteProfile.insights.length > 0 && (
-                      <div className="rounded-lg border border-amber-400/30 bg-amber-400/5 p-3 space-y-1.5">
-                        <p className="text-[10px] uppercase tracking-wider text-amber-400/80 font-semibold">
-                          {personalityType ? 'Personality vs. Taste' : 'What stands out'}
-                        </p>
-                        {tasteProfile.insights.map((line, i) => (
-                          <p key={i} className="text-sm text-foreground/90 leading-relaxed">
-                            {line}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-
-                    {personalityType && (
-                      <p className="text-[11px] text-muted-foreground pt-1">
-                        Together with your <span className="text-foreground font-medium">{personalityType}</span> personality
-                        ("how you collect"), this forms your full PokeIQ Profile.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </Card>
-
               {/* Aesthetic insights (always show what we have) */}
               {(matches.length > 0 || vibes.length > 0) && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
                   <Card className="p-4">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Tags your eye picks up</p>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-2">Vibes you like today</p>
                     {vibes.length === 0 ? (
                       <p className="text-xs text-muted-foreground">Review more cards on Earn Credits to teach PokeIQ your taste</p>
                     ) : (
