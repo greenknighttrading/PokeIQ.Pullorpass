@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
 import { saveLike } from '@/lib/likesService';
+import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
@@ -97,6 +98,7 @@ export default function PullOrPass() {
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
 
   // DEV: grant Pro membership for testing (unlimited swipes on this device).
   useEffect(() => {
@@ -565,7 +567,24 @@ export default function PullOrPass() {
                 </div>
 
                 <div className="text-center">
-                  <h2 className="text-base font-semibold text-foreground leading-tight">{current.name}</h2>
+                  <button
+                    type="button"
+                    onClick={() => setDetailSeed({
+                      card_id: current.card_id,
+                      card_name: current.name,
+                      set_name: current.set_name,
+                      image_url: current.image_url,
+                      price: current.price,
+                      rarity: current.rarity,
+                    })}
+                    className="text-center hover:text-primary transition-colors group"
+                    aria-label="View card details"
+                  >
+                    <h2 className="text-base font-semibold text-foreground leading-tight group-hover:text-primary inline-flex items-center gap-1">
+                      {current.name}
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground group-hover:text-primary font-normal">· details</span>
+                    </h2>
+                  </button>
                   <p className="text-xs text-muted-foreground">
                     {current.set_name ?? 'Unknown set'} · ${current.price.toFixed(2)}
                     {current.rarity && ` · ${current.rarity}`}
@@ -626,6 +645,7 @@ export default function PullOrPass() {
             <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth')} />
           )}
         </AnimatePresence>
+        <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
       </div>
     </>
   );
