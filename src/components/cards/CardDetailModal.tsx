@@ -55,6 +55,9 @@ interface HistoryStats {
   history: HistoryPoint[];
   allTimeHigh: number | null;
   allTimeLow: number | null;
+  number: string | null;
+  rarity: string | null;
+  set_name: string | null;
 }
 
 // In-memory caches — survive between opens within a session.
