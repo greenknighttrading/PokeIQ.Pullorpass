@@ -58,6 +58,14 @@ interface HistoryStats {
   number: string | null;
   rarity: string | null;
   set_name: string | null;
+  // Current market price from JustTCG (same source as the history)
+  price: number | null;
+  priceChange7d: number | null;
+  priceChange30d: number | null;
+  priceChange90d: number | null;
+  lastUpdated: string | null;
+  variant: string | null;
+  condition: string | null;
 }
 
 // In-memory caches — survive between opens within a session.
@@ -170,7 +178,12 @@ async function fetchFullDetails(seed: CardDetailSeed): Promise<FullDetails> {
 
 async function fetchHistory(cardId: string): Promise<HistoryStats> {
   if (historyCache.has(cardId)) return historyCache.get(cardId)!;
-  const result: HistoryStats = { history: [], allTimeHigh: null, allTimeLow: null, number: null, rarity: null, set_name: null };
+  const result: HistoryStats = {
+    history: [], allTimeHigh: null, allTimeLow: null,
+    number: null, rarity: null, set_name: null,
+    price: null, priceChange7d: null, priceChange30d: null, priceChange90d: null,
+    lastUpdated: null, variant: null, condition: null,
+  };
   try {
     const { data } = await supabase.functions.invoke('justtcg', {
       body: { action: 'getCard', cardId, game: 'pokemon' },
@@ -192,11 +205,35 @@ async function fetchHistory(cardId: string): Promise<HistoryStats> {
         if (history.length) result.history = history;
         result.allTimeHigh = best.maxPriceAllTime ?? best.maxPrice1y ?? null;
         result.allTimeLow = best.minPriceAllTime ?? best.minPrice1y ?? null;
+        result.price = best.price ?? best.marketPrice ?? null;
+        result.priceChange7d = (best.priceChange7d ?? best.priceChange1w) ?? null;
+        result.priceChange30d = (best.priceChange30d ?? best.priceChange1m) ?? null;
+        result.priceChange90d = (best.priceChange90d ?? best.priceChange3m) ?? null;
+        result.lastUpdated = best.lastUpdated ?? best.priceLastUpdated ?? null;
+        result.variant = best.printing ?? best.variant ?? null;
+        result.condition = best.condition ?? null;
       }
       if (result.history.length && (result.allTimeHigh == null || result.allTimeLow == null)) {
         const prices = result.history.map((p) => p.p);
         result.allTimeHigh = result.allTimeHigh ?? Math.max(...prices);
         result.allTimeLow = result.allTimeLow ?? Math.min(...prices);
+      }
+      // Derive % changes from history if API didn't supply them
+      if (result.history.length > 1) {
+        const sorted = [...result.history].sort((a, b) => a.t - b.t);
+        const last = sorted[sorted.length - 1];
+        const findChange = (days: number) => {
+          const targetT = last.t - days * 86400 * 1000;
+          // Find the closest point at/before targetT
+          let prev = sorted[0];
+          for (const pt of sorted) { if (pt.t <= targetT) prev = pt; else break; }
+          if (!prev || !prev.p) return null;
+          return ((last.p - prev.p) / prev.p) * 100;
+        };
+        if (result.price == null) result.price = last.p;
+        if (result.priceChange7d == null) result.priceChange7d = findChange(7);
+        if (result.priceChange30d == null) result.priceChange30d = findChange(30);
+        if (result.priceChange90d == null) result.priceChange90d = findChange(90);
       }
     }
   } catch (e) {
@@ -288,11 +325,21 @@ export function CardDetailModal({
   // Merge JustTCG card-level metadata into details for display
   const display = useMemo(() => {
     if (!details) return null;
+    // Prefer JustTCG (same source as price history) for current price + changes
+    // so the headline number is consistent with the chart below.
+    const jtPrice = history?.price ?? null;
     return {
       ...details,
       card_number: details.card_number ?? history?.number ?? null,
       rarity: details.rarity ?? history?.rarity ?? null,
       set_name: details.set_name ?? history?.set_name ?? null,
+      price: jtPrice ?? details.price,
+      price_change_7d: history?.priceChange7d ?? details.price_change_7d,
+      price_change_30d: history?.priceChange30d ?? details.price_change_30d,
+      price_change_90d: history?.priceChange90d ?? details.price_change_90d,
+      snapshot_date: history?.lastUpdated ?? details.snapshot_date,
+      variant: history?.variant ?? details.variant,
+      priceSource: jtPrice != null ? 'JustTCG' : (details.price != null ? 'Market snapshot' : null),
     };
   }, [details, history]);
 
@@ -422,24 +469,27 @@ export function CardDetailModal({
               {/* Price snapshot */}
               <div className="rounded-xl border border-border/60 bg-background/40 p-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Market price</p>
-                  {details?.snapshot_date && (
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Market price{display?.priceSource ? ` · ${display.priceSource}` : ''}
+                    {history?.condition ? ` · ${history.condition}` : ''}
+                  </p>
+                  {(display?.snapshot_date) && (
                     <p className="text-[10px] text-muted-foreground">
-                      Updated {new Date(details.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      Updated {new Date(display.snapshot_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </p>
                   )}
                 </div>
                 <div className="flex items-baseline gap-2">
-                  {details?.price != null ? (
-                    <p className="text-2xl font-bold text-foreground tabular-nums">${details.price.toFixed(2)}</p>
+                  {display?.price != null ? (
+                    <p className="text-2xl font-bold text-foreground tabular-nums">${display.price.toFixed(2)}</p>
                   ) : (
                     <Skeleton className="h-7 w-24" />
                   )}
                 </div>
                 <div className="grid grid-cols-3 gap-2 pt-1">
-                  <ChangeStat label="7D"  value={details?.price_change_7d} loading={!details} />
-                  <ChangeStat label="30D" value={details?.price_change_30d} loading={!details} />
-                  <ChangeStat label="90D" value={details?.price_change_90d} loading={!details} />
+                  <ChangeStat label="7D"  value={display?.price_change_7d} loading={!details} />
+                  <ChangeStat label="30D" value={display?.price_change_30d} loading={!details} />
+                  <ChangeStat label="90D" value={display?.price_change_90d} loading={!details} />
                 </div>
                 {details && (details.max_price_30d != null || details.min_price_30d != null || history?.allTimeHigh != null || history?.allTimeLow != null) && (
                   <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
