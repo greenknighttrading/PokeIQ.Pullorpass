@@ -13,6 +13,7 @@ import {
 } from '@/lib/pullorpass';
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
+import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
@@ -92,6 +93,7 @@ export default function PullOrPass() {
   const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
   const [matchCount, setMatchCount] = useState(0);
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
+  const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
 
@@ -373,7 +375,6 @@ export default function PullOrPass() {
     const pulledCard = current;
     if (matched) {
       setMatchCount((c) => c + 1);
-      // Persist record immediately but DO NOT advance until user dismisses overlay.
       const rec: SwipeRecord = { card: pulledCard, decision: 'pull', tags: ['Match'] };
       const newRecords = [...records, rec];
       setRecords(newRecords);
@@ -392,9 +393,31 @@ export default function PullOrPass() {
           tags: rec.tags,
         }).then(({ error }) => { if (error) console.error('swipe insert', error); });
       }
-      window.setTimeout(() => setMatchCard(pulledCard), 450);
-      // Queue the advance for dismissal
-      setPendingMatchAdvance(() => () => {
+
+      // First match of the day → full celebratory overlay (tutorial moment).
+      // Subsequent matches → lightweight, non-blocking pulse so flow keeps moving.
+      const FIRST_MATCH_KEY = 'pop_first_match_date';
+      let isFirstToday = false;
+      try {
+        isFirstToday = localStorage.getItem(FIRST_MATCH_KEY) !== todayKey();
+        if (isFirstToday) localStorage.setItem(FIRST_MATCH_KEY, todayKey());
+      } catch {}
+
+      if (isFirstToday) {
+        window.setTimeout(() => setMatchCard(pulledCard), 450);
+        setPendingMatchAdvance(() => () => {
+          if (index + 1 >= cards.length) {
+            finalizeRound(newRecords);
+          } else {
+            setIndex(index + 1);
+            setImgError(false);
+            setExitDir(null);
+          }
+        });
+      } else {
+        // Quick microinteraction; advance immediately so swiping stays fast.
+        setMatchPulse({ key: Date.now() });
+        window.setTimeout(() => setMatchPulse(null), 900);
         if (index + 1 >= cards.length) {
           finalizeRound(newRecords);
         } else {
@@ -402,7 +425,7 @@ export default function PullOrPass() {
           setImgError(false);
           setExitDir(null);
         }
-      });
+      }
     } else {
       recordSwipe({ card: pulledCard, decision: 'pull', tags: [] });
     }
@@ -447,6 +470,7 @@ export default function PullOrPass() {
 
         <main className={`flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto' : ''}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
+          <MatchPulse event={matchPulse} />
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
