@@ -13,7 +13,7 @@ import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
-import tasteHeroArt from '@/assets/taste-hero-art.png';
+import tasteHeroArt from '@/assets/taste-hero-art.jpg';
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
