@@ -76,7 +76,7 @@ export default function Matches() {
           )}
 
           {!loading && userId && (
-            <div className="space-y-16 sm:space-y-20">
+            <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} />
               {likes.length > 0 && <RecentlyLiked likes={likes} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
