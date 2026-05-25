@@ -370,11 +370,13 @@ export default function PokeYelp() {
       grantSwipeBonus(SWIPES_PER_BATCH);
       toast.success(`+${SWIPES_PER_BATCH} PullOrPass swipes unlocked!`, {
         description: `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
+        position: 'top-center',
       });
     } else {
       const toNext = REVIEWS_PER_SWIPE_BATCH - (lifetime % REVIEWS_PER_SWIPE_BATCH);
       toast.success('Review saved — PokeIQ just got smarter', {
         description: `${toNext} more to unlock +${SWIPES_PER_BATCH} swipes.`,
+        position: 'top-center',
       });
     }
 
@@ -383,6 +385,7 @@ export default function PokeYelp() {
       grantPremium(PREMIUM_DAYS);
       toast.success(`🎉 PokeIQ Premium unlocked — ${PREMIUM_DAYS} days!`, {
         description: 'Unlimited swipes and premium features are now active.',
+        position: 'top-center',
       });
     }
     if (todaysMode) {
@@ -718,7 +721,7 @@ export default function PokeYelp() {
                   </Button>
                   <Button onClick={submit} className="flex-[2] gap-1.5">
                     <Sparkles className="w-4 h-4" />
-                    Train PokeIQ
+                    Submit
                   </Button>
                 </div>
 
