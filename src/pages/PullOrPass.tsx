@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
+import { saveLike } from '@/lib/likesService';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
