@@ -443,7 +443,7 @@ function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; co
   const filterChips: { key: string; label: string; count: number; isMatch?: boolean }[] = [
     { key: 'all', label: 'All', count: items.length },
     { key: 'match', label: 'PokeIQ Match', count: matchCount, isMatch: true },
-    ...vibes.slice(0, 6).map((v) => ({
+    ...vibes.map((v) => ({
       key: v.tag,
       label: v.tag,
       count: items.filter((s) => (s.tags || []).includes(v.tag)).length,
