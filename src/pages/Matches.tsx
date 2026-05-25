@@ -425,13 +425,35 @@ function SwipeThumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ items }: { items: Swipe[] }) {
+function BinderView({ items, vibes }: { items: Swipe[]; vibes: { tag: string; count: number }[] }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
-  const totalSpreads = Math.max(1, Math.ceil(items.length / CARDS_PER_SPREAD));
+  const [filter, setFilter] = useState<string>('all'); // 'all' | 'match' | vibe tag
+
+  // Reset to first spread when filter changes
+  React.useEffect(() => { setSpread(0); setDir(1); }, [filter]);
+
+  const filtered = React.useMemo(() => {
+    if (filter === 'all') return items;
+    if (filter === 'match') return items.filter((s) => (s.tags || []).includes('Match'));
+    return items.filter((s) => (s.tags || []).includes(filter));
+  }, [items, filter]);
+
+  const matchCount = items.filter((s) => (s.tags || []).includes('Match')).length;
+  const filterChips: { key: string; label: string; count: number; isMatch?: boolean }[] = [
+    { key: 'all', label: 'All', count: items.length },
+    { key: 'match', label: 'PokeIQ Match', count: matchCount, isMatch: true },
+    ...vibes.slice(0, 6).map((v) => ({
+      key: v.tag,
+      label: v.tag,
+      count: items.filter((s) => (s.tags || []).includes(v.tag)).length,
+    })),
+  ].filter((c) => c.count > 0 || c.key === 'all');
+
+  const totalSpreads = Math.max(1, Math.ceil(filtered.length / CARDS_PER_SPREAD));
   const start = spread * CARDS_PER_SPREAD;
-  const leftCards = items.slice(start, start + CARDS_PER_PAGE);
-  const rightCards = items.slice(start + CARDS_PER_PAGE, start + CARDS_PER_SPREAD);
+  const leftCards = filtered.slice(start, start + CARDS_PER_PAGE);
+  const rightCards = filtered.slice(start + CARDS_PER_PAGE, start + CARDS_PER_SPREAD);
 
   const go = (delta: 1 | -1) => {
     setDir(delta);
@@ -442,19 +464,47 @@ function BinderView({ items }: { items: Swipe[] }) {
     <section className="mb-10">
       <div className="flex items-end justify-between mb-2 gap-3">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="text-base font-semibold text-foreground">Matches</h2>
-          <span className="text-xs text-muted-foreground tabular-nums">· {items.length}</span>
+          <Heart className="w-4 h-4 text-primary fill-primary" />
+          <h2 className="text-base font-semibold text-foreground">Likes</h2>
+          <span className="text-xs text-muted-foreground tabular-nums">· {filtered.length}{filter !== 'all' ? ` of ${items.length}` : ''}</span>
         </div>
-        <Link to="/matches/matches" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+        <Link to="/matches/likes" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
           See all <ArrowRight className="w-3 h-3" />
         </Link>
       </div>
-      <p className="text-xs text-muted-foreground mb-3">Your matched cards, organized like a real binder. Flip through the pages.</p>
+      <p className="text-xs text-muted-foreground mb-3">Every card you pulled or super-liked — organized like a real binder. Filter by PokeIQ Match or by vibe.</p>
+
+      {/* Filter chips */}
+      {items.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {filterChips.map((c) => {
+            const active = filter === c.key;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setFilter(c.key)}
+                className={`text-[11px] px-2.5 py-1 rounded-full border transition-colors inline-flex items-center gap-1 ${
+                  active
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-background text-muted-foreground border-border hover:text-foreground hover:border-primary/40'
+                }`}
+              >
+                {c.isMatch && <Sparkles className="w-3 h-3" />}
+                {c.label}
+                <span className="tabular-nums opacity-70">· {c.count}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <Card className="p-6 text-center text-xs text-muted-foreground">
-          No matches yet. Keep swiping — PokeIQ surfaces a match when it spots a pattern in your taste.
+          No likes yet. Start swiping to build your binder.
+        </Card>
+      ) : filtered.length === 0 ? (
+        <Card className="p-6 text-center text-xs text-muted-foreground">
+          No cards match this filter yet.
         </Card>
       ) : (
         <div className="relative">
