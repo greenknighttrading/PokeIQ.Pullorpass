@@ -16,7 +16,7 @@ import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
 import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
-import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight } from 'lucide-react';
+import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infinity as InfinityIcon, Zap, BarChart3, Library } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 
@@ -655,6 +655,8 @@ export default function PullOrPass() {
               isAuthed={!!userId}
               onSignUp={() => navigate('/auth')}
               outOfSwipes={outOfSwipes}
+              premium={premium}
+              remaining={remaining}
             />
           )}
         </main>
@@ -964,12 +966,16 @@ function ResultsView({
   isAuthed,
   onSignUp,
   outOfSwipes,
+  premium,
+  remaining,
 }: {
   records: SwipeRecord[];
   onPlayAgain: () => void;
   isAuthed: boolean;
   onSignUp: () => void;
   outOfSwipes?: boolean;
+  premium?: boolean;
+  remaining?: number;
 }) {
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
@@ -1187,8 +1193,122 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 4: Binder hero (matches reference mockup) ─── */}
+      {/* ── SECTION 4: Binder hero (guests) OR Your Collection Awaits (authed) ─── */}
       <motion.section {...fadeUp}>
+        {isAuthed ? (
+          <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
+            <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-center">
+              {/* Left: layered profile + binder + matches previews */}
+              <div className="relative h-[280px] sm:h-[340px]">
+                {/* Profile preview card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.05 }}
+                  className="absolute left-0 top-0 w-[55%] rounded-xl border border-white/10 bg-zinc-950/90 p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Your Profile</p>
+                      <p className="text-sm font-bold text-foreground truncate">{displayArchetype}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {tagList.slice(0, 4).map((t) => (
+                      <span key={t} className="px-2 py-0.5 text-[10px] rounded-full border border-primary/40 bg-primary/10 text-primary">{t}</span>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Binder preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 }}
+                  className="absolute right-0 top-6 w-[55%] rounded-xl border border-white/10 bg-zinc-950/90 p-3 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <BookOpen className="w-3.5 h-3.5 text-purple-300" />
+                    <p className="text-[10px] uppercase tracking-widest text-purple-300 font-semibold">Your Binder</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {Array.from({ length: 6 }).map((_, idx) => {
+                      const r = pulled[idx];
+                      return (
+                        <div key={idx} className="aspect-[2.5/3.5] rounded-sm overflow-hidden bg-muted/30 border border-white/5">
+                          {r?.card?.image_url ? (
+                            <img src={r.card.image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                              <ImageOff className="w-3 h-3" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+
+                {/* Matches preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.25 }}
+                  className="absolute left-6 bottom-0 w-[60%] rounded-xl border border-white/10 bg-zinc-950/90 p-3 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <Heart className="w-3.5 h-3.5 fill-primary text-primary" />
+                    <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Matches</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {(recs.length ? recs : pulled.map((p) => ({ image_url: p.card.image_url, card_id: p.card.card_id }))).slice(0, 4).map((c: any, i) => (
+                      <div key={c.card_id ?? i} className="flex-1 aspect-[2.5/3.5] rounded-sm overflow-hidden bg-muted/30 border border-white/5">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                            <ImageOff className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Right: copy + CTA */}
+              <div className="space-y-5">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">
+                  Your Collection Awaits
+                </p>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
+                  Go to Your Profile and<br />See Your Matches
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-lg leading-relaxed">
+                  View all your liked cards, your evolving custom binder, and deeper insights built around your unique collector taste.
+                </p>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => window.location.assign('/matches')}
+                  className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
+                >
+                  Go To Your Profile
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="relative rounded-2xl border border-white/5 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
           <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
@@ -1262,6 +1382,7 @@ function ResultsView({
             </div>
           </div>
         </div>
+        )}
       </motion.section>
 
       {/* ── SECTION 5: Hand-picked recommendations row ────────── */}
@@ -1269,11 +1390,11 @@ function ResultsView({
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You</p>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Hand-picked For You</p>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked for your taste</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked Cards Based On Your Preference</h2>
           <p className="text-sm text-muted-foreground mt-1.5">
-            Different cards from this round — chosen by matching the sets, artists, eras, and Pokémon you liked.
+            A mix of cards you liked and new discoveries tailored to your taste.
           </p>
           <p className="text-xs text-primary/80 mt-1 italic">
             This is just a sample — accuracy will increase as you swipe more.
@@ -1299,7 +1420,8 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 6: Combined Progress + Why + SIGN UP NOW ───── */}
+      {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
+      {!isAuthed && (
       <motion.section {...fadeUp}>
         <div className="relative rounded-2xl border border-primary/25 bg-[#0a1414] p-5 sm:p-7 lg:p-8 overflow-hidden">
           <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
@@ -1342,8 +1464,7 @@ function ResultsView({
             </div>
 
             {/* Right: primary CTA */}
-            {!isAuthed ? (
-              <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
+            <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
                 <p className="text-sm text-foreground/90 text-center lg:text-right">
                   Ready to continue your collector journey?
                 </p>
@@ -1357,32 +1478,138 @@ function ResultsView({
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
                 <p className="text-[11px] text-muted-foreground">It's free and only takes a moment.</p>
-              </div>
-            ) : null}
+            </div>
           </div>
         </div>
       </motion.section>
+      )}
 
+      {/* Premium upsell — authed users who are NOT premium */}
+      {isAuthed && !premium && (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-2xl border border-amber-400/30 bg-gradient-to-br from-[#1a1410] via-[#0f0a06] to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_30px_80px_-30px_rgba(251,191,36,0.25)]">
+            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] bg-amber-400/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] bg-amber-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      {/* Authed-only replay (guests convert via the SIGN UP NOW widget above) */}
+            <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+              <div className="space-y-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10">
+                  <Crown className="w-3.5 h-3.5 text-amber-300" />
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300 font-semibold">PokeIQ Premium</p>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
+                  {outOfSwipes ? 'Out of swipes?' : 'Want unlimited swipes?'}
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
+                  Upgrade to Premium for deeper collector insights and unlimited rounds.
+                </p>
+
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-2 max-w-xl">
+                  {[
+                    { icon: <InfinityIcon className="w-4 h-4" />, label: 'Unlimited swipes' },
+                    { icon: <BarChart3 className="w-4 h-4" />, label: 'Advanced portfolio analytics' },
+                    { icon: <TrendingUpIcon className="w-4 h-4" />, label: 'Collection value tracking' },
+                    { icon: <Wand2 className="w-4 h-4" />, label: 'Recommendation tuning' },
+                    { icon: <Sparkles className="w-4 h-4" />, label: 'Deep collector insights' },
+                    { icon: <Library className="w-4 h-4" />, label: 'Binder customization' },
+                    { icon: <Zap className="w-4 h-4" />, label: 'Market trend tracking' },
+                    { icon: <Crown className="w-4 h-4" />, label: 'Personalized portfolio analysis' },
+                  ].map((f) => (
+                    <li key={f.label} className="flex items-center gap-2.5 text-sm text-foreground/90">
+                      <span className="text-amber-300 shrink-0">{f.icon}</span>
+                      <span>{f.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[240px]">
+                <div className="text-center lg:text-right">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/80 font-semibold">Only</p>
+                  <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
+                    $5<span className="text-base text-muted-foreground font-medium">/month</span>
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => window.location.assign('/get-started')}
+                  className="w-full lg:w-auto h-12 px-10 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)] hover:shadow-[0_0_44px_rgba(251,191,36,0.85)] transition-shadow whitespace-nowrap"
+                >
+                  <Crown className="w-4 h-4" />
+                  Go Premium
+                </motion.button>
+                <p className="text-[11px] text-muted-foreground">Cancel anytime.</p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
+      {/* Play Another Round / Out-of-swipes (authed) */}
       {isAuthed && (
-        <div className="flex flex-col items-center gap-2 pt-2">
-          <Button
-            onClick={onPlayAgain}
-            size="lg"
-            className="gap-2 min-w-[280px]"
-            disabled={outOfSwipes}
-          >
-            <RotateCw className="w-4 h-4" />
-            {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'Play Another Round'}
-          </Button>
-        </div>
+        <motion.section {...fadeUp}>
+          {outOfSwipes ? (
+            <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-card to-zinc-950 p-6 sm:p-8 overflow-hidden text-center">
+              <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+              <div className="relative space-y-3">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Daily Limit Reached</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">You're out of swipes for today</h3>
+                <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                  Upgrade to Premium for unlimited rounds and advanced features.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+                  <ResetCountdown />
+                  <motion.button
+                    whileHover={{ y: -2, scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => window.location.assign('/get-started')}
+                    className="h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
+                  >
+                    <Crown className="w-4 h-4" />
+                    Go Premium
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <p className="text-sm text-muted-foreground">Keep training PokeIQ to sharpen your recommendations.</p>
+              <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
+                <RotateCw className="w-4 h-4" />
+                Play Another Round
+              </Button>
+              {!premium && Number.isFinite(remaining ?? Infinity) && (
+                <p className="text-xs text-muted-foreground">{remaining} swipes left today</p>
+              )}
+            </div>
+          )}
+        </motion.section>
       )}
     </div>
   );
 }
 
 /* ─── Helpers for the redesigned results page ─────────────── */
+
+function ResetCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  return (
+    <div className="inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-purple-400/30 bg-purple-500/5 text-sm text-foreground/90">
+      <RotateCw className="w-3.5 h-3.5 text-purple-300" />
+      <span>Daily swipes reset in <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span></span>
+    </div>
+  );
+}
 
 function StatGlowCard({
   icon, value, label, sub, tint,
