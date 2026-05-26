@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, ArrowDown, BookOpen, Tag, Layers, Apple } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -905,117 +905,526 @@ function ResultsView({
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
   const passed = records.filter((r) => r.decision === 'pass');
+
+  const archetypeName = a.archetype?.name?.replace(/^The /, '') ?? 'Emerging Collector';
+  const archetypeDesc =
+    a.archetype?.tagline ??
+    "You're drawn to iconic Pokémon, vintage energy, and bold expressive artwork that hits with nostalgia.";
+  const tagList = (a.topTags.length
+    ? a.topTags.map((t) => t.tag)
+    : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine']
+  ).slice(0, 5);
+  const completion = Math.min(100, Math.round(((records.length) / 100) * 100));
+  const recVisible = pulled.slice(0, 3);
+  const recLocked = Math.max(0, 6 - recVisible.length);
+
+  const fadeUp = {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-80px' },
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] },
+  } as const;
+
+  return (
+    <div className="flex-1 flex flex-col gap-8 py-6 max-w-5xl mx-auto w-full">
+      {/* ── SECTION 1: Hero ───────────────────────────────────── */}
+      <motion.section {...fadeUp} className="text-center space-y-4">
+        <motion.div
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 200, damping: 18 }}
+          className="inline-flex flex-col items-center gap-1"
+        >
+          <div className="relative">
+            <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
+            <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
+          </div>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Complete</p>
+        </motion.div>
+        <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+          Your Taste Profile Is Taking Shape <span className="inline-block">✨</span>
+        </h1>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+          Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+          <StatGlowCard
+            icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
+            tint="primary"
+            value={String(a.pulls)}
+            label="Liked"
+            sub="Cards you connected with"
+          />
+          <StatGlowCard
+            icon={<X className="w-5 h-5 text-purple-400" />}
+            tint="purple"
+            value={String(a.passes)}
+            label="Passed"
+            sub="Cards you didn't vibe with"
+          />
+          <StatGlowCard
+            icon={<DollarSign className="w-5 h-5 text-amber-400" />}
+            tint="amber"
+            value={`$${a.avgPullPrice.toFixed(0)}`}
+            label="Avg Value Preference"
+            sub="Your sweet spot"
+          />
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 2: Liked vs Disliked ──────────────────────── */}
+      <motion.section {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <LikedDislikedPanel
+          tint="primary"
+          label="Liked"
+          icon={<Heart className="w-4 h-4 fill-primary text-primary" />}
+          count={pulled.length}
+          records={pulled}
+          glow
+        />
+        <LikedDislikedPanel
+          tint="purple"
+          label="Disliked"
+          icon={<X className="w-4 h-4 text-purple-400" />}
+          count={passed.length}
+          records={passed}
+        />
+        <div className="md:col-span-2 flex flex-col items-center gap-2 pt-2">
+          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="w-3.5 h-3.5" />
+            Save your results and keep building your profile
+          </div>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <ArrowDown className="w-5 h-5 text-primary/70" />
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 3: Taste Profile Preview ──────────────────── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-purple-500/5 p-6 sm:p-8 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
+            {/* Emblem */}
+            <div className="flex justify-center md:justify-start">
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.8, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute inset-0 rounded-full bg-primary/30 blur-2xl"
+                />
+                <div className="absolute inset-2 rounded-full border-2 border-primary/40" />
+                <Sparkles className="relative w-10 h-10 text-primary drop-shadow-[0_0_14px_hsl(var(--primary)/0.9)]" />
+              </div>
+            </div>
+
+            {/* Center */}
+            <div className="space-y-3 text-center md:text-left">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Taste Profile Preview</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                {archetypeName} <span>🔥</span>
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-lg">{archetypeDesc}</p>
+              <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-1">
+                {tagList.map((t, i) => (
+                  <span
+                    key={t}
+                    className={`px-3 py-1 text-xs rounded-full border ${
+                      i % 2 === 0
+                        ? 'border-primary/40 bg-primary/10 text-primary'
+                        : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
+                    }`}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+              <div className="pt-3">
+                <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
+                  <span>Profile Completion</span>
+                  <span className="text-primary font-semibold tabular-nums">{completion}%</span>
+                </div>
+                <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${completion}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.2, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-primary to-primary/60 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Lock side */}
+            <LockedCTA
+              title="Unlock your full profile"
+              desc="See your full personality, detailed insights, and collector DNA."
+              cta="Create Free Account"
+              onClick={onSignUp}
+              tint="primary"
+            />
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 4: Future Binder ─────────────────────────── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-card to-primary/5 p-6 sm:p-8 overflow-hidden">
+          <div className="absolute -top-24 -left-24 w-72 h-72 bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+          <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-6 items-center relative">
+            {/* Binder mock */}
+            <div className="rounded-xl bg-gradient-to-b from-zinc-900 to-black p-3 shadow-2xl border border-white/5">
+              <div className="grid grid-cols-4 gap-1.5">
+                {pulled.slice(0, 8).concat(Array.from({ length: Math.max(0, 8 - pulled.length) }).map(() => null as any)).slice(0, 8).map((r, i) => (
+                  <div
+                    key={i}
+                    className="aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 border border-white/5"
+                  >
+                    {r?.card?.image_url ? (
+                      <img src={r.card.image_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                        <ImageOff className="w-3 h-3" />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Copy */}
+            <div className="space-y-3 text-center md:text-left">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Your Future Binder</p>
+              <h2 className="text-2xl font-bold text-foreground">Your binder is beginning to form…</h2>
+              <p className="text-sm text-muted-foreground">
+                PokeIQ automatically curates and organizes a digital binder filled with cards you'll actually love.
+              </p>
+              <div className="flex gap-4 justify-center md:justify-start pt-2">
+                <BinderFeature icon={<Layers className="w-4 h-4" />} title="Auto-organized" sub="by sets & theme" />
+                <BinderFeature icon={<Tag className="w-4 h-4" />} title="Matches your" sub="unique taste" />
+                <BinderFeature icon={<Sparkles className="w-4 h-4" />} title="Evolves as you" sub="swipe more" />
+              </div>
+            </div>
+
+            <LockedCTA
+              title="Preview your full binder"
+              desc="Create a free account to see more."
+              cta="Unlock Binder"
+              onClick={onSignUp}
+              tint="purple"
+            />
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 5: Recommended For You ───────────────────── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-primary/15 bg-card/60 p-6 sm:p-8 overflow-hidden">
+          <div className="flex flex-col gap-1 mb-5">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You ✨</p>
+            </div>
+            <p className="text-sm text-muted-foreground">Hand-picked cards PokeIQ thinks you'll love.</p>
+          </div>
+
+          <div className="grid grid-cols-[1fr_auto] gap-6 items-start">
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2">
+              {recVisible.map((r, i) => (
+                <RecCard key={r.card.card_id} card={r.card} match={98 - i * 4} />
+              ))}
+              {Array.from({ length: recLocked }).map((_, i) => (
+                <LockedRecCard key={i} />
+              ))}
+            </div>
+
+            <LockedCTA
+              title="Unlock personalized recommendations"
+              desc="Get better matches the more you swipe."
+              cta="Create Free Account"
+              onClick={onSignUp}
+              tint="purple"
+              compact
+            />
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 6: Progression ───────────────────────────── */}
+      <motion.section {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-primary/15 bg-card/60 p-6">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-4">Your Progress</p>
+          <div className="flex items-center gap-5">
+            <CircularMeter value={completion} />
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-foreground">Taste Accuracy</h3>
+              <p className="text-sm text-muted-foreground">
+                Keep swiping! The more you train PokeIQ, the sharper your matches become.
+              </p>
+              <p className="text-xs text-muted-foreground/80">
+                Most users see major improvements after 100+ swipes.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-card p-6">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-4">Why Sign Up?</p>
+          <ul className="space-y-2.5">
+            {[
+              'Save & track your Taste Profile',
+              'Build your custom digital binder',
+              'Unlock advanced insights & trends',
+              'Get personalized card recommendations',
+              'Continue unlimited 20-card rounds',
+            ].map((s) => (
+              <li key={s} className="flex items-start gap-2 text-sm text-foreground/90">
+                <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                <span>{s}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 7: Final hard gate ───────────────────────── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_60%)] pointer-events-none" />
+          <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
+            <div className="relative w-20 h-20 rounded-full bg-muted/40 border border-primary/30 flex items-center justify-center mx-auto md:mx-0">
+              <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl" />
+              <Lock className="relative w-7 h-7 text-primary" />
+            </div>
+            <div className="space-y-2 text-center md:text-left">
+              <h2 className="text-2xl font-bold text-foreground">
+                Create Your Free Profile to Continue <span>⭐</span>
+              </h2>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto md:mx-0">
+                Save your results, build your binder, unlock recommendations, and keep training your collector taste.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 w-full md:w-auto md:min-w-[260px]">
+              <button
+                onClick={onSignUp}
+                className="h-11 px-4 rounded-md bg-white text-zinc-900 font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition shadow-lg"
+              >
+                <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 via-red-500 to-yellow-400" />
+                Continue with Google
+              </button>
+              <button
+                onClick={onSignUp}
+                className="h-11 px-4 rounded-md bg-black text-white font-semibold flex items-center justify-center gap-2 hover:bg-zinc-900 transition border border-white/10"
+              >
+                <Apple className="w-4 h-4" />
+                Continue with Apple
+              </button>
+              <button
+                onClick={onSignUp}
+                className="text-xs text-muted-foreground hover:text-foreground text-center mt-1"
+              >
+                Or sign up with email
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Hidden: keeps existing replay/out-of-swipes flow accessible via header. */}
+      {isAuthed && (
+        <div className="flex flex-col gap-2 pt-2">
+          <Button onClick={onPlayAgain} size="lg" className="gap-2" disabled={outOfSwipes}>
+            <RotateCw className="w-4 h-4" />
+            {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'New 20-Card Round'}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Helpers for the redesigned results page ─────────────── */
+
+function StatGlowCard({
+  icon, value, label, sub, tint,
+}: {
+  icon: React.ReactNode; value: string; label: string; sub: string;
+  tint: 'primary' | 'purple' | 'amber';
+}) {
+  const ring =
+    tint === 'primary' ? 'border-primary/25 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--primary)/0.25)]'
+    : tint === 'purple' ? 'border-purple-500/25 hover:border-purple-400/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)]'
+    : 'border-amber-400/25 hover:border-amber-300/50 hover:shadow-[0_0_30px_rgba(251,191,36,0.22)]';
+  const iconBg =
+    tint === 'primary' ? 'bg-primary/10'
+    : tint === 'purple' ? 'bg-purple-500/10'
+    : 'bg-amber-400/10';
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex-1 flex flex-col gap-5 py-4"
+      whileHover={{ y: -4 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      className={`rounded-xl border ${ring} bg-card/60 p-5 transition-all duration-300`}
     >
-      <div className="text-center space-y-2">
-        <Trophy className="w-10 h-10 mx-auto text-primary" />
-        <p className="text-xs uppercase tracking-widest text-muted-foreground">Round Complete</p>
-        <h1 className="text-3xl font-bold text-foreground">
-          PokeIQ is learning your eye
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Every swipe shapes your Taste Profile — what you naturally love, not how you collect.
+      <div className="flex items-center gap-4">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${iconBg}`}>{icon}</div>
+        <div className="text-left">
+          <p className="text-3xl font-bold text-foreground tabular-nums leading-none">{value}</p>
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground mt-1">{label}</p>
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground/80 mt-3">{sub}</p>
+    </motion.div>
+  );
+}
+
+function LikedDislikedPanel({
+  label, icon, count, records, glow, tint,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  count: number;
+  records: SwipeRecord[];
+  glow?: boolean;
+  tint: 'primary' | 'purple';
+}) {
+  const border = tint === 'primary' ? 'border-primary/20' : 'border-purple-500/20';
+  const headColor = tint === 'primary' ? 'text-primary' : 'text-purple-300';
+  return (
+    <div className={`rounded-2xl border ${border} bg-card/60 p-5`}>
+      <div className="flex items-center justify-between mb-3">
+        <p className={`text-[11px] uppercase tracking-[0.22em] font-semibold flex items-center gap-2 ${headColor}`}>
+          {icon} {label}
         </p>
+        <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
       </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-primary tabular-nums">{a.pulls}</p>
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Pulled</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground tabular-nums">{a.passes}</p>
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Passed</p>
-        </Card>
-        <Card className="p-4 text-center">
-          <p className="text-2xl font-bold text-foreground tabular-nums">${a.avgPullPrice.toFixed(0)}</p>
-          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Avg Pull</p>
-        </Card>
-      </div>
-
-      {/* Liked vs Disliked side by side */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="p-3">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs uppercase tracking-wide text-primary font-semibold flex items-center gap-1.5">
-              <Heart className="w-3.5 h-3.5 fill-primary" /> Liked
-            </p>
-            <span className="text-xs text-muted-foreground tabular-nums">{pulled.length}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {pulled.length === 0 && (
-              <p className="col-span-3 text-xs text-muted-foreground text-center py-4">No pulls</p>
-            )}
-            {pulled.map((r) => (
-              <ResultThumb key={r.card.card_id} card={r.card} loved={r.tags.includes('Loved')} />
-            ))}
-          </div>
-        </Card>
-        <Card className="p-3">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold flex items-center gap-1.5">
-              <X className="w-3.5 h-3.5" /> Disliked
-            </p>
-            <span className="text-xs text-muted-foreground tabular-nums">{passed.length}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-1.5">
-            {passed.length === 0 && (
-              <p className="col-span-3 text-xs text-muted-foreground text-center py-4">No passes</p>
-            )}
-            {passed.map((r) => (
-              <ResultThumb key={r.card.card_id} card={r.card} />
-            ))}
-          </div>
-        </Card>
-      </div>
-
-      {a.favoriteSets.length > 0 && (
-        <Card className="p-4">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-3">Sets you gravitate to</p>
-          <div className="space-y-1.5">
-            {a.favoriteSets.map((s) => (
-              <div key={s.set} className="flex items-center justify-between text-sm">
-                <span className="text-foreground truncate">{s.set}</span>
-                <span className="text-muted-foreground tabular-nums">{s.count} pulls</span>
+      <div className="grid grid-cols-4 gap-2">
+        {records.length === 0 && (
+          <p className="col-span-4 text-xs text-muted-foreground text-center py-6">No cards</p>
+        )}
+        {records.slice(0, 8).map((r) => (
+          <motion.div
+            key={r.card.card_id}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+            className={`relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/30 ${glow ? 'ring-1 ring-primary/30 shadow-[0_0_18px_hsl(var(--primary)/0.25)]' : ''}`}
+          >
+            {r.card.image_url ? (
+              <img src={r.card.image_url} alt={r.card.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <ImageOff className="w-4 h-4 text-muted-foreground" />
               </div>
-            ))}
-          </div>
-        </Card>
-      )}
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      {!isAuthed && (
-        <Card className="p-5 border-primary/40 bg-primary/5">
-          <div className="text-center space-y-3">
-            <Sparkles className="w-8 h-8 mx-auto text-primary" />
-            <h3 className="text-lg font-bold text-foreground">Save your Taste Profile</h3>
-            <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Sign up free to keep every swipe, watch your Taste Profile evolve over time,
-              and unlock smarter PokeIQ recommendations tailored to your eye.
-            </p>
-            <Button onClick={onSignUp} size="lg" className="gap-2 w-full sm:w-auto">
-              <LogIn className="w-4 h-4" />
-              Sign up to save your results
-            </Button>
-          </div>
-        </Card>
-      )}
+function LockedCTA({
+  title, desc, cta, onClick, tint, compact,
+}: {
+  title: string; desc: string; cta: string;
+  onClick: () => void;
+  tint: 'primary' | 'purple';
+  compact?: boolean;
+}) {
+  const btn =
+    tint === 'primary'
+      ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_24px_hsl(var(--primary)/0.45)]'
+      : 'bg-purple-500 text-white hover:bg-purple-400 shadow-[0_0_24px_rgba(168,85,247,0.45)]';
+  return (
+    <div className={`rounded-xl border border-white/10 bg-background/40 backdrop-blur-sm p-5 ${compact ? 'max-w-[240px]' : 'max-w-[260px]'} text-center`}>
+      <div className="flex items-center justify-center gap-1.5 text-foreground font-semibold text-sm mb-1">
+        <Lock className="w-3.5 h-3.5" /> {title}
+      </div>
+      <p className="text-xs text-muted-foreground mb-4">{desc}</p>
+      <button
+        onClick={onClick}
+        className={`w-full h-10 rounded-md text-sm font-semibold transition ${btn}`}
+      >
+        {cta}
+      </button>
+    </div>
+  );
+}
 
-      <div className="flex flex-col gap-2 pt-2">
-        <Button onClick={onPlayAgain} size="lg" className="gap-2" disabled={outOfSwipes}>
-          <RotateCw className="w-4 h-4" />
-          {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'New 20-Card Round'}
-        </Button>
-        <p className="text-[11px] text-center text-muted-foreground">
-          {outOfSwipes
-            ? 'Complete PokéYelp to unlock +20 more swipes today.'
-            : 'Come back tomorrow — your Taste Profile evolves with every swipe.'}
-        </p>
+function BinderFeature({ icon, title, sub }: { icon: React.ReactNode; title: string; sub: string }) {
+  return (
+    <div className="flex flex-col items-center text-center gap-1 min-w-[80px]">
+      <div className="w-9 h-9 rounded-full bg-purple-500/10 border border-purple-400/30 flex items-center justify-center text-purple-300">
+        {icon}
+      </div>
+      <p className="text-[11px] font-semibold text-foreground">{title}</p>
+      <p className="text-[10px] text-muted-foreground -mt-0.5">{sub}</p>
+    </div>
+  );
+}
+
+function RecCard({ card, match }: { card: SwipeCard; match: number }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4, scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="relative w-[140px] shrink-0 rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/40 shadow-[0_0_22px_hsl(var(--primary)/0.35)]"
+    >
+      <div className="aspect-[2.5/3.5]">
+        {card.image_url ? (
+          <img src={card.image_url} alt={card.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageOff className="w-4 h-4 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-bold text-primary">
+        {match}% <span className="text-[8px] font-semibold text-white/70">MATCH</span>
       </div>
     </motion.div>
+  );
+}
+
+function LockedRecCard() {
+  return (
+    <div className="relative w-[140px] shrink-0 rounded-lg overflow-hidden bg-muted/20 border border-white/5">
+      <div className="aspect-[2.5/3.5] flex flex-col items-center justify-center gap-1.5 backdrop-blur-md bg-gradient-to-br from-purple-500/10 to-primary/10">
+        <Lock className="w-5 h-5 text-muted-foreground" />
+        <p className="text-[10px] text-muted-foreground text-center px-2 leading-tight">Unlock more recommendations</p>
+      </div>
+    </div>
+  );
+}
+
+function CircularMeter({ value }: { value: number }) {
+  const r = 36;
+  const c = 2 * Math.PI * r;
+  const dash = (value / 100) * c;
+  return (
+    <div className="relative w-24 h-24 shrink-0">
+      <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+        <circle cx="50" cy="50" r={r} fill="none" stroke="hsl(var(--muted))" strokeWidth="6" opacity="0.35" />
+        <motion.circle
+          cx="50" cy="50" r={r} fill="none"
+          stroke="hsl(var(--primary))" strokeWidth="6" strokeLinecap="round"
+          strokeDasharray={c}
+          initial={{ strokeDashoffset: c }}
+          whileInView={{ strokeDashoffset: c - dash }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.2, ease: 'easeOut' }}
+          style={{ filter: 'drop-shadow(0 0 6px hsl(var(--primary) / 0.7))' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-xl font-bold text-foreground tabular-nums">{value}%</span>
+      </div>
+    </div>
   );
 }
 
