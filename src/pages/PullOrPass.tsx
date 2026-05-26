@@ -1193,8 +1193,122 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 4: Binder hero (matches reference mockup) ─── */}
+      {/* ── SECTION 4: Binder hero (guests) OR Your Collection Awaits (authed) ─── */}
       <motion.section {...fadeUp}>
+        {isAuthed ? (
+          <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
+            <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] gap-10 lg:gap-14 items-center">
+              {/* Left: layered profile + binder + matches previews */}
+              <div className="relative h-[280px] sm:h-[340px]">
+                {/* Profile preview card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.05 }}
+                  className="absolute left-0 top-0 w-[55%] rounded-xl border border-white/10 bg-zinc-950/90 p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center">
+                      <Sparkles className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Your Profile</p>
+                      <p className="text-sm font-bold text-foreground truncate">{displayArchetype}</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {tagList.slice(0, 4).map((t) => (
+                      <span key={t} className="px-2 py-0.5 text-[10px] rounded-full border border-primary/40 bg-primary/10 text-primary">{t}</span>
+                    ))}
+                  </div>
+                </motion.div>
+
+                {/* Binder preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 }}
+                  className="absolute right-0 top-6 w-[55%] rounded-xl border border-white/10 bg-zinc-950/90 p-3 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <BookOpen className="w-3.5 h-3.5 text-purple-300" />
+                    <p className="text-[10px] uppercase tracking-widest text-purple-300 font-semibold">Your Binder</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-1.5">
+                    {Array.from({ length: 6 }).map((_, idx) => {
+                      const r = pulled[idx];
+                      return (
+                        <div key={idx} className="aspect-[2.5/3.5] rounded-sm overflow-hidden bg-muted/30 border border-white/5">
+                          {r?.card?.image_url ? (
+                            <img src={r.card.image_url} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                              <ImageOff className="w-3 h-3" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+
+                {/* Matches preview */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.25 }}
+                  className="absolute left-6 bottom-0 w-[60%] rounded-xl border border-white/10 bg-zinc-950/90 p-3 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)] backdrop-blur"
+                >
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <Heart className="w-3.5 h-3.5 fill-primary text-primary" />
+                    <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Matches</p>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {(recs.length ? recs : pulled.map((p) => ({ image_url: p.card.image_url, card_id: p.card.card_id }))).slice(0, 4).map((c: any, i) => (
+                      <div key={c.card_id ?? i} className="flex-1 aspect-[2.5/3.5] rounded-sm overflow-hidden bg-muted/30 border border-white/5">
+                        {c.image_url ? (
+                          <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                            <ImageOff className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Right: copy + CTA */}
+              <div className="space-y-5">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">
+                  Your Collection Awaits
+                </p>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
+                  Go to Your Profile and<br />See Your Matches
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-lg leading-relaxed">
+                  View all your liked cards, your evolving custom binder, and deeper insights built around your unique collector taste.
+                </p>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => window.location.assign('/matches')}
+                  className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
+                >
+                  Go To Your Profile
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        ) : (
         <div className="relative rounded-2xl border border-white/5 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
           <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
@@ -1268,6 +1382,7 @@ function ResultsView({
             </div>
           </div>
         </div>
+        )}
       </motion.section>
 
       {/* ── SECTION 5: Hand-picked recommendations row ────────── */}
