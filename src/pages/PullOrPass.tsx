@@ -1211,6 +1211,7 @@ function ResultsView({
 
       {/* ── SECTION 3: Taste Profile (authed) OR View All My Matches (guest) ─── */}
       {isAuthed ? (
+        <>
         <motion.section {...fadeUp}>
           <Link to="/matches" className="block group">
             <div className="relative rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/12 via-card to-purple-500/12 p-8 sm:p-10 lg:p-12 overflow-hidden transition-shadow shadow-[0_0_0_hsl(var(--primary)/0)] group-hover:shadow-[0_0_60px_hsl(var(--primary)/0.35)]">
@@ -1222,29 +1223,59 @@ function ResultsView({
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
                 className="pointer-events-none absolute top-1/2 right-[10%] w-[280px] h-[280px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
               />
-              <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left">
+              <div className="relative flex flex-col items-center gap-6 text-center">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0">
                   <Sparkles className="w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
                 </div>
-                <div className="flex-1 min-w-0 space-y-2">
+                <div className="space-y-2 max-w-2xl">
                   <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Collector Profile</p>
-                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
+                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
                     Go to your profile
                   </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
+                  <p className="text-sm sm:text-base text-muted-foreground">
                     See every card you've liked, your evolving taste, and what PokeIQ has learned about you.
                   </p>
                 </div>
-                <div className="shrink-0">
-                  <span className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide shadow-[0_0_28px_hsl(var(--primary)/0.55)] group-hover:shadow-[0_0_44px_hsl(var(--primary)/0.85)] transition-shadow">
-                    View Profile
-                    <ArrowRight className="w-4 h-4" />
-                  </span>
-                </div>
+                <motion.span
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-3 h-16 sm:h-20 px-10 sm:px-14 rounded-2xl bg-primary text-primary-foreground font-black text-lg sm:text-2xl tracking-wide shadow-[0_0_40px_hsl(var(--primary)/0.65)] group-hover:shadow-[0_0_64px_hsl(var(--primary)/0.95)] transition-shadow"
+                >
+                  View Profile
+                  <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
+                </motion.span>
               </div>
             </div>
           </Link>
         </motion.section>
+        {/* Train PokeIQ widget */}
+        <motion.section {...fadeUp}>
+          <Link to="/earn" className="block group">
+            <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/12 via-card to-primary/10 p-6 sm:p-8 overflow-hidden transition-shadow group-hover:shadow-[0_0_44px_hsl(var(--primary)/0.35)]">
+              <div className="absolute -top-24 -right-24 w-[300px] h-[300px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-[300px] h-[300px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
+              <div className="relative flex flex-col sm:flex-row items-center gap-5 sm:gap-7 text-center sm:text-left">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border border-purple-400/40 bg-purple-500/10 flex items-center justify-center shrink-0">
+                  <Zap className="w-9 h-9 text-purple-300 drop-shadow-[0_0_14px_rgba(192,132,252,0.9)]" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <p className="text-[11px] uppercase tracking-[0.24em] text-purple-300 font-semibold">Earn More Swipes</p>
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground tracking-tight leading-tight">
+                    Train PokeIQ to get more swipe credits
+                  </h3>
+                  <p className="text-sm text-muted-foreground max-w-xl">
+                    Every 20 cards you help tag earns you <strong className="text-foreground">+10 free swipes</strong>. Your taste sharpens our recommendations.
+                  </p>
+                </div>
+                <span className="shrink-0 inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-purple-500/15 border border-purple-400/40 text-purple-200 font-bold text-sm tracking-wide group-hover:bg-purple-500/25 transition-colors">
+                  <Sparkles className="w-4 h-4" />
+                  Train PokeIQ
+                </span>
+              </div>
+            </div>
+          </Link>
+        </motion.section>
+        </>
       ) : (
         <motion.section {...fadeUp}>
           <div className="relative rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/8 via-card to-purple-500/8 p-6 sm:p-8 overflow-hidden">
