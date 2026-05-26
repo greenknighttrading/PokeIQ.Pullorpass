@@ -422,14 +422,8 @@ export default function PokeYelp() {
       });
     }
 
-    // 200 reviews → 30 days of PokeIQ Premium
-    if (lifetime === REVIEWS_FOR_PREMIUM) {
-      grantPremium(PREMIUM_DAYS);
-      toast.success(`🎉 PokeIQ Premium unlocked — ${PREMIUM_DAYS} days!`, {
-        description: 'Unlimited swipes and premium features are now active.',
-        position: 'top-center',
-      });
-    }
+    // PokeIQ Pro is a paid subscription — training only grants swipe credits,
+    // never auto-upgrades the account to Pro.
     if (todaysMode) {
       setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }

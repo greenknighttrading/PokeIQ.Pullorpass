@@ -54,8 +54,11 @@ export function GlobalNavBar({
   useEffect(() => {
     const check = () => {
       try {
-        const until = Number(localStorage.getItem('pokeiq_premium_until') || '0');
-        setIsPremium(until > Date.now());
+        // PokeIQ Pro requires a paid subscription. No free auto-grants.
+        if (localStorage.getItem('pokeiq_premium_until')) {
+          localStorage.removeItem('pokeiq_premium_until');
+        }
+        setIsPremium(false);
       } catch { setIsPremium(false); }
     };
     check();

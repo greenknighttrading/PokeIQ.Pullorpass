@@ -49,8 +49,13 @@ function writeQuota(q: { date: string; used: number; bonus: number; lifetime: nu
 // PokeIQ Premium (granted after 200 Earn reviews → 30 days unlimited)
 function isPremiumActive(): boolean {
   try {
-    const until = Number(localStorage.getItem('pokeiq_premium_until') || '0');
-    return until > Date.now();
+    // PokeIQ Pro requires a paid subscription. No free auto-grants.
+    // Clear any legacy auto-granted premium flag so previously-flagged
+    // accounts (e.g. earned via training rewards) revert to Free.
+    if (localStorage.getItem('pokeiq_premium_until')) {
+      localStorage.removeItem('pokeiq_premium_until');
+    }
+    return false;
   } catch { return false; }
 }
 
@@ -1199,6 +1204,7 @@ function ResultsView({
           count={pulled.length}
           records={pulled}
           glow
+          viewProfileHref={isAuthed ? '/matches' : undefined}
         />
         <LikedDislikedPanel
           tint="purple"
@@ -1209,45 +1215,9 @@ function ResultsView({
         />
       </motion.section>
 
-      {/* ── SECTION 3: Taste Profile (authed) OR View All My Matches (guest) ─── */}
+      {/* ── SECTION 3: Train PokeIQ (authed) OR View All My Matches (guest) ─── */}
       {isAuthed ? (
         <>
-        <motion.section {...fadeUp}>
-          <Link to="/matches" className="block group">
-            <div className="relative rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/12 via-card to-purple-500/12 p-8 sm:p-10 lg:p-12 overflow-hidden transition-shadow shadow-[0_0_0_hsl(var(--primary)/0)] group-hover:shadow-[0_0_60px_hsl(var(--primary)/0.35)]">
-              <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-              <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
-              <motion.div
-                aria-hidden="true"
-                animate={{ opacity: [0.2, 0.4, 0.2] }}
-                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="pointer-events-none absolute top-1/2 right-[10%] w-[280px] h-[280px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
-              />
-              <div className="relative flex flex-col items-center gap-6 text-center">
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
-                </div>
-                <div className="space-y-2 max-w-2xl">
-                  <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Collector Profile</p>
-                  <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
-                    Go to your profile
-                  </h2>
-                  <p className="text-sm sm:text-base text-muted-foreground">
-                    See every card you've liked, your evolving taste, and what PokeIQ has learned about you.
-                  </p>
-                </div>
-                <motion.span
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  className="inline-flex items-center gap-3 h-16 sm:h-20 px-10 sm:px-14 rounded-2xl bg-primary text-primary-foreground font-black text-lg sm:text-2xl tracking-wide shadow-[0_0_40px_hsl(var(--primary)/0.65)] group-hover:shadow-[0_0_64px_hsl(var(--primary)/0.95)] transition-shadow"
-                >
-                  View Profile
-                  <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
-                </motion.span>
-              </div>
-            </div>
-          </Link>
-        </motion.section>
         {/* Train PokeIQ widget */}
         <motion.section {...fadeUp}>
           <Link to="/earn" className="block group">
@@ -1766,7 +1736,7 @@ function StatGlowCard({
 }
 
 function LikedDislikedPanel({
-  label, icon, count, records, glow, tint,
+  label, icon, count, records, glow, tint, viewProfileHref,
 }: {
   label: string;
   icon: React.ReactNode;
@@ -1774,6 +1744,7 @@ function LikedDislikedPanel({
   records: SwipeRecord[];
   glow?: boolean;
   tint: 'primary' | 'purple';
+  viewProfileHref?: string;
 }) {
   const border = tint === 'primary' ? 'border-primary/20' : 'border-purple-500/20';
   const headColor = tint === 'primary' ? 'text-primary' : 'text-purple-300';
@@ -1814,6 +1785,18 @@ function LikedDislikedPanel({
           </motion.div>
         ))}
       </div>
+      {viewProfileHref && (
+        <div className="mt-4 pt-4 border-t border-primary/15">
+          <Link
+            to={viewProfileHref}
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            View your profile
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
