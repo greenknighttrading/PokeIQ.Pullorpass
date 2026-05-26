@@ -190,6 +190,63 @@ export default function PullOrPass() {
     };
   }, []);
 
+  // Fetch credits balance (signed-in users)
+  const refreshCredits = useCallback(async (uid?: string | null) => {
+    const id = uid ?? userId;
+    if (!id) { setCredits(0); return; }
+    const { data } = await supabase
+      .from('pokeiq_credits').select('credits').eq('user_id', id).maybeSingle();
+    setCredits(data?.credits ?? 0);
+  }, [userId]);
+
+  useEffect(() => {
+    refreshCredits();
+    const onFocus = () => refreshCredits();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [refreshCredits]);
+
+  // Redeem 10 credits → +10 swipes (bonus added to today's quota)
+  const redeemSwipes = useCallback(async () => {
+    if (!userId) {
+      navigate('/auth');
+      return;
+    }
+    if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
+    setRedeeming(true);
+    try {
+      const newCredits = credits - CREDITS_PER_REDEMPTION;
+      const { error } = await supabase.from('pokeiq_credits').upsert({
+        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      setCredits(newCredits);
+      const q = readQuota();
+      const next = { ...q, bonus: (q.bonus ?? 0) + SWIPES_PER_REDEMPTION };
+      writeQuota(next);
+      setQuota(next);
+      toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
+        description: `${newCredits} credits remaining.`,
+        position: 'top-center',
+      });
+    } catch (e: any) {
+      toast.error('Could not redeem credits');
+    } finally {
+      setRedeeming(false);
+    }
+  }, [userId, credits, redeeming, navigate]);
+
+  // Clicking "Pull or Pass" in the nav while already on /swipe → start a new round
+  const initialKeyRef = React.useRef(location.key);
+  useEffect(() => {
+    if (location.key === initialKeyRef.current) return;
+    initialKeyRef.current = location.key;
+    clearResume();
+    clearResults();
+    loadRound();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
+
   // Persist in-progress round so users can leave and come back
   useEffect(() => {
     if (stage !== 'swiping') return;
