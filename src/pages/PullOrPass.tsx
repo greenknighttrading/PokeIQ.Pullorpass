@@ -918,8 +918,54 @@ function ResultsView({
     : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine']
   ).slice(0, 5);
   const completion = Math.min(100, Math.round(((records.length) / 100) * 100));
-  const recVisible = pulled.slice(0, 4);
-  const recLocked = Math.max(0, 8 - recVisible.length);
+
+  // Build a sparse LikedCard[] from this round's pulls so we can fetch
+  // *different* but stylistically related recommendations.
+  const likedAsRich: LikedCard[] = useMemo(
+    () =>
+      pulled.map((r) => ({
+        id: r.card.card_id,
+        user_id: '',
+        card_id: r.card.card_id,
+        card_name: r.card.name,
+        pokemon_name: extractPokemonName(r.card.name),
+        artist: null,
+        set_name: r.card.set_name,
+        set_id: null,
+        era: classifyEra(r.card.set_name)?.id ?? null,
+        release_year: null,
+        card_type: null,
+        pokemon_type: null,
+        rarity: r.card.rarity,
+        language: null,
+        card_number: null,
+        variant: null,
+        product_category: null,
+        price: r.card.price,
+        price_tier: priceTier(r.card.price),
+        image_url: r.card.image_url,
+        source: 'swipe',
+        liked_at: '',
+      })),
+    [pulled]
+  );
+
+  const [recs, setRecs] = useState<RecommendedCard[]>([]);
+  const [recsLoading, setRecsLoading] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    setRecsLoading(true);
+    if (likedAsRich.length === 0) {
+      setRecs([]);
+      setRecsLoading(false);
+      return;
+    }
+    recommendForUser(likedAsRich, 12)
+      .then((r) => { if (alive) setRecs(r); })
+      .catch(() => { if (alive) setRecs([]); })
+      .finally(() => { if (alive) setRecsLoading(false); });
+    return () => { alive = false; };
+  }, [likedAsRich]);
 
   const fadeUp = {
     initial: { opacity: 0, y: 24 },
