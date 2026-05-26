@@ -43,8 +43,8 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
   const page = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    // Scroll by ~90% of visible width for a "page" feel
-    el.scrollBy({ left: dir * el.clientWidth * 0.9, behavior: 'smooth' });
+    // Scroll by ~45% of visible width for a relaxed, smooth feel
+    el.scrollBy({ left: dir * el.clientWidth * 0.45, behavior: 'smooth' });
   };
 
   return (
