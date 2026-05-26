@@ -1390,11 +1390,11 @@ function ResultsView({
         <div>
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
-            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You</p>
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Hand-picked For You</p>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked for your taste</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked Cards Based On Your Preference</h2>
           <p className="text-sm text-muted-foreground mt-1.5">
-            Different cards from this round — chosen by matching the sets, artists, eras, and Pokémon you liked.
+            A mix of cards you liked and new discoveries tailored to your taste.
           </p>
           <p className="text-xs text-primary/80 mt-1 italic">
             This is just a sample — accuracy will increase as you swipe more.
