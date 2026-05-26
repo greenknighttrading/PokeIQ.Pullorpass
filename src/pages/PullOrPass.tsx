@@ -1129,7 +1129,7 @@ function ResultsView({
 
       {/* ── SECTION 3: Taste Profile (compact horizontal card) ─── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px] lg:max-h-[340px]">
+        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px]">
           <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
           {/* Subtle holographic shimmer — replaces previous mascot artwork */}
@@ -1194,6 +1194,34 @@ function ResultsView({
               </div>
             )}
           </div>
+
+          {/* Guests: Save & revisit every match — merged into Taste Profile widget */}
+          {!isAuthed && (
+            <div className="relative mt-6 pt-6 border-t border-primary/20">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-11 h-11 rounded-xl border border-primary/40 bg-primary/15 flex items-center justify-center shrink-0">
+                    <Heart className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground leading-tight">Save and revisit every match</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
+                      Track every card you've loved, revisit recommendations, and build your collector identity over time.
+                    </p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onSignUp}
+                  className="shrink-0 h-11 px-6 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-sm inline-flex items-center gap-2 transition-colors"
+                >
+                  View My Matches
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+          )}
         </div>
       </motion.section>
 
@@ -1424,37 +1452,6 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 5b: Save & revisit every match (guests) ───── */}
-      {!isAuthed && (
-        <motion.section {...fadeUp}>
-          <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-purple-500/10 p-5 sm:p-6 overflow-hidden">
-            <div className="absolute -top-16 -right-16 w-[260px] h-[260px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <div className="w-12 h-12 rounded-xl border border-primary/40 bg-primary/15 flex items-center justify-center shrink-0">
-                  <Heart className="w-6 h-6 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">Save and revisit every match</h3>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-xl">
-                    Track every card you've loved, revisit recommendations, and build your collector identity over time.
-                  </p>
-                </div>
-              </div>
-              <motion.button
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={onSignUp}
-                className="shrink-0 h-11 px-6 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-sm inline-flex items-center gap-2 transition-colors"
-              >
-                View My Matches
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
-            </div>
-          </div>
-        </motion.section>
-      )}
-
       {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
       {!isAuthed && (
       <motion.section {...fadeUp}>
@@ -1463,7 +1460,7 @@ function ResultsView({
           <div className="absolute -bottom-32 -left-32 w-[460px] h-[460px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
 
           <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-10 lg:gap-14 items-center">
-            {/* LEFT: recommendation accuracy meter */}
+            {/* LEFT: recommendation accuracy meter (center-aligned) */}
             <div className="flex flex-col items-center text-center gap-3 lg:min-w-[200px]">
               <CircularMeter value={completion} />
               <div className="space-y-1">
@@ -1474,17 +1471,19 @@ function ResultsView({
               </div>
             </div>
 
-            {/* CENTER: benefits */}
-            <div className="space-y-4">
+            {/* CENTER: benefits (center-aligned) */}
+            <div className="space-y-4 flex flex-col items-center text-center">
               <p className="text-[11px] uppercase tracking-[0.24em] text-purple-300 font-semibold">What You Unlock</p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mx-auto">
                 {[
                   'Save your collector profile',
                   'Build your custom binder',
                   'Get smarter recommendations',
-                  'Unlock unlimited rounds',
+                  '20 free swipes a day',
+                  'Learn more about you as a collector',
+                  'Organize your dream collection',
                 ].map((s) => (
-                  <li key={s} className="flex items-center gap-3 text-[15px] text-foreground/90">
+                  <li key={s} className="flex items-center gap-3 text-[15px] text-foreground/90 text-left">
                     <Check className="w-4 h-4 text-primary shrink-0" />
                     <span>{s}</span>
                   </li>
@@ -1711,7 +1710,11 @@ function LikedDislikedPanel({
             }`}
           >
             {r.card.image_url ? (
-              <img src={r.card.image_url} alt={r.card.name} className="w-full h-full object-cover" />
+              <img
+                src={r.card.image_url}
+                alt={r.card.name}
+                className={`w-full h-full object-cover ${glow ? '' : 'opacity-60 saturate-50'}`}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <ImageOff className="w-4 h-4 text-muted-foreground" />
