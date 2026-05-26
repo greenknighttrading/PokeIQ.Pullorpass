@@ -55,22 +55,27 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     }
 
     const start = el.scrollLeft;
-    const distance = dir * el.clientWidth * 0.9;
-    const duration = 700; // ms — smooth, relaxed pace
+    const max = el.scrollWidth - el.clientWidth;
+    const rawTarget = start + dir * el.clientWidth * 0.9;
+    const target = Math.max(0, Math.min(max, rawTarget));
+    const distance = target - start;
+    if (distance === 0) return;
+    const duration = 600; // ms — Netflix-like snappy glide
     const startTime = performance.now();
 
-    const easeInOutCubic = (t: number) =>
-      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    // Ease-out quart: quick takeoff, gentle landing — feels premium
+    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
 
     const step = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = easeInOutCubic(progress);
-      el.scrollLeft = Math.round(start + distance * eased);
+      const eased = easeOutQuart(progress);
+      el.scrollLeft = start + distance * eased;
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(step);
       } else {
+        el.scrollLeft = target;
         rafRef.current = null;
       }
     };
