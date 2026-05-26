@@ -454,19 +454,98 @@ export default function PokeYelp() {
       <div className="min-h-screen bg-background flex flex-col">
         <GlobalNavBar />
 
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 flex flex-col select-none">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Earn Credits — Help train PokeIQ</h1>
-              <p className="text-xs text-muted-foreground">
-                Your reviews personalize recommendations. Every {REVIEWS_PER_SWIPE_BATCH} reviews → <strong className="text-foreground">+{SWIPES_PER_BATCH} swipes</strong> · {REVIEWS_FOR_PREMIUM} reviews → <strong className="text-foreground">{PREMIUM_DAYS} days of PokeIQ Premium</strong>.
-                {todaysMode && todaysRemaining != null && todaysRemaining > 0 && ` · ${todaysRemaining} of today's swipes left to tag`}
-              </p>
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col select-none">
+          {/* Cinematic hero */}
+          <header className="relative text-center mb-10 pt-4">
+            {/* Soft neon glow + animated particles */}
+            <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[260px] rounded-full blur-3xl opacity-40 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.45),transparent_70%)]" />
+              {[...Array(6)].map((_, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute block w-1 h-1 rounded-full bg-primary/60"
+                  style={{ left: `${15 + i * 12}%`, top: `${30 + (i % 3) * 18}%` }}
+                  animate={{ y: [0, -14, 0], opacity: [0.2, 0.9, 0.2] }}
+                  transition={{ duration: 4 + i, repeat: Infinity, delay: i * 0.3, ease: 'easeInOut' }}
+                />
+              ))}
+              <motion.div
+                className="absolute left-[10%] top-[60%] w-32 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+                animate={{ x: [-40, 40, -40], opacity: [0, 0.8, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <motion.div
+                className="absolute right-[8%] top-[35%] w-40 h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent"
+                animate={{ x: [30, -30, 30], opacity: [0, 0.6, 0] }}
+                transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+              />
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline" size="sm"
+
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight"
+              style={{ textShadow: '0 0 40px hsl(var(--primary) / 0.35)' }}
+            >
+              PokeIQ Training <span className="inline-block">✨</span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.7 }}
+              className="mt-3 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto"
+            >
+              Help train smarter recommendations for yourself and collectors everywhere.
+            </motion.p>
+
+            {/* Milestone progress strip */}
+            <div className="mt-8 max-w-xl mx-auto">
+              <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                <span className="inline-flex items-center gap-1.5">
+                  <Coins className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-foreground font-semibold tabular-nums">{reviewedCount}</span> reviewed
+                </span>
+                <span className="tabular-nums">
+                  {reviewedCount < REVIEWS_PER_SWIPE_BATCH
+                    ? `${REVIEWS_PER_SWIPE_BATCH - (reviewedCount % REVIEWS_PER_SWIPE_BATCH)} to +${SWIPES_PER_BATCH} swipes`
+                    : reviewedCount < REVIEWS_FOR_PREMIUM
+                    ? `${REVIEWS_FOR_PREMIUM - reviewedCount} to Premium`
+                    : 'Premium unlocked'}
+                </span>
+              </div>
+              <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                <motion.div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(100, (reviewedCount / REVIEWS_FOR_PREMIUM) * 100)}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
+                />
+                {/* Milestone markers */}
+                <div
+                  className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-background border border-primary"
+                  style={{ left: `calc(${(REVIEWS_PER_SWIPE_BATCH / REVIEWS_FOR_PREMIUM) * 100}% - 4px)` }}
+                />
+              </div>
+              <div className="mt-3 flex items-center justify-between text-xs">
+                <span className={`inline-flex items-center gap-1.5 ${reviewedCount >= REVIEWS_PER_SWIPE_BATCH ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <Sparkles className="w-3 h-3" /> 20 → +10 Swipes
+                </span>
+                <span className={`inline-flex items-center gap-1.5 ${reviewedCount >= REVIEWS_FOR_PREMIUM ? 'text-accent' : 'text-muted-foreground'}`}>
+                  <Sparkles className="w-3 h-3" /> 200 → Premium Unlock
+                </span>
+              </div>
+            </div>
+
+            {/* Subtle filter / credits row */}
+            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1.5">
+                <Coins className="w-3.5 h-3.5 text-amber-400" />
+                <span className="tabular-nums text-foreground font-medium">{credits}</span> credits
+              </span>
+              <span className="w-px h-3 bg-border" />
+              <button
                 onClick={() => {
                   if (todaysMode && (todaysRemaining ?? 0) > 0) {
                     toast.message('Filters locked', {
@@ -476,31 +555,22 @@ export default function PokeYelp() {
                   }
                   setShowFilters((s) => !s);
                 }}
-                className="gap-1.5 h-8"
-                aria-disabled={todaysMode && (todaysRemaining ?? 0) > 0}
+                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
                 <Filter className="w-3.5 h-3.5" />
-                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters 🔒' : 'Filters'}
+                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters locked' : 'Filters'}
                 {activeFiltersCount > 0 && (
-                  <span className="ml-1 text-[10px] font-bold bg-primary text-primary-foreground rounded-full px-1.5 py-0.5">
-                    {activeFiltersCount}
-                  </span>
+                  <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
                 )}
-              </Button>
-              <Card className="px-3 py-1.5 flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-bold tabular-nums">{credits}</span>
-                <span className="text-[10px] uppercase text-muted-foreground">Credits</span>
-              </Card>
-              {reviewedCount > 0 && (
-                <Card className="px-3 py-1.5 flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-bold tabular-nums">{reviewedCount}</span>
-                  <span className="text-[10px] uppercase text-muted-foreground">Reviewed</span>
-                </Card>
+              </button>
+              {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
+                <>
+                  <span className="w-px h-3 bg-border" />
+                  <span><span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left</span>
+                </>
               )}
             </div>
-          </div>
+          </header>
 
           {/* Filters panel */}
           <AnimatePresence initial={false}>
@@ -595,11 +665,13 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row gap-6 items-start justify-center"
+              className="flex flex-col sm:flex-row gap-10 items-start justify-center"
             >
               {/* Card image and info: left column on tablet/desktop */}
-              <div className="space-y-2 w-full max-w-[260px] mx-auto sm:mx-0 sm:max-w-none sm:w-[260px] lg:w-[280px] sm:shrink-0">
-                <button
+              <div className="space-y-3 w-full max-w-[280px] mx-auto sm:mx-0 sm:max-w-none sm:w-[280px] lg:w-[300px] sm:shrink-0">
+                <div className="relative">
+                  <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl" />
+                  <button
                   type="button"
                   onClick={() => setDetailSeed({
                     card_id: current.card_id,
@@ -610,7 +682,7 @@ export default function PokeYelp() {
                     rarity: current.rarity,
                   })}
                   aria-label="View card details"
-                  className="block w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-xl hover:ring-2 hover:ring-primary/50 transition-shadow"
+                  className="relative block w-full aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 shadow-2xl hover:scale-[1.02] transition-transform duration-300"
                 >
                   {current.image_url && !imgErr ? (
                     <img
@@ -626,40 +698,39 @@ export default function PokeYelp() {
                     </div>
                   )}
                 </button>
-                <div>
-                  <p className="text-sm font-semibold text-foreground truncate">{current.name}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                </div>
+                <div className="text-center sm:text-left pt-1">
+                  <p className="text-base font-semibold text-foreground truncate">{current.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {current.set_name ?? 'Unknown set'} · ${current.price.toFixed(2)}
                     {current.rarity && ` · ${current.rarity}`}
                   </p>
                 </div>
               </div>
 
-              {/* Tag picker */}
-              <div className="space-y-4 min-w-0 w-full sm:flex-1">
-                <Card className="p-4">
-                  <div className="flex items-center justify-between mb-1 gap-2">
-                    <p className="text-sm font-semibold text-foreground">
-                      AI suggested tags
-                    </p>
-                    <span className="text-[10px] font-bold tabular-nums px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+              {/* Tag picker — borderless, breathing */}
+              <div className="space-y-6 min-w-0 w-full sm:flex-1">
+                <div>
+                  <div className="flex items-baseline justify-between mb-1 gap-2">
+                    <h2 className="text-lg font-semibold text-foreground">What fits this card?</h2>
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {selected.size} selected
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    Tap any tag that fits this card. Skip the ones that don't.
+                  <p className="text-xs text-muted-foreground mb-5">
+                    Tap any tag that fits. Skip the rest.
                   </p>
 
                   <div className="min-h-[140px]">
                     {suggestLoading && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-6 justify-center">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-8 justify-center">
                         <Wand2 className="w-4 h-4 animate-pulse text-primary" />
                         AI is reading the card…
                       </div>
                     )}
 
                     {!suggestLoading && suggestions.length === 0 && (
-                      <div className="text-xs text-muted-foreground py-6 text-center">
+                      <div className="text-xs text-muted-foreground py-8 text-center">
                         No suggestions yet.
                         <Button
                           variant="link" size="sm" className="ml-1 h-auto p-0"
@@ -670,9 +741,9 @@ export default function PokeYelp() {
                       </div>
                     )}
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2.5">
                       <AnimatePresence initial={false}>
-                        {suggestions.map((s) => {
+                        {suggestions.slice(0, 10).map((s) => {
                           const on = selected.has(s.tag);
                           return (
                             <motion.button
@@ -681,11 +752,13 @@ export default function PokeYelp() {
                               animate={{ opacity: 1, scale: 1 }}
                               exit={{ opacity: 0 }}
                               onClick={() => toggleTag(s.tag)}
-                              className={`px-3 py-1.5 text-sm rounded-full border transition-all active:scale-95 ${
+                              whileTap={{ scale: 0.94 }}
+                              className={`px-4 py-2 text-sm rounded-full transition-all duration-200 ${
                                 on
-                                  ? 'bg-primary text-primary-foreground border-primary'
-                                  : 'bg-background text-foreground border-border hover:bg-muted'
+                                  ? 'bg-primary/15 text-primary border border-primary/60 font-semibold'
+                                  : 'bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground'
                               }`}
+                              style={on ? { boxShadow: '0 0 18px hsl(var(--primary) / 0.35)' } : undefined}
                             >
                               {s.tag}
                             </motion.button>
@@ -695,30 +768,31 @@ export default function PokeYelp() {
                     </div>
                   </div>
 
-                  {/* Custom tags */}
-                  <div className="mt-4 pt-4 border-t border-border">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">
-                      Add your own tag
-                    </p>
-                    <div className="flex gap-2">
+                  {/* Custom tags + comment — no boxed border, just whitespace */}
+                  <div className="mt-8 space-y-5">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                        Add your own
+                      </p>
+                      <div className="flex gap-2">
                       <Input
                         value={customInput}
                         onChange={(e) => setCustomInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
                         placeholder="e.g. Mona Lisa pose"
                         maxLength={40}
-                        className="h-9 text-sm"
+                        className="h-10 text-sm bg-muted/30 border-transparent focus-visible:border-primary/40"
                       />
                       <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
                         <Plus className="w-3.5 h-3.5" /> Add
                       </Button>
-                    </div>
+                      </div>
                     {custom.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-3">
                         {custom.map((t) => (
                           <span
                             key={t}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full bg-amber-400/15 text-amber-400 border border-amber-400/40"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30"
                           >
                             <Sparkles className="w-3 h-3" />
                             {t}
@@ -729,59 +803,69 @@ export default function PokeYelp() {
                         ))}
                       </div>
                     )}
+                    </div>
 
                     {/* Optional comment */}
-                    <div className="mt-4">
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground inline-flex items-center gap-1 mb-1.5">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1 mb-2">
                         <MessageSquare className="w-3 h-3" /> Optional comment
                       </p>
                       <Textarea
                         value={comment}
                         onChange={(e) => setComment(e.target.value.slice(0, 500))}
-                        placeholder="Any extra thoughts? (optional)"
-                        className="text-sm min-h-[60px]"
+                        placeholder="Any extra thoughts?"
+                        className="text-sm min-h-[60px] bg-muted/30 border-transparent focus-visible:border-primary/40 resize-none"
                       />
                     </div>
                   </div>
-                </Card>
+                </div>
 
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      if (index > 0) {
-                        setSelected(new Set());
-                        setSuggestions([]);
-                        setCustom([]);
-                        setCustomInput('');
-                        setComment('');
-                        setImgErr(false);
-                        setIndex(index - 1);
-                      }
-                    }}
-                    disabled={index === 0}
-                    className="gap-1"
-                  >
-                    <ArrowLeft className="w-3.5 h-3.5" /> Back
-                  </Button>
-                  <Button variant="ghost" onClick={skip} className="flex-1 gap-1">
-                    <RotateCw className="w-3.5 h-3.5" /> Skip
-                  </Button>
-                  <Button onClick={submit} className="flex-[2] gap-1.5">
-                    <Sparkles className="w-4 h-4" />
-                    Submit
-                  </Button>
+                {/* Action area — primary hero CTA */}
+                <div className="pt-2 space-y-3">
+                  <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
+                    <Button
+                      onClick={submit}
+                      className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
+                      style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
+                    >
+                      <Sparkles className="w-5 h-5" />
+                      Submit Review
+                    </Button>
+                  </motion.div>
+                  <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
+                    <button
+                      onClick={() => {
+                        if (index > 0) {
+                          setSelected(new Set());
+                          setSuggestions([]);
+                          setCustom([]);
+                          setCustomInput('');
+                          setComment('');
+                          setImgErr(false);
+                          setIndex(index - 1);
+                        }
+                      }}
+                      disabled={index === 0}
+                      className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" /> Back
+                    </button>
+                    <span className="w-px h-3 bg-border" />
+                    <button onClick={skip} className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors">
+                      <RotateCw className="w-3.5 h-3.5" /> Skip this card
+                    </button>
+                  </div>
                 </div>
 
                 {!userId && (
-                  <Card className="p-4 border-primary/40 bg-primary/5 text-center">
+                  <div className="mt-4 text-center">
                     <p className="text-xs text-muted-foreground mb-2">
-                      Sign up to save your contributions, unlock swipe bonuses, and earn PokeIQ Premium.
+                      Sign up to save your contributions and unlock rewards.
                     </p>
-                    <Button onClick={() => navigate('/auth')} size="sm" className="gap-1.5">
+                    <Button onClick={() => navigate('/auth')} size="sm" variant="outline" className="gap-1.5 rounded-full">
                       <LogIn className="w-3.5 h-3.5" /> Sign up to start earning
                     </Button>
-                  </Card>
+                  </div>
                 )}
               </div>
             </motion.div>
