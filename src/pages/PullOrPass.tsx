@@ -142,16 +142,16 @@ export default function PullOrPass() {
     if (typeof window === 'undefined') return false;
     return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
   });
-  const showProNudge =
-    !premium &&
-    redemptionCount >= REDEMPTIONS_BEFORE_PRO_NUDGE &&
-    !proNudgeDismissed;
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premium && remaining <= 0;
   const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
+  const showProNudge =
+    !premium &&
+    redemptionCount >= REDEMPTIONS_BEFORE_PRO_NUDGE &&
+    !proNudgeDismissed;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
