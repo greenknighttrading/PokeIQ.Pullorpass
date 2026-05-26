@@ -194,6 +194,15 @@ function ActionTicker() {
     interface Signal { weight: number; icon: React.ReactNode; iconBg: string; title: string; detail: string; itemId?: string; }
     const signals: Signal[] = [];
 
+    // Play Pull or Pass CTA — high visibility, always first for authed users too
+    signals.push({
+      weight: 100,
+      icon: <Heart className="w-3 h-3 text-rose-400" />,
+      iconBg: 'bg-rose-500/15',
+      title: 'Play Pull or Pass',
+      detail: 'Swipe cards · build your DNA',
+    });
+
     // Profit Lock
     const profitLockItems = (milestones ?? []).filter(
       (m: any) => m.item.gainPercent > 300 && m.sellHalfProfit > 250 && m.item.quantity > 1
@@ -274,6 +283,7 @@ function ActionTicker() {
       '🏆 Greatest Hits': '/buylist/movers',
       '✏️ Create Your Own': '/buylist/movers',
       '🧠 Know Your Personality?': '/personality-test',
+      'Play Pull or Pass': '/swipe',
     };
     const path = base[s.title] || '/daily-report';
     if (s.itemId && (s.title === 'Lock Profit' || s.title === 'Weak Trend' || s.title === 'New High' || s.title === 'Over-Concentration')) {
