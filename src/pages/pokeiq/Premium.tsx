@@ -223,31 +223,76 @@ function PreviewShell({ children }: { children: React.ReactNode }) {
 }
 
 function AnalyticsPreview() {
+  // Mirrors the actual Portfolio Review: Health Score donut, total value,
+  // era allocation bar, and value-over-time sparkline.
+  const score = 87;
+  const circ = 2 * Math.PI * 28;
+  const offset = circ - (score / 100) * circ;
+  const eras: { label: string; pct: number; color: string }[] = [
+    { label: 'Vintage', pct: 42, color: 'hsl(265 85% 65%)' },
+    { label: 'Classic', pct: 22, color: 'hsl(290 75% 65%)' },
+    { label: 'Modern',  pct: 26, color: 'hsl(190 80% 60%)' },
+    { label: 'Sealed',  pct: 10, color: 'hsl(155 70% 55%)' },
+  ];
+  let acc = 0;
   return (
     <PreviewShell>
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Health Score</span>
-        <span className="text-[10px] text-emerald-400 flex items-center gap-1"><ArrowUpRight className="w-3 h-3" />+4.2%</span>
+      {/* Top row: Health Score donut + portfolio value */}
+      <div className="flex items-center gap-4 mb-3">
+        <div className="relative w-[68px] h-[68px] shrink-0">
+          <svg viewBox="0 0 64 64" className="w-full h-full -rotate-90">
+            <circle cx="32" cy="32" r="28" stroke="hsl(var(--border))" strokeWidth="6" fill="none" opacity="0.4" />
+            <circle
+              cx="32" cy="32" r="28"
+              stroke="rgb(167,139,250)" strokeWidth="6" fill="none"
+              strokeLinecap="round"
+              strokeDasharray={circ}
+              strokeDashoffset={offset}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-base font-bold leading-none">{score}</span>
+            <span className="text-[8px] text-muted-foreground leading-none mt-0.5">/100</span>
+          </div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Portfolio value</div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-xl font-bold">$12,480</span>
+            <span className="text-[10px] text-emerald-400 flex items-center gap-0.5">
+              <ArrowUpRight className="w-3 h-3" />+4.2%
+            </span>
+          </div>
+          <div className="text-[9px] text-violet-300 mt-0.5">Well Balanced</div>
+        </div>
       </div>
-      <div className="flex items-baseline gap-2 mb-3">
-        <span className="text-3xl font-bold">87</span>
-        <span className="text-xs text-muted-foreground">/ 100</span>
-      </div>
-      <svg viewBox="0 0 200 60" className="w-full h-14 mb-3">
+
+      {/* Value over time sparkline */}
+      <svg viewBox="0 0 200 40" className="w-full h-10 mb-3">
         <defs>
           <linearGradient id="apv" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="rgb(139,92,246)" stopOpacity="0.5" />
             <stop offset="100%" stopColor="rgb(139,92,246)" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <path d="M0,45 L20,38 L40,42 L60,30 L80,33 L100,22 L120,25 L140,15 L160,20 L180,10 L200,14 L200,60 L0,60 Z" fill="url(#apv)" />
-        <path d="M0,45 L20,38 L40,42 L60,30 L80,33 L100,22 L120,25 L140,15 L160,20 L180,10 L200,14" stroke="rgb(167,139,250)" strokeWidth="1.5" fill="none" />
+        <path d="M0,30 L20,26 L40,28 L60,20 L80,22 L100,14 L120,16 L140,10 L160,12 L180,6 L200,8 L200,40 L0,40 Z" fill="url(#apv)" />
+        <path d="M0,30 L20,26 L40,28 L60,20 L80,22 L100,14 L120,16 L140,10 L160,12 L180,6 L200,8" stroke="rgb(167,139,250)" strokeWidth="1.5" fill="none" />
       </svg>
-      <div className="grid grid-cols-3 gap-2 text-center">
-        {[['Vintage', '42%'], ['Modern', '38%'], ['Sealed', '20%']].map(([l, v]) => (
-          <div key={l} className="rounded-md bg-card/60 border border-border/50 py-1.5">
-            <div className="text-[9px] uppercase tracking-wider text-muted-foreground">{l}</div>
-            <div className="text-xs font-semibold">{v}</div>
+
+      {/* Era allocation stacked bar */}
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Era allocation</span>
+      </div>
+      <div className="w-full h-2 rounded-full overflow-hidden flex bg-card/60 border border-border/50 mb-2">
+        {eras.map((e) => (
+          <div key={e.label} style={{ width: `${e.pct}%`, background: e.color }} />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {eras.map((e) => (
+          <div key={e.label} className="flex items-center gap-1 text-[10px] text-muted-foreground">
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: e.color }} />
+            {e.label} <span className="text-foreground font-medium">{e.pct}%</span>
           </div>
         ))}
       </div>
@@ -256,20 +301,39 @@ function AnalyticsPreview() {
 }
 
 function ReportPreview() {
+  // Personalised report driven by the user's Collector Archetype.
   return (
     <PreviewShell>
       <div className="flex items-center gap-2 mb-3">
         <FileText className="w-4 h-4 text-violet-300" />
-        <span className="text-xs font-semibold">November Report</span>
+        <span className="text-xs font-semibold">Your November Report</span>
         <span className="ml-auto text-[10px] text-muted-foreground">2026</span>
       </div>
+
+      {/* Archetype badge */}
+      <div className="rounded-md border border-violet-500/30 bg-violet-500/10 p-2.5 mb-3">
+        <div className="flex items-center justify-between mb-1">
+          <div className="text-[9px] uppercase tracking-wider text-violet-300">Your archetype</div>
+          <div className="text-[9px] text-muted-foreground">92% match</div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-[11px] font-bold text-white">
+            IN
+          </div>
+          <div className="min-w-0">
+            <div className="text-xs font-semibold">The Investor</div>
+            <div className="text-[9px] text-muted-foreground truncate">Patient · Vintage-leaning · Long holds</div>
+          </div>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <ReportRow label="Portfolio value" value="$12,480" trend="+8.4%" up />
         <ReportRow label="Top mover" value="Charizard ex 199" trend="+22%" up />
         <ReportRow label="Underperformer" value="Pikachu V 043" trend="-6%" />
         <div className="rounded-md bg-violet-500/10 border border-violet-500/25 p-2 mt-3">
-          <div className="text-[10px] uppercase tracking-wider text-violet-300 mb-0.5">Recommended action</div>
-          <div className="text-xs">Rebalance 12% from Modern → Vintage</div>
+          <div className="text-[10px] uppercase tracking-wider text-violet-300 mb-0.5">Recommended for an Investor</div>
+          <div className="text-xs">Add 12% Vintage exposure — accumulate WOTC slabs on dips.</div>
         </div>
       </div>
     </PreviewShell>
@@ -312,34 +376,6 @@ function SmartFeedPreview() {
               <div className="text-[10px] text-violet-300">{it.tag}</div>
             </div>
             <div className="text-xs font-semibold">{it.price}</div>
-          </div>
-        ))}
-      </div>
-    </PreviewShell>
-  );
-}
-
-function BuyListPreview() {
-  const rows = [
-    { name: 'Rayquaza VMAX', delta: '-18%', target: '$120' },
-    { name: 'Giratina V Alt', delta: '-12%', target: '$310' },
-    { name: 'Gardevoir ex', delta: '-9%', target: '$54' },
-  ];
-  return (
-    <PreviewShell>
-      <div className="flex items-center gap-2 mb-3">
-        <ShoppingBag className="w-4 h-4 text-violet-300" />
-        <span className="text-xs font-semibold">Buy List</span>
-        <span className="ml-auto text-[10px] text-emerald-400">3 new alerts</span>
-      </div>
-      <div className="space-y-1.5">
-        {rows.map((r) => (
-          <div key={r.name} className="flex items-center justify-between text-xs p-2 rounded-md bg-card/60 border border-border/50">
-            <span className="font-medium truncate">{r.name}</span>
-            <div className="flex items-center gap-2">
-              <span className="text-emerald-400 text-[10px]">{r.delta}</span>
-              <span className="font-semibold">{r.target}</span>
-            </div>
           </div>
         ))}
       </div>
