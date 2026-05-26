@@ -49,8 +49,13 @@ function writeQuota(q: { date: string; used: number; bonus: number; lifetime: nu
 // PokeIQ Premium (granted after 200 Earn reviews → 30 days unlimited)
 function isPremiumActive(): boolean {
   try {
-    const until = Number(localStorage.getItem('pokeiq_premium_until') || '0');
-    return until > Date.now();
+    // PokeIQ Pro requires a paid subscription. No free auto-grants.
+    // Clear any legacy auto-granted premium flag so previously-flagged
+    // accounts (e.g. earned via training rewards) revert to Free.
+    if (localStorage.getItem('pokeiq_premium_until')) {
+      localStorage.removeItem('pokeiq_premium_until');
+    }
+    return false;
   } catch { return false; }
 }
 
