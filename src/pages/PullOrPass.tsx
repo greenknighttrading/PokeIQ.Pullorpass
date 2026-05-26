@@ -790,12 +790,27 @@ function DraggableCard({
 
   const [frozen, setFrozen] = React.useState<{ x: number; y: number; rot: number } | null>(null);
 
+  // Mobile/touch users get an amplified horizontal drag so swipes feel more
+  // responsive to thumb movement. Desktop mouse behavior is unchanged.
+  const isTouch = React.useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+    []
+  );
+  const X_MULTIPLIER = isTouch ? 1.25 : 1;
+  const touchThreshold = isTouch ? 88 : SWIPE_THRESHOLD;
+
+  const handleDrag = (_: any, info: PanInfo) => {
+    if (!isTouch) return;
+    x.set(info.offset.x * X_MULTIPLIER);
+  };
+
   const handleDragEnd = (_: any, info: PanInfo) => {
-    const { x: dx, y: dy } = info.offset;
+    const { x: rawDx, y: dy } = info.offset;
+    const dx = rawDx * X_MULTIPLIER;
     const { x: vx, y: vy } = info.velocity;
     const fastUp = vy < -500 || dy < -SWIPE_THRESHOLD;
-    const fastRight = vx > 500 || dx > SWIPE_THRESHOLD;
-    const fastLeft = vx < -500 || dx < -SWIPE_THRESHOLD;
+    const fastRight = vx > 500 || dx > touchThreshold;
+    const fastLeft = vx < -500 || dx < -touchThreshold;
 
     const willSwipe = (fastUp && Math.abs(dy) > Math.abs(dx)) || fastRight || fastLeft;
     if (willSwipe) {
@@ -842,6 +857,7 @@ function DraggableCard({
       drag={disabled || exitDir ? false : true}
       dragElastic={0.6}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      onDrag={handleDrag}
       onDragEnd={handleDragEnd}
       initial={{ opacity: 0.85, scale: 0.95, y: 14 }}
       animate={buildExitAnimate()}
