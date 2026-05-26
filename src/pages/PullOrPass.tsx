@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, ArrowDown, BookOpen, Tag, Layers, Apple } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
@@ -906,7 +906,6 @@ function ResultsView({
   const pulled = records.filter((r) => r.decision === 'pull');
   const passed = records.filter((r) => r.decision === 'pass');
 
-  const archetypeName = a.archetype?.name?.replace(/^The /, '') ?? 'Emerging Collector';
   const displayArchetype =
     a.archetype?.name?.replace(/^The /, '') ?? 'Nostalgic Chaos Collector';
   const archetypeDesc =
