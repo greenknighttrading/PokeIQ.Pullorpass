@@ -1,63 +1,159 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, BarChart3, PieChart, FileText, Sparkles, ArrowRight, Zap } from 'lucide-react';
+import { Crown, Check, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
-const tools = [
-  { href: '/rebalance', icon: PieChart, title: 'Portfolio Rebalancer', desc: 'See exactly where to put this month\'s budget across assets and eras.' },
-  { href: '/report', icon: FileText, title: 'PokeIQ Report', desc: 'Personalised narrative + Buy / Hold / Weak signals on every card you own.' },
-  { href: '/insights', icon: BarChart3, title: 'Advanced Portfolio Metrics', desc: 'Health Score, allocation balance, era diversification, risk analysis.' },
-  { href: '/era-allocation', icon: Sparkles, title: 'Era Allocation', desc: 'Drill into how your collection is spread across Pokémon eras.' },
-  { href: '/winners', icon: Zap, title: 'Top Movers in Your Bag', desc: 'Which of your cards are heating up — and which are bleeding value.' },
-  { href: '/buylist/scanner', icon: BarChart3, title: 'Card Scanner Pro', desc: 'Deep scan with confidence intervals, comp history, and signal context.' },
+const includedFeatures = [
+  'Unlimited Pull or Pass swipes',
+  'Advanced portfolio analytics',
+  'Personalised PokeIQ Report',
+  'Health Score & risk analysis',
+  'Portfolio Rebalancer (Asset + Era)',
+  'Era Allocation breakdown',
+  'Top Movers in your bag',
+  'Card Scanner Pro (confidence + comps)',
+  'Smart Feed with daily picks',
+  'Sealed vs Cards comparison tool',
+  'Pack Gains EV calculator',
+  'Market News & daily briefs',
+  'Buy List with curated picks',
+  'Movers, Sets Explorer & Watchlist',
+  'Recommendation tuning',
+  'Priority support',
+];
+
+const excludedFeatures = [
+  'Physical card grading service',
+  'In-person consignment',
+];
+
+const advancedTools = [
+  { href: '/home', title: 'Overview Dashboard' },
+  { href: '/collection', title: 'Manage Collection' },
+  { href: '/winners', title: 'Position Details' },
+  { href: '/insights', title: 'Signals' },
+  { href: '/rebalance', title: 'Asset Rebalancer' },
+  { href: '/era-allocation', title: 'Era Allocation' },
+  { href: '/report', title: 'Generate Report' },
+  { href: '/smart-feed', title: 'Smart Feed' },
+  { href: '/daily-report', title: 'Market News' },
+  { href: '/tools/sealed-vs-cards', title: 'Sealed vs Cards' },
+  { href: '/pack-gains', title: 'Pack Gains' },
+  { href: '/buylist/list', title: 'Buy List' },
+  { href: '/buylist/movers', title: 'Movers' },
+  { href: '/buylist/sets', title: 'Sets Explorer' },
+  { href: '/buylist/scanner', title: 'Card Scanner' },
+  { href: '/buylist/watchlist', title: 'Watchlist' },
 ];
 
 export default function Premium() {
+  const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
+  const monthlyPrice = 5;
+  const annualTotal = 49;
+  const annualMonthly = (annualTotal / 12).toFixed(2); // 4.08
+  const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
+
   return (
-    <div className="px-6 lg:px-10 py-8 max-w-[1400px] mx-auto">
-      <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground mb-2">Premium</div>
-      <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight">PokeIQ Premium</h1>
-        <Crown className="w-7 h-7 text-primary" />
-      </div>
-      <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
-        Advanced portfolio analytics, your personalised PokeIQ Report, and the full collecting & budgeting toolkit.
-        All Premium tools are currently in <span className="text-primary font-semibold">beta</span> — your feedback shapes them.
-      </p>
-
-      <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-primary/5 to-transparent p-6 mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div>
-          <div className="text-xs uppercase tracking-wider text-primary font-semibold mb-1">Go Premium</div>
-          <div className="text-xl font-bold">$5 / month · $49 / year</div>
-          <div className="text-xs text-muted-foreground mt-1">Unlimited swipes, every analytics tool, priority support.</div>
+    <div className="px-6 lg:px-10 py-10 max-w-[1100px] mx-auto">
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-primary mb-3">
+          <Crown className="w-3.5 h-3.5" /> PokeIQ Premium
         </div>
-        <Button size="lg" className="gap-2">
-          <Crown className="w-4 h-4" /> Upgrade Now
-        </Button>
+        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
+          Unlock the full collector toolkit
+        </h1>
+        <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+          Advanced portfolio analytics, your personalised PokeIQ Report, and every collecting & budgeting tool — all in beta, shaped by your feedback.
+        </p>
+
+        {/* Billing toggle */}
+        <div className="mt-6 inline-flex items-center bg-card/60 border border-border/60 rounded-full p-1">
+          <button
+            onClick={() => setBilling('monthly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
+              billing === 'monthly' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+            )}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBilling('annual')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5',
+              billing === 'annual' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+            )}
+          >
+            Annual
+            <span className={cn(
+              'text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
+              billing === 'annual' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/20 text-primary'
+            )}>
+              Save 18%
+            </span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tools.map((t) => {
-          const Icon = t.icon;
-          return (
+      {/* Pricing card */}
+      <div className="relative max-w-md mx-auto rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card/60 to-card/30 p-7 mb-10 overflow-hidden">
+        <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-primary text-primary-foreground">
+          Most popular
+        </div>
+        <div className="text-lg font-semibold mb-4">Premium</div>
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="text-5xl font-bold">${shown}</span>
+          <span className="text-sm text-muted-foreground">/ month</span>
+        </div>
+        <div className="text-xs text-muted-foreground mb-4">
+          {billing === 'annual'
+            ? `$${annualTotal} billed annually`
+            : 'Billed monthly · cancel anytime'}
+        </div>
+        <p className="text-sm text-muted-foreground mb-5">
+          Full analytics suite for smart collectors.
+        </p>
+
+        <Button size="lg" className="w-full mb-6 gap-2">
+          <Crown className="w-4 h-4" /> Get Premium
+        </Button>
+
+        <div className="text-xs font-semibold uppercase tracking-wider text-foreground/80 mb-3">Includes:</div>
+        <ul className="space-y-2 mb-5">
+          {includedFeatures.map((f) => (
+            <li key={f} className="flex items-start gap-2 text-sm">
+              <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <span>{f}</span>
+            </li>
+          ))}
+          {excludedFeatures.map((f) => (
+            <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground/60">
+              <X className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{f}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Advanced tools preview */}
+      <div>
+        <h2 className="text-lg font-bold mb-1">All Premium tools</h2>
+        <p className="text-xs text-muted-foreground mb-4">
+          Every advanced page below is included with Premium. All currently in <span className="text-primary font-semibold">beta</span>.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          {advancedTools.map((t) => (
             <Link
               key={t.href}
               to={t.href}
-              className="group rounded-xl border border-border/60 bg-card/30 p-5 transition-all hover:border-primary/40 hover:bg-card/50"
+              className="group flex items-center justify-between rounded-lg border border-border/50 bg-card/30 px-3 py-2.5 text-xs font-medium hover:border-primary/40 hover:bg-card/60 transition-colors"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary" />
-                </div>
-                <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">Beta</span>
-              </div>
-              <div className="font-semibold mb-1">{t.title}</div>
-              <p className="text-xs text-muted-foreground leading-relaxed mb-3">{t.desc}</p>
-              <div className="flex items-center gap-1 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                Open <ArrowRight className="w-3 h-3" />
-              </div>
+              <span className="truncate">{t.title}</span>
+              <ArrowRight className="w-3 h-3 text-muted-foreground group-hover:text-primary shrink-0" />
             </Link>
-          );
-        })}
+          ))}
+        </div>
       </div>
     </div>
   );
