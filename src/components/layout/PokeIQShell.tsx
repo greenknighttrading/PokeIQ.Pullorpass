@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Heart, User, Trophy, ScanLine, Crown, Zap, Users,
+  Heart, User, Trophy, ScanLine, Crown, Zap, Users, Lock,
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
 
 interface NavItem {
@@ -28,7 +29,7 @@ const primaryNav: NavItem[] = [
 ];
 
 const premiumCollect: NavItem[] = [
-  { label: 'Overview', href: '/home', icon: LayoutDashboard },
+  { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard },
   { label: 'Manage Collection', href: '/collection', icon: Layers },
   { label: 'Position Details', href: '/winners', icon: Trophy },
   { label: 'Signals', href: '/insights', icon: Lightbulb },
@@ -51,10 +52,18 @@ const premiumTools: NavItem[] = [
 export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isPremium } = useIsPremium();
   const isPremiumPath = [...premiumCollect, ...premiumTools].some(
     (i) => location.pathname === i.href || location.pathname.startsWith(i.href + '/')
   ) || location.pathname === '/premium';
   const [premiumOpen, setPremiumOpen] = useState(isPremiumPath);
+
+  const handlePremiumLink = (e: React.MouseEvent, href: string) => {
+    if (!isPremium) {
+      e.preventDefault();
+      navigate('/premium');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -115,13 +124,13 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium',
                   location.pathname === '/premium'
-                    ? 'text-primary'
-                    : 'text-muted-foreground hover:text-foreground'
+                    ? 'text-accent'
+                    : 'text-accent/80 hover:text-accent'
                 )}
               >
-                <Crown className="w-3.5 h-3.5" /> Upgrade
+                <Crown className="w-3.5 h-3.5" /> Unlimited Swipes
               </Link>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1 px-2.5">Collect</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1 px-2.5">Advanced Analytics</div>
               {premiumCollect.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.href;
@@ -129,16 +138,19 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.href}
                     to={item.href}
+                    onClick={(e) => handlePremiumLink(e, item.href)}
                     className={cn(
                       'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30'
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5" /> {item.label}
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {!isPremium && <Lock className="w-3 h-3 text-accent/70" />}
                   </Link>
                 );
               })}
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-3 mb-1 px-2.5">Tools</div>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-3 mb-1 px-2.5">Beta Tools</div>
               {premiumTools.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.href;
@@ -146,12 +158,15 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.href}
                     to={item.href}
+                    onClick={(e) => handlePremiumLink(e, item.href)}
                     className={cn(
                       'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30'
                     )}
                   >
-                    <Icon className="w-3.5 h-3.5" /> {item.label}
+                    <Icon className="w-3.5 h-3.5" />
+                    <span className="flex-1 truncate">{item.label}</span>
+                    {!isPremium && <Lock className="w-3 h-3 text-accent/70" />}
                   </Link>
                 );
               })}
