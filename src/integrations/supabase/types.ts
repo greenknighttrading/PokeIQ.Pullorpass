@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      archetypes: {
+        Row: {
+          centroid_embedding: string | null
+          created_at: string
+          description: string | null
+          id: string
+          member_count: number
+          name: string
+          seed_traits: Json
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          centroid_embedding?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name: string
+          seed_traits?: Json
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          centroid_embedding?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          member_count?: number
+          name?: string
+          seed_traits?: Json
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       buylist_access: {
         Row: {
           granted_at: string
@@ -273,6 +309,84 @@ export type Database = {
         }
         Relationships: []
       }
+      card_community_stats: {
+        Row: {
+          card_id: string
+          confidence: number
+          hover_ms_p50: number | null
+          hovers: number
+          last_computed_at: string
+          popularity_score: number
+          pull_pct: number | null
+          repeat_view_rate: number | null
+          swipes_love: number
+          swipes_pass: number
+          swipes_pull: number
+          swipes_super: number
+          trending_score_30d: number
+          trending_score_7d: number
+          views: number
+        }
+        Insert: {
+          card_id: string
+          confidence?: number
+          hover_ms_p50?: number | null
+          hovers?: number
+          last_computed_at?: string
+          popularity_score?: number
+          pull_pct?: number | null
+          repeat_view_rate?: number | null
+          swipes_love?: number
+          swipes_pass?: number
+          swipes_pull?: number
+          swipes_super?: number
+          trending_score_30d?: number
+          trending_score_7d?: number
+          views?: number
+        }
+        Update: {
+          card_id?: string
+          confidence?: number
+          hover_ms_p50?: number | null
+          hovers?: number
+          last_computed_at?: string
+          popularity_score?: number
+          pull_pct?: number | null
+          repeat_view_rate?: number | null
+          swipes_love?: number
+          swipes_pass?: number
+          swipes_pull?: number
+          swipes_super?: number
+          trending_score_30d?: number
+          trending_score_7d?: number
+          views?: number
+        }
+        Relationships: []
+      }
+      card_embeddings: {
+        Row: {
+          art_embedding: string | null
+          card_id: string
+          source: string
+          tag_embedding: string | null
+          updated_at: string
+        }
+        Insert: {
+          art_embedding?: string | null
+          card_id: string
+          source?: string
+          tag_embedding?: string | null
+          updated_at?: string
+        }
+        Update: {
+          art_embedding?: string | null
+          card_id?: string
+          source?: string
+          tag_embedding?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       card_tag_aggregates: {
         Row: {
           card_id: string
@@ -296,6 +410,53 @@ export type Database = {
           vote_count?: number
         }
         Relationships: []
+      }
+      card_tag_stats: {
+        Row: {
+          ai_suggested_count: number
+          card_id: string
+          confidence: number
+          decayed_weight: number
+          last_computed_at: string
+          last_voted_at: string | null
+          source_mix: Json
+          tag_id: string
+          unique_users: number
+          vote_count: number
+        }
+        Insert: {
+          ai_suggested_count?: number
+          card_id: string
+          confidence?: number
+          decayed_weight?: number
+          last_computed_at?: string
+          last_voted_at?: string | null
+          source_mix?: Json
+          tag_id: string
+          unique_users?: number
+          vote_count?: number
+        }
+        Update: {
+          ai_suggested_count?: number
+          card_id?: string
+          confidence?: number
+          decayed_weight?: number
+          last_computed_at?: string
+          last_voted_at?: string | null
+          source_mix?: Json
+          tag_id?: string
+          unique_users?: number
+          vote_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_tag_stats_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       card_tag_votes: {
         Row: {
@@ -432,6 +593,48 @@ export type Database = {
           tcgplayer_url?: string | null
           total_set_number?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      collector_follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
+      collector_similarity: {
+        Row: {
+          computed_at: string
+          method: string
+          neighbor_id: string
+          similarity: number
+          user_id: string
+        }
+        Insert: {
+          computed_at?: string
+          method?: string
+          neighbor_id: string
+          similarity: number
+          user_id: string
+        }
+        Update: {
+          computed_at?: string
+          method?: string
+          neighbor_id?: string
+          similarity?: number
+          user_id?: string
         }
         Relationships: []
       }
@@ -749,6 +952,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pokeiq_events: {
+        Row: {
+          card_id: string | null
+          client_ts: string | null
+          created_at: string
+          event_type: string
+          id: string
+          ingest_batch_id: string | null
+          payload: Json
+          server_ts: string
+          session_id: string | null
+          source_page: string | null
+          tag_id: string | null
+          user_id: string
+        }
+        Insert: {
+          card_id?: string | null
+          client_ts?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          ingest_batch_id?: string | null
+          payload?: Json
+          server_ts?: string
+          session_id?: string | null
+          source_page?: string | null
+          tag_id?: string | null
+          user_id: string
+        }
+        Update: {
+          card_id?: string | null
+          client_ts?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          ingest_batch_id?: string | null
+          payload?: Json
+          server_ts?: string
+          session_id?: string | null
+          source_page?: string | null
+          tag_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pokeiq_likes: {
         Row: {
           artist: string | null
@@ -829,6 +1077,98 @@ export type Database = {
           variant?: string | null
         }
         Relationships: []
+      }
+      pokeiq_profiles: {
+        Row: {
+          archetype_confidence: number
+          archetype_id: string | null
+          art_focus_score: number
+          chaos_score: number
+          created_at: string
+          grail_appetite: number
+          jp_lean: number
+          last_computed_at: string
+          model_version: string
+          nostalgia_score: number
+          price_distribution: Json
+          rarity_lean: number
+          sealed_lean: number
+          signal_count: number
+          stage: string
+          taste_embedding: string | null
+          top_artists: Json
+          top_eras: Json
+          top_pokemon: Json
+          top_rarities: Json
+          top_sets: Json
+          top_types: Json
+          updated_at: string
+          user_id: string
+          value_lean: number
+        }
+        Insert: {
+          archetype_confidence?: number
+          archetype_id?: string | null
+          art_focus_score?: number
+          chaos_score?: number
+          created_at?: string
+          grail_appetite?: number
+          jp_lean?: number
+          last_computed_at?: string
+          model_version?: string
+          nostalgia_score?: number
+          price_distribution?: Json
+          rarity_lean?: number
+          sealed_lean?: number
+          signal_count?: number
+          stage?: string
+          taste_embedding?: string | null
+          top_artists?: Json
+          top_eras?: Json
+          top_pokemon?: Json
+          top_rarities?: Json
+          top_sets?: Json
+          top_types?: Json
+          updated_at?: string
+          user_id: string
+          value_lean?: number
+        }
+        Update: {
+          archetype_confidence?: number
+          archetype_id?: string | null
+          art_focus_score?: number
+          chaos_score?: number
+          created_at?: string
+          grail_appetite?: number
+          jp_lean?: number
+          last_computed_at?: string
+          model_version?: string
+          nostalgia_score?: number
+          price_distribution?: Json
+          rarity_lean?: number
+          sealed_lean?: number
+          signal_count?: number
+          stage?: string
+          taste_embedding?: string | null
+          top_artists?: Json
+          top_eras?: Json
+          top_pokemon?: Json
+          top_rarities?: Json
+          top_sets?: Json
+          top_types?: Json
+          updated_at?: string
+          user_id?: string
+          value_lean?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pokeiq_profiles_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pokeyelp_reviews: {
         Row: {
@@ -1034,6 +1374,81 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_impressions: {
+        Row: {
+          card_id: string
+          clicked_at: string | null
+          dismissed_at: string | null
+          id: string
+          led_to_action: string | null
+          model_version: string | null
+          shown_at: string
+          slot: number
+          surface: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          clicked_at?: string | null
+          dismissed_at?: string | null
+          id?: string
+          led_to_action?: string | null
+          model_version?: string | null
+          shown_at?: string
+          slot?: number
+          surface: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          clicked_at?: string | null
+          dismissed_at?: string | null
+          id?: string
+          led_to_action?: string | null
+          model_version?: string | null
+          shown_at?: string
+          slot?: number
+          surface?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recommendations_feed: {
+        Row: {
+          card_id: string
+          expires_at: string | null
+          generated_at: string
+          id: string
+          model_version: string
+          reason_codes: string[]
+          score: number
+          surface: string
+          user_id: string
+        }
+        Insert: {
+          card_id: string
+          expires_at?: string | null
+          generated_at?: string
+          id?: string
+          model_version?: string
+          reason_codes?: string[]
+          score: number
+          surface: string
+          user_id: string
+        }
+        Update: {
+          card_id?: string
+          expires_at?: string | null
+          generated_at?: string
+          id?: string
+          model_version?: string
+          reason_codes?: string[]
+          score?: number
+          surface?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sealed_ppt: {
         Row: {
           category: string | null
@@ -1186,6 +1601,125 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      tag_clusters: {
+        Row: {
+          centroid_embedding: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          centroid_embedding?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          centroid_embedding?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tag_synonyms: {
+        Row: {
+          alias_tag_id: string
+          canonical_tag_id: string
+          confidence: number
+          created_at: string
+          decided_by: string
+          id: string
+        }
+        Insert: {
+          alias_tag_id: string
+          canonical_tag_id: string
+          confidence?: number
+          created_at?: string
+          decided_by?: string
+          id?: string
+        }
+        Update: {
+          alias_tag_id?: string
+          canonical_tag_id?: string
+          confidence?: number
+          created_at?: string
+          decided_by?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tag_synonyms_alias_tag_id_fkey"
+            columns: ["alias_tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tag_synonyms_canonical_tag_id_fkey"
+            columns: ["canonical_tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tags: {
+        Row: {
+          category: string
+          cluster_id: string | null
+          created_at: string
+          display_name: string
+          embedding: string | null
+          id: string
+          is_canonical: boolean
+          slug: string
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          cluster_id?: string | null
+          created_at?: string
+          display_name: string
+          embedding?: string | null
+          id?: string
+          is_canonical?: boolean
+          slug: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cluster_id?: string | null
+          created_at?: string
+          display_name?: string
+          embedding?: string | null
+          id?: string
+          is_canonical?: boolean
+          slug?: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_cluster_id_fkey"
+            columns: ["cluster_id"]
+            isOneToOne: false
+            referencedRelation: "tag_clusters"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_asset_mappings: {
         Row: {
