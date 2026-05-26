@@ -162,6 +162,7 @@ export function buildPortfolioReportHtml({
     role: string;
     howTheyCollect: string[];
     whatItSays: string;
+    collectingMindset: string;
     coreStrength: string;
     tradeOff: string;
   };
@@ -176,7 +177,8 @@ export function buildPortfolioReportHtml({
         subtitle: info.tagline,
         role: '',
         howTheyCollect: info.collectionStyle,
-        whatItSays: `${info.fullProfile.coreIdentity} ${info.fullProfile.collectingMindset}`,
+        whatItSays: info.fullProfile.coreIdentity,
+        collectingMindset: info.fullProfile.collectingMindset,
         coreStrength: info.strength.replace(/\.$/, ''),
         tradeOff: info.weakness.replace(/\.$/, ''),
       };
