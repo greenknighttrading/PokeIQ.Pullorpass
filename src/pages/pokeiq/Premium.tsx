@@ -4,8 +4,23 @@ import { Crown, Check, X, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const includedFeatures = [
+const coreFeatures = [
   'Unlimited Pull or Pass swipes',
+  'Advanced recommendation engine',
+  'Collector DNA insights',
+  'Taste evolution tracking',
+  'Recommendation tuning',
+  'Personalized card discoveries',
+  'Collector similarity matching',
+  'Community leaderboard boosts',
+  'Early access archetypes',
+  'Enhanced card intelligence',
+  'Premium binder customization',
+  'AI-powered collector insights',
+  'Swipe streak rewards',
+];
+
+const includedFeatures = [
   'Advanced portfolio analytics',
   'Personalised PokeIQ Report',
   'Health Score & risk analysis',
@@ -19,7 +34,6 @@ const includedFeatures = [
   'Market News & daily briefs',
   'Buy List with curated picks',
   'Movers, Sets Explorer & Watchlist',
-  'Recommendation tuning',
   'Priority support',
 ];
 
