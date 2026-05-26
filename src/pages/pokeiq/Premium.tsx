@@ -7,7 +7,6 @@ import {
   BarChart3,
   FileText,
   Rss,
-  ShoppingBag,
   LayoutGrid,
   TrendingUp,
   TrendingDown,
@@ -47,9 +46,55 @@ export default function Premium() {
         <p className="text-sm text-muted-foreground max-w-xl mx-auto">
           The complete Pull or Pass experience — plus advanced portfolio analytics as a bonus.
         </p>
+      </div>
 
-        {/* Billing toggle */}
-        <div className="mt-6 inline-flex items-center bg-card/60 border border-border/60 rounded-full p-1">
+      {/* Premium feature previews */}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-violet-300 mb-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30">
+          <Sparkles className="w-3 h-3" /> Premium features
+        </div>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
+          Always know when to <br className="hidden sm:block" />buy, sell, or grade
+        </h2>
+        <p className="text-sm text-muted-foreground mt-2">
+          Powerful tools designed to help collectors make smarter decisions.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-5 mb-10">
+        <FeatureCard
+          icon={BarChart3}
+          title="Advanced portfolio analytics"
+          description="Track Health Score, era allocation, value-over-time, and risk exposure across your entire collection — the full Portfolio Review at your fingertips."
+          chips={['Health Score', 'Era allocation', 'Value over time']}
+          preview={<AnalyticsPreview />}
+        />
+        <FeatureCard
+          icon={FileText}
+          title="Personalised PokeIQ Report"
+          description="Your Collector Archetype meets your portfolio. We use your DNA — Investor, Archivist, Gambler — to tailor every recommendation in your monthly briefing."
+          chips={['Archetype-driven', 'Tailored picks', 'Monthly briefing']}
+          preview={<ReportPreview />}
+        />
+        <FeatureCard
+          icon={Rss}
+          title="Custom Smart Feed"
+          description="Daily curated picks based on your budget, taste, and the cards trending in your favorite sets."
+          chips={['Daily picks', 'Budget-aware', 'Trend-driven']}
+          preview={<SmartFeedPreview />}
+        />
+        <FeatureCard
+          icon={LayoutGrid}
+          title="Sets Explorer"
+          description="Dive into every set with chase odds, sealed performance, and singles momentum side-by-side."
+          chips={['Chase odds', 'Sealed vs singles', 'Set momentum']}
+          preview={<SetsExplorerPreview />}
+        />
+      </div>
+
+      {/* Billing toggle — sits right above the pricing widget */}
+      <div className="flex justify-center mb-4">
+        <div className="inline-flex items-center bg-card/60 border border-border/60 rounded-full p-1">
           <button
             onClick={() => setBilling('annual')}
             className={cn(
@@ -77,85 +122,7 @@ export default function Premium() {
         </div>
       </div>
 
-      {/* Core Pull or Pass feature widget */}
-      <div
-        className="relative rounded-2xl border border-violet-500/40 bg-gradient-to-br from-violet-500/15 via-card/70 to-card/40 p-8 overflow-hidden mb-10"
-        style={{ boxShadow: '0 0 80px rgba(139, 92, 246, 0.25), 0 0 30px rgba(167, 139, 250, 0.15) inset' }}
-      >
-        {/* Glow orbs */}
-        <div className="pointer-events-none absolute -top-24 -right-24 w-72 h-72 rounded-full bg-violet-500/30 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
-
-        <div className="relative">
-          <div className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <Heart className="w-5 h-5 text-violet-300" /> Unlimited Pull or Pass
-          </div>
-          <p className="text-sm text-muted-foreground mb-6 max-w-lg">
-            Swipe as much as you want and train the recommendation engine on your taste.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
-            {coreFeatures.map((f) => (
-              <div key={f} className="flex items-start gap-2 text-sm">
-                <Sparkles className="w-4 h-4 text-violet-300 shrink-0 mt-0.5" />
-                <span>{f}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Premium feature previews */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-violet-300 mb-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30">
-          <Sparkles className="w-3 h-3" /> Premium features
-        </div>
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-          Always know when to <br className="hidden sm:block" />buy, sell, or grade
-        </h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Powerful tools designed to help collectors make smarter decisions.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-5 mb-10">
-        <FeatureCard
-          icon={BarChart3}
-          title="Advanced portfolio analytics"
-          description="Track Health Score, risk exposure, era allocation, and momentum across your entire collection in real time."
-          chips={['Health Score & risk analysis', 'Era allocation', 'Momentum tracking']}
-          preview={<AnalyticsPreview />}
-        />
-        <FeatureCard
-          icon={FileText}
-          title="Personalised PokeIQ Report"
-          description="A monthly briefing on your collection — wins, losses, what to hold, and where to rebalance next."
-          chips={['Monthly briefing', 'Hold / rebalance calls', 'Tailored to your portfolio']}
-          preview={<ReportPreview />}
-        />
-        <FeatureCard
-          icon={Rss}
-          title="Custom Smart Feed"
-          description="Daily curated picks based on your budget, taste, and the cards trending in your favorite sets."
-          chips={['Daily picks', 'Budget-aware', 'Trend-driven']}
-          preview={<SmartFeedPreview />}
-        />
-        <FeatureCard
-          icon={ShoppingBag}
-          title="Curated Buy List"
-          description="A live list of undervalued cards we'd buy right now, refreshed with arbitrage and price-spike alerts."
-          chips={['Arbitrage opportunities', 'Price spike alerts', 'Refreshed daily']}
-          preview={<BuyListPreview />}
-        />
-        <FeatureCard
-          icon={LayoutGrid}
-          title="Sets Explorer"
-          description="Dive into every set with chase odds, sealed performance, and singles momentum side-by-side."
-          chips={['Chase odds', 'Sealed vs singles', 'Set momentum']}
-          preview={<SetsExplorerPreview />}
-        />
-      </div>
-
-      {/* Pricing CTA */}
+      {/* Pricing CTA + Unlimited Pull or Pass perks */}
       <div
         className="relative rounded-2xl border border-violet-500/40 bg-gradient-to-br from-violet-500/15 via-card/70 to-card/40 p-8 overflow-hidden text-center"
         style={{ boxShadow: '0 0 80px rgba(139, 92, 246, 0.25), 0 0 30px rgba(167, 139, 250, 0.15) inset' }}
@@ -178,11 +145,27 @@ export default function Premium() {
           </div>
           <Button
             size="lg"
-            className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0"
+            className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0 mb-8"
             style={{ boxShadow: '0 0 30px rgba(139, 92, 246, 0.45)' }}
           >
             <Crown className="w-4 h-4" /> Get Premium
           </Button>
+
+          {/* Unlimited Pull or Pass — included perks */}
+          <div className="pt-6 border-t border-violet-500/25 text-left max-w-md mx-auto">
+            <div className="flex items-center gap-2 mb-3 justify-center">
+              <Heart className="w-4 h-4 text-violet-300" />
+              <span className="text-sm font-semibold">Unlimited Pull or Pass included</span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+              {coreFeatures.map((f) => (
+                <div key={f} className="flex items-start gap-2 text-xs">
+                  <Check className="w-3.5 h-3.5 text-violet-300 shrink-0 mt-0.5" />
+                  <span className="text-muted-foreground">{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
