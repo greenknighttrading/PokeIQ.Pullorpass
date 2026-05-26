@@ -22,14 +22,14 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
-        navigate('/home');
+        navigate('/pokeiq-daily');
       }
     };
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && !session.user.is_anonymous) {
-        navigate('/home');
+        navigate('/pokeiq-daily');
       }
     });
 
@@ -68,7 +68,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/home` }
+        options: { emailRedirectTo: `${window.location.origin}/pokeiq-daily` }
       });
 
       if (error) {
@@ -102,7 +102,7 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
       } else {
-        navigate('/home');
+        navigate('/pokeiq-daily');
       }
     } catch (err) {
       toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });

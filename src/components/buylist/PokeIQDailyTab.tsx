@@ -194,6 +194,15 @@ function ActionTicker() {
     interface Signal { weight: number; icon: React.ReactNode; iconBg: string; title: string; detail: string; itemId?: string; }
     const signals: Signal[] = [];
 
+    // Play Pull or Pass CTA — high visibility, always first for authed users too
+    signals.push({
+      weight: 100,
+      icon: <Heart className="w-3 h-3 text-rose-400" />,
+      iconBg: 'bg-rose-500/15',
+      title: 'Play Pull or Pass',
+      detail: 'Swipe cards · build your DNA',
+    });
+
     // Profit Lock
     const profitLockItems = (milestones ?? []).filter(
       (m: any) => m.item.gainPercent > 300 && m.sellHalfProfit > 250 && m.item.quantity > 1
@@ -274,6 +283,7 @@ function ActionTicker() {
       '🏆 Greatest Hits': '/buylist/movers',
       '✏️ Create Your Own': '/buylist/movers',
       '🧠 Know Your Personality?': '/personality-test',
+      'Play Pull or Pass': '/swipe',
     };
     const path = base[s.title] || '/daily-report';
     if (s.itemId && (s.title === 'Lock Profit' || s.title === 'Weak Trend' || s.title === 'New High' || s.title === 'Over-Concentration')) {
@@ -294,10 +304,13 @@ function ActionTicker() {
             {i > 0 && <div className="w-px h-4 bg-border/30 shrink-0" />}
             <button
               onClick={() => navigate(getHref(s))}
-              className="flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity"
+              className={cn(
+                'flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity',
+                s.title === 'Play Pull or Pass' && 'ring-1 ring-rose-400/40 rounded-full px-2.5 py-1 bg-rose-500/10'
+              )}
             >
               <div className={cn('w-5 h-5 rounded flex items-center justify-center', s.iconBg)}>{s.icon}</div>
-              <span className="text-[13px] font-semibold text-foreground whitespace-nowrap">{s.title}</span>
+              <span className={cn('text-[13px] font-semibold whitespace-nowrap', s.title === 'Play Pull or Pass' ? 'text-rose-400' : 'text-foreground')}>{s.title}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">{s.detail}</span>
             </button>
           </React.Fragment>
