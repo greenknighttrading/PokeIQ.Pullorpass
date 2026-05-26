@@ -2233,6 +2233,8 @@ function OutOfSwipesModal({
   redeeming,
   isAuthed,
   onSignUp,
+  showProNudge,
+  onKeepTraining,
 }: {
   credits: number;
   canRedeem: boolean;
@@ -2240,8 +2242,11 @@ function OutOfSwipesModal({
   redeeming: boolean;
   isAuthed: boolean;
   onSignUp: () => void;
+  showProNudge?: boolean;
+  onKeepTraining?: () => void;
 }) {
   const needed = Math.max(0, CREDITS_PER_REDEMPTION - credits);
+  const inProNudge = !!showProNudge && isAuthed;
   return (
     <motion.div
       className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-background/70 backdrop-blur-md"
@@ -2257,6 +2262,37 @@ function OutOfSwipesModal({
       >
         <Card className="relative overflow-hidden p-7 border-primary/40 bg-card/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)]">
           <div aria-hidden className="absolute -top-24 -right-24 w-[280px] h-[280px] rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          {inProNudge ? (
+            <div className="relative space-y-5 text-center">
+              <div className="mx-auto w-14 h-14 rounded-full bg-amber-400/15 flex items-center justify-center ring-1 ring-amber-400/40">
+                <Crown className="w-6 h-6 text-amber-400" />
+              </div>
+              <div className="space-y-1.5">
+                <h2 className="text-2xl font-bold text-foreground tracking-tight">Swiping a lot lately?</h2>
+                <p className="text-sm text-muted-foreground">
+                  Skip the credit grind. Go PokeIQ Pro for unlimited swipes — or keep training and earning.
+                </p>
+              </div>
+              <div className="space-y-2.5 pt-1">
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => toast.success("PokeIQ Pro launches soon — you're on the early list.")}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
+                >
+                  <Crown className="w-5 h-5" />
+                  Go PokeIQ Pro — unlimited
+                </motion.button>
+                <button
+                  onClick={onKeepTraining}
+                  className="w-full h-12 rounded-xl border border-border bg-muted/40 hover:bg-muted/60 text-foreground font-medium text-sm inline-flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Keep training PokeIQ
+                </button>
+              </div>
+            </div>
+          ) : (
           <div className="relative space-y-5 text-center">
             <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-primary/30">
               <Lock className="w-6 h-6 text-primary" />
@@ -2327,6 +2363,7 @@ function OutOfSwipesModal({
               </div>
             )}
           </div>
+          )}
         </Card>
       </motion.div>
     </motion.div>
