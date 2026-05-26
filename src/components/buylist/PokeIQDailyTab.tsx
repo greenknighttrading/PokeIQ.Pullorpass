@@ -342,15 +342,6 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
     interface Signal { icon: React.ReactNode; iconBg: string; title: string; detail: string; href?: string; }
     const s: Signal[] = [];
 
-    // Play Pull or Pass CTA — high visibility, placed first
-    s.push({
-      icon: <Heart className="w-3.5 h-3.5 text-primary" />,
-      iconBg: 'bg-gradient-to-r from-primary/30 via-cyan-400/30 to-purple-500/30',
-      title: 'Play Pull or Pass',
-      detail: 'Discover your collecting taste →',
-      href: '/swipe',
-    });
-
     // Market sentiment
     const isGreedy = dbCounts.cardsUpPct >= 55;
     const isFearful = dbCounts.cardsUpPct < 45;
@@ -358,6 +349,15 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
     const sentimentIcon = isGreedy ? <TrendingUp className="w-3.5 h-3.5 text-success" /> : isFearful ? <TrendingDown className="w-3.5 h-3.5 text-destructive" /> : <Zap className="w-3.5 h-3.5 text-warning" />;
     const sentimentBg = isGreedy ? 'bg-success/10' : isFearful ? 'bg-destructive/10' : 'bg-warning/10';
     s.push({ icon: sentimentIcon, iconBg: sentimentBg, title: 'Market Pulse', detail: `${sentiment} · ${dbCounts.cardsUpPct}% up` });
+
+    // Play Pull or Pass CTA — always shown in the SECOND slot
+    s.push({
+      icon: <Heart className="w-3.5 h-3.5 text-primary" />,
+      iconBg: 'bg-gradient-to-r from-primary/30 via-cyan-400/30 to-purple-500/30',
+      title: 'Play Pull or Pass',
+      detail: 'Discover your collecting taste →',
+      href: '/swipe',
+    });
 
     // Top gaining and top losing set — placed early for visibility
     if (topSets && topSets.length > 0) {
