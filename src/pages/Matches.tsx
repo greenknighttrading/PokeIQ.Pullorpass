@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Seo } from '@/components/seo/Seo';
@@ -124,6 +126,7 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
+              <UsernameCard />
               <TasteHero taste={taste} />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
