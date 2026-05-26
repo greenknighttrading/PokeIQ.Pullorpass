@@ -197,8 +197,8 @@ function ActionTicker() {
     // Play Pull or Pass CTA — high visibility, always first for authed users too
     signals.push({
       weight: 100,
-      icon: <Heart className="w-3 h-3 text-rose-400" />,
-      iconBg: 'bg-rose-500/15',
+      icon: <Heart className="w-3 h-3 text-primary" />,
+      iconBg: 'bg-gradient-to-r from-primary/25 via-cyan-400/25 to-purple-500/25',
       title: 'Play Pull or Pass',
       detail: 'Swipe cards · build your DNA',
     });
@@ -306,11 +306,18 @@ function ActionTicker() {
               onClick={() => navigate(getHref(s))}
               className={cn(
                 'flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity',
-                s.title === 'Play Pull or Pass' && 'ring-1 ring-rose-400/40 rounded-full px-2.5 py-1 bg-rose-500/10'
+                s.title === 'Play Pull or Pass' && 'ring-1 ring-primary/40 rounded-full px-2.5 py-1 bg-gradient-to-r from-primary/15 via-cyan-400/15 to-purple-500/15 shadow-[0_0_10px_hsl(var(--primary)/0.15)]'
               )}
             >
               <div className={cn('w-5 h-5 rounded flex items-center justify-center', s.iconBg)}>{s.icon}</div>
-              <span className={cn('text-[13px] font-semibold whitespace-nowrap', s.title === 'Play Pull or Pass' ? 'text-rose-400' : 'text-foreground')}>{s.title}</span>
+              <span
+                className="text-[13px] font-semibold whitespace-nowrap"
+                style={s.title === 'Play Pull or Pass' ? {
+                  backgroundImage: 'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                } : undefined}
+              >{s.title}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">{s.detail}</span>
             </button>
           </React.Fragment>
@@ -333,8 +340,8 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
 
     // Play Pull or Pass CTA — high visibility, placed first
     s.push({
-      icon: <Heart className="w-3.5 h-3.5 text-rose-400" />,
-      iconBg: 'bg-rose-500/20',
+      icon: <Heart className="w-3.5 h-3.5 text-primary" />,
+      iconBg: 'bg-gradient-to-r from-primary/30 via-cyan-400/30 to-purple-500/30',
       title: 'Play Pull or Pass',
       detail: 'Discover your collecting taste →',
       href: '/swipe',
@@ -475,11 +482,18 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
               onClick={() => s.href && navigate(s.href)}
               className={cn(
                 'flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity',
-                s.title === 'Play Pull or Pass' && 'ring-1 ring-rose-400/40 rounded-full px-2.5 py-1 bg-rose-500/10'
+                s.title === 'Play Pull or Pass' && 'ring-1 ring-primary/40 rounded-full px-2.5 py-1 bg-gradient-to-r from-primary/15 via-cyan-400/15 to-purple-500/15 shadow-[0_0_10px_hsl(var(--primary)/0.15)]'
               )}
             >
               <div className={cn('w-5 h-5 rounded flex items-center justify-center', s.iconBg)}>{s.icon}</div>
-              <span className={cn('text-[13px] font-semibold whitespace-nowrap', s.title === 'Play Pull or Pass' ? 'text-rose-400' : 'text-foreground')}>{s.title}</span>
+              <span
+                className="text-[13px] font-semibold whitespace-nowrap"
+                style={s.title === 'Play Pull or Pass' ? {
+                  backgroundImage: 'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                } : undefined}
+              >{s.title}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">{s.detail}</span>
             </button>
           </React.Fragment>
