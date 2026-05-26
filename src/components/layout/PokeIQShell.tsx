@@ -92,6 +92,14 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               (item.href !== '/' && location.pathname.startsWith(item.href));
             const Icon = item.icon;
             const isPullOrPass = item.label === 'Pull or Pass';
+            const rainbowTextStyle = isPullOrPass
+              ? {
+                  backgroundImage: 'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  fontWeight: 700,
+                }
+              : {};
             return (
               <Link
                 key={item.href}
@@ -99,12 +107,28 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? isPullOrPass ? 'bg-rose-500/15 text-rose-400' : 'bg-primary/15 text-primary'
-                    : isPullOrPass ? 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                    ? isPullOrPass
+                      ? 'bg-gradient-to-r from-primary/20 via-cyan-400/15 to-purple-500/20 shadow-[0_0_12px_hsl(var(--primary)/0.15)]'
+                      : 'bg-primary/15 text-primary'
+                    : isPullOrPass
+                      ? 'hover:bg-gradient-to-r hover:from-primary/10 hover:via-cyan-400/10 hover:to-purple-400/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/40',
+                  !isPullOrPass && isActive && 'text-primary',
+                  !isPullOrPass && !isActive && 'text-muted-foreground'
                 )}
               >
-                <Icon className={cn('w-4 h-4 shrink-0', isPullOrPass && 'text-rose-400')} />
-                <span className="flex-1 truncate">{item.label}</span>
+                <Icon
+                  className={cn(
+                    'w-4 h-4 shrink-0',
+                    isPullOrPass && 'text-primary drop-shadow-[0_0_5px_hsl(var(--primary)/0.7)]'
+                  )}
+                />
+                <span
+                  className="flex-1 truncate"
+                  style={rainbowTextStyle as React.CSSProperties}
+                >
+                  {item.label}
+                </span>
                 {item.badge && (
                   <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/20 text-primary">
                     {item.badge}
