@@ -521,33 +521,46 @@ export default function PullOrPass() {
           {stage === 'swiping' && !outOfSwipes && current && (
             <>
               {/* Progress + Matches link + quota */}
-              <div className="flex items-center justify-between mb-2 gap-2">
-                <span className="text-xs font-medium text-muted-foreground tabular-nums">
-                  Card {index + 1} / {cards.length}
+              <div className="flex items-center justify-between mb-3 gap-3">
+                <span className="text-sm font-medium text-muted-foreground tabular-nums">
+                  Card <span className="text-foreground font-semibold">{index + 1}</span>
+                  <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
-                <div className="flex items-center gap-3">
-                  <Link to="/matches" className="text-xs text-primary hover:underline flex items-center gap-1">
-                    <Heart className="w-3 h-3 fill-primary" /> Matches
-                  </Link>
+                <Link
+                  to="/matches"
+                  className="text-xs font-semibold text-primary hover:text-primary/90 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 shadow-[0_0_18px_hsl(var(--primary)/0.25)] transition-shadow hover:shadow-[0_0_24px_hsl(var(--primary)/0.45)]"
+                >
+                  <Heart className="w-3.5 h-3.5 fill-primary" /> Matches
+                </Link>
+                {premium ? (
+                  <span className="text-[10px] uppercase tracking-wider font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400/15 to-primary/15 border border-amber-400/40 text-amber-300">
+                    <Sparkles className="w-3 h-3" /> PokeIQ Premium
+                  </span>
+                ) : (
                   <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
                     {remaining} left today
                   </span>
-                </div>
+                )}
               </div>
-              <div className="h-1 w-full bg-muted rounded-full overflow-hidden mb-3">
-                <div
-                  className="h-full bg-primary transition-all duration-300"
-                  style={{ width: `${(index / cards.length) * 100}%` }}
+              <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
+                <motion.div
+                  className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
+                  initial={false}
+                  animate={{ width: `${(index / cards.length) * 100}%` }}
+                  transition={{ type: 'spring', stiffness: 120, damping: 22 }}
                 />
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 min-h-0 flex flex-col items-center justify-center gap-3 relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-4 relative pt-1">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
                   className="relative aspect-[2.5/3.5] w-auto"
-                  style={{ touchAction: 'none', height: 'min(60vh, 420px)' }}
+                  style={{ touchAction: 'none', height: 'min(64vh, 480px)' }}
                 >
+                  {/* Soft ambient glow behind the card */}
+                  <div className="absolute -inset-8 rounded-[2.5rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
+                  <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/15 via-transparent to-purple-500/15 blur-2xl pointer-events-none -z-10" />
                   {/* Behind cards — stable keys so they smoothly promote forward */}
                   {after && (
                     <StackCardShell key={after.card_id} offset={2}>
@@ -568,62 +581,66 @@ export default function PullOrPass() {
                   />
                 </div>
 
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => setDetailSeed({
-                      card_id: current.card_id,
-                      card_name: current.name,
-                      set_name: current.set_name,
-                      image_url: current.image_url,
-                      price: current.price,
-                      rarity: current.rarity,
-                    })}
-                    className="text-center hover:text-primary transition-colors group"
-                    aria-label="View card details"
-                  >
-                    <h2 className="text-base font-semibold text-foreground leading-tight group-hover:text-primary inline-flex items-center gap-1">
+                <div className="text-center space-y-1.5">
+                  <div className="flex items-center justify-center gap-3">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-none">
                       {current.name}
-                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground group-hover:text-primary font-normal">· details</span>
                     </h2>
-                  </button>
-                  <p className="text-xs text-muted-foreground">
-                    {current.set_name ?? 'Unknown set'} · ${current.price.toFixed(2)}
-                    {current.rarity && ` · ${current.rarity}`}
+                    <button
+                      type="button"
+                      onClick={() => setDetailSeed({
+                        card_id: current.card_id,
+                        card_name: current.name,
+                        set_name: current.set_name,
+                        image_url: current.image_url,
+                        price: current.price,
+                        rarity: current.rarity,
+                      })}
+                      className="text-[10px] uppercase tracking-[0.2em] font-semibold text-primary hover:text-primary/80 transition-colors px-2.5 py-1 rounded-full border border-primary/30 bg-primary/5 hover:bg-primary/15 hover:shadow-[0_0_14px_hsl(var(--primary)/0.35)]"
+                      aria-label="View card details"
+                    >
+                      Details
+                    </button>
+                  </div>
+                  <p className="text-sm text-muted-foreground/90 font-medium">
+                    <span>{current.set_name ?? 'Unknown set'}</span>
+                    <span className="mx-2 text-primary/60">•</span>
+                    <span className="text-foreground/90">${current.price.toFixed(2)}</span>
+                    {current.rarity && (
+                      <>
+                        <span className="mx-2 text-primary/60">•</span>
+                        <span>{current.rarity}</span>
+                      </>
+                    )}
                   </p>
                 </div>
 
                 <>
-                  <div className="flex items-center gap-4">
-                      <Button
-                        onClick={handlePass}
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full h-12 w-12 p-0 border-2"
-                        aria-label="Pass"
-                      >
-                        <X className="w-5 h-5" />
-                      </Button>
-                      <Button
-                        onClick={handleLove}
-                        size="lg"
-                        variant="outline"
-                        className="rounded-full h-12 w-12 p-0 border-2 border-amber-400/60 text-amber-400 hover:text-amber-400 hover:bg-amber-400/10"
-                        aria-label="Love"
-                      >
-                        <Star className="w-5 h-5 fill-current" />
-                      </Button>
-                      <Button
-                        onClick={handlePull}
-                        size="lg"
-                        className="rounded-full h-12 w-12 p-0 bg-primary hover:bg-primary/90"
-                        aria-label="Pull"
-                      >
-                        <Heart className="w-5 h-5 fill-current" />
-                      </Button>
+                  <div className="flex items-end justify-center gap-7 sm:gap-10 pt-1">
+                    <ActionButton
+                      onClick={handlePass}
+                      label="Pass"
+                      ariaLabel="Pass"
+                      icon={<X className="w-6 h-6" strokeWidth={3} />}
+                      tone="pass"
+                    />
+                    <ActionButton
+                      onClick={handleLove}
+                      label="Love"
+                      ariaLabel="Love"
+                      icon={<Star className="w-6 h-6 fill-current" />}
+                      tone="love"
+                    />
+                    <ActionButton
+                      onClick={handlePull}
+                      label="Pull"
+                      ariaLabel="Pull"
+                      icon={<Heart className="w-6 h-6 fill-current" />}
+                      tone="pull"
+                    />
                   </div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Swipe ← Pass · ↑ Love · Pull →
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium">
+                    Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
                   </p>
                 </>
               </div>
