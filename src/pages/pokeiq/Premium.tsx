@@ -384,31 +384,3 @@ function SmartFeedPreview() {
   );
 }
 
-function SetsExplorerPreview() {
-  const sets = [
-    { name: 'Surging Sparks', mom: '+12%', chase: '1 / 86' },
-    { name: 'Paldean Fates', mom: '+6%', chase: '1 / 124' },
-    { name: '151', mom: '+18%', chase: '1 / 64' },
-  ];
-  return (
-    <PreviewShell>
-      <div className="flex items-center gap-2 mb-3">
-        <Star className="w-4 h-4 text-violet-300" />
-        <span className="text-xs font-semibold">Top sets this week</span>
-      </div>
-      <div className="space-y-1.5">
-        {sets.map((s) => (
-          <div key={s.name} className="flex items-center justify-between text-xs p-2 rounded-md bg-card/60 border border-border/50">
-            <span className="font-medium truncate">{s.name}</span>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] text-muted-foreground">Chase {s.chase}</span>
-              <span className="text-emerald-400 text-[10px] flex items-center gap-0.5">
-                <TrendingUp className="w-3 h-3" />{s.mom}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PreviewShell>
-  );
-}
