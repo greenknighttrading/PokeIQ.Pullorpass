@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Heart, User, Sparkles, Trophy, ScanLine, Crown, Zap, Users } from 'lucide-react';
+import {
+  Heart, User, Trophy, ScanLine, Crown, Zap, Users,
+  ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
+  Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
+  Package, Calculator, Newspaper, ShoppingBag,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
@@ -19,13 +24,37 @@ const primaryNav: NavItem[] = [
   { label: 'Training', href: '/pokeyelp', icon: Zap },
   { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, badge: 'NEW' },
   { label: 'Personality Test', href: '/test', icon: Users },
-  { label: 'Card Intelligence', href: '/card-intelligence', icon: ScanLine },
-  { label: 'Premium', href: '/premium', icon: Crown },
+  { label: 'Card Scanner', href: '/buylist/scanner', icon: ScanLine },
+];
+
+const premiumCollect: NavItem[] = [
+  { label: 'Overview', href: '/home', icon: LayoutDashboard },
+  { label: 'Manage Collection', href: '/collection', icon: Layers },
+  { label: 'Position Details', href: '/winners', icon: Trophy },
+  { label: 'Signals', href: '/insights', icon: Lightbulb },
+  { label: 'Asset Type', href: '/rebalance', icon: Scale },
+  { label: 'Era Allocation', href: '/era-allocation', icon: Clock },
+  { label: 'Generate Report', href: '/report', icon: FileText },
+  { label: 'Smart Feed', href: '/smart-feed', icon: Sparkles },
+];
+
+const premiumTools: NavItem[] = [
+  { label: 'Market News', href: '/daily-report', icon: Newspaper },
+  { label: 'Sealed vs Cards', href: '/tools/sealed-vs-cards', icon: Package },
+  { label: 'Pack Gains', href: '/pack-gains', icon: Calculator },
+  { label: 'Buy List', href: '/buylist/list', icon: ShoppingBag },
+  { label: 'Movers', href: '/buylist/movers', icon: BarChart3 },
+  { label: 'Sets Explorer', href: '/buylist/sets', icon: PieChart },
+  { label: 'Watchlist', href: '/buylist/watchlist', icon: Heart },
 ];
 
 export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const isPremiumPath = [...premiumCollect, ...premiumTools].some(
+    (i) => location.pathname === i.href || location.pathname.startsWith(i.href + '/')
+  ) || location.pathname === '/premium';
+  const [premiumOpen, setPremiumOpen] = useState(isPremiumPath);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex">
@@ -63,6 +92,71 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          {/* Premium expandable */}
+          <button
+            onClick={() => setPremiumOpen((o) => !o)}
+            className={cn(
+              'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mt-1',
+              isPremiumPath
+                ? 'bg-primary/15 text-primary'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+            )}
+          >
+            <Crown className="w-4 h-4 shrink-0" />
+            <span className="flex-1 truncate text-left">Premium</span>
+            {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+
+          {premiumOpen && (
+            <div className="ml-2 pl-3 border-l border-border/50 flex flex-col gap-0.5 mt-1 mb-2">
+              <Link
+                to="/premium"
+                className={cn(
+                  'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium',
+                  location.pathname === '/premium'
+                    ? 'text-primary'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <Crown className="w-3.5 h-3.5" /> Upgrade
+              </Link>
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1 px-2.5">Collect</div>
+              {premiumCollect.map((item) => {
+                const Icon = item.icon;
+                const active = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" /> {item.label}
+                  </Link>
+                );
+              })}
+              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-3 mb-1 px-2.5">Tools</div>
+              {premiumTools.map((item) => {
+                const Icon = item.icon;
+                const active = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    to={item.href}
+                    className={cn(
+                      'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
+                      active ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'
+                    )}
+                  >
+                    <Icon className="w-3.5 h-3.5" /> {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </nav>
 
         {/* Go Premium card */}
@@ -87,31 +181,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-card/80 backdrop-blur border-b border-border/60 px-3 py-2 flex items-center gap-2 overflow-x-auto">
-        <Link to="/" className="flex items-center gap-2 shrink-0 mr-1">
-          <img src={pokeiqLogo} alt="PokeIQ" className="h-7 w-auto" />
-        </Link>
-        {primaryNav.map((item) => {
-          const isActive = location.pathname === item.href || (item.href !== '/' && location.pathname.startsWith(item.href));
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium shrink-0 transition-colors',
-                isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
-
-      <main className="flex-1 min-w-0 pt-14 md:pt-0">
+      <main className="flex-1 min-w-0">
         {children}
       </main>
     </div>
