@@ -103,17 +103,6 @@ export default function PullOrPass() {
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
 
-  // DEV: grant Pro membership for testing (unlimited swipes on this device).
-  useEffect(() => {
-    try {
-      const FAR_FUTURE = new Date('2099-12-31').getTime();
-      const current = Number(localStorage.getItem('pokeiq_premium_until') || '0');
-      if (current < FAR_FUTURE) {
-        localStorage.setItem('pokeiq_premium_until', String(FAR_FUTURE));
-      }
-    } catch {}
-  }, []);
-
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
@@ -122,7 +111,20 @@ export default function PullOrPass() {
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
+      if (session?.user && !session.user.is_anonymous) {
+        setUserId(session.user.id);
+        // First time we see this authed user on this device → reset daily quota
+        // so a freshly-signed-up user gets another 20 free swipes.
+        try {
+          const lastSeen = localStorage.getItem('pop_last_user_id');
+          if (lastSeen !== session.user.id) {
+            localStorage.setItem('pop_last_user_id', session.user.id);
+            const fresh = { date: todayKey(), used: 0, bonus: 0, lifetime: readQuota().lifetime };
+            writeQuota(fresh);
+            setQuota(fresh);
+          }
+        } catch {}
+      }
     });
     // Try to resume an in-progress round first
     const resume = readResume();
@@ -528,7 +530,7 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
-                  {remaining} left today
+                  {Number.isFinite(remaining) ? `${remaining} left today` : 'Unlimited'}
                 </span>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
@@ -1239,7 +1241,7 @@ function ResultsView({
               <div className="flex-1 text-center sm:text-left min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">View All My Matches</h3>
                 <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                  Save every card you love, revisit your recommendations, and build your collector identity over time.
+                  Sign up to save every card you liked, revisit your recommendations, and build your collector identity over time.
                 </p>
               </div>
               <motion.button
@@ -1248,7 +1250,7 @@ function ResultsView({
                 onClick={onSignUp}
                 className="shrink-0 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
               >
-                View My Matches
+                Sign Up
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </div>
