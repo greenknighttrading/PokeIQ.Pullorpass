@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -502,7 +501,6 @@ export default function PokeYelp() {
         description="Help train PokeIQ. Your reviews personalize recommendations, unlock more Pull or Pass swipes, and earn PokeIQ Premium."
       />
       <div className="min-h-screen bg-background flex flex-col">
-        <GlobalNavBar />
 
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col select-none">
           {/* Cinematic hero */}

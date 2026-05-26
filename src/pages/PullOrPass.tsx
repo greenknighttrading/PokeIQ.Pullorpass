@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -621,7 +620,6 @@ export default function PullOrPass() {
         description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving Taste Profile."
       />
       <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
-        <GlobalNavBar />
 
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />

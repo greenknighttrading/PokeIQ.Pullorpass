@@ -30,12 +30,7 @@ const primaryNav: NavItem[] = [
 
 const premiumCollect: NavItem[] = [
   { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard },
-  { label: 'Manage Collection', href: '/collection', icon: Layers },
-  { label: 'Position Details', href: '/winners', icon: Trophy },
-  { label: 'Signals', href: '/insights', icon: Lightbulb },
-  { label: 'Asset Type', href: '/rebalance', icon: Scale },
-  { label: 'Era Allocation', href: '/era-allocation', icon: Clock },
-  { label: 'Generate Report', href: '/report', icon: FileText },
+  { label: 'Collector Report', href: '/report', icon: FileText },
   { label: 'Smart Feed', href: '/smart-feed', icon: Sparkles },
 ];
 
@@ -108,11 +103,11 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             className={cn(
               'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mt-1',
               isPremiumPath
-                ? 'bg-accent/15 text-accent'
-                : 'text-accent/90 hover:text-accent hover:bg-accent/10'
+                ? 'bg-violet-500/15 text-violet-300'
+                : 'text-violet-300/90 hover:text-violet-200 hover:bg-violet-500/10'
             )}
           >
-            <Crown className="w-4 h-4 shrink-0 text-accent" />
+            <Crown className="w-4 h-4 shrink-0 text-violet-300" />
             <span className="flex-1 truncate text-left">Premium</span>
             {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
@@ -124,8 +119,8 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium',
                   location.pathname === '/premium'
-                    ? 'text-accent'
-                    : 'text-accent/80 hover:text-accent'
+                    ? 'text-violet-300'
+                    : 'text-violet-300/80 hover:text-violet-200'
                 )}
               >
                 <Crown className="w-3.5 h-3.5" /> Unlimited Swipes
@@ -146,7 +141,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span className="flex-1 truncate">{item.label}</span>
-                    {!isPremium && <Lock className="w-3 h-3 text-accent/70" />}
+                    {!isPremium && <Lock className="w-3 h-3 text-violet-300/70" />}
                   </Link>
                 );
               })}
@@ -166,7 +161,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span className="flex-1 truncate">{item.label}</span>
-                    {!isPremium && <Lock className="w-3 h-3 text-accent/70" />}
+                    {!isPremium && <Lock className="w-3 h-3 text-violet-300/70" />}
                   </Link>
                 );
               })}

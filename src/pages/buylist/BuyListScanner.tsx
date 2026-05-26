@@ -6,7 +6,6 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Seo } from '@/components/seo/Seo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -428,7 +427,6 @@ export default function BuyListScanner() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <Seo title="Market Scanner — PokeIQ" description="Scan and filter the Pokémon TCG market by price, movement, and type." />
-      <GlobalNavBar />
 
       <main className="flex-1">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-6 space-y-3 sm:space-y-4">
