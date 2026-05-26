@@ -7,14 +7,8 @@ const coreFeatures = [
   'Unlimited Pull or Pass swipes',
   'Advanced recommendation engine',
   'Collector DNA insights',
-  'Taste evolution tracking',
-  'Recommendation tuning',
   'Personalized card discoveries',
-  'Collector similarity matching',
   'Community leaderboard boosts',
-  'Early access archetypes',
-  'Enhanced card intelligence',
-  'Premium binder customization',
   'AI-powered collector insights',
   'Swipe streak rewards',
 ];
@@ -23,17 +17,9 @@ const bonusFeatures = [
   'Advanced portfolio analytics',
   'Personalised PokeIQ Report',
   'Health Score & risk analysis',
-  'Portfolio Rebalancer (Asset + Era)',
-  'Era Allocation breakdown',
-  'Top Movers in your bag',
-  'Card Scanner Pro (confidence + comps)',
   'Smart Feed with daily picks',
-  'Sealed vs Cards comparison tool',
-  'Pack Gains EV calculator',
-  'Market News & daily briefs',
   'Buy List with curated picks',
-  'Movers, Sets Explorer & Watchlist',
-  'Priority support',
+  'Sets Explorer',
 ];
 
 export default function Premium() {
@@ -59,15 +45,6 @@ export default function Premium() {
         {/* Billing toggle */}
         <div className="mt-6 inline-flex items-center bg-card/60 border border-border/60 rounded-full p-1">
           <button
-            onClick={() => setBilling('monthly')}
-            className={cn(
-              'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
-              billing === 'monthly' ? 'bg-violet-500 text-white' : 'text-muted-foreground'
-            )}
-          >
-            Monthly
-          </button>
-          <button
             onClick={() => setBilling('annual')}
             className={cn(
               'px-4 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5',
@@ -81,6 +58,15 @@ export default function Premium() {
             )}>
               Save 18%
             </span>
+          </button>
+          <button
+            onClick={() => setBilling('monthly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
+              billing === 'monthly' ? 'bg-violet-500 text-white' : 'text-muted-foreground'
+            )}
+          >
+            Monthly
           </button>
         </div>
       </div>
