@@ -151,6 +151,81 @@ const STAGE_LABEL: Record<string, string> = {
   seedling: 'Seedling', sprouting: 'Sprouting', established: 'Established', expert: 'Expert',
 };
 
+// ─────────────────────────────────────────────────────────────
+// Editable username card — stores in auth user_metadata.display_name
+// ─────────────────────────────────────────────────────────────
+function UsernameCard() {
+  const [email, setEmail] = useState<string>('');
+  const [name, setName] = useState<string>('');
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      setEmail(user.email ?? '');
+      const display = (user.user_metadata as { display_name?: string } | null)?.display_name
+        || (user.email ? user.email.split('@')[0] : '')
+        || 'Collector';
+      setName(display);
+      setDraft(display);
+    })();
+  }, []);
+
+  const save = async () => {
+    const trimmed = draft.trim();
+    if (!trimmed) { toast({ title: 'Username required', variant: 'destructive' }); return; }
+    setSaving(true);
+    const { error } = await supabase.auth.updateUser({ data: { display_name: trimmed } });
+    setSaving(false);
+    if (error) { toast({ title: 'Could not save', description: error.message, variant: 'destructive' }); return; }
+    setName(trimmed);
+    setEditing(false);
+    toast({ title: 'Username updated' });
+  };
+
+  const initial = (name || 'C').charAt(0).toUpperCase();
+
+  return (
+    <Card className="p-4 sm:p-5 flex items-center gap-4">
+      <div className="w-12 h-12 rounded-full bg-primary/15 text-primary flex items-center justify-center text-lg font-bold shrink-0">
+        {initial}
+      </div>
+      <div className="flex-1 min-w-0">
+        {editing ? (
+          <div className="flex items-center gap-2">
+            <Input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              maxLength={32}
+              placeholder="Choose a username"
+              className="h-9 max-w-xs"
+              autoFocus
+              onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setEditing(false); setDraft(name); } }}
+            />
+            <Button size="icon" variant="ghost" onClick={save} disabled={saving} className="h-9 w-9">
+              <Check className="w-4 h-4 text-success" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={() => { setEditing(false); setDraft(name); }} className="h-9 w-9">
+              <XClose className="w-4 h-4" />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="text-base sm:text-lg font-semibold text-foreground truncate">{name}</span>
+            <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/40 transition-colors">
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+        {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
+      </div>
+    </Card>
+  );
+}
+
 function buildIdentitySentence(t: TasteProfile): string {
   if (t.totalLikes === 0) return 'Start swiping to reveal your collector identity.';
   if (t.totalLikes < 8) return 'A taste is forming — keep swiping to sharpen your collector identity.';
