@@ -613,17 +613,9 @@ export default function PullOrPass() {
             </div>
           )}
 
-          {stage === 'swiping' && outOfSwipes && (
-            <OutOfSwipesView
-              limit={dailyLimit}
-              hasBonus={quota.bonus > 0}
-              isAuthed={!!userId}
-              onSignUp={() => navigate('/auth')}
-            />
-          )}
-
-          {stage === 'swiping' && !outOfSwipes && current && (
-            <>
+          {stage === 'swiping' && current && (
+            <div className="relative flex-1 min-h-0 flex flex-col">
+              <div className={outOfSwipes ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
               {/* Progress + quota */}
               <div className="flex items-center justify-between mb-3 gap-3">
                 <span className="text-sm font-medium text-muted-foreground tabular-nums">
@@ -795,7 +787,31 @@ export default function PullOrPass() {
                   </p>
                 </>
               </div>
-            </>
+              </div>
+              {outOfSwipes && (
+                <OutOfSwipesModal
+                  credits={credits}
+                  canRedeem={canRedeem}
+                  onRedeem={redeemSwipes}
+                  redeeming={redeeming}
+                  isAuthed={!!userId}
+                  onSignUp={() => navigate('/auth')}
+                />
+              )}
+            </div>
+          )}
+
+          {stage === 'swiping' && !current && outOfSwipes && (
+            <div className="relative flex-1 min-h-0 flex items-center justify-center">
+              <OutOfSwipesModal
+                credits={credits}
+                canRedeem={canRedeem}
+                onRedeem={redeemSwipes}
+                redeeming={redeeming}
+                isAuthed={!!userId}
+                onSignUp={() => navigate('/auth')}
+              />
+            </div>
           )}
 
           {stage === 'results' && (
