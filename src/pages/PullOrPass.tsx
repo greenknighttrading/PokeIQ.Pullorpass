@@ -1454,20 +1454,20 @@ function ResultsView({
           <div className="absolute -top-32 -right-32 w-[460px] h-[460px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-32 -left-32 w-[460px] h-[460px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-10 lg:gap-14 items-center">
-            {/* LEFT: recommendation accuracy meter (center-aligned) */}
-            <div className="flex flex-col items-center text-center gap-3 lg:min-w-[200px]">
+          <div className="relative flex flex-col items-center text-center gap-8">
+            {/* TOP: recommendation accuracy meter */}
+            <div className="flex flex-col items-center gap-3">
               <CircularMeter value={completion} />
               <div className="space-y-1">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-primary font-semibold">Recommendation Accuracy</p>
-                <p className="text-xs text-muted-foreground max-w-[200px] leading-snug">
+                <p className="text-xs text-muted-foreground max-w-[220px] leading-snug">
                   Sharpens with every swipe.
                 </p>
               </div>
             </div>
 
-            {/* CENTER: benefits (center-aligned) */}
-            <div className="space-y-4 flex flex-col items-center text-center">
+            {/* MIDDLE: benefits */}
+            <div className="space-y-4 flex flex-col items-center">
               <p className="text-[11px] uppercase tracking-[0.24em] text-purple-300 font-semibold">What You Unlock</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mx-auto">
                 {[
@@ -1486,18 +1486,18 @@ function ResultsView({
               </ul>
             </div>
 
-            {/* RIGHT: dominant CTA */}
-            <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[280px]">
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight text-center lg:text-right leading-tight">
+            {/* BOTTOM: dominant CTA */}
+            <div className="flex flex-col items-center gap-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-tight">
                 Ready for another round?
               </h3>
-              <div className="relative w-full lg:w-auto">
+              <div className="relative">
                 <div className="absolute inset-0 rounded-2xl bg-primary/40 blur-2xl opacity-70 pointer-events-none" />
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={onSignUp}
-                  className="relative w-full lg:w-auto h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_32px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_52px_hsl(var(--primary)/0.9)] transition-shadow whitespace-nowrap"
+                  className="relative h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_32px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_52px_hsl(var(--primary)/0.9)] transition-shadow whitespace-nowrap"
                 >
                   Sign Up Now
                   <ArrowRight className="w-5 h-5" />
