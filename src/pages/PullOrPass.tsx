@@ -1420,7 +1420,8 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 6: Combined Progress + Why + SIGN UP NOW ───── */}
+      {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
+      {!isAuthed && (
       <motion.section {...fadeUp}>
         <div className="relative rounded-2xl border border-primary/25 bg-[#0a1414] p-5 sm:p-7 lg:p-8 overflow-hidden">
           <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
@@ -1463,8 +1464,7 @@ function ResultsView({
             </div>
 
             {/* Right: primary CTA */}
-            {!isAuthed ? (
-              <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
+            <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
                 <p className="text-sm text-foreground/90 text-center lg:text-right">
                   Ready to continue your collector journey?
                 </p>
@@ -1478,26 +1478,113 @@ function ResultsView({
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
                 <p className="text-[11px] text-muted-foreground">It's free and only takes a moment.</p>
-              </div>
-            ) : null}
+            </div>
           </div>
         </div>
       </motion.section>
+      )}
 
+      {/* Premium upsell — authed users who are NOT premium */}
+      {isAuthed && !premium && (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-2xl border border-amber-400/30 bg-gradient-to-br from-[#1a1410] via-[#0f0a06] to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_30px_80px_-30px_rgba(251,191,36,0.25)]">
+            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] bg-amber-400/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] bg-amber-600/10 blur-3xl rounded-full pointer-events-none" />
 
-      {/* Authed-only replay (guests convert via the SIGN UP NOW widget above) */}
+            <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
+              <div className="space-y-5">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10">
+                  <Crown className="w-3.5 h-3.5 text-amber-300" />
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300 font-semibold">PokeIQ Premium</p>
+                </div>
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
+                  {outOfSwipes ? 'Out of swipes?' : 'Want unlimited swipes?'}
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
+                  Upgrade to Premium for deeper collector insights and unlimited rounds.
+                </p>
+
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-2 max-w-xl">
+                  {[
+                    { icon: <InfinityIcon className="w-4 h-4" />, label: 'Unlimited swipes' },
+                    { icon: <BarChart3 className="w-4 h-4" />, label: 'Advanced portfolio analytics' },
+                    { icon: <TrendingUpIcon className="w-4 h-4" />, label: 'Collection value tracking' },
+                    { icon: <Wand2 className="w-4 h-4" />, label: 'Recommendation tuning' },
+                    { icon: <Sparkles className="w-4 h-4" />, label: 'Deep collector insights' },
+                    { icon: <Library className="w-4 h-4" />, label: 'Binder customization' },
+                    { icon: <Zap className="w-4 h-4" />, label: 'Market trend tracking' },
+                    { icon: <Crown className="w-4 h-4" />, label: 'Personalized portfolio analysis' },
+                  ].map((f) => (
+                    <li key={f.label} className="flex items-center gap-2.5 text-sm text-foreground/90">
+                      <span className="text-amber-300 shrink-0">{f.icon}</span>
+                      <span>{f.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[240px]">
+                <div className="text-center lg:text-right">
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/80 font-semibold">Only</p>
+                  <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
+                    $5<span className="text-base text-muted-foreground font-medium">/month</span>
+                  </p>
+                </div>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => window.location.assign('/get-started')}
+                  className="w-full lg:w-auto h-12 px-10 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)] hover:shadow-[0_0_44px_rgba(251,191,36,0.85)] transition-shadow whitespace-nowrap"
+                >
+                  <Crown className="w-4 h-4" />
+                  Go Premium
+                </motion.button>
+                <p className="text-[11px] text-muted-foreground">Cancel anytime.</p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
+      {/* Play Another Round / Out-of-swipes (authed) */}
       {isAuthed && (
-        <div className="flex flex-col items-center gap-2 pt-2">
-          <Button
-            onClick={onPlayAgain}
-            size="lg"
-            className="gap-2 min-w-[280px]"
-            disabled={outOfSwipes}
-          >
-            <RotateCw className="w-4 h-4" />
-            {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'Play Another Round'}
-          </Button>
-        </div>
+        <motion.section {...fadeUp}>
+          {outOfSwipes ? (
+            <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-card to-zinc-950 p-6 sm:p-8 overflow-hidden text-center">
+              <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+              <div className="relative space-y-3">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Daily Limit Reached</p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">You're out of swipes for today</h3>
+                <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+                  Upgrade to Premium for unlimited rounds and advanced features.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+                  <ResetCountdown />
+                  <motion.button
+                    whileHover={{ y: -2, scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => window.location.assign('/get-started')}
+                    className="h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
+                  >
+                    <Crown className="w-4 h-4" />
+                    Go Premium
+                  </motion.button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 pt-2">
+              <p className="text-sm text-muted-foreground">Keep training PokeIQ to sharpen your recommendations.</p>
+              <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
+                <RotateCw className="w-4 h-4" />
+                Play Another Round
+              </Button>
+              {!premium && Number.isFinite(remaining ?? Infinity) && (
+                <p className="text-xs text-muted-foreground">{remaining} swipes left today</p>
+              )}
+            </div>
+          )}
+        </motion.section>
       )}
     </div>
   );
