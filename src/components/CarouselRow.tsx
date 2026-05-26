@@ -79,7 +79,7 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     el.style.scrollSnapType = 'none';
     el.style.scrollBehavior = 'auto';
 
-    const duration = 720; // ms — one premium, continuous Netflix-style glide
+    const duration = Math.min(860, Math.max(620, Math.abs(distance) * 0.42));
     const startTime = performance.now();
 
     // Ease-in-out cubic keeps the entire row moving as one continuous motion.
@@ -113,7 +113,7 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     <div className={cn('relative group/carousel', className)}>
       <div
         ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto overscroll-x-contain pb-4 [overflow-anchor:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>
