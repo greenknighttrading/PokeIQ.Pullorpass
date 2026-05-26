@@ -711,19 +711,15 @@ export default function PokeYelp() {
               {/* Tag picker — borderless, breathing */}
               <div className="space-y-6 min-w-0 w-full sm:flex-1">
                 <div>
-                  <div className="flex items-baseline justify-between mb-1 gap-2">
-                    <h2 className="text-lg font-semibold text-foreground">What fits this card?</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-1">What fits this card?</h2>
+                  <div className="flex items-baseline justify-between mb-1">
+                    <p className="text-xs text-muted-foreground">
+                      Tap any tag that fits. Skip the rest. <span className="text-amber-400/90">Accuracy is rewarded!</span>
+                    </p>
                     <span className="text-[11px] tabular-nums text-muted-foreground">
                       {selected.size} selected
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Tap any tag that fits. Skip the rest.
-                  </p>
-                  <p className="text-xs text-amber-400/90 mb-5 inline-flex items-center gap-1.5">
-                    <Plus className="w-3 h-3" />
-                    Add custom tags for bonus credits — accuracy is rewarded
-                  </p>
 
                   <div className="min-h-[140px]">
                     {suggestLoading && (
@@ -775,9 +771,14 @@ export default function PokeYelp() {
                   {/* Custom tags + comment — no boxed border, just whitespace */}
                   <div className="mt-8 space-y-5">
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-                        Add your own
-                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                          Add your own
+                        </p>
+                        <p className="text-[10px] uppercase tracking-wider text-amber-400/90">
+                          Add custom tags for bonus credit
+                        </p>
+                      </div>
                       <div className="flex gap-2">
                       <Input
                         value={customInput}
