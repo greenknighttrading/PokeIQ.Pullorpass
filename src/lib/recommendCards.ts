@@ -80,19 +80,21 @@ export async function recommendForUser(
   ) {
     if (values.length === 0) return;
     const { data } = await supabase
-      .from('cards_ppt')
-      .select('ppt_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_cdn_url_400, card_number')
+      .from('market_snapshots')
+      .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price')
       .in(column, values)
-      .limit(300);
+      .eq('game', 'Pokemon')
+      .limit(400);
     for (const c of data ?? []) {
-      if (!c.ppt_id || likedIds.has(c.ppt_id) || candidates.has(c.ppt_id)) continue;
+      const id = c.card_id || c.tcgplayer_id;
+      if (!id || likedIds.has(id) || candidates.has(id)) continue;
       if (EXCLUDE.test(c.name || '')) continue;
-      candidates.set(c.ppt_id, {
-        card_id: c.ppt_id,
+      candidates.set(id, {
+        card_id: id,
         card_name: c.name,
         set_name: c.set_name,
-        image_url: c.image_cdn_url_400 || tcgImage(c.tcgplayer_id),
-        price: null,
+        image_url: c.image_url || tcgImage(c.tcgplayer_id),
+        price: c.price != null ? Number(c.price) : null,
         rarity: c.rarity,
         artist: c.artist,
         pokemon_type: Array.isArray(c.pokemon_type) ? c.pokemon_type[0] : (c.pokemon_type as any),
@@ -107,6 +109,37 @@ export async function recommendForUser(
     pullByFilter('set_name', sets.list.map((x) => x.key as string).filter(Boolean)),
     pullByFilter('artist',   artists.list.map((x) => x.key as string).filter(Boolean)),
   ]);
+
+  // Fallback: if no candidates yet, broaden by top Pokémon names
+  if (candidates.size === 0 && pokemons.list.length > 0) {
+    const names = pokemons.list.map((x) => x.key as string).filter(Boolean).slice(0, 5);
+    for (const name of names) {
+      const { data } = await supabase
+        .from('market_snapshots')
+        .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price')
+        .ilike('name', `%${name}%`)
+        .eq('game', 'Pokemon')
+        .limit(80);
+      for (const c of data ?? []) {
+        const id = c.card_id || c.tcgplayer_id;
+        if (!id || likedIds.has(id) || candidates.has(id)) continue;
+        if (EXCLUDE.test(c.name || '')) continue;
+        candidates.set(id, {
+          card_id: id,
+          card_name: c.name,
+          set_name: c.set_name,
+          image_url: c.image_url || tcgImage(c.tcgplayer_id),
+          price: c.price != null ? Number(c.price) : null,
+          rarity: c.rarity,
+          artist: c.artist,
+          pokemon_type: Array.isArray(c.pokemon_type) ? c.pokemon_type[0] : (c.pokemon_type as any),
+          era: classifyEra(c.set_name)?.id ?? null,
+          score: 0,
+          reason: '',
+        });
+      }
+    }
+  }
 
   // Score each candidate
   for (const c of candidates.values()) {
@@ -131,39 +164,18 @@ export async function recommendForUser(
     if (c.set_name && sets.set.has(c.set_name as any)) {
       score += W.set; reasons.push(c.set_name);
     }
+    if (c.price != null) {
+      const candTier = priceTier(c.price);
+      if (tiers.set.has(candTier as any)) score += W.priceTier;
+    }
     c.score = score;
     c.reason = reasons.slice(0, 2).join(' · ') || 'matches your taste';
   }
 
-  // Hydrate prices from market_snapshots for the strongest candidates
   const ranked = Array.from(candidates.values())
     .filter((c) => c.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.max(limit * 3, 30));
-
-  if (ranked.length > 0) {
-    const ids = ranked.map((c) => c.card_id);
-    const { data: snaps } = await supabase
-      .from('market_snapshots')
-      .select('card_id, price')
-      .in('card_id', ids)
-      .eq('game', 'Pokemon')
-      .limit(ids.length);
-    const priceMap = new Map<string, number>();
-    for (const s of snaps ?? []) {
-      if (s.card_id && s.price != null && !priceMap.has(s.card_id)) {
-        priceMap.set(s.card_id, Number(s.price));
-      }
-    }
-    for (const c of ranked) {
-      const p = priceMap.get(c.card_id);
-      if (p != null) {
-        c.price = p;
-        const candTier = priceTier(p);
-        if (tiers.set.has(candTier as any)) c.score += W.priceTier;
-      }
-    }
-  }
 
   // Diversify: cap per artist and per set
   const perArtist = new Map<string, number>();
