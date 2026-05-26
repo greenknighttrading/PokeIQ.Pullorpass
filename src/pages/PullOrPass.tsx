@@ -1192,6 +1192,9 @@ function ResultsView({
           <p className="text-sm text-muted-foreground mt-1.5">
             Different cards from this round — chosen by matching the sets, artists, eras, and Pokémon you liked.
           </p>
+          <p className="text-xs text-primary/80 mt-1 italic">
+            This is just a sample — accuracy will increase as you swipe more.
+          </p>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {recsLoading && recs.length === 0 ? (
