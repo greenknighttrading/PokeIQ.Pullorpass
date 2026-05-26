@@ -121,7 +121,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               >
                 <Crown className="w-3.5 h-3.5" /> Unlimited Swipes
               </Link>
-              <div className="mt-2" />
               {premiumCollect.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.href;
@@ -141,7 +140,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-3 mb-1 px-2.5">Beta Tools</div>
               {premiumTools.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.href;
