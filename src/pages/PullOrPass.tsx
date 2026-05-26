@@ -1279,16 +1279,20 @@ function LikedDislikedPanel({
         </p>
         <span className="text-xs text-muted-foreground tabular-nums">{count}</span>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-4">
         {records.length === 0 && (
-          <p className="col-span-4 text-xs text-muted-foreground text-center py-6">No cards</p>
+          <p className="col-span-3 text-xs text-muted-foreground text-center py-6">No cards</p>
         )}
-        {records.slice(0, 8).map((r) => (
+        {records.slice(0, 6).map((r) => (
           <motion.div
             key={r.card.card_id}
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: 'spring', stiffness: 280, damping: 20 }}
-            className={`relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/30 ${glow ? 'ring-1 ring-primary/30 shadow-[0_0_18px_hsl(var(--primary)/0.25)]' : ''}`}
+            whileHover={{ scale: 1.06, y: -6 }}
+            transition={{ type: 'spring', stiffness: 260, damping: 18 }}
+            className={`relative aspect-[2.5/3.5] rounded-lg overflow-hidden bg-muted/30 transition-shadow duration-300 ${
+              glow
+                ? 'ring-1 ring-primary/30 shadow-[0_0_20px_hsl(var(--primary)/0.2)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.55)] hover:ring-primary/60'
+                : 'ring-1 ring-purple-500/20 hover:shadow-[0_0_36px_rgba(168,85,247,0.45)] hover:ring-purple-400/60'
+            }`}
           >
             {r.card.image_url ? (
               <img src={r.card.image_url} alt={r.card.name} className="w-full h-full object-cover" />
