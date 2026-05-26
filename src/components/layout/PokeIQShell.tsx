@@ -30,12 +30,7 @@ const primaryNav: NavItem[] = [
 
 const premiumCollect: NavItem[] = [
   { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard },
-  { label: 'Manage Collection', href: '/collection', icon: Layers },
-  { label: 'Position Details', href: '/winners', icon: Trophy },
-  { label: 'Signals', href: '/insights', icon: Lightbulb },
-  { label: 'Asset Type', href: '/rebalance', icon: Scale },
-  { label: 'Era Allocation', href: '/era-allocation', icon: Clock },
-  { label: 'Generate Report', href: '/report', icon: FileText },
+  { label: 'Collector Report', href: '/report', icon: FileText },
   { label: 'Smart Feed', href: '/smart-feed', icon: Sparkles },
 ];
 
