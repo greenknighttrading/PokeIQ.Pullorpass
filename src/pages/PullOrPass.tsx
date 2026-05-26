@@ -1218,30 +1218,37 @@ function ResultsView({
 
       {/* ── SECTION 6: Combined Progress + Why + SIGN UP NOW ───── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative rounded-2xl border border-primary/25 bg-[#0a1414] p-5 sm:p-7 lg:p-8 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-8 lg:gap-12 items-center">
+          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 lg:gap-10 items-center">
             {/* Left: progress meter */}
-            <div className="flex flex-col items-center gap-2 lg:min-w-[180px]">
+            <div className="flex items-center gap-4 lg:gap-5">
               <CircularMeter value={completion} />
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mt-1">Your Progress</p>
-              <p className="text-xs text-muted-foreground text-center max-w-[180px]">
-                Recommendation accuracy sharpens with every swipe.
-              </p>
+              <div className="space-y-1">
+                <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Progress</p>
+                <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">Recommendation Accuracy</h3>
+                <p className="text-xs text-muted-foreground max-w-[260px] leading-snug">
+                  The more you train PokeIQ, the sharper your matches become.
+                </p>
+                <p className="text-xs text-foreground/70">
+                  Most users see major improvements after <span className="text-primary font-semibold">100+</span> swipes.
+                </p>
+              </div>
             </div>
 
-            {/* Middle: why sign up */}
+            {/* Middle: why sign up checklist (2 cols) */}
             <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-3">Why Sign Up</p>
-              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-3">Why Sign Up?</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
                 {[
-                  'Get 25 free swipes a day',
                   'Save & track your Taste Profile',
+                  'Get personalized recommendations',
                   'Build your custom digital binder',
+                  'Continue unlimited 20-card rounds',
                   'Unlock advanced insights & trends',
-                  'Get personalized card recommendations',
+                  'Your data is safe and never shared',
                 ].map((s) => (
                   <li key={s} className="flex items-start gap-2.5 text-sm text-foreground/90">
                     <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
@@ -1252,38 +1259,42 @@ function ResultsView({
             </div>
 
             {/* Right: primary CTA */}
-            {!isAuthed && (
-              <div className="flex flex-col items-center gap-2 lg:min-w-[220px]">
+            {!isAuthed ? (
+              <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
+                <p className="text-sm text-foreground/90 text-center lg:text-right">
+                  Ready to continue your collector journey?
+                </p>
                 <motion.button
-                  whileHover={{ y: -2, scale: 1.03 }}
+                  whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={onSignUp}
-                  className="h-12 px-8 rounded-full bg-primary text-primary-foreground font-bold text-sm tracking-wide shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow whitespace-nowrap"
+                  className="w-full lg:w-auto h-12 px-10 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow whitespace-nowrap"
                 >
                   SIGN UP NOW
+                  <ArrowRight className="w-4 h-4" />
                 </motion.button>
-                <p className="text-[11px] text-muted-foreground">Free forever · No credit card</p>
+                <p className="text-[11px] text-muted-foreground">It's free and only takes a moment.</p>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </motion.section>
 
 
-      {/* Continue journey — replay for authed, signup for guests */}
-      <div className="flex flex-col items-center gap-2 pt-2">
-        <Button
-          onClick={isAuthed ? onPlayAgain : onSignUp}
-          size="lg"
-          className="gap-2 min-w-[280px]"
-          disabled={isAuthed && outOfSwipes}
-        >
-          <RotateCw className="w-4 h-4" />
-          {isAuthed
-            ? (outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'Continue Your Collector Journey')
-            : 'Continue Your Collector Journey'}
-        </Button>
-      </div>
+      {/* Authed-only replay (guests convert via the SIGN UP NOW widget above) */}
+      {isAuthed && (
+        <div className="flex flex-col items-center gap-2 pt-2">
+          <Button
+            onClick={onPlayAgain}
+            size="lg"
+            className="gap-2 min-w-[280px]"
+            disabled={outOfSwipes}
+          >
+            <RotateCw className="w-4 h-4" />
+            {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'Play Another Round'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
