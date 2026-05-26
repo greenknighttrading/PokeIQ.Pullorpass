@@ -56,7 +56,6 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
 
     const start = el.scrollLeft;
     const distance = dir * el.clientWidth * 0.9;
-    const target = start + distance;
     const duration = 650; // ms — ~35% slower than native smooth scroll
     const startTime = performance.now();
 
