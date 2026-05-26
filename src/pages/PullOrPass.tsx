@@ -1592,6 +1592,25 @@ function ResultsView({
 
 /* ─── Helpers for the redesigned results page ─────────────── */
 
+function ResetCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  return (
+    <div className="inline-flex items-center gap-2 px-4 h-11 rounded-xl border border-purple-400/30 bg-purple-500/5 text-sm text-foreground/90">
+      <RotateCw className="w-3.5 h-3.5 text-purple-300" />
+      <span>Daily swipes reset in <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span></span>
+    </div>
+  );
+}
+
 function StatGlowCard({
   icon, value, label, sub, tint,
 }: {
