@@ -907,6 +907,8 @@ function ResultsView({
   const passed = records.filter((r) => r.decision === 'pass');
 
   const archetypeName = a.archetype?.name?.replace(/^The /, '') ?? 'Emerging Collector';
+  const displayArchetype =
+    a.archetype?.name?.replace(/^The /, '') ?? 'Nostalgic Chaos Collector';
   const archetypeDesc =
     a.archetype?.tagline ??
     "You're drawn to iconic Pokémon, vintage energy, and bold expressive artwork that hits with nostalgia.";
@@ -915,8 +917,8 @@ function ResultsView({
     : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine']
   ).slice(0, 5);
   const completion = Math.min(100, Math.round(((records.length) / 100) * 100));
-  const recVisible = pulled.slice(0, 3);
-  const recLocked = Math.max(0, 6 - recVisible.length);
+  const recVisible = pulled.slice(0, 4);
+  const recLocked = Math.max(0, 8 - recVisible.length);
 
   const fadeUp = {
     initial: { opacity: 0, y: 24 },
@@ -926,7 +928,7 @@ function ResultsView({
   } as const;
 
   return (
-    <div className="flex-1 flex flex-col gap-8 py-6 max-w-5xl mx-auto w-full">
+    <div className="flex-1 flex flex-col gap-12 py-8 w-full max-w-[1440px] xl:max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12">
       {/* ── SECTION 1: Hero ───────────────────────────────────── */}
       <motion.section {...fadeUp} className="text-center space-y-4">
         <motion.div
@@ -948,7 +950,7 @@ function ResultsView({
           Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 max-w-4xl mx-auto">
           <StatGlowCard
             icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
             tint="primary"
@@ -974,7 +976,7 @@ function ResultsView({
       </motion.section>
 
       {/* ── SECTION 2: Liked vs Disliked ──────────────────────── */}
-      <motion.section {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.section {...fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <LikedDislikedPanel
           tint="primary"
           label="Liked"
@@ -990,192 +992,159 @@ function ResultsView({
           count={passed.length}
           records={passed}
         />
-        <div className="md:col-span-2 flex flex-col items-center gap-2 pt-2">
-          <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-            <Lock className="w-3.5 h-3.5" />
-            Save your results and keep building your profile
-          </div>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <ArrowDown className="w-5 h-5 text-primary/70" />
-          </motion.div>
-        </div>
       </motion.section>
 
-      {/* ── SECTION 3: Taste Profile Preview ──────────────────── */}
+      {/* ── SECTION 3: Taste Profile (HERO — only soft CTA) ───── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-card to-purple-500/5 p-6 sm:p-8 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-8 sm:p-14 lg:p-20 overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-[420px] h-[420px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
-            {/* Emblem */}
-            <div className="flex justify-center md:justify-start">
-              <div className="relative w-28 h-28 flex items-center justify-center">
+          <div className="relative flex flex-col items-center text-center max-w-3xl mx-auto gap-6">
+            <div className="relative w-32 h-32 flex items-center justify-center">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.85, 0.5] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute inset-0 rounded-full bg-primary/35 blur-2xl"
+              />
+              <div className="absolute inset-3 rounded-full border-2 border-primary/40" />
+              <Sparkles className="relative w-12 h-12 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
+            </div>
+
+            <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Taste Profile</p>
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground tracking-tight leading-[1.05]">
+              {displayArchetype}
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">{archetypeDesc}</p>
+
+            <div className="flex flex-wrap gap-2 justify-center pt-1">
+              {tagList.map((t, i) => (
+                <span
+                  key={t}
+                  className={`px-3.5 py-1.5 text-xs rounded-full border ${
+                    i % 2 === 0
+                      ? 'border-primary/40 bg-primary/10 text-primary'
+                      : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
+                  }`}
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+
+            <div className="w-full max-w-md pt-4">
+              <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
+                <span>Profile Completion</span>
+                <span className="text-primary font-semibold tabular-nums">{completion}%</span>
+              </div>
+              <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
                 <motion.div
-                  animate={{ scale: [1, 1.08, 1], opacity: [0.5, 0.8, 0.5] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute inset-0 rounded-full bg-primary/30 blur-2xl"
+                  initial={{ width: 0 }}
+                  whileInView={{ width: `${completion}%` }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1.2, ease: 'easeOut' }}
+                  className="h-full bg-gradient-to-r from-primary to-primary/60 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
                 />
-                <div className="absolute inset-2 rounded-full border-2 border-primary/40" />
-                <Sparkles className="relative w-10 h-10 text-primary drop-shadow-[0_0_14px_hsl(var(--primary)/0.9)]" />
               </div>
             </div>
 
-            {/* Center */}
-            <div className="space-y-3 text-center md:text-left">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Taste Profile Preview</p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-                {archetypeName} <span>🔥</span>
-              </h2>
-              <p className="text-sm text-muted-foreground max-w-lg">{archetypeDesc}</p>
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start pt-1">
-                {tagList.map((t, i) => (
-                  <span
-                    key={t}
-                    className={`px-3 py-1 text-xs rounded-full border ${
-                      i % 2 === 0
-                        ? 'border-primary/40 bg-primary/10 text-primary'
-                        : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
-                    }`}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[10px] uppercase tracking-wider text-muted-foreground mb-1.5">
-                  <span>Profile Completion</span>
-                  <span className="text-primary font-semibold tabular-nums">{completion}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-muted/40 overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${completion}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.2, ease: 'easeOut' }}
-                    className="h-full bg-gradient-to-r from-primary to-primary/60 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Lock side */}
-            <LockedCTA
-              title="Unlock your full profile"
-              desc="See your full personality, detailed insights, and collector DNA."
-              cta="Create Free Account"
-              onClick={onSignUp}
-              tint="primary"
-            />
+            {!isAuthed && (
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onSignUp}
+                className="mt-4 h-12 px-8 rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-[0_0_30px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.7)] transition-shadow"
+              >
+                Create Free Account
+              </motion.button>
+            )}
+            {!isAuthed && (
+              <p className="text-xs text-muted-foreground/80">Save this profile and keep training it.</p>
+            )}
           </div>
         </div>
       </motion.section>
 
-      {/* ── SECTION 4: Future Binder ─────────────────────────── */}
+      {/* ── SECTION 4: Future Collection (no CTA) ─────────────── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 via-card to-primary/5 p-6 sm:p-8 overflow-hidden">
-          <div className="absolute -top-24 -left-24 w-72 h-72 bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr_auto] gap-6 items-center relative">
-            {/* Binder mock */}
-            <div className="rounded-xl bg-gradient-to-b from-zinc-900 to-black p-3 shadow-2xl border border-white/5">
-              <div className="grid grid-cols-4 gap-1.5">
-                {pulled.slice(0, 8).concat(Array.from({ length: Math.max(0, 8 - pulled.length) }).map(() => null as any)).slice(0, 8).map((r, i) => (
-                  <div
-                    key={i}
-                    className="aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 border border-white/5"
-                  >
-                    {r?.card?.image_url ? (
-                      <img src={r.card.image_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                        <ImageOff className="w-3 h-3" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-10 items-center">
+          <div className="relative rounded-xl bg-gradient-to-b from-zinc-900 to-black p-4 shadow-2xl border border-white/5 overflow-hidden">
+            <div className="grid grid-cols-4 gap-2">
+              {pulled.slice(0, 8).concat(Array.from({ length: Math.max(0, 8 - pulled.length) }).map(() => null as any)).slice(0, 8).map((r, i) => (
+                <div
+                  key={i}
+                  className={`relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 border border-white/5 ${i >= 4 ? 'opacity-60' : ''}`}
+                >
+                  {r?.card?.image_url ? (
+                    <img src={r.card.image_url} alt="" className={`w-full h-full object-cover ${i >= 4 ? 'blur-[2px]' : ''}`} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                      <ImageOff className="w-3 h-3" />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+            {!isAuthed && (
+              <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+            )}
+          </div>
 
-            {/* Copy */}
-            <div className="space-y-3 text-center md:text-left">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Your Future Binder</p>
-              <h2 className="text-2xl font-bold text-foreground">Your binder is beginning to form…</h2>
-              <p className="text-sm text-muted-foreground">
-                PokeIQ automatically curates and organizes a digital binder filled with cards you'll actually love.
+          <div className="space-y-4 text-center lg:text-left">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Your Future Collection</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">A binder shaped by your taste</h2>
+            <p className="text-sm text-muted-foreground max-w-md mx-auto lg:mx-0">
+              PokeIQ auto-curates a digital binder of cards you'll actually love — organized by set, theme, and feel.
+            </p>
+            {!isAuthed && (
+              <p className="inline-flex items-center gap-2 text-xs text-muted-foreground/80">
+                <Lock className="w-3 h-3" /> Your binder evolves as your profile grows.
               </p>
-              <div className="flex gap-4 justify-center md:justify-start pt-2">
-                <BinderFeature icon={<Layers className="w-4 h-4" />} title="Auto-organized" sub="by sets & theme" />
-                <BinderFeature icon={<Tag className="w-4 h-4" />} title="Matches your" sub="unique taste" />
-                <BinderFeature icon={<Sparkles className="w-4 h-4" />} title="Evolves as you" sub="swipe more" />
-              </div>
-            </div>
-
-            <LockedCTA
-              title="Preview your full binder"
-              desc="Create a free account to see more."
-              cta="Unlock Binder"
-              onClick={onSignUp}
-              tint="purple"
-            />
+            )}
           </div>
         </div>
       </motion.section>
 
-      {/* ── SECTION 5: Recommended For You ───────────────────── */}
+      {/* ── SECTION 5: Recommendations (no CTA) ──────────────── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/15 bg-card/60 p-6 sm:p-8 overflow-hidden">
-          <div className="flex flex-col gap-1 mb-5">
+        <div className="flex items-end justify-between mb-5">
+          <div>
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You ✨</p>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You</p>
             </div>
-            <p className="text-sm text-muted-foreground">Hand-picked cards PokeIQ thinks you'll love.</p>
+            <p className="text-sm text-muted-foreground mt-1">Hand-picked cards PokeIQ thinks you'll love.</p>
           </div>
-
-          <div className="grid grid-cols-[1fr_auto] gap-6 items-start">
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2">
-              {recVisible.map((r, i) => (
-                <RecCard key={r.card.card_id} card={r.card} match={98 - i * 4} />
-              ))}
-              {Array.from({ length: recLocked }).map((_, i) => (
-                <LockedRecCard key={i} />
-              ))}
-            </div>
-
-            <LockedCTA
-              title="Unlock personalized recommendations"
-              desc="Get better matches the more you swipe."
-              cta="Create Free Account"
-              onClick={onSignUp}
-              tint="purple"
-              compact
-            />
-          </div>
+          {!isAuthed && (
+            <p className="hidden sm:inline-flex items-center gap-1.5 text-xs text-muted-foreground/80">
+              <Lock className="w-3 h-3" /> Personalized recommendations unlock after signup.
+            </p>
+          )}
+        </div>
+        <div className="flex gap-4 overflow-x-auto pb-3 -mx-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {recVisible.map((r, i) => (
+            <RecCard key={r.card.card_id} card={r.card} match={98 - i * 4} />
+          ))}
+          {Array.from({ length: recLocked }).map((_, i) => (
+            <LockedRecCard key={i} />
+          ))}
         </div>
       </motion.section>
 
-      {/* ── SECTION 6: Progression ───────────────────────────── */}
-      <motion.section {...fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="rounded-2xl border border-primary/15 bg-card/60 p-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-4">Your Progress</p>
-          <div className="flex items-center gap-5">
-            <CircularMeter value={completion} />
-            <div className="space-y-2">
-              <h3 className="text-lg font-bold text-foreground">Taste Accuracy</h3>
-              <p className="text-sm text-muted-foreground">
-                Keep swiping! The more you train PokeIQ, the sharper your matches become.
-              </p>
-              <p className="text-xs text-muted-foreground/80">
-                Most users see major improvements after 100+ swipes.
-              </p>
-            </div>
+      {/* ── SECTION 6: Progress + Why (flat, no boxes) ────────── */}
+      <motion.section {...fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-4 border-t border-border/40 pt-12">
+        <div className="flex items-center gap-6">
+          <CircularMeter value={completion} />
+          <div className="space-y-1.5">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Progress</p>
+            <h3 className="text-xl font-bold text-foreground">Recommendation Accuracy</h3>
+            <p className="text-sm text-muted-foreground max-w-sm">
+              The more you train PokeIQ, the sharper your matches become. Most users see major improvements after 100+ swipes.
+            </p>
           </div>
         </div>
-        <div className="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-purple-500/5 to-card p-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-4">Why Sign Up?</p>
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-4">Why Sign Up</p>
           <ul className="space-y-2.5">
             {[
               'Save & track your Taste Profile',
@@ -1184,7 +1153,7 @@ function ResultsView({
               'Get personalized card recommendations',
               'Continue unlimited 20-card rounds',
             ].map((s) => (
-              <li key={s} className="flex items-start gap-2 text-sm text-foreground/90">
+              <li key={s} className="flex items-start gap-2.5 text-sm text-foreground/90">
                 <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
                 <span>{s}</span>
               </li>
@@ -1194,6 +1163,7 @@ function ResultsView({
       </motion.section>
 
       {/* ── SECTION 7: Final hard gate ───────────────────────── */}
+      {!isAuthed && (
       <motion.section {...fadeUp}>
         <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_60%)] pointer-events-none" />
@@ -1235,16 +1205,22 @@ function ResultsView({
           </div>
         </div>
       </motion.section>
-
-      {/* Hidden: keeps existing replay/out-of-swipes flow accessible via header. */}
-      {isAuthed && (
-        <div className="flex flex-col gap-2 pt-2">
-          <Button onClick={onPlayAgain} size="lg" className="gap-2" disabled={outOfSwipes}>
-            <RotateCw className="w-4 h-4" />
-            {outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'New 20-Card Round'}
-          </Button>
-        </div>
       )}
+
+      {/* Continue journey — replay for authed, signup for guests */}
+      <div className="flex flex-col items-center gap-2 pt-2">
+        <Button
+          onClick={isAuthed ? onPlayAgain : onSignUp}
+          size="lg"
+          className="gap-2 min-w-[280px]"
+          disabled={isAuthed && outOfSwipes}
+        >
+          <RotateCw className="w-4 h-4" />
+          {isAuthed
+            ? (outOfSwipes ? 'Daily limit reached — come back tomorrow' : 'Continue Your Collector Journey')
+            : 'Continue Your Collector Journey'}
+        </Button>
+      </div>
     </div>
   );
 }
