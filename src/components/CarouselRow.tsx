@@ -16,12 +16,15 @@ interface CarouselRowProps {
  */
 export function CarouselRow({ children, ariaLabel = 'cards', className }: CarouselRowProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+  const isAnimatingRef = useRef(false);
   const [canLeft, setCanLeft] = useState(false);
   const [canRight, setCanRight] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   const update = useCallback(() => {
     const el = scrollerRef.current;
-    if (!el) return;
+    if (!el || isAnimatingRef.current) return;
     const max = el.scrollWidth - el.clientWidth;
     setCanLeft(el.scrollLeft > 4);
     setCanRight(el.scrollLeft < max - 4);
@@ -43,40 +46,63 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     };
   }, [update, children]);
 
-  const rafRef = useRef<number | null>(null);
+  const getAlignedTarget = (el: HTMLDivElement, rawTarget: number) => {
+    const max = el.scrollWidth - el.clientWidth;
+    const clampedTarget = Math.max(0, Math.min(max, rawTarget));
+    const scrollerLeft = el.getBoundingClientRect().left;
+    const candidates = [0, max, ...Array.from(el.children).map((child) => {
+      const childLeft = child.getBoundingClientRect().left;
+      return Math.max(0, Math.min(max, childLeft - scrollerLeft + el.scrollLeft));
+    })];
+
+    return candidates.reduce((closest, candidate) => (
+      Math.abs(candidate - clampedTarget) < Math.abs(closest - clampedTarget) ? candidate : closest
+    ), clampedTarget);
+  };
 
   const page = (dir: 1 | -1) => {
     const el = scrollerRef.current;
-    if (!el) return;
-
-    // Cancel any in-flight animation
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-    }
+    if (!el || isAnimatingRef.current) return;
 
     const start = el.scrollLeft;
     const max = el.scrollWidth - el.clientWidth;
-    const rawTarget = start + dir * el.clientWidth * 0.9;
-    const target = Math.max(0, Math.min(max, rawTarget));
+    const rawTarget = start + dir * el.clientWidth;
+    const target = getAlignedTarget(el, rawTarget);
     const distance = target - start;
-    if (distance === 0) return;
-    const duration = 600; // ms — Netflix-like snappy glide
+    if (Math.abs(distance) < 1) return;
+
+    isAnimatingRef.current = true;
+    setIsAnimating(true);
+
+    const previousSnapType = el.style.scrollSnapType;
+    const previousScrollBehavior = el.style.scrollBehavior;
+    el.style.scrollSnapType = 'none';
+    el.style.scrollBehavior = 'auto';
+
+    const duration = 720; // ms — one premium, continuous Netflix-style glide
     const startTime = performance.now();
 
-    // Ease-out quart: quick takeoff, gentle landing — feels premium
-    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+    // Ease-in-out cubic keeps the entire row moving as one continuous motion.
+    const easeInOutCubic = (t: number) => (
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+    );
 
     const step = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = easeOutQuart(progress);
+      const eased = easeInOutCubic(progress);
       el.scrollLeft = start + distance * eased;
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(step);
       } else {
         el.scrollLeft = target;
+        el.style.scrollSnapType = previousSnapType;
+        el.style.scrollBehavior = previousScrollBehavior;
+        isAnimatingRef.current = false;
         rafRef.current = null;
+        setIsAnimating(false);
+        update();
       }
     };
 
@@ -111,8 +137,9 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
         <button
           type="button"
           aria-label={`Scroll ${ariaLabel} left`}
+          disabled={isAnimating}
           onClick={() => page(-1)}
-          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border text-foreground shadow-lg opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background hover:scale-105 transition-all"
+          className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border text-foreground shadow-lg opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background hover:scale-105 transition-all disabled:pointer-events-none"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -121,8 +148,9 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
         <button
           type="button"
           aria-label={`Scroll ${ariaLabel} right`}
+          disabled={isAnimating}
           onClick={() => page(1)}
-          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border text-foreground shadow-lg opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background hover:scale-105 transition-all"
+          className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 items-center justify-center rounded-full bg-background/80 backdrop-blur border border-border text-foreground shadow-lg opacity-0 group-hover/carousel:opacity-100 focus-visible:opacity-100 hover:bg-background hover:scale-105 transition-all disabled:pointer-events-none"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
