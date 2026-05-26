@@ -35,13 +35,8 @@ const premiumCollect: NavItem[] = [
 ];
 
 const premiumTools: NavItem[] = [
-  { label: 'Market News', href: '/daily-report', icon: Newspaper },
-  { label: 'Sealed vs Cards', href: '/tools/sealed-vs-cards', icon: Package },
-  { label: 'Pack Gains', href: '/pack-gains', icon: Calculator },
   { label: 'Buy List', href: '/buylist/list', icon: ShoppingBag },
-  { label: 'Movers', href: '/buylist/movers', icon: BarChart3 },
   { label: 'Sets Explorer', href: '/buylist/sets', icon: PieChart },
-  { label: 'Watchlist', href: '/buylist/watchlist', icon: Heart },
 ];
 
 export function PokeIQShell({ children }: { children: React.ReactNode }) {
@@ -125,7 +120,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               >
                 <Crown className="w-3.5 h-3.5" /> Unlimited Swipes
               </Link>
-              <div className="text-[10px] uppercase tracking-wider text-muted-foreground/70 mt-2 mb-1 px-2.5">Advanced Analytics</div>
+              <div className="mt-2" />
               {premiumCollect.map((item) => {
                 const Icon = item.icon;
                 const active = location.pathname === item.href;
