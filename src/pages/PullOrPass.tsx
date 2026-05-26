@@ -530,7 +530,7 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
-                  {remaining} left today
+                  {Number.isFinite(remaining) ? `${remaining} left today` : 'Unlimited'}
                 </span>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
