@@ -869,71 +869,104 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     body {
       font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #111827 50%, #0f172a 100%);
-      color: #e2e8f0;
-      line-height: 1.6;
+      color: #edf2f7;
+      line-height: 1.75;
+      font-size: 17px;
+      -webkit-font-smoothing: antialiased;
       min-height: 100vh;
     }
     
     .container {
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto;
-      padding: 40px 24px;
+      padding: 72px 32px 96px;
     }
     
     .header {
       text-align: center;
-      margin-bottom: 48px;
-      padding-bottom: 32px;
+      margin-bottom: 80px;
+      padding-bottom: 40px;
       border-bottom: 1px solid rgba(59, 158, 143, 0.3);
     }
     
     .logo {
-      font-size: 32px;
+      font-size: 40px;
       font-weight: 700;
+      letter-spacing: -0.02em;
       background: linear-gradient(135deg, #5bb8a9, #4aad9e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
     
     .subtitle {
-      color: #94a3b8;
-      font-size: 14px;
+      color: #b6c2d1;
+      font-size: 16px;
+      letter-spacing: 0.01em;
     }
     
     .date {
-      color: #64748b;
-      font-size: 12px;
-      margin-top: 16px;
+      color: #94a3b8;
+      font-size: 13px;
+      margin-top: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
     
     .section {
       background: rgba(17, 24, 39, 0.5);
       border: 1px solid rgba(59, 158, 143, 0.2);
-      border-radius: 16px;
-      padding: 32px;
-      margin-bottom: 24px;
+      border-radius: 20px;
+      padding: 44px 48px;
+      margin-bottom: 72px;
+    }
+
+    .section p {
+      margin-bottom: 18px;
+    }
+    .section p:last-child { margin-bottom: 0; }
+
+    .section + .section { margin-top: 0; }
+
+    /* Editorial readability cap for prose blocks */
+    .section p,
+    .narrative-block,
+    .narrative-block p,
+    .collector-desc,
+    .insight-desc,
+    .action-desc {
+      max-width: 68ch;
     }
     
     .section-title {
-      font-size: 20px;
-      font-weight: 600;
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      line-height: 1.25;
       color: #5bb8a9;
-      margin-bottom: 16px;
+      margin-bottom: 28px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+    }
+
+    .section h3, .subsection-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: #e2e8f0;
+      letter-spacing: -0.01em;
+      margin: 28px 0 12px;
     }
     
     
     .narrative-block {
       background: rgba(15, 23, 42, 0.4);
-      border-radius: 10px;
-      padding: 20px 24px;
-      margin-top: 24px;
-      font-size: 15px;
+      border-radius: 14px;
+      padding: 28px 32px;
+      margin-top: 28px;
+      font-size: 17px;
       line-height: 1.8;
-      color: #cbd5e1;
+      color: #dbe3ee;
     }
     
     .narrative-block em {
@@ -946,54 +979,81 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     }
     
     .narrative-title {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: 13px;
+      font-weight: 700;
       color: #3b9e8f;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 12px;
+      letter-spacing: 1.2px;
+      margin-bottom: 16px;
+    }
+
+    /* Key Insight callout — premium editorial highlight */
+    .key-insight {
+      position: relative;
+      margin: 36px 0;
+      padding: 28px 32px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(91, 184, 169, 0.14), rgba(59, 158, 143, 0.06));
+      border: 1px solid rgba(91, 184, 169, 0.28);
+      box-shadow: 0 10px 40px -20px rgba(91, 184, 169, 0.45);
+      font-size: 18px;
+      line-height: 1.65;
+      color: #f1f5f9;
+    }
+    .key-insight::before {
+      content: 'Key Insight';
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: #5bb8a9;
+      margin-bottom: 10px;
     }
     
     .collector-profile {
       text-align: center;
-      padding: 40px 24px;
+      padding: 64px 32px;
       background: linear-gradient(135deg, rgba(59, 158, 143, 0.2), rgba(74, 173, 158, 0.1));
-      border-radius: 16px;
-      margin-bottom: 24px;
+      border-radius: 24px;
+      margin-bottom: 64px;
     }
     
     .collector-type {
-      font-size: 28px;
+      font-size: 38px;
       font-weight: 700;
+      letter-spacing: -0.02em;
       color: #fff;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     
     .collector-desc {
-      color: #cbd5e1;
-      max-width: 600px;
+      color: #dbe3ee;
+      max-width: 640px;
       margin: 0 auto;
-      font-size: 15px;
+      font-size: 17px;
+      line-height: 1.75;
     }
     
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
+      gap: 18px;
+      margin-bottom: 32px;
     }
     
     .stat-card {
       background: rgba(15, 23, 42, 0.6);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 14px;
+      padding: 24px 20px;
       text-align: center;
     }
     
     .stat-value {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       color: #fff;
+      letter-spacing: -0.01em;
     }
     
     .stat-value.positive { color: #4ade80; }
@@ -1001,10 +1061,10 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     
     .stat-label {
       font-size: 12px;
-      color: #94a3b8;
-      margin-top: 4px;
+      color: #b6c2d1;
+      margin-top: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
     
     .allocation-bar {
@@ -1070,10 +1130,10 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     }
     
     .insight-item {
-      padding: 16px;
+      padding: 20px 22px;
       background: rgba(15, 23, 42, 0.4);
-      border-radius: 10px;
-      margin-bottom: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
     }
     
     .insight-item.strength { border-left: 3px solid #4ade80; }
@@ -1082,23 +1142,25 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     .insight-title {
       font-weight: 600;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 16px;
     }
     
     .insight-desc {
-      font-size: 14px;
-      color: #94a3b8;
+      font-size: 15px;
+      color: #b6c2d1;
+      line-height: 1.65;
     }
     
     .action-item {
       display: flex;
       align-items: flex-start;
-      gap: 12px;
-      padding: 16px;
+      gap: 14px;
+      padding: 20px 22px;
       background: rgba(59, 158, 143, 0.1);
       border: 1px solid rgba(59, 158, 143, 0.3);
-      border-radius: 10px;
-      margin-bottom: 12px;
+      border-radius: 12px;
+      margin-bottom: 14px;
     }
     
     .action-number {
@@ -1121,21 +1183,24 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     .action-title {
       font-weight: 600;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 16px;
     }
     
     .action-desc {
-      font-size: 14px;
-      color: #94a3b8;
+      font-size: 15px;
+      color: #b6c2d1;
+      line-height: 1.65;
     }
     
     .footer {
       text-align: center;
-      margin-top: 48px;
-      padding-top: 32px;
+      margin-top: 64px;
+      padding-top: 40px;
       border-top: 1px solid rgba(59, 158, 143, 0.2);
-      color: #64748b;
-      font-size: 12px;
+      color: #94a3b8;
+      font-size: 13px;
+      letter-spacing: 0.04em;
     }
 
     .health-score {
@@ -1282,26 +1347,27 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     /* Mobile responsive styles */
     @media (max-width: 600px) {
       .container {
-        padding: 20px 12px;
+        padding: 32px 16px 48px;
       }
 
       .section {
-        padding: 16px 12px;
-        border-radius: 12px;
-        margin-bottom: 16px;
+        padding: 28px 20px;
+        border-radius: 16px;
+        margin-bottom: 40px;
       }
 
       .header {
-        margin-bottom: 24px;
-        padding-bottom: 16px;
+        margin-bottom: 48px;
+        padding-bottom: 24px;
       }
 
       .logo {
-        font-size: 24px;
+        font-size: 28px;
       }
 
       .section-title {
-        font-size: 16px;
+        font-size: 24px;
+        margin-bottom: 20px;
       }
 
       .stats-grid {
@@ -1314,7 +1380,7 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .stat-value {
-        font-size: 20px !important;
+        font-size: 22px !important;
       }
 
       .stat-label {
@@ -1322,23 +1388,23 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .narrative-block {
-        padding: 14px 12px;
-        font-size: 13px;
-        line-height: 1.7;
+        padding: 20px 18px;
+        font-size: 16px;
+        line-height: 1.75;
         word-wrap: break-word;
         overflow-wrap: break-word;
       }
 
       .collector-profile {
-        padding: 24px 12px;
+        padding: 40px 20px;
       }
 
       .collector-type {
-        font-size: 22px;
+        font-size: 28px;
       }
 
       .collector-desc {
-        font-size: 13px;
+        font-size: 16px;
       }
 
       .allocation-legend {
@@ -1366,27 +1432,27 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .insight-item {
-        padding: 12px;
+        padding: 16px;
       }
 
       .insight-title {
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .insight-desc {
-        font-size: 12px;
-      }
-
-      .action-item {
-        padding: 12px;
-      }
-
-      .action-title {
         font-size: 14px;
       }
 
+      .action-item {
+        padding: 16px;
+      }
+
+      .action-title {
+        font-size: 15px;
+      }
+
       .action-desc {
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .target-allocation-card {
