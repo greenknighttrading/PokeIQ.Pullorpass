@@ -1241,7 +1241,7 @@ function ResultsView({
               <div className="flex-1 text-center sm:text-left min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">View All My Matches</h3>
                 <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                  Save every card you love, revisit your recommendations, and build your collector identity over time.
+                  Sign up to save every card you liked, revisit your recommendations, and build your collector identity over time.
                 </p>
               </div>
               <motion.button
@@ -1250,7 +1250,7 @@ function ResultsView({
                 onClick={onSignUp}
                 className="shrink-0 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
               >
-                View My Matches
+                Sign Up
                 <ArrowRight className="w-4 h-4" />
               </motion.button>
             </div>
