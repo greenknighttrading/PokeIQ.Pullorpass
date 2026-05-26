@@ -112,6 +112,7 @@ function tcgImage(tcgplayerId: string | null): string | null {
 
 export default function PullOrPass() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [stage, setStage] = useState<Stage>('loading');
   const [userId, setUserId] = useState<string | null>(null);
   const [cards, setCards] = useState<SwipeCard[]>([]);
@@ -128,11 +129,14 @@ export default function PullOrPass() {
   const [quota, setQuota] = useState(() => readQuota());
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
+  const [credits, setCredits] = useState<number>(0);
+  const [redeeming, setRedeeming] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premium && remaining <= 0;
+  const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
