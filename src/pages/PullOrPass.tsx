@@ -787,6 +787,55 @@ function CardArt({ card }: { card: SwipeCard }) {
   );
 }
 
+// Tactile, color-coded swipe action button with press + glow feedback.
+function ActionButton({
+  onClick,
+  label,
+  ariaLabel,
+  icon,
+  tone,
+}: {
+  onClick: () => void;
+  label: string;
+  ariaLabel: string;
+  icon: React.ReactNode;
+  tone: 'pass' | 'love' | 'pull';
+}) {
+  const toneStyles = {
+    pass: {
+      btn: 'bg-zinc-900/80 border-zinc-700/80 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800 hover:shadow-[0_0_22px_rgba(255,255,255,0.08)]',
+      label: 'text-muted-foreground',
+    },
+    love: {
+      btn: 'bg-amber-500/10 border-amber-400/60 text-amber-300 hover:bg-amber-400/15 hover:border-amber-300 hover:shadow-[0_0_28px_rgba(251,191,36,0.45)]',
+      label: 'text-amber-300/90',
+    },
+    pull: {
+      btn: 'bg-primary text-primary-foreground border-primary/80 shadow-[0_0_24px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_38px_hsl(var(--primary)/0.8)] hover:bg-primary/95',
+      label: 'text-primary',
+    },
+  }[tone];
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <motion.button
+        type="button"
+        onClick={onClick}
+        aria-label={ariaLabel}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.88 }}
+        transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+        className={`rounded-full h-16 w-16 sm:h-[68px] sm:w-[68px] border-2 flex items-center justify-center transition-shadow transition-colors ${toneStyles.btn}`}
+      >
+        {icon}
+      </motion.button>
+      <span className={`text-[10px] uppercase tracking-[0.22em] font-bold ${toneStyles.label}`}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
 function DraggableCard({
   card,
   onSwipe,
