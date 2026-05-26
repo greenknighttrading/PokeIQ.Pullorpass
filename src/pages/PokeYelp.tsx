@@ -273,7 +273,21 @@ export default function PokeYelp() {
 
     if (eraId) items = items.filter((c) => classifyEra(c.set_name) === eraId);
 
-    items = items.sort(() => Math.random() - 0.5).slice(0, 40);
+    // Avoid repeating cards already shown earlier in this session (fallback pool)
+    let sessionShown: Set<string> = new Set();
+    try {
+      const raw = sessionStorage.getItem(SESSION_SHOWN_KEY);
+      sessionShown = new Set(raw ? JSON.parse(raw) : []);
+    } catch {}
+    const filtered = items.filter((c) => !sessionShown.has(c.card_id));
+    const sourcePool = filtered.length >= 10 ? filtered : items;
+    items = sourcePool.sort(() => Math.random() - 0.5).slice(0, 40);
+    try {
+      const next = Array.from(sessionShown);
+      for (const c of items) if (!sessionShown.has(c.card_id)) next.push(c.card_id);
+      // Cap to last 400 to keep storage small
+      sessionStorage.setItem(SESSION_SHOWN_KEY, JSON.stringify(next.slice(-400)));
+    } catch {}
 
     if (items.length === 0) {
       toast.message('No cards match your filters', { description: 'Try widening price or clearing filters.' });
