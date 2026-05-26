@@ -40,11 +40,39 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     };
   }, [update, children]);
 
+  const rafRef = useRef<number | null>(null);
+
   const page = (dir: 1 | -1) => {
     const el = scrollerRef.current;
     if (!el) return;
-    // Scroll by ~45% of visible width for a relaxed, smooth feel
-    el.scrollBy({ left: dir * el.clientWidth * 0.45, behavior: 'smooth' });
+
+    // Cancel any in-flight animation
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+    }
+
+    const start = el.scrollLeft;
+    const distance = dir * el.clientWidth * 0.9;
+    const target = start + distance;
+    const duration = 650; // ms — ~35% slower than native smooth scroll
+    const startTime = performance.now();
+
+    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeOutCubic(progress);
+      el.scrollLeft = start + distance * eased;
+
+      if (progress < 1) {
+        rafRef.current = requestAnimationFrame(step);
+      } else {
+        rafRef.current = null;
+      }
+    };
+
+    rafRef.current = requestAnimationFrame(step);
   };
 
   return (
