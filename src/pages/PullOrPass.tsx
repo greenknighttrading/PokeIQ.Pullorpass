@@ -1263,50 +1263,6 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 7: Final hard gate ───────────────────────── */}
-      {!isAuthed && (
-      <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_60%)] pointer-events-none" />
-          <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
-            <div className="relative w-20 h-20 rounded-full bg-muted/40 border border-primary/30 flex items-center justify-center mx-auto md:mx-0">
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl" />
-              <Lock className="relative w-7 h-7 text-primary" />
-            </div>
-            <div className="space-y-2 text-center md:text-left">
-              <h2 className="text-2xl font-bold text-foreground">
-                Create Your Free Profile to Continue <span>⭐</span>
-              </h2>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto md:mx-0">
-                Save your results, build your binder, unlock recommendations, and keep training your collector taste.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 w-full md:w-auto md:min-w-[260px]">
-              <button
-                onClick={onSignUp}
-                className="h-11 px-4 rounded-md bg-white text-zinc-900 font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition shadow-lg"
-              >
-                <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 via-red-500 to-yellow-400" />
-                Continue with Google
-              </button>
-              <button
-                onClick={onSignUp}
-                className="h-11 px-4 rounded-md bg-black text-white font-semibold flex items-center justify-center gap-2 hover:bg-zinc-900 transition border border-white/10"
-              >
-                <Apple className="w-4 h-4" />
-                Continue with Apple
-              </button>
-              <button
-                onClick={onSignUp}
-                className="text-xs text-muted-foreground hover:text-foreground text-center mt-1"
-              >
-                Or sign up with email
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-      )}
 
       {/* Continue journey — replay for authed, signup for guests */}
       <div className="flex flex-col items-center gap-2 pt-2">
