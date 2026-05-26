@@ -194,14 +194,14 @@ function ActionTicker() {
     interface Signal { weight: number; icon: React.ReactNode; iconBg: string; title: string; detail: string; itemId?: string; }
     const signals: Signal[] = [];
 
-    // Play Pull or Pass CTA — high visibility, always first for authed users too
-    signals.push({
-      weight: 100,
+    // Play Pull or Pass CTA — always shown in the SECOND slot (inserted after sort)
+    const pullOrPassSignal: Signal = {
+      weight: 0,
       icon: <Heart className="w-3 h-3 text-primary" />,
       iconBg: 'bg-gradient-to-r from-primary/25 via-cyan-400/25 to-purple-500/25',
       title: 'Play Pull or Pass',
       detail: 'Swipe cards · build your DNA',
-    });
+    };
 
     // Profit Lock
     const profitLockItems = (milestones ?? []).filter(
@@ -247,7 +247,11 @@ function ActionTicker() {
     // Personality test
     signals.push({ weight: 2, icon: <Zap className="w-3 h-3 text-accent" />, iconBg: 'bg-accent/10', title: '🧠 Know Your Personality?', detail: 'Take the collector quiz' });
 
-    return [...signals].sort((a, b) => b.weight - a.weight).slice(0, 15);
+    const sortedSignals = [...signals].sort((a, b) => b.weight - a.weight);
+    // Force Pull or Pass into the 2nd position
+    const withPoP = [...sortedSignals];
+    withPoP.splice(1, 0, pullOrPassSignal);
+    return withPoP.slice(0, 15);
   }, [isDataLoaded, concentration, milestones, items, summary]);
 
   const duped = useMemo(() => [...sorted, ...sorted], [sorted]);
