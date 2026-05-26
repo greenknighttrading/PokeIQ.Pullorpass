@@ -189,6 +189,7 @@ export default function PullOrPass() {
 
   const loadRound = useCallback(async () => {
     setStage('loading');
+    clearResults();
     setIndex(0);
     setRecords([]);
     setImgError(false);
