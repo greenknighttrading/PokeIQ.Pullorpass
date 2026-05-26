@@ -1056,12 +1056,25 @@ function ResultsView({
           </div>
           <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Complete</p>
         </motion.div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-          Your Taste Profile Is Taking Shape <span className="inline-block">✨</span>
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
-          Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
-        </p>
+        {!isAuthed ? (
+          <>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Your Taste Profile Is Taking Shape <span className="inline-block">✨</span>
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+              Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Round Complete <span className="inline-block">✨</span>
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+              Here's how your taste sharpened this round.
+            </p>
+          </>
+        )}
 
         <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-4 max-w-5xl mx-auto">
           <StatGlowCard
