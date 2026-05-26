@@ -458,6 +458,30 @@ export default function PokeYelp() {
 
   const skip = () => nextCard();
 
+  const [redeeming, setRedeeming] = useState(false);
+  const redeemCredits = useCallback(async () => {
+    if (!userId) { navigate('/auth?next=/earn'); return; }
+    if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
+    setRedeeming(true);
+    try {
+      const newCredits = credits - CREDITS_PER_REDEMPTION;
+      const { error } = await supabase.from('pokeiq_credits').upsert({
+        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+      if (error) throw error;
+      setCredits(newCredits);
+      grantSwipeBonus(SWIPES_PER_REDEMPTION);
+      toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
+        description: 'Head to Pull or Pass to use them.',
+        position: 'top-center',
+      });
+    } catch (e: any) {
+      toast.error('Could not redeem credits');
+    } finally {
+      setRedeeming(false);
+    }
+  }, [userId, credits, redeeming, navigate]);
+
   const activeFiltersCount = useMemo(() => {
     let n = 0;
     if (Number(minPrice) > 5) n++;
