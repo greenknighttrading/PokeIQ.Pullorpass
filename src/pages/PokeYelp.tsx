@@ -60,6 +60,9 @@ const PACK_GAINS_HIT_RARITIES = Array.from(
   )
 );
 const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
+const SESSION_SHOWN_KEY = 'pokeyelp_session_shown';
+const CREDITS_PER_REDEMPTION = 20;
+const SWIPES_PER_REDEMPTION = 20;
 
 interface YelpCard {
   card_id: string;
