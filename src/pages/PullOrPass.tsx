@@ -1736,7 +1736,7 @@ function StatGlowCard({
 }
 
 function LikedDislikedPanel({
-  label, icon, count, records, glow, tint,
+  label, icon, count, records, glow, tint, viewProfileHref,
 }: {
   label: string;
   icon: React.ReactNode;
@@ -1744,6 +1744,7 @@ function LikedDislikedPanel({
   records: SwipeRecord[];
   glow?: boolean;
   tint: 'primary' | 'purple';
+  viewProfileHref?: string;
 }) {
   const border = tint === 'primary' ? 'border-primary/20' : 'border-purple-500/20';
   const headColor = tint === 'primary' ? 'text-primary' : 'text-purple-300';
@@ -1784,6 +1785,18 @@ function LikedDislikedPanel({
           </motion.div>
         ))}
       </div>
+      {viewProfileHref && (
+        <div className="mt-4 pt-4 border-t border-primary/15">
+          <Link
+            to={viewProfileHref}
+            className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+          >
+            <Sparkles className="w-4 h-4" />
+            View your profile
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
