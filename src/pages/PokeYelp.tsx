@@ -533,8 +533,8 @@ export default function PokeYelp() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
-              className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight"
-              style={{ textShadow: '0 0 40px hsl(var(--primary) / 0.35)' }}
+              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
+              style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
             >
               PokeIQ Training <span className="inline-block">✨</span>
             </motion.h1>
@@ -542,7 +542,7 @@ export default function PokeYelp() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.25, duration: 0.7 }}
-              className="mt-3 text-base sm:text-lg text-muted-foreground max-w-xl mx-auto"
+              className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
               Help train smarter recommendations for yourself and collectors everywhere.
             </motion.p>

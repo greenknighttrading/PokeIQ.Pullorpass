@@ -12,6 +12,11 @@ import {
   calculatePersonalityResult 
 } from '@/lib/personalityEngine';
 import { Seo } from '@/components/seo/Seo';
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from '@/components/ui/accordion';
+import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+import { Sparkles } from 'lucide-react';
 
 const QUESTIONS_PER_PAGE = 6;
 const TOTAL_PAGES = Math.ceil(QUIZ_QUESTIONS.length / QUESTIONS_PER_PAGE);
@@ -70,17 +75,62 @@ export default function PersonalityTest() {
           {stage === 'quiz' && (
             <>
               {currentPage === 0 && (
-                <div className="text-center mb-8 space-y-2">
-                  <h1 className="text-3xl font-bold text-foreground">
-                    Collector Personality Test
-                  </h1>
-                  <p className="text-muted-foreground">
-                    Answer {QUIZ_QUESTIONS.length} quick questions to discover your collecting style.
-                  </p>
-                  <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto pt-2">
-                    In just 10 minutes, uncover the hidden psychology behind how you collect, spend, hold, chase, and connect with Pokémon.
-                  </p>
-                </div>
+                <>
+                  <div className="text-center mb-8 space-y-2">
+                    <h1 className="text-3xl font-bold text-foreground">
+                      Collector Personality Test
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Answer {QUIZ_QUESTIONS.length} quick questions to discover your collecting style.
+                    </p>
+                    <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto pt-2">
+                      In just 10 minutes, uncover the hidden psychology behind how you collect, spend, hold, chase, and connect with Pokémon.
+                    </p>
+                  </div>
+
+                  {/* Browse all archetypes */}
+                  <div className="mb-10 rounded-2xl border border-border/60 bg-card/40 p-4 sm:p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-primary" />
+                        <h2 className="text-sm font-semibold text-foreground">
+                          Preview the 12 collector archetypes
+                        </h2>
+                      </div>
+                      <Link to="/personality-types" className="text-xs text-primary hover:underline">
+                        See full gallery →
+                      </Link>
+                    </div>
+                    <Accordion type="single" collapsible className="w-full">
+                      {(Object.keys(PERSONALITY_INFO) as PersonalityType[]).map((t) => {
+                        const info = PERSONALITY_INFO[t];
+                        return (
+                          <AccordionItem key={t} value={t} className="border-border/40">
+                            <AccordionTrigger className="py-2.5 hover:no-underline text-sm">
+                              <span className="flex items-center gap-2 text-left">
+                                <span>{info.emoji}</span>
+                                <span className="font-medium">The {t}</span>
+                                <span className="text-xs text-muted-foreground italic hidden sm:inline">
+                                  · "{info.philosophy}"
+                                </span>
+                              </span>
+                            </AccordionTrigger>
+                            <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-3">
+                              <p>{info.tagline}</p>
+                              <div className="flex flex-wrap gap-1.5 pt-1">
+                                {info.coreTraits.map((tr) => (
+                                  <span key={tr} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                                    {tr}
+                                  </span>
+                                ))}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
+                  </div>
+                </>
               )}
               <QuizPage
                 currentPage={currentPage}

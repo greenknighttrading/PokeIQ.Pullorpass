@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
+import { cn } from '@/lib/utils';
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
@@ -31,6 +32,7 @@ export default function Matches() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikedCard[]>([]);
+  const [passes, setPasses] = useState<LikedCard[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
   const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
 
@@ -41,6 +43,41 @@ export default function Matches() {
       setUserId(session.user.id);
       const liked = await fetchLikes(session.user.id);
       setLikes(liked);
+      // Fetch recent passes from pullorpass_swipes
+      try {
+        const { data: passRows } = await supabase
+          .from('pullorpass_swipes')
+          .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
+          .eq('user_id', session.user.id)
+          .eq('decision', 'pass')
+          .order('created_at', { ascending: false })
+          .limit(40);
+        const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
+          id: `pass-${r.card_id}-${r.created_at}`,
+          user_id: session.user.id,
+          card_id: r.card_id,
+          card_name: r.card_name,
+          pokemon_name: null,
+          artist: null,
+          set_name: r.card_set ?? null,
+          set_id: null,
+          era: null,
+          release_year: null,
+          card_type: null,
+          pokemon_type: null,
+          rarity: r.card_rarity ?? null,
+          language: null,
+          card_number: null,
+          variant: null,
+          product_category: null,
+          price: Number(r.card_price) || null,
+          price_tier: null,
+          image_url: r.card_image ?? null,
+          source: 'pass',
+          liked_at: r.created_at,
+        }));
+        setPasses(mapped);
+      } catch (e) { console.warn('fetch passes failed', e); }
       if (liked.length > 0) {
         try { setRecommendations(await recommendForUser(liked, 12)); }
         catch (e) { console.warn('recommend failed', e); }
@@ -88,7 +125,9 @@ export default function Matches() {
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} />
-              {likes.length > 0 && <RecentlyLiked likes={likes} onOpen={setOpenSeed} />}
+              {(likes.length > 0 || passes.length > 0) && (
+                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
+              )}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
               <DeepTasteInsights taste={taste} />
@@ -308,26 +347,34 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, onOpen }: { likes: LikedCard[]; onOpen: (s: CardDetailSeed) => void }) {
-  const recent = likes.slice(0, 18);
+function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void }) {
+  // Merge likes + passes, tag each with its decision, sort by date desc.
+  const tagged = [
+    ...likes.map((l) => ({ ...l, _decision: 'pull' as const })),
+    ...passes.map((p) => ({ ...p, _decision: 'pass' as const })),
+  ].sort((a, b) => (b.liked_at || '').localeCompare(a.liked_at || ''));
+  const recent = tagged.slice(0, 24);
   return (
     <section>
       <div className="mb-5">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Recently liked</h2>
+          <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">The latest cards that caught your eye.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Every card you pulled or passed on, freshest first.
+        </p>
       </div>
-      <CarouselRow ariaLabel="recently liked cards">
-        {recent.map((c) => <RecentCard key={c.id} like={c} onOpen={onOpen} />)}
+      <CarouselRow ariaLabel="latest matches">
+        {recent.map((c) => <RecentCard key={`${c._decision}-${c.id}`} like={c} decision={c._decision} onOpen={onOpen} />)}
       </CarouselRow>
     </section>
   );
 }
 
-function RecentCard({ like, onOpen }: { like: LikedCard; onOpen: (s: CardDetailSeed) => void }) {
+function RecentCard({ like, decision, onOpen }: { like: LikedCard; decision: 'pull' | 'pass'; onOpen: (s: CardDetailSeed) => void }) {
   const [err, setErr] = useState(false);
+  const isPass = decision === 'pass';
   return (
     <motion.button
       whileHover={{ y: -6 }}
@@ -339,12 +386,23 @@ function RecentCard({ like, onOpen }: { like: LikedCard; onOpen: (s: CardDetailS
       })}
       className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left"
     >
-      <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
+      <div className={cn(
+        "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
+        isPass
+          ? "ring-border/40 group-hover:ring-destructive/40"
+          : "ring-border/60 group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50"
+      )}>
         {like.image_url && !err ? (
-          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
+          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-60 grayscale")} onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
+        <div className={cn(
+          "absolute top-1.5 left-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider backdrop-blur",
+          isPass ? "bg-destructive/80 text-destructive-foreground" : "bg-primary/80 text-primary-foreground"
+        )}>
+          {isPass ? <><XIcon className="w-2.5 h-2.5" /> Pass</> : <><HeartIcon className="w-2.5 h-2.5" /> Pull</>}
+        </div>
       </div>
       <p className="mt-2.5 text-sm text-foreground font-medium truncate">{like.card_name}</p>
       <p className="text-xs text-muted-foreground truncate">

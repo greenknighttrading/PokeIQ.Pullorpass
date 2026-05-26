@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Heart, User, Trophy, ScanLine, Crown, Zap, Users, Lock,
+  Heart, User, Trophy, ScanLine, Crown, Zap, Users, Lock, Activity,
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag,
@@ -21,10 +21,11 @@ interface NavItem {
 const primaryNav: NavItem[] = [
   { label: 'Pull or Pass', href: '/swipe', icon: Heart },
   { label: 'Matches', href: '/matches', icon: Heart },
-  { label: 'Profile', href: '/profile', icon: User },
+  { label: 'Smart Profile', href: '/profile', icon: User },
   { label: 'Training', href: '/pokeyelp', icon: Zap },
   { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, badge: 'NEW' },
   { label: 'Personality Test', href: '/test', icon: Users },
+  { label: 'Market Report', href: '/pokeiq-daily', icon: Activity },
   { label: 'Card Scanner', href: '/buylist/scanner', icon: ScanLine },
 ];
 
