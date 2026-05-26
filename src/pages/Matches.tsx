@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export default function Matches() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikedCard[]>([]);
+  const [passes, setPasses] = useState<LikedCard[]>([]);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
   const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
 
@@ -41,6 +42,41 @@ export default function Matches() {
       setUserId(session.user.id);
       const liked = await fetchLikes(session.user.id);
       setLikes(liked);
+      // Fetch recent passes from pullorpass_swipes
+      try {
+        const { data: passRows } = await supabase
+          .from('pullorpass_swipes')
+          .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
+          .eq('user_id', session.user.id)
+          .eq('decision', 'pass')
+          .order('created_at', { ascending: false })
+          .limit(40);
+        const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
+          id: `pass-${r.card_id}-${r.created_at}`,
+          user_id: session.user.id,
+          card_id: r.card_id,
+          card_name: r.card_name,
+          pokemon_name: null,
+          artist: null,
+          set_name: r.card_set ?? null,
+          set_id: null,
+          era: null,
+          release_year: null,
+          card_type: null,
+          pokemon_type: null,
+          rarity: r.card_rarity ?? null,
+          language: null,
+          card_number: null,
+          variant: null,
+          product_category: null,
+          price: Number(r.card_price) || null,
+          price_tier: null,
+          image_url: r.card_image ?? null,
+          source: 'pass',
+          liked_at: r.created_at,
+        }));
+        setPasses(mapped);
+      } catch (e) { console.warn('fetch passes failed', e); }
       if (liked.length > 0) {
         try { setRecommendations(await recommendForUser(liked, 12)); }
         catch (e) { console.warn('recommend failed', e); }
@@ -88,7 +124,9 @@ export default function Matches() {
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} />
-              {likes.length > 0 && <RecentlyLiked likes={likes} onOpen={setOpenSeed} />}
+              {(likes.length > 0 || passes.length > 0) && (
+                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
+              )}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
               <DeepTasteInsights taste={taste} />
