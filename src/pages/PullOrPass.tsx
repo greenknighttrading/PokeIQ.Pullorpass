@@ -1599,8 +1599,8 @@ function ResultsView({
                 </ul>
               </div>
 
-              <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[240px]">
-                <div className="text-center lg:text-right">
+              <div className="flex flex-col items-center gap-3 lg:min-w-[240px] lg:pr-8 xl:pr-16">
+                <div className="text-center">
                   <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/80 font-semibold">Only</p>
                   <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
                     $5<span className="text-base text-muted-foreground font-medium">/month</span>
