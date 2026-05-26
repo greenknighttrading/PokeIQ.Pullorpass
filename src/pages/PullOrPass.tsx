@@ -553,7 +553,55 @@ export default function PullOrPass() {
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-4 relative pt-1">
+              {/* Branded game title */}
+              <div className="relative flex flex-col items-center justify-center text-center mt-1 mb-3 select-none">
+                {/* Animated glow backdrop */}
+                <motion.div
+                  aria-hidden
+                  className="absolute inset-0 -z-10 pointer-events-none blur-2xl"
+                  style={{
+                    background:
+                      'radial-gradient(ellipse at center, hsl(var(--primary) / 0.35), transparent 65%)',
+                  }}
+                  animate={{ opacity: [0.55, 0.95, 0.55], scale: [0.95, 1.05, 0.95] }}
+                  transition={{ duration: 4.2, repeat: Infinity, ease: 'easeInOut' }}
+                />
+                {/* Light streaks */}
+                <div
+                  aria-hidden
+                  className="absolute inset-0 -z-10 pointer-events-none opacity-40 mix-blend-screen"
+                  style={{
+                    backgroundImage:
+                      'repeating-linear-gradient(115deg, transparent 0 14px, hsl(var(--primary) / 0.08) 14px 15px)',
+                    maskImage:
+                      'radial-gradient(ellipse at center, black 30%, transparent 75%)',
+                  }}
+                />
+                <div className="inline-flex items-center gap-2.5">
+                  <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
+                  <motion.h1
+                    className="font-black uppercase tracking-[0.18em] text-3xl sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
+                    style={{
+                      backgroundImage:
+                        'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+                      backgroundSize: '250% 100%',
+                      WebkitTextStroke: '1px hsl(var(--primary) / 0.25)',
+                      filter: 'drop-shadow(0 0 14px hsl(var(--primary) / 0.55))',
+                    }}
+                    animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+                  >
+                    Pull or Pass
+                  </motion.h1>
+                  <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
+                </div>
+                <p className="mt-1.5 text-[11px] sm:text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
+                  A game by <span className="text-primary/90 font-semibold">PokeIQ</span>
+                </p>
+              </div>
+
+              {/* Card stack */}
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-4 relative">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
                   className="relative aspect-[2.5/3.5] w-auto"
