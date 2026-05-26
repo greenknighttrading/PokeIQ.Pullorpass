@@ -16,7 +16,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Seo } from '@/components/seo/Seo';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 import investorImg from '@/assets/personalities/investor.jpg';
 import archivistImg from '@/assets/personalities/archivist.jpg';
@@ -76,16 +78,31 @@ export default function PersonalityTypes() {
       />
 
       <div className="min-h-screen bg-background">
-        <GlobalNavBar />
-
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-          <div className="text-center mb-8 space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              Collector Personality Types
-            </h1>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Every collector has a tribe. Tap any type to explore the psychology, strengths, blind spots, and growth path behind it.
-            </p>
+          <div className="mb-10 grid md:grid-cols-[1fr_auto] gap-6 md:gap-8 items-center">
+            <div className="space-y-3">
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                Collector Personality Types
+              </h1>
+              <p className="text-muted-foreground max-w-2xl">
+                Every collector has a tribe. Tap any type to explore the psychology, strengths, blind spots, and growth path behind it.
+              </p>
+            </div>
+            <div className="md:text-right">
+              <Link to="/test" className="inline-block group">
+                <Button
+                  size="lg"
+                  className="h-auto py-5 px-7 text-base font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_15px_50px_-10px_hsl(var(--primary)/0.8)] transition-all"
+                >
+                  <Sparkles className="w-5 h-5 mr-2" />
+                  Take the Test
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 max-w-[260px] md:ml-auto">
+                  Just <span className="text-primary font-semibold">30 quick questions</span> to discover exactly how you collect.
+                </p>
+              </Link>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
