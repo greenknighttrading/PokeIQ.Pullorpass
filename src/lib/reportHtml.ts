@@ -162,6 +162,7 @@ export function buildPortfolioReportHtml({
     role: string;
     howTheyCollect: string[];
     whatItSays: string;
+    collectingMindset: string;
     coreStrength: string;
     tradeOff: string;
   };
@@ -176,7 +177,8 @@ export function buildPortfolioReportHtml({
         subtitle: info.tagline,
         role: '',
         howTheyCollect: info.collectionStyle,
-        whatItSays: `${info.fullProfile.coreIdentity} ${info.fullProfile.collectingMindset}`,
+        whatItSays: info.fullProfile.coreIdentity,
+        collectingMindset: info.fullProfile.collectingMindset,
         coreStrength: info.strength.replace(/\.$/, ''),
         tradeOff: info.weakness.replace(/\.$/, ''),
       };
@@ -236,7 +238,9 @@ export function buildPortfolioReportHtml({
       
       <div class="section">
         <h2 class="section-title">What This Says About You</h2>
-        <p>${archetype.whatItSays} Your core strength is <strong style="color: #4ade80;">${archetype.coreStrength}</strong>, though this comes with a trade-off: <strong style="color: #fbbf24;">${archetype.tradeOff}</strong>.</p>
+        <p>${archetype.whatItSays}</p>
+        <p>${archetype.collectingMindset}</p>
+        <p>Your core strength is <strong style="color: #4ade80;">${archetype.coreStrength}</strong>, though this comes with a trade-off: <strong style="color: #fbbf24;">${archetype.tradeOff}</strong>.</p>
       </div>
     `;
   };
