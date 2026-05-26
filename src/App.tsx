@@ -8,6 +8,7 @@ import { BuyListProvider } from "@/contexts/BuyListContext";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
+import { PokeIQShell } from "@/components/layout/PokeIQShell";
 
 // Eager: home (LCP) + lightweight 404
 import PokeIQDaily from "./pages/PokeIQDaily";
@@ -61,6 +62,10 @@ const MatchesCollection = lazy(() => import("./pages/MatchesCollection"));
 const PokeYelp = lazy(() => import("./pages/PokeYelp"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const PokeIQLeaderboard = lazy(() => import("./pages/pokeiq/Leaderboard"));
+const PokeIQPremium = lazy(() => import("./pages/pokeiq/Premium"));
+const PokeIQCardIntelligence = lazy(() => import("./pages/pokeiq/CardIntelligence"));
+const PokeIQLastRound = lazy(() => import("./pages/pokeiq/LastRound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,11 +125,15 @@ function AppRoutes() {
         {/* Tools */}
         <Route path="/tools/sealed-vs-cards" element={<SealedVsCards />} />
         <Route path="/pack-gains" element={<PackGainsCalculator />} />
-        <Route path="/swipe" element={<PullOrPass />} />
-        <Route path="/matches" element={<Matches />} />
+        <Route path="/swipe" element={<PokeIQShell><PullOrPass /></PokeIQShell>} />
+        <Route path="/matches" element={<PokeIQShell><PokeIQLastRound /></PokeIQShell>} />
         <Route path="/matches/:category" element={<MatchesCollection />} />
-        <Route path="/pokeyelp" element={<PokeYelp />} />
-        <Route path="/earn" element={<PokeYelp />} />
+        <Route path="/profile" element={<PokeIQShell><Matches /></PokeIQShell>} />
+        <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
+        <Route path="/earn" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
+        <Route path="/leaderboard" element={<PokeIQShell><PokeIQLeaderboard /></PokeIQShell>} />
+        <Route path="/card-intelligence" element={<PokeIQShell><PokeIQCardIntelligence /></PokeIQShell>} />
+        <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
