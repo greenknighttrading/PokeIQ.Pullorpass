@@ -1789,11 +1789,11 @@ function LikedDislikedPanel({
         <div className="mt-4 pt-4 border-t border-primary/15">
           <Link
             to={viewProfileHref}
-            className="group inline-flex items-center gap-2 text-sm font-semibold text-primary hover:text-primary/80 transition-colors"
+            className="group flex items-center justify-center gap-3 text-base font-bold text-primary hover:text-primary/80 transition-colors w-full py-3 rounded-lg bg-primary/5 hover:bg-primary/10"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-5 h-5" />
             View your profile
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+            <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
       )}
