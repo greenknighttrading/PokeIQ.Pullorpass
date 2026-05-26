@@ -631,6 +631,14 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          {stage === 'intro' && (
+            <IntroScreen
+              onStart={() => {
+                try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
+                loadRound();
+              }}
+            />
+          )}
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
