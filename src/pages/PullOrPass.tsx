@@ -997,7 +997,7 @@ function ResultsView({
           Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-4 max-w-5xl mx-auto">
           <StatGlowCard
             icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
             tint="primary"
