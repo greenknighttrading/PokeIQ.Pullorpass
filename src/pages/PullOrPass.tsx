@@ -2170,6 +2170,113 @@ function OutOfSwipesView({
   );
 }
 
+function OutOfSwipesModal({
+  credits,
+  canRedeem,
+  onRedeem,
+  redeeming,
+  isAuthed,
+  onSignUp,
+}: {
+  credits: number;
+  canRedeem: boolean;
+  onRedeem: () => void;
+  redeeming: boolean;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
+  const needed = Math.max(0, CREDITS_PER_REDEMPTION - credits);
+  return (
+    <motion.div
+      className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-background/70 backdrop-blur-md"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+    >
+      <motion.div
+        initial={{ scale: 0.94, y: 14, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+        className="w-full max-w-md"
+      >
+        <Card className="relative overflow-hidden p-7 border-primary/40 bg-card/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)]">
+          <div aria-hidden className="absolute -top-24 -right-24 w-[280px] h-[280px] rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="relative space-y-5 text-center">
+            <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-primary/30">
+              <Lock className="w-6 h-6 text-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">You're out of swipes</h2>
+              <p className="text-sm text-muted-foreground">
+                {canRedeem
+                  ? 'Redeem your credits to keep swiping.'
+                  : isAuthed
+                  ? 'Earn more credits or go Pro for unlimited swipes.'
+                  : 'Sign up to earn credits and unlock more swipes.'}
+              </p>
+            </div>
+
+            {/* Credits chip */}
+            {isAuthed && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border text-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="tabular-nums font-semibold text-foreground">{credits}</span>
+                <span className="text-muted-foreground text-xs">credits</span>
+              </div>
+            )}
+
+            {canRedeem ? (
+              <div className="space-y-2.5 pt-1">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onRedeem}
+                  disabled={redeeming}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.5)] disabled:opacity-60"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} credits → +${SWIPES_PER_REDEMPTION} swipes`}
+                </motion.button>
+                <Link to="/earn" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Or train PokeIQ to earn more →
+                </Link>
+              </div>
+            ) : isAuthed ? (
+              <div className="space-y-3 pt-1">
+                {credits > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-foreground font-semibold">{needed}</span> more credit{needed === 1 ? '' : 's'} to redeem +{SWIPES_PER_REDEMPTION} swipes
+                  </p>
+                )}
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => toast.success("PokeIQ Pro launches soon — you're on the early list.")}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
+                >
+                  <Crown className="w-5 h-5" />
+                  Go PokeIQ Pro — unlimited
+                </motion.button>
+                <Link to="/earn" className="block">
+                  <Button variant="outline" size="lg" className="w-full gap-2">
+                    <Sparkles className="w-4 h-4" /> Earn credits
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2 pt-1">
+                <Button size="lg" className="w-full gap-2" onClick={onSignUp}>
+                  <LogIn className="w-4 h-4" /> Sign up — get 20 free swipes
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function SignupNudge({ onClose, onSignUp }: { onClose: () => void; onSignUp: () => void }) {
   return (
     <motion.div
