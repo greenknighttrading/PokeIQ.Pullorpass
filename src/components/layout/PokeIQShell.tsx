@@ -108,11 +108,11 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             className={cn(
               'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors mt-1',
               isPremiumPath
-                ? 'bg-primary/15 text-primary'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                ? 'bg-accent/15 text-accent'
+                : 'text-accent/90 hover:text-accent hover:bg-accent/10'
             )}
           >
-            <Crown className="w-4 h-4 shrink-0" />
+            <Crown className="w-4 h-4 shrink-0 text-accent" />
             <span className="flex-1 truncate text-left">Premium</span>
             {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
