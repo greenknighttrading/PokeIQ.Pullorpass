@@ -60,6 +60,9 @@ const PACK_GAINS_HIT_RARITIES = Array.from(
   )
 );
 const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
+const SESSION_SHOWN_KEY = 'pokeyelp_session_shown';
+const CREDITS_PER_REDEMPTION = 20;
+const SWIPES_PER_REDEMPTION = 20;
 
 interface YelpCard {
   card_id: string;
@@ -270,7 +273,21 @@ export default function PokeYelp() {
 
     if (eraId) items = items.filter((c) => classifyEra(c.set_name) === eraId);
 
-    items = items.sort(() => Math.random() - 0.5).slice(0, 40);
+    // Avoid repeating cards already shown earlier in this session (fallback pool)
+    let sessionShown: Set<string> = new Set();
+    try {
+      const raw = sessionStorage.getItem(SESSION_SHOWN_KEY);
+      sessionShown = new Set(raw ? JSON.parse(raw) : []);
+    } catch {}
+    const filtered = items.filter((c) => !sessionShown.has(c.card_id));
+    const sourcePool = filtered.length >= 10 ? filtered : items;
+    items = sourcePool.sort(() => Math.random() - 0.5).slice(0, 40);
+    try {
+      const next = Array.from(sessionShown);
+      for (const c of items) if (!sessionShown.has(c.card_id)) next.push(c.card_id);
+      // Cap to last 400 to keep storage small
+      sessionStorage.setItem(SESSION_SHOWN_KEY, JSON.stringify(next.slice(-400)));
+    } catch {}
 
     if (items.length === 0) {
       toast.message('No cards match your filters', { description: 'Try widening price or clearing filters.' });
@@ -441,6 +458,30 @@ export default function PokeYelp() {
 
   const skip = () => nextCard();
 
+  const [redeeming, setRedeeming] = useState(false);
+  const redeemCredits = useCallback(async () => {
+    if (!userId) { navigate('/auth?next=/earn'); return; }
+    if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
+    setRedeeming(true);
+    try {
+      const newCredits = credits - CREDITS_PER_REDEMPTION;
+      const { error } = await supabase.from('pokeiq_credits').upsert({
+        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id' });
+      if (error) throw error;
+      setCredits(newCredits);
+      grantSwipeBonus(SWIPES_PER_REDEMPTION);
+      toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
+        description: 'Head to Pull or Pass to use them.',
+        position: 'top-center',
+      });
+    } catch (e: any) {
+      toast.error('Could not redeem credits');
+    } finally {
+      setRedeeming(false);
+    }
+  }, [userId, credits, redeeming, navigate]);
+
   const activeFiltersCount = useMemo(() => {
     let n = 0;
     if (Number(minPrice) > 5) n++;
@@ -544,6 +585,20 @@ export default function PokeYelp() {
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
                 <span className="tabular-nums text-foreground font-medium">{credits}</span> credits
               </span>
+              {credits >= CREDITS_PER_REDEMPTION && (
+                <>
+                  <span className="w-px h-3 bg-border" />
+                  <button
+                    onClick={redeemCredits}
+                    disabled={redeeming}
+                    className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                    title={`Trade ${CREDITS_PER_REDEMPTION} credits for ${SWIPES_PER_REDEMPTION} swipes`}
+                  >
+                    <RotateCw className="w-3 h-3" />
+                    {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} → ${SWIPES_PER_REDEMPTION} swipes`}
+                  </button>
+                </>
+              )}
               <span className="w-px h-3 bg-border" />
               <button
                 onClick={() => {
@@ -553,12 +608,14 @@ export default function PokeYelp() {
                     });
                     return;
                   }
-                  setShowFilters((s) => !s);
+                  toast.message('Premium unlocks card-level training', {
+                    description: 'PokeIQ Pro lets you pick specific cards to train so your favorites get the most accurate tags.',
+                  });
                 }}
                 className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
                 <Filter className="w-3.5 h-3.5" />
-                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters locked' : 'Filters'}
+                Filters locked
                 {activeFiltersCount > 0 && (
                   <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
                 )}
