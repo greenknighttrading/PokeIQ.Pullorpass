@@ -1272,6 +1272,32 @@ function ResultsView({
             sub="Your sweet spot"
           />
         </div>
+
+        {/* Swipe Again CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.35, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-6"
+        >
+          <motion.button
+            whileHover={{ y: -2, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={onPlayAgain}
+            disabled={outOfSwipes}
+            className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+          >
+            <RotateCw className="w-5 h-5" />
+            Swipe Again
+          </motion.button>
+          {outOfSwipes && (
+            <p className="mt-2.5 text-xs text-muted-foreground">
+              You're out of swipes — go to{' '}
+              <Link to="/earn" className="text-primary underline underline-offset-2 hover:text-primary/80">Earn Credits</Link>{' '}
+              or upgrade to Pro.
+            </p>
+          )}
+        </motion.div>
       </motion.section>
 
       {/* ── SECTION 2: Liked vs Disliked ──────────────────────── */}
