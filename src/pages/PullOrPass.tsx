@@ -966,12 +966,16 @@ function ResultsView({
   isAuthed,
   onSignUp,
   outOfSwipes,
+  premium,
+  remaining,
 }: {
   records: SwipeRecord[];
   onPlayAgain: () => void;
   isAuthed: boolean;
   onSignUp: () => void;
   outOfSwipes?: boolean;
+  premium?: boolean;
+  remaining?: number;
 }) {
   const a = analyzeRound(records);
   const pulled = records.filter((r) => r.decision === 'pull');
