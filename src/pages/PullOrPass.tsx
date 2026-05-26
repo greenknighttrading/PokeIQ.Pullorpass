@@ -816,6 +816,11 @@ export default function PullOrPass() {
                   redeeming={redeeming}
                   isAuthed={!!userId}
                   onSignUp={() => navigate('/auth')}
+                  showProNudge={showProNudge}
+                  onKeepTraining={() => {
+                    try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
+                    setProNudgeDismissed(true);
+                  }}
                 />
               )}
             </div>
@@ -830,6 +835,11 @@ export default function PullOrPass() {
                 redeeming={redeeming}
                 isAuthed={!!userId}
                 onSignUp={() => navigate('/auth')}
+                showProNudge={showProNudge}
+                onKeepTraining={() => {
+                  try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
+                  setProNudgeDismissed(true);
+                }}
               />
             </div>
           )}
