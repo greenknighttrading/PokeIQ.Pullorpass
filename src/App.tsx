@@ -93,7 +93,7 @@ function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
-        <Route path="/test" element={<PersonalityTest />} />
+        <Route path="/test" element={<PokeIQShell><PersonalityTest /></PokeIQShell>} />
         <Route path="/personality-types" element={<PersonalityTypes />} />
         <Route path="/get-started" element={<GetStarted />} />
 
@@ -132,7 +132,7 @@ function AppRoutes() {
         <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
         <Route path="/earn" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
         <Route path="/leaderboard" element={<PokeIQShell><PokeIQLeaderboard /></PokeIQShell>} />
-        <Route path="/card-intelligence" element={<PokeIQShell><PokeIQCardIntelligence /></PokeIQShell>} />
+        <Route path="/card-intelligence" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
 
         {/* Standalone report pages - no layout */}
