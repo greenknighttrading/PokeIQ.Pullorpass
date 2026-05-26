@@ -35,14 +35,13 @@ const primaryNav: NavItem[] = [
 ];
 
 const premiumCollect: NavItem[] = [
-  { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard },
-  { label: 'Collector Report', href: '/report', icon: FileText },
+  { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard, badge: 'BETA' },
+  { label: 'Collector Report Card', href: '/report', icon: FileText },
   { label: 'Smart Feed', href: '/smart-feed', icon: Sparkles },
 ];
 
 const premiumTools: NavItem[] = [
   { label: 'Buy List', href: '/buylist/list', icon: ShoppingBag },
-  { label: 'Sets Explorer', href: '/buylist/sets', icon: PieChart },
 ];
 
 export function PokeIQShell({ children }: { children: React.ReactNode }) {
@@ -181,6 +180,11 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span className="flex-1 truncate">{item.label}</span>
+                    {item.badge && (
+                      <span className="text-[8px] font-bold uppercase tracking-wider px-1 py-0.5 rounded bg-violet-500/20 text-violet-300">
+                        {item.badge}
+                      </span>
+                    )}
                     {!isPremium && <Lock className="w-3 h-3 text-violet-300/70" />}
                   </Link>
                 );

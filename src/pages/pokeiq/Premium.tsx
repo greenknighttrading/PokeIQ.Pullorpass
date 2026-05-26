@@ -7,12 +7,10 @@ import {
   BarChart3,
   FileText,
   Rss,
-  LayoutGrid,
   TrendingUp,
   TrendingDown,
   ArrowUpRight,
   Flame,
-  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -65,13 +63,14 @@ export default function Premium() {
         <FeatureCard
           icon={BarChart3}
           title="Advanced portfolio analytics"
+          badge="BETA"
           description="Track Health Score, era allocation, value-over-time, and risk exposure across your entire collection — the full Portfolio Review at your fingertips."
           chips={['Health Score', 'Era allocation', 'Value over time']}
           preview={<AnalyticsPreview />}
         />
         <FeatureCard
           icon={FileText}
-          title="Personalised PokeIQ Report"
+          title="Collector Report Card"
           description="Your Collector Archetype meets your portfolio. We use your DNA — Investor, Archivist, Gambler — to tailor every recommendation in your monthly briefing."
           chips={['Archetype-driven', 'Tailored picks', 'Monthly briefing']}
           preview={<ReportPreview />}
@@ -82,13 +81,6 @@ export default function Premium() {
           description="Daily curated picks based on your budget, taste, and the cards trending in your favorite sets."
           chips={['Daily picks', 'Budget-aware', 'Trend-driven']}
           preview={<SmartFeedPreview />}
-        />
-        <FeatureCard
-          icon={LayoutGrid}
-          title="Sets Explorer"
-          description="Dive into every set with chase odds, sealed performance, and singles momentum side-by-side."
-          chips={['Chase odds', 'Sealed vs singles', 'Set momentum']}
-          preview={<SetsExplorerPreview />}
         />
       </div>
 
@@ -175,12 +167,14 @@ export default function Premium() {
 function FeatureCard({
   icon: Icon,
   title,
+  badge,
   description,
   chips,
   preview,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
+  badge?: string;
   description: string;
   chips: string[];
   preview: React.ReactNode;
@@ -193,7 +187,14 @@ function FeatureCard({
           <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-violet-500/15 border border-violet-500/30 mb-3">
             <Icon className="w-4 h-4 text-violet-300" />
           </div>
-          <h3 className="text-xl font-semibold mb-2">{title}</h3>
+          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2 flex-wrap">
+            {title}
+            {badge && (
+              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                {badge}
+              </span>
+            )}
+          </h3>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{description}</p>
           <div className="flex flex-wrap gap-1.5">
             {chips.map((c) => (
@@ -383,31 +384,3 @@ function SmartFeedPreview() {
   );
 }
 
-function SetsExplorerPreview() {
-  const sets = [
-    { name: 'Surging Sparks', mom: '+12%', chase: '1 / 86' },
-    { name: 'Paldean Fates', mom: '+6%', chase: '1 / 124' },
-    { name: '151', mom: '+18%', chase: '1 / 64' },
-  ];
-  return (
-    <PreviewShell>
-      <div className="flex items-center gap-2 mb-3">
-        <Star className="w-4 h-4 text-violet-300" />
-        <span className="text-xs font-semibold">Top sets this week</span>
-      </div>
-      <div className="space-y-1.5">
-        {sets.map((s) => (
-          <div key={s.name} className="flex items-center justify-between text-xs p-2 rounded-md bg-card/60 border border-border/50">
-            <span className="font-medium truncate">{s.name}</span>
-            <div className="flex items-center gap-3">
-              <span className="text-[10px] text-muted-foreground">Chase {s.chase}</span>
-              <span className="text-emerald-400 text-[10px] flex items-center gap-0.5">
-                <TrendingUp className="w-3 h-3" />{s.mom}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </PreviewShell>
-  );
-}
