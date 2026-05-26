@@ -1358,10 +1358,10 @@ function ResultsView({
                 Your Future Collection
               </p>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
-                A binder shaped by your taste
+                Create a custom binder shaped by your taste
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground max-w-md">
-                PokeIQ automatically organizes the cards you'll actually love.
+                PokeIQ automatically organizes your favorite cards into a personalized digital binder built around your unique collector identity.
               </p>
               <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-2">
                 <BinderPill
