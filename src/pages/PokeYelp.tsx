@@ -717,13 +717,14 @@ export default function PokeYelp() {
                       {selected.size} selected
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Tap any tag that fits. Skip the rest.
-                  </p>
-                  <p className="text-xs text-amber-400/90 mb-5 inline-flex items-center gap-1.5">
-                    <Plus className="w-3 h-3" />
-                    Add custom tags for bonus credits — accuracy is rewarded
-                  </p>
+                  <div className="flex items-baseline justify-between mb-1">
+                    <p className="text-xs text-muted-foreground">
+                      Tap any tag that fits. Skip the rest. <span className="text-amber-400/90">Accuracy is rewarded!</span>
+                    </p>
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                      {selected.size} selected
+                    </span>
+                  </div>
 
                   <div className="min-h-[140px]">
                     {suggestLoading && (
