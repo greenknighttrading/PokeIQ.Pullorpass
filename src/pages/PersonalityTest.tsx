@@ -16,7 +16,6 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
-import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 
 const QUESTIONS_PER_PAGE = 6;
