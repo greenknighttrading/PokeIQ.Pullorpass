@@ -1439,6 +1439,52 @@ function LockedRecCard() {
   );
 }
 
+function BinderPill({
+  icon, title, sub, tint,
+}: { icon: React.ReactNode; title: string; sub: string; tint: 'primary' | 'purple' }) {
+  const ring = tint === 'primary'
+    ? 'border-primary/30 text-primary'
+    : 'border-purple-400/30 text-purple-300';
+  const bg = tint === 'primary' ? 'bg-primary/10' : 'bg-purple-500/10';
+  return (
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+      className="flex flex-col items-center text-center gap-2"
+    >
+      <div className={`w-11 h-11 rounded-full border ${ring} ${bg} flex items-center justify-center`}>
+        {icon}
+      </div>
+      <p className="text-xs font-semibold text-foreground leading-tight">{title}</p>
+      <p className="text-[11px] text-muted-foreground -mt-1.5 leading-tight">{sub}</p>
+    </motion.div>
+  );
+}
+
+function RecommendedRecCard({ card, match }: { card: RecommendedCard; match: number }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4, scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="relative w-[180px] sm:w-[200px] shrink-0 rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/40 shadow-[0_0_22px_hsl(var(--primary)/0.35)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
+      title={card.reason}
+    >
+      <div className="aspect-[2.5/3.5]">
+        {card.image_url ? (
+          <img src={card.image_url} alt={card.card_name} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageOff className="w-4 h-4 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-bold text-primary">
+        {match}% <span className="text-[8px] font-semibold text-white/70">MATCH</span>
+      </div>
+    </motion.div>
+  );
+}
+
 function CircularMeter({ value }: { value: number }) {
   const r = 36;
   const c = 2 * Math.PI * r;
