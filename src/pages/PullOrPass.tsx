@@ -1554,10 +1554,6 @@ function ResultsView({
 
             <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10">
-                  <Crown className="w-3.5 h-3.5 text-amber-300" />
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300 font-semibold">PokeIQ Premium</p>
-                </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
                   {outOfSwipes ? 'Out of swipes?' : 'Want unlimited swipes?'}
                 </h2>
