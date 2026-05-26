@@ -615,7 +615,7 @@ export default function PokeYelp() {
                 className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
                 <Filter className="w-3.5 h-3.5" />
-                {todaysMode && (todaysRemaining ?? 0) > 0 ? 'Filters locked' : 'Filters'}
+                Filters locked
                 {activeFiltersCount > 0 && (
                   <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
                 )}
