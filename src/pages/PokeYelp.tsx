@@ -585,6 +585,20 @@ export default function PokeYelp() {
                 <Coins className="w-3.5 h-3.5 text-amber-400" />
                 <span className="tabular-nums text-foreground font-medium">{credits}</span> credits
               </span>
+              {credits >= CREDITS_PER_REDEMPTION && (
+                <>
+                  <span className="w-px h-3 bg-border" />
+                  <button
+                    onClick={redeemCredits}
+                    disabled={redeeming}
+                    className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+                    title={`Trade ${CREDITS_PER_REDEMPTION} credits for ${SWIPES_PER_REDEMPTION} swipes`}
+                  >
+                    <RotateCw className="w-3 h-3" />
+                    {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} → ${SWIPES_PER_REDEMPTION} swipes`}
+                  </button>
+                </>
+              )}
               <span className="w-px h-3 bg-border" />
               <button
                 onClick={() => {
@@ -594,7 +608,9 @@ export default function PokeYelp() {
                     });
                     return;
                   }
-                  setShowFilters((s) => !s);
+                  toast.message('Premium unlocks card-level training', {
+                    description: 'PokeIQ Pro lets you pick specific cards to train so your favorites get the most accurate tags.',
+                  });
                 }}
                 className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
               >
