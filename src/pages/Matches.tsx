@@ -42,7 +42,7 @@ export default function Matches() {
       const liked = await fetchLikes(session.user.id);
       setLikes(liked);
       if (liked.length > 0) {
-        try { setRecommendations(await recommendForUser(liked, 10)); }
+        try { setRecommendations(await recommendForUser(liked, 12)); }
         catch (e) { console.warn('recommend failed', e); }
       }
       setLoading(false);
