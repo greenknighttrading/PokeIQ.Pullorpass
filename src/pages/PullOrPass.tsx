@@ -14,7 +14,9 @@ import {
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
-import { saveLike } from '@/lib/likesService';
+import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
+import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
+import { BookOpen, Wand2, TrendingUp as TrendingUpIcon } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 
 type Stage = 'loading' | 'swiping' | 'results';
@@ -916,8 +918,54 @@ function ResultsView({
     : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine']
   ).slice(0, 5);
   const completion = Math.min(100, Math.round(((records.length) / 100) * 100));
-  const recVisible = pulled.slice(0, 4);
-  const recLocked = Math.max(0, 8 - recVisible.length);
+
+  // Build a sparse LikedCard[] from this round's pulls so we can fetch
+  // *different* but stylistically related recommendations.
+  const likedAsRich: LikedCard[] = useMemo(
+    () =>
+      pulled.map((r) => ({
+        id: r.card.card_id,
+        user_id: '',
+        card_id: r.card.card_id,
+        card_name: r.card.name,
+        pokemon_name: extractPokemonName(r.card.name),
+        artist: null,
+        set_name: r.card.set_name,
+        set_id: null,
+        era: classifyEra(r.card.set_name)?.id ?? null,
+        release_year: null,
+        card_type: null,
+        pokemon_type: null,
+        rarity: r.card.rarity,
+        language: null,
+        card_number: null,
+        variant: null,
+        product_category: null,
+        price: r.card.price,
+        price_tier: priceTier(r.card.price),
+        image_url: r.card.image_url,
+        source: 'swipe',
+        liked_at: '',
+      })),
+    [pulled]
+  );
+
+  const [recs, setRecs] = useState<RecommendedCard[]>([]);
+  const [recsLoading, setRecsLoading] = useState(true);
+  useEffect(() => {
+    let alive = true;
+    setRecsLoading(true);
+    if (likedAsRich.length === 0) {
+      setRecs([]);
+      setRecsLoading(false);
+      return;
+    }
+    recommendForUser(likedAsRich, 12)
+      .then((r) => { if (alive) setRecs(r); })
+      .catch(() => { if (alive) setRecs([]); })
+      .finally(() => { if (alive) setRecsLoading(false); });
+    return () => { alive = false; };
+  }, [likedAsRich]);
 
   const fadeUp = {
     initial: { opacity: 0, y: 24 },
@@ -1053,138 +1101,168 @@ function ResultsView({
         </div>
       </motion.section>
 
-      {/* ── SECTION 4+5: Binder + Recommendations side-by-side ── */}
-      <motion.section {...fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Binder Preview */}
-        <div className="flex flex-col gap-4">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Your Future Collection</p>
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">A binder shaped by your taste</h2>
-            <p className="text-sm text-muted-foreground mt-1.5 max-w-md">
-              PokeIQ auto-curates a digital binder of cards you'll actually love.
-            </p>
-          </div>
-          <div className="relative rounded-xl bg-gradient-to-b from-zinc-900 to-black p-4 shadow-2xl border border-white/5 overflow-hidden">
-            <div className="grid grid-cols-4 gap-2.5">
-              {pulled.slice(0, 8).concat(Array.from({ length: Math.max(0, 8 - pulled.length) }).map(() => null as any)).slice(0, 8).map((r, i) => (
-                <div
-                  key={i}
-                  className={`relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 border border-white/5 ${i >= 4 ? 'opacity-60' : ''}`}
-                >
-                  {r?.card?.image_url ? (
-                    <img src={r.card.image_url} alt="" className={`w-full h-full object-cover ${i >= 4 ? 'blur-[2px]' : ''}`} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
-                      <ImageOff className="w-3 h-3" />
+      {/* ── SECTION 4: Binder hero (matches reference mockup) ─── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-white/5 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
+          <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-8 lg:gap-12 items-center">
+            {/* Left: binder mockup with two pages of 4 cards each */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.18),transparent_70%)] blur-2xl pointer-events-none" />
+              <div className="relative rounded-xl bg-gradient-to-b from-zinc-800/60 to-black p-3 sm:p-4 border border-white/10 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.8)]">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                  {[0, 1].map((page) => (
+                    <div
+                      key={page}
+                      className="grid grid-cols-2 gap-2 p-2 sm:p-3 rounded-md bg-black/40 border border-white/5"
+                    >
+                      {Array.from({ length: 4 }).map((_, idx) => {
+                        const cardIdx = page * 4 + idx;
+                        const r = pulled[cardIdx];
+                        return (
+                          <div
+                            key={idx}
+                            className="relative aspect-[2.5/3.5] rounded-sm overflow-hidden bg-muted/30 border border-white/5"
+                          >
+                            {r?.card?.image_url ? (
+                              <img src={r.card.image_url} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-muted-foreground/40">
+                                <ImageOff className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                  )}
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
+
+            {/* Right: headline + 3 feature pills */}
+            <div className="space-y-5">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">
+                Your Future Collection
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
+                A binder shaped by your taste
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-md">
+                PokeIQ automatically organizes the cards you'll actually love.
+              </p>
+              <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-2">
+                <BinderPill
+                  icon={<BookOpen className="w-5 h-5" />}
+                  title="Auto-organized"
+                  sub="by sets & themes"
+                  tint="primary"
+                />
+                <BinderPill
+                  icon={<Wand2 className="w-5 h-5" />}
+                  title="Matches your"
+                  sub="unique taste"
+                  tint="purple"
+                />
+                <BinderPill
+                  icon={<TrendingUpIcon className="w-5 h-5" />}
+                  title="Evolves as you"
+                  sub="swipe more"
+                  tint="primary"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 5: Hand-picked recommendations row ────────── */}
+      <motion.section {...fadeUp} className="flex flex-col gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You</p>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked for your taste</h2>
+          <p className="text-sm text-muted-foreground mt-1.5">
+            Different cards from this round — chosen by matching the sets, artists, eras, and Pokémon you liked.
+          </p>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {recsLoading && recs.length === 0 ? (
+            Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="w-[180px] sm:w-[200px] shrink-0 aspect-[2.5/3.5] rounded-lg bg-muted/20 border border-white/5 animate-pulse"
+              />
+            ))
+          ) : recs.length > 0 ? (
+            recs.slice(0, 12).map((c, i) => (
+              <RecommendedRecCard key={c.card_id} card={c} match={Math.max(70, 98 - i * 2)} />
+            ))
+          ) : (
+            <p className="text-sm text-muted-foreground py-8 px-2">
+              Like a few more cards to unlock personalized picks.
+            </p>
+          )}
+        </div>
+      </motion.section>
+
+      {/* ── SECTION 6: Combined Progress + Why + SIGN UP NOW ───── */}
+      <motion.section {...fadeUp}>
+        <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+
+          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-8 lg:gap-12 items-center">
+            {/* Left: progress meter */}
+            <div className="flex flex-col items-center gap-2 lg:min-w-[180px]">
+              <CircularMeter value={completion} />
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mt-1">Your Progress</p>
+              <p className="text-xs text-muted-foreground text-center max-w-[180px]">
+                Recommendation accuracy sharpens with every swipe.
+              </p>
+            </div>
+
+            {/* Middle: why sign up */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-3">Why Sign Up</p>
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2.5">
+                {[
+                  'Get 25 free swipes a day',
+                  'Save & track your Taste Profile',
+                  'Build your custom digital binder',
+                  'Unlock advanced insights & trends',
+                  'Get personalized card recommendations',
+                ].map((s) => (
+                  <li key={s} className="flex items-start gap-2.5 text-sm text-foreground/90">
+                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: primary CTA */}
             {!isAuthed && (
-              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+              <div className="flex flex-col items-center gap-2 lg:min-w-[220px]">
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onSignUp}
+                  className="h-12 px-8 rounded-full bg-primary text-primary-foreground font-bold text-sm tracking-wide shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow whitespace-nowrap"
+                >
+                  SIGN UP NOW
+                </motion.button>
+                <p className="text-[11px] text-muted-foreground">Free forever · No credit card</p>
+              </div>
             )}
           </div>
         </div>
-
-        {/* Recommendations */}
-        <div className="flex flex-col gap-4">
-          <div className="flex items-end justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-primary" />
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Recommended For You</p>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground mt-1">Hand-picked for your taste</h2>
-              <p className="text-sm text-muted-foreground mt-1.5">Cards PokeIQ thinks you'll love.</p>
-            </div>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {recVisible.map((r, i) => (
-              <RecCard key={r.card.card_id} card={r.card} match={98 - i * 4} />
-            ))}
-            {Array.from({ length: recLocked }).map((_, i) => (
-              <LockedRecCard key={i} />
-            ))}
-          </div>
-        </div>
       </motion.section>
 
-      {/* ── SECTION 6: Progress + Why (flat, no boxes) ────────── */}
-      <motion.section {...fadeUp} className="grid grid-cols-1 lg:grid-cols-2 gap-12 py-4 border-t border-border/40 pt-12">
-        <div className="flex items-center gap-6">
-          <CircularMeter value={completion} />
-          <div className="space-y-1.5">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Progress</p>
-            <h3 className="text-xl font-bold text-foreground">Recommendation Accuracy</h3>
-            <p className="text-sm text-muted-foreground max-w-sm">
-              The more you train PokeIQ, the sharper your matches become. Most users see major improvements after 100+ swipes.
-            </p>
-          </div>
-        </div>
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-4">Why Sign Up</p>
-          <ul className="space-y-2.5">
-            {[
-              'Get 25 free swipes a day',
-              'Save & track your Taste Profile',
-              'Build your custom digital binder',
-              'Unlock advanced insights & trends',
-              'Get personalized card recommendations',
-            ].map((s) => (
-              <li key={s} className="flex items-start gap-2.5 text-sm text-foreground/90">
-                <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                <span>{s}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </motion.section>
-
-      {/* ── SECTION 7: Final hard gate ───────────────────────── */}
-      {!isAuthed && (
-      <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.12),transparent_60%)] pointer-events-none" />
-          <div className="relative grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-6 items-center">
-            <div className="relative w-20 h-20 rounded-full bg-muted/40 border border-primary/30 flex items-center justify-center mx-auto md:mx-0">
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl" />
-              <Lock className="relative w-7 h-7 text-primary" />
-            </div>
-            <div className="space-y-2 text-center md:text-left">
-              <h2 className="text-2xl font-bold text-foreground">
-                Create Your Free Profile to Continue <span>⭐</span>
-              </h2>
-              <p className="text-sm text-muted-foreground max-w-md mx-auto md:mx-0">
-                Save your results, build your binder, unlock recommendations, and keep training your collector taste.
-              </p>
-            </div>
-            <div className="flex flex-col gap-2 w-full md:w-auto md:min-w-[260px]">
-              <button
-                onClick={onSignUp}
-                className="h-11 px-4 rounded-md bg-white text-zinc-900 font-semibold flex items-center justify-center gap-2 hover:bg-white/90 transition shadow-lg"
-              >
-                <span className="inline-block w-4 h-4 rounded-full bg-gradient-to-br from-blue-500 via-red-500 to-yellow-400" />
-                Continue with Google
-              </button>
-              <button
-                onClick={onSignUp}
-                className="h-11 px-4 rounded-md bg-black text-white font-semibold flex items-center justify-center gap-2 hover:bg-zinc-900 transition border border-white/10"
-              >
-                <Apple className="w-4 h-4" />
-                Continue with Apple
-              </button>
-              <button
-                onClick={onSignUp}
-                className="text-xs text-muted-foreground hover:text-foreground text-center mt-1"
-              >
-                Or sign up with email
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.section>
-      )}
 
       {/* Continue journey — replay for authed, signup for guests */}
       <div className="flex flex-col items-center gap-2 pt-2">
@@ -1358,6 +1436,52 @@ function LockedRecCard() {
         <p className="text-[10px] text-muted-foreground text-center px-2 leading-tight">Unlocks after signup</p>
       </div>
     </div>
+  );
+}
+
+function BinderPill({
+  icon, title, sub, tint,
+}: { icon: React.ReactNode; title: string; sub: string; tint: 'primary' | 'purple' }) {
+  const ring = tint === 'primary'
+    ? 'border-primary/30 text-primary'
+    : 'border-purple-400/30 text-purple-300';
+  const bg = tint === 'primary' ? 'bg-primary/10' : 'bg-purple-500/10';
+  return (
+    <motion.div
+      whileHover={{ y: -3 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 18 }}
+      className="flex flex-col items-center text-center gap-2"
+    >
+      <div className={`w-11 h-11 rounded-full border ${ring} ${bg} flex items-center justify-center`}>
+        {icon}
+      </div>
+      <p className="text-xs font-semibold text-foreground leading-tight">{title}</p>
+      <p className="text-[11px] text-muted-foreground -mt-1.5 leading-tight">{sub}</p>
+    </motion.div>
+  );
+}
+
+function RecommendedRecCard({ card, match }: { card: RecommendedCard; match: number }) {
+  return (
+    <motion.div
+      whileHover={{ y: -4, scale: 1.03 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+      className="relative w-[180px] sm:w-[200px] shrink-0 rounded-lg overflow-hidden bg-muted/30 ring-1 ring-primary/40 shadow-[0_0_22px_hsl(var(--primary)/0.35)] hover:shadow-[0_0_40px_hsl(var(--primary)/0.6)] transition-shadow"
+      title={card.reason}
+    >
+      <div className="aspect-[2.5/3.5]">
+        {card.image_url ? (
+          <img src={card.image_url} alt={card.card_name} className="w-full h-full object-cover" loading="lazy" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <ImageOff className="w-4 h-4 text-muted-foreground" />
+          </div>
+        )}
+      </div>
+      <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/70 backdrop-blur-sm text-[10px] font-bold text-primary">
+        {match}% <span className="text-[8px] font-semibold text-white/70">MATCH</span>
+      </div>
+    </motion.div>
   );
 }
 
