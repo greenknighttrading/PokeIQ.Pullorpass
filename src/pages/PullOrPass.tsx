@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
@@ -28,6 +28,8 @@ const SWIPE_THRESHOLD = 110;
 // ─── Daily swipe quota (free tier) ───────────────────────
 const DAILY_BASE_LIMIT = 20;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 20 Earn reviews
+const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes
+const SWIPES_PER_REDEMPTION = 10;
 
 function todayKey() {
   const d = new Date();
