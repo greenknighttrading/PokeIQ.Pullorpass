@@ -12,6 +12,7 @@ import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
+import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
 
@@ -320,9 +321,9 @@ function RecentlyLiked({ likes, onOpen }: { likes: LikedCard[]; onOpen: (s: Card
         </div>
         <p className="text-sm text-muted-foreground mt-1">The latest cards that caught your eye.</p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <CarouselRow ariaLabel="recently liked cards">
         {recent.map((c) => <RecentCard key={c.id} like={c} onOpen={onOpen} />)}
-      </div>
+      </CarouselRow>
     </section>
   );
 }
@@ -342,7 +343,7 @@ function RecentCard({ like, onOpen }: { like: LikedCard; onOpen: (s: CardDetailS
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
         {like.image_url && !err ? (
-          <img src={like.image_url} alt={like.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
@@ -545,7 +546,7 @@ function BinderSlot({ like, onOpen }: { like: LikedCard | null; onOpen: (s: Card
       })}
     >
       {like.image_url && !err ? (
-        <img src={like.image_url} alt={like.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
       ) : (
         <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-4 h-4 text-muted-foreground" /></div>
       )}
@@ -569,9 +570,9 @@ function RecommendedRow({ items, onOpen }: { items: RecommendedCard[]; onOpen: (
           Picked by matching the artists, sets, types, and rarities you keep liking.
         </p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <CarouselRow ariaLabel="recommended cards">
         {items.map((r) => <RecRowCard key={r.card_id} r={r} onOpen={onOpen} />)}
-      </div>
+      </CarouselRow>
     </section>
   );
 }
@@ -591,7 +592,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
         {r.image_url && !err ? (
-          <img src={r.image_url} alt={r.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+          <img src={r.image_url} alt={r.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
