@@ -767,7 +767,6 @@ function StackCardShell({ offset, children }: { offset: number; children: React.
 }
 
 function CardArt({ card }: { card: SwipeCard }) {
-  // (kept above DraggableCard)
   const [err, setErr] = React.useState(false);
   if (!card.image_url || err) {
     return (
