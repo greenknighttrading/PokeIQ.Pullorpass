@@ -94,7 +94,7 @@ function AppRoutes() {
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/test" element={<PokeIQShell><PersonalityTest /></PokeIQShell>} />
-        <Route path="/personality-types" element={<PersonalityTypes />} />
+        <Route path="/personality-types" element={<PokeIQShell><PersonalityTypes /></PokeIQShell>} />
         <Route path="/get-started" element={<GetStarted />} />
 
         {/* Portfolio Simulator */}
