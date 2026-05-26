@@ -1,11 +1,26 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Crown, Check, X, ArrowRight } from 'lucide-react';
+import { Crown, Check, X, ArrowRight, Sparkles, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const includedFeatures = [
+const coreFeatures = [
   'Unlimited Pull or Pass swipes',
+  'Advanced recommendation engine',
+  'Collector DNA insights',
+  'Taste evolution tracking',
+  'Recommendation tuning',
+  'Personalized card discoveries',
+  'Collector similarity matching',
+  'Community leaderboard boosts',
+  'Early access archetypes',
+  'Enhanced card intelligence',
+  'Premium binder customization',
+  'AI-powered collector insights',
+  'Swipe streak rewards',
+];
+
+const includedFeatures = [
   'Advanced portfolio analytics',
   'Personalised PokeIQ Report',
   'Health Score & risk analysis',
@@ -19,7 +34,6 @@ const includedFeatures = [
   'Market News & daily briefs',
   'Buy List with curated picks',
   'Movers, Sets Explorer & Watchlist',
-  'Recommendation tuning',
   'Priority support',
 ];
 
@@ -57,7 +71,7 @@ export default function Premium() {
   return (
     <div className="px-6 lg:px-10 py-10 max-w-[1100px] mx-auto">
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-primary mb-3">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-accent mb-3">
           <Crown className="w-3.5 h-3.5" /> PokeIQ Premium
         </div>
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
@@ -73,7 +87,7 @@ export default function Premium() {
             onClick={() => setBilling('monthly')}
             className={cn(
               'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
-              billing === 'monthly' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+              billing === 'monthly' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
             )}
           >
             Monthly
@@ -82,13 +96,13 @@ export default function Premium() {
             onClick={() => setBilling('annual')}
             className={cn(
               'px-4 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5',
-              billing === 'annual' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
+              billing === 'annual' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
             )}
           >
             Annual
             <span className={cn(
               'text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
-              billing === 'annual' ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/20 text-primary'
+              billing === 'annual' ? 'bg-accent-foreground/20 text-accent-foreground' : 'bg-accent/20 text-accent'
             )}>
               Save 18%
             </span>
@@ -96,9 +110,26 @@ export default function Premium() {
         </div>
       </div>
 
+      {/* Core Pull or Pass features — highlighted */}
+      <div className="max-w-3xl mx-auto mb-10 rounded-2xl border border-accent/40 bg-gradient-to-br from-accent/15 via-accent/5 to-transparent p-6">
+        <div className="flex items-center gap-2 mb-1">
+          <Heart className="w-4 h-4 text-accent" />
+          <span className="text-[11px] uppercase tracking-[0.18em] text-accent font-semibold">Core Pull or Pass Premium</span>
+        </div>
+        <h2 className="text-xl font-bold mb-4">The full Pull or Pass experience</h2>
+        <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+          {coreFeatures.map((f) => (
+            <div key={f} className="flex items-start gap-2 text-sm">
+              <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <span>{f}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Pricing card */}
-      <div className="relative max-w-md mx-auto rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/10 via-card/60 to-card/30 p-7 mb-10 overflow-hidden">
-        <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-primary text-primary-foreground">
+      <div className="relative max-w-md mx-auto rounded-2xl border border-accent/50 bg-gradient-to-br from-accent/15 via-card/60 to-card/30 p-7 mb-10 overflow-hidden">
+        <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-accent text-accent-foreground">
           Most popular
         </div>
         <div className="text-lg font-semibold mb-4">Premium</div>
@@ -115,15 +146,15 @@ export default function Premium() {
           Full analytics suite for smart collectors.
         </p>
 
-        <Button size="lg" className="w-full mb-6 gap-2">
+        <Button size="lg" className="w-full mb-6 gap-2 bg-accent text-accent-foreground hover:bg-accent/90">
           <Crown className="w-4 h-4" /> Get Premium
         </Button>
 
-        <div className="text-xs font-semibold uppercase tracking-wider text-foreground/80 mb-3">Includes:</div>
+        <div className="text-xs font-semibold uppercase tracking-wider text-foreground/80 mb-3">Plus everything else:</div>
         <ul className="space-y-2 mb-5">
           {includedFeatures.map((f) => (
             <li key={f} className="flex items-start gap-2 text-sm">
-              <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <Check className="w-4 h-4 text-accent shrink-0 mt-0.5" />
               <span>{f}</span>
             </li>
           ))}
