@@ -236,7 +236,13 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 min-w-0">
         {/* Top bar with profile in upper right */}
-        <div className="sticky top-0 z-30 flex justify-end items-center gap-2 px-5 py-3 bg-background/70 backdrop-blur-md border-b border-border/40">
+        <div
+          className={cn(
+            'sticky top-0 z-30 justify-end items-center gap-2 px-5 py-3 bg-background/70 backdrop-blur-md border-b border-border/40',
+            // Hide on mobile when on the Pull or Pass swipe page (profile is rendered inline there)
+            location.pathname === '/swipe' ? 'hidden md:flex' : 'flex'
+          )}
+        >
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button

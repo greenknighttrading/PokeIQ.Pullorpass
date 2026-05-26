@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,7 +19,9 @@ import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infin
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 
-type Stage = 'loading' | 'swiping' | 'results';
+type Stage = 'intro' | 'loading' | 'swiping' | 'results';
+
+const INTRO_SEEN_KEY = 'pop_intro_seen_v1';
 type SwipeDir = 'left' | 'right' | 'up';
 
 const SWIPE_THRESHOLD = 110;
@@ -173,6 +175,9 @@ export default function PullOrPass() {
         } catch {}
       }
     });
+    // First-time visitors see the landing/instructions page
+    let introSeen = false;
+    try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
     // Try to resume an in-progress round first, then fall back to last results
     const resume = readResume();
     if (resume) {
@@ -189,6 +194,8 @@ export default function PullOrPass() {
         setRoundId(last.roundId);
         setIndex(last.cards.length);
         setStage('results');
+      } else if (!introSeen) {
+        setStage('intro');
       } else {
         loadRound();
       }
@@ -624,6 +631,14 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          {stage === 'intro' && (
+            <IntroScreen
+              onStart={() => {
+                try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
+                loadRound();
+              }}
+            />
+          )}
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -640,20 +655,29 @@ export default function PullOrPass() {
                   Card <span className="text-foreground font-semibold">{index + 1}</span>
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
-                {premium ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
-                    <Crown className="w-3 h-3" /> Unlimited
-                  </span>
-                ) : (
-                  <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-                    <span className="text-foreground font-semibold">{quota.used}</span>
-                    <span className="text-muted-foreground">done today</span>
-                    <span className="text-muted-foreground/50">·</span>
-                    <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
-                      {remaining} left
+                <div className="flex items-center gap-2">
+                  {premium ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
+                      <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  </span>
-                )}
+                  ) : (
+                    <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
+                      <span className="text-foreground font-semibold">{quota.used}</span>
+                      <span className="text-muted-foreground">done today</span>
+                      <span className="text-muted-foreground/50">·</span>
+                      <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
+                        {remaining} left
+                      </span>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => navigate(userId ? '/profile' : '/auth')}
+                    aria-label="Account"
+                    className="md:hidden w-7 h-7 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center text-[11px] font-semibold hover:bg-primary/25 transition-colors"
+                  >
+                    <UserIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
                 <motion.div
@@ -2365,6 +2389,99 @@ function OutOfSwipesModal({
         </Card>
       </motion.div>
     </motion.div>
+  );
+}
+
+/* ── Intro / Landing Screen ── */
+function IntroScreen({ onStart }: { onStart: () => void }) {
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto pb-6">
+      <div className="max-w-xl mx-auto space-y-5 pt-4">
+        <div className="text-center space-y-3">
+          <motion.h1
+            className="font-black uppercase tracking-[0.18em] text-4xl sm:text-5xl bg-clip-text text-transparent"
+            style={{
+              backgroundImage:
+                'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+              backgroundSize: '250% 100%',
+              filter: 'drop-shadow(0 0 14px hsl(var(--primary) / 0.55))',
+            }}
+            animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+          >
+            Pull or Pass
+          </motion.h1>
+          <p className="text-base text-foreground/90 italic">
+            A dating app for Pokémon cards.
+          </p>
+        </div>
+
+        <Card className="p-4 space-y-2 border-primary/30 bg-card/60">
+          <div className="flex items-center gap-3 text-sm">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary/15 text-primary"><Heart className="w-3.5 h-3.5" /></span>
+            <span><strong className="text-foreground">Swipe right</strong> if you like the card.</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-muted text-muted-foreground"><X className="w-3.5 h-3.5" /></span>
+            <span><strong className="text-foreground">Swipe left</strong> if you'd pass.</span>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-amber-400/20 text-amber-400"><Star className="w-3.5 h-3.5 fill-current" /></span>
+            <span><strong className="text-foreground">Swipe up</strong> for a Super Like.</span>
+          </div>
+        </Card>
+
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Every round contains <strong className="text-foreground">20 different cards</strong> pulled from
+          across the Pokémon hobby — vintage grails, modern hits, beautiful artwork, weird promos,
+          underrated cards, and everything in between.
+        </p>
+
+        <div className="space-y-2">
+          <p className="text-sm text-foreground font-semibold">As you swipe, PokeIQ learns:</p>
+          <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
+            <li>your collecting taste</li>
+            <li>your favorite artwork styles</li>
+            <li>the Pokémon you gravitate toward</li>
+            <li>the eras, artists, rarities, and cards you naturally love</li>
+          </ul>
+          <p className="text-xs text-muted-foreground/80 pt-1">
+            Over time, your profile becomes smarter and more personalized.
+          </p>
+        </div>
+
+        <Card className="p-4 border-primary/30 bg-primary/5">
+          <p className="text-sm text-foreground">
+            <Sparkles className="inline w-4 h-4 text-primary mr-1 -mt-0.5" />
+            <strong>Matches</strong> are cards PokeIQ thinks you'll really connect with based on your
+            taste profile and swipe history.
+          </p>
+        </Card>
+
+        <div className="space-y-2">
+          <p className="text-sm text-foreground font-semibold">Your swipes will help:</p>
+          <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
+            <li>build your digital binder / gallery</li>
+            <li>unlock your collector personality</li>
+            <li>power personalized recommendations</li>
+            <li>discover cards you may want to buy</li>
+            <li>compare your taste with other collectors</li>
+          </ul>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground italic">
+          There are no wrong answers. Just trust your instincts and swipe.
+        </p>
+
+        <Button
+          onClick={onStart}
+          size="lg"
+          className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.45)]"
+        >
+          I Understand — Let's Start Swiping
+        </Button>
+      </div>
+    </div>
   );
 }
 
