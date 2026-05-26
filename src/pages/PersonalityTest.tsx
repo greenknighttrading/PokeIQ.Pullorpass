@@ -12,7 +12,6 @@ import {
   calculatePersonalityResult 
 } from '@/lib/personalityEngine';
 import { Seo } from '@/components/seo/Seo';
-import { Link } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 
 const QUESTIONS_PER_PAGE = 6;
