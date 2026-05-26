@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
   SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
 } from '@/lib/pullorpass';
@@ -28,6 +28,8 @@ const SWIPE_THRESHOLD = 110;
 // ─── Daily swipe quota (free tier) ───────────────────────
 const DAILY_BASE_LIMIT = 20;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 20 Earn reviews
+const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes
+const SWIPES_PER_REDEMPTION = 10;
 
 function todayKey() {
   const d = new Date();
@@ -110,6 +112,7 @@ function tcgImage(tcgplayerId: string | null): string | null {
 
 export default function PullOrPass() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [stage, setStage] = useState<Stage>('loading');
   const [userId, setUserId] = useState<string | null>(null);
   const [cards, setCards] = useState<SwipeCard[]>([]);
@@ -126,11 +129,14 @@ export default function PullOrPass() {
   const [quota, setQuota] = useState(() => readQuota());
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
+  const [credits, setCredits] = useState<number>(0);
+  const [redeeming, setRedeeming] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premium && remaining <= 0;
+  const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -183,6 +189,63 @@ export default function PullOrPass() {
       window.removeEventListener('storage', refresh);
     };
   }, []);
+
+  // Fetch credits balance (signed-in users)
+  const refreshCredits = useCallback(async (uid?: string | null) => {
+    const id = uid ?? userId;
+    if (!id) { setCredits(0); return; }
+    const { data } = await supabase
+      .from('pokeiq_credits').select('credits').eq('user_id', id).maybeSingle();
+    setCredits(data?.credits ?? 0);
+  }, [userId]);
+
+  useEffect(() => {
+    refreshCredits();
+    const onFocus = () => refreshCredits();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [refreshCredits]);
+
+  // Redeem 10 credits → +10 swipes (bonus added to today's quota)
+  const redeemSwipes = useCallback(async () => {
+    if (!userId) {
+      navigate('/auth');
+      return;
+    }
+    if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
+    setRedeeming(true);
+    try {
+      const newCredits = credits - CREDITS_PER_REDEMPTION;
+      const { error } = await supabase.from('pokeiq_credits').upsert({
+        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      setCredits(newCredits);
+      const q = readQuota();
+      const next = { ...q, bonus: (q.bonus ?? 0) + SWIPES_PER_REDEMPTION };
+      writeQuota(next);
+      setQuota(next);
+      toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
+        description: `${newCredits} credits remaining.`,
+        position: 'top-center',
+      });
+    } catch (e: any) {
+      toast.error('Could not redeem credits');
+    } finally {
+      setRedeeming(false);
+    }
+  }, [userId, credits, redeeming, navigate]);
+
+  // Clicking "Pull or Pass" in the nav while already on /swipe → start a new round
+  const initialKeyRef = React.useRef(location.key);
+  useEffect(() => {
+    if (location.key === initialKeyRef.current) return;
+    initialKeyRef.current = location.key;
+    clearResume();
+    clearResults();
+    loadRound();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   // Persist in-progress round so users can leave and come back
   useEffect(() => {
@@ -550,17 +613,9 @@ export default function PullOrPass() {
             </div>
           )}
 
-          {stage === 'swiping' && outOfSwipes && (
-            <OutOfSwipesView
-              limit={dailyLimit}
-              hasBonus={quota.bonus > 0}
-              isAuthed={!!userId}
-              onSignUp={() => navigate('/auth')}
-            />
-          )}
-
-          {stage === 'swiping' && !outOfSwipes && current && (
-            <>
+          {stage === 'swiping' && current && (
+            <div className="relative flex-1 min-h-0 flex flex-col">
+              <div className={outOfSwipes ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
               {/* Progress + quota */}
               <div className="flex items-center justify-between mb-3 gap-3">
                 <span className="text-sm font-medium text-muted-foreground tabular-nums">
@@ -732,7 +787,31 @@ export default function PullOrPass() {
                   </p>
                 </>
               </div>
-            </>
+              </div>
+              {outOfSwipes && (
+                <OutOfSwipesModal
+                  credits={credits}
+                  canRedeem={canRedeem}
+                  onRedeem={redeemSwipes}
+                  redeeming={redeeming}
+                  isAuthed={!!userId}
+                  onSignUp={() => navigate('/auth')}
+                />
+              )}
+            </div>
+          )}
+
+          {stage === 'swiping' && !current && outOfSwipes && (
+            <div className="relative flex-1 min-h-0 flex items-center justify-center">
+              <OutOfSwipesModal
+                credits={credits}
+                canRedeem={canRedeem}
+                onRedeem={redeemSwipes}
+                redeeming={redeeming}
+                isAuthed={!!userId}
+                onSignUp={() => navigate('/auth')}
+              />
+            </div>
           )}
 
           {stage === 'results' && (
@@ -2088,6 +2167,113 @@ function OutOfSwipesView({
         )}
       </div>
     </div>
+  );
+}
+
+function OutOfSwipesModal({
+  credits,
+  canRedeem,
+  onRedeem,
+  redeeming,
+  isAuthed,
+  onSignUp,
+}: {
+  credits: number;
+  canRedeem: boolean;
+  onRedeem: () => void;
+  redeeming: boolean;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
+  const needed = Math.max(0, CREDITS_PER_REDEMPTION - credits);
+  return (
+    <motion.div
+      className="absolute inset-0 z-30 flex items-center justify-center p-4 bg-background/70 backdrop-blur-md"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25 }}
+    >
+      <motion.div
+        initial={{ scale: 0.94, y: 14, opacity: 0 }}
+        animate={{ scale: 1, y: 0, opacity: 1 }}
+        transition={{ type: 'spring', stiffness: 240, damping: 22 }}
+        className="w-full max-w-md"
+      >
+        <Card className="relative overflow-hidden p-7 border-primary/40 bg-card/95 backdrop-blur-xl shadow-[0_30px_80px_-20px_hsl(var(--primary)/0.45)]">
+          <div aria-hidden className="absolute -top-24 -right-24 w-[280px] h-[280px] rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="relative space-y-5 text-center">
+            <div className="mx-auto w-14 h-14 rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-primary/30">
+              <Lock className="w-6 h-6 text-primary" />
+            </div>
+            <div className="space-y-1.5">
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">You're out of swipes</h2>
+              <p className="text-sm text-muted-foreground">
+                {canRedeem
+                  ? 'Redeem your credits to keep swiping.'
+                  : isAuthed
+                  ? 'Earn more credits or go Pro for unlimited swipes.'
+                  : 'Sign up to earn credits and unlock more swipes.'}
+              </p>
+            </div>
+
+            {/* Credits chip */}
+            {isAuthed && (
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-muted/60 border border-border text-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span className="tabular-nums font-semibold text-foreground">{credits}</span>
+                <span className="text-muted-foreground text-xs">credits</span>
+              </div>
+            )}
+
+            {canRedeem ? (
+              <div className="space-y-2.5 pt-1">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onRedeem}
+                  disabled={redeeming}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.5)] disabled:opacity-60"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} credits → +${SWIPES_PER_REDEMPTION} swipes`}
+                </motion.button>
+                <Link to="/earn" className="block text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  Or train PokeIQ to earn more →
+                </Link>
+              </div>
+            ) : isAuthed ? (
+              <div className="space-y-3 pt-1">
+                {credits > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-foreground font-semibold">{needed}</span> more credit{needed === 1 ? '' : 's'} to redeem +{SWIPES_PER_REDEMPTION} swipes
+                  </p>
+                )}
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => toast.success("PokeIQ Pro launches soon — you're on the early list.")}
+                  className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
+                >
+                  <Crown className="w-5 h-5" />
+                  Go PokeIQ Pro — unlimited
+                </motion.button>
+                <Link to="/earn" className="block">
+                  <Button variant="outline" size="lg" className="w-full gap-2">
+                    <Sparkles className="w-4 h-4" /> Earn credits
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-2 pt-1">
+                <Button size="lg" className="w-full gap-2" onClick={onSignUp}>
+                  <LogIn className="w-4 h-4" /> Sign up — get 20 free swipes
+                </Button>
+              </div>
+            )}
+          </div>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }
 
