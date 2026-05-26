@@ -1742,7 +1742,7 @@ function ResultsView({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => window.location.assign('/get-started')}
+onClick={() => window.location.assign('/premium')}
                   className="w-full lg:w-auto h-12 px-10 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)] hover:shadow-[0_0_44px_rgba(251,191,36,0.85)] transition-shadow whitespace-nowrap"
                 >
                   <Crown className="w-4 h-4" />
@@ -1786,7 +1786,7 @@ function ResultsView({
                   <motion.button
                     whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
-                    onClick={() => window.location.assign('/get-started')}
+                    onClick={() => window.location.assign('/premium')}
                     className="h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
                   >
                     <Crown className="w-4 h-4" />
