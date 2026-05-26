@@ -16,8 +16,9 @@ import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailMo
 // ── Reward constants ────────────────────────────────────
 // Every 20 reviews → +10 PullOrPass swipes
 // Every 200 reviews → 30 days of PokeIQ Premium (unlimited swipes + premium features)
-const REVIEWS_PER_SWIPE_BATCH = 20;
+const REVIEWS_PER_SWIPE_BATCH = 10;
 const SWIPES_PER_BATCH = 10;
+const CUSTOM_TAG_BONUS_CREDITS = 1; // bonus credit per custom tag for accuracy
 const REVIEWS_FOR_PREMIUM = 200;
 const PREMIUM_DAYS = 30;
 
@@ -370,9 +371,10 @@ export default function PokeYelp() {
       return;
     }
 
-    // 1 credit per card reviewed
-    const earned = 1;
+    // 1 credit per card reviewed + bonus credits per custom tag (accuracy reward)
     const applicableTags = Array.from(selected);
+    const customBonus = custom.length * CUSTOM_TAG_BONUS_CREDITS;
+    const earned = 1 + customBonus;
 
     const tagPayload = [
       ...applicableTags,
@@ -407,19 +409,26 @@ export default function PokeYelp() {
     } catch {}
     setReviewedCount((c) => c + 1);
 
-    // Every 20 reviews → +10 PullOrPass swipes
+    // Every 10 reviews → +10 PullOrPass swipes
     if (lifetime > 0 && lifetime % REVIEWS_PER_SWIPE_BATCH === 0) {
       grantSwipeBonus(SWIPES_PER_BATCH);
       toast.success(`+${SWIPES_PER_BATCH} PullOrPass swipes unlocked!`, {
-        description: `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
+        description: customBonus > 0
+          ? `+${customBonus} bonus credits for custom tags. ${lifetime} reviews and counting.`
+          : `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
         position: 'top-center',
       });
     } else {
       const toNext = REVIEWS_PER_SWIPE_BATCH - (lifetime % REVIEWS_PER_SWIPE_BATCH);
-      toast.success('Review saved — PokeIQ just got smarter', {
+      toast.success(
+        customBonus > 0
+          ? `Review saved · +${customBonus} bonus credits`
+          : 'Review saved — PokeIQ just got smarter',
+        {
         description: `${toNext} more to unlock +${SWIPES_PER_BATCH} swipes.`,
         position: 'top-center',
-      });
+        }
+      );
     }
 
     // PokeIQ Pro is a paid subscription — training only grants swipe credits,
@@ -499,44 +508,35 @@ export default function PokeYelp() {
               Help train smarter recommendations for yourself and collectors everywhere.
             </motion.p>
 
-            {/* Milestone progress strip */}
-            <div className="mt-8 max-w-xl mx-auto">
-              <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                <span className="inline-flex items-center gap-1.5">
-                  <Coins className="w-3.5 h-3.5 text-amber-400" />
-                  <span className="text-foreground font-semibold tabular-nums">{reviewedCount}</span> reviewed
-                </span>
-                <span className="tabular-nums">
-                  {reviewedCount < REVIEWS_PER_SWIPE_BATCH
-                    ? `${REVIEWS_PER_SWIPE_BATCH - (reviewedCount % REVIEWS_PER_SWIPE_BATCH)} to +${SWIPES_PER_BATCH} swipes`
-                    : reviewedCount < REVIEWS_FOR_PREMIUM
-                    ? `${REVIEWS_FOR_PREMIUM - reviewedCount} to Premium`
-                    : 'Premium unlocked'}
-                </span>
-              </div>
-              <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                <motion.div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${Math.min(100, (reviewedCount / REVIEWS_FOR_PREMIUM) * 100)}%` }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
-                />
-                {/* Milestone markers */}
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-background border border-primary"
-                  style={{ left: `calc(${(REVIEWS_PER_SWIPE_BATCH / REVIEWS_FOR_PREMIUM) * 100}% - 4px)` }}
-                />
-              </div>
-              <div className="mt-3 flex items-center justify-between text-xs">
-                <span className={`inline-flex items-center gap-1.5 ${reviewedCount >= REVIEWS_PER_SWIPE_BATCH ? 'text-primary' : 'text-muted-foreground'}`}>
-                  <Sparkles className="w-3 h-3" /> 20 → +10 Swipes
-                </span>
-                <span className={`inline-flex items-center gap-1.5 ${reviewedCount >= REVIEWS_FOR_PREMIUM ? 'text-accent' : 'text-muted-foreground'}`}>
-                  <Sparkles className="w-3 h-3" /> 200 → Premium Unlock
-                </span>
-              </div>
-            </div>
+            {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
+            {(() => {
+              const inRound = reviewedCount % REVIEWS_PER_SWIPE_BATCH;
+              const toNext = REVIEWS_PER_SWIPE_BATCH - inRound;
+              const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
+              return (
+                <div className="mt-8 max-w-md mx-auto">
+                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Coins className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
+                      <span>/ {REVIEWS_PER_SWIPE_BATCH} reviewed</span>
+                    </span>
+                    <span className="tabular-nums">
+                      {toNext} to <span className="text-primary font-semibold">+{SWIPES_PER_BATCH} swipes</span>
+                    </span>
+                  </div>
+                  <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                    <motion.div
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Subtle filter / credits row */}
             <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
@@ -717,8 +717,12 @@ export default function PokeYelp() {
                       {selected.size} selected
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mb-5">
+                  <p className="text-xs text-muted-foreground mb-1">
                     Tap any tag that fits. Skip the rest.
+                  </p>
+                  <p className="text-xs text-amber-400/90 mb-5 inline-flex items-center gap-1.5">
+                    <Plus className="w-3 h-3" />
+                    Add custom tags for bonus credits — accuracy is rewarded
                   </p>
 
                   <div className="min-h-[140px]">
