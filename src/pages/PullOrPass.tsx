@@ -1194,6 +1194,34 @@ function ResultsView({
               </div>
             )}
           </div>
+
+          {/* Guests: Save & revisit every match — merged into Taste Profile widget */}
+          {!isAuthed && (
+            <div className="relative mt-6 pt-6 border-t border-primary/20">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="w-11 h-11 rounded-xl border border-primary/40 bg-primary/15 flex items-center justify-center shrink-0">
+                    <Heart className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="text-base sm:text-lg font-bold text-foreground leading-tight">Save and revisit every match</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
+                      Track every card you've loved, revisit recommendations, and build your collector identity over time.
+                    </p>
+                  </div>
+                </div>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onSignUp}
+                  className="shrink-0 h-11 px-6 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-sm inline-flex items-center gap-2 transition-colors"
+                >
+                  View My Matches
+                  <ArrowRight className="w-4 h-4" />
+                </motion.button>
+              </div>
+            </div>
+          )}
         </div>
       </motion.section>
 
