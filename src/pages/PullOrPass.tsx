@@ -1710,7 +1710,11 @@ function LikedDislikedPanel({
             }`}
           >
             {r.card.image_url ? (
-              <img src={r.card.image_url} alt={r.card.name} className="w-full h-full object-cover" />
+              <img
+                src={r.card.image_url}
+                alt={r.card.name}
+                className={`w-full h-full object-cover ${glow ? '' : 'opacity-60 saturate-50'}`}
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <ImageOff className="w-4 h-4 text-muted-foreground" />
