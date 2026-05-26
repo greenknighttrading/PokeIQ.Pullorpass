@@ -56,16 +56,17 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
 
     const start = el.scrollLeft;
     const distance = dir * el.clientWidth * 0.9;
-    const duration = 650; // ms — ~35% slower than native smooth scroll
+    const duration = 700; // ms — smooth, relaxed pace
     const startTime = performance.now();
 
-    const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
     const step = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
-      const eased = easeOutCubic(progress);
-      el.scrollLeft = start + distance * eased;
+      const eased = easeInOutCubic(progress);
+      el.scrollLeft = Math.round(start + distance * eased);
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(step);
@@ -81,7 +82,7 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     <div className={cn('relative group/carousel', className)}>
       <div
         ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto pb-4 snap-x scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>
