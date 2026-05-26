@@ -16,7 +16,7 @@ import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
 import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
-import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight } from 'lucide-react';
+import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infinity as InfinityIcon, Zap, BarChart3, Library } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 
@@ -655,6 +655,8 @@ export default function PullOrPass() {
               isAuthed={!!userId}
               onSignUp={() => navigate('/auth')}
               outOfSwipes={outOfSwipes}
+              premium={premium}
+              remaining={remaining}
             />
           )}
         </main>
