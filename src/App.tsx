@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { PokeIQShell } from "@/components/layout/PokeIQShell";
+import { PremiumGate } from "@/components/PremiumGate";
 
 // Eager: home (LCP) + lightweight 404
 import PokeIQDaily from "./pages/PokeIQDaily";
@@ -115,10 +116,10 @@ function AppRoutes() {
         <Route path="/buylist/watchlist" element={<BuyListWatchlist />} />
         <Route path="/buylist/movers" element={<BuyListMovers />} />
         <Route path="/buylist/scanner" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
-        <Route path="/buylist/list" element={<BuyListMain />} />
+        <Route path="/buylist/list" element={<PremiumGate><BuyListMain /></PremiumGate>} />
         <Route path="/buylist/pick/:id" element={<BuyListPickDetail />} />
         <Route path="/buylist/mover/:id" element={<BuyListMoverDetail />} />
-        <Route path="/buylist/sets" element={<BuyListSets />} />
+        <Route path="/buylist/sets" element={<PremiumGate><BuyListSets /></PremiumGate>} />
         <Route path="/buylist/opportunities" element={<BuyListOpportunities />} />
         <Route path="/buylist/admin" element={<BuyListAdmin />} />
 
@@ -140,17 +141,17 @@ function AppRoutes() {
         <Route path="/report/print" element={<PrintReport />} />
 
         {/* All other pages with AppLayout */}
-        <Route path="/home" element={<AppLayout><Index /></AppLayout>} />
+        <Route path="/home" element={<PremiumGate><AppLayout><Index /></AppLayout></PremiumGate>} />
         <Route path="/collection" element={<AppLayout><MyCollection /></AppLayout>} />
         <Route path="/insights" element={<AppLayout><Insights /></AppLayout>} />
         <Route path="/winners" element={<AppLayout><Winners /></AppLayout>} />
         <Route path="/items" element={<AppLayout><FilteredItems /></AppLayout>} />
         <Route path="/rebalance" element={<AppLayout><Rebalance /></AppLayout>} />
         <Route path="/era-allocation" element={<AppLayout><EraAllocation /></AppLayout>} />
-        <Route path="/report" element={<AppLayout><Report /></AppLayout>} />
-        <Route path="/smart-feed" element={<SmartFeed />} />
-        <Route path="/smart-feed/brief" element={<SmartFeedBrief />} />
-        <Route path="/buy-list" element={<AppLayout><BuyListPicks /></AppLayout>} />
+        <Route path="/report" element={<PremiumGate><AppLayout><Report /></AppLayout></PremiumGate>} />
+        <Route path="/smart-feed" element={<PremiumGate><SmartFeed /></PremiumGate>} />
+        <Route path="/smart-feed/brief" element={<PremiumGate><SmartFeedBrief /></PremiumGate>} />
+        <Route path="/buy-list" element={<PremiumGate><AppLayout><BuyListPicks /></AppLayout></PremiumGate>} />
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
       </Routes>
     </Suspense>
