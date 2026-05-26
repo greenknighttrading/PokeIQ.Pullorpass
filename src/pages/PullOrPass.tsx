@@ -1127,64 +1127,60 @@ function ResultsView({
         />
       </motion.section>
 
-      {/* ── SECTION 3: Taste Profile (compact horizontal card) ─── */}
-      <motion.section {...fadeUp}>
-        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px]">
-          <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
-          {/* Subtle holographic shimmer — replaces previous mascot artwork */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-screen"
-            style={{
-              backgroundImage:
-                'repeating-linear-gradient(120deg, hsl(var(--primary)/0.6) 0px, transparent 2px, transparent 12px), repeating-linear-gradient(60deg, hsl(280 80% 70% / 0.5) 0px, transparent 2px, transparent 14px)',
-            }}
-          />
-          <motion.div
-            aria-hidden="true"
-            animate={{ opacity: [0.15, 0.3, 0.15] }}
-            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-            className="pointer-events-none absolute top-1/2 right-[12%] w-[260px] h-[260px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
-          />
+      {/* ── SECTION 3: Taste Profile (authed) OR View All My Matches (guest) ─── */}
+      {isAuthed ? (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px]">
+            <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-screen"
+              style={{
+                backgroundImage:
+                  'repeating-linear-gradient(120deg, hsl(var(--primary)/0.6) 0px, transparent 2px, transparent 12px), repeating-linear-gradient(60deg, hsl(280 80% 70% / 0.5) 0px, transparent 2px, transparent 14px)',
+              }}
+            />
+            <motion.div
+              aria-hidden="true"
+              animate={{ opacity: [0.15, 0.3, 0.15] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              className="pointer-events-none absolute top-1/2 right-[12%] w-[260px] h-[260px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
+            />
 
-          <div className={`relative grid grid-cols-1 gap-6 lg:gap-10 items-center ${isAuthed ? 'lg:grid-cols-[auto_1fr_auto]' : 'lg:grid-cols-[auto_1fr]'}`}>
-            {/* Left: emblem */}
-            <div className="relative w-24 h-24 lg:w-28 lg:h-28 flex items-center justify-center mx-auto lg:mx-0">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.85, 0.5] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute inset-0 rounded-full bg-primary/35 blur-2xl"
-              />
-              <div className="absolute inset-2 rounded-full border-2 border-primary/40" />
-              <Sparkles className="relative w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
-            </div>
-
-            {/* Middle: name + desc + tags */}
-            <div className="text-center lg:text-left space-y-3 min-w-0">
-              <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Taste Profile</p>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
-                {displayArchetype}
-              </h2>
-              <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">{archetypeDesc}</p>
-              <div className="flex flex-wrap gap-2 justify-center lg:justify-start pt-1">
-                {tagList.map((t, i) => (
-                  <span
-                    key={t}
-                    className={`px-3 py-1 text-xs rounded-full border ${
-                      i % 2 === 0
-                        ? 'border-primary/40 bg-primary/10 text-primary'
-                        : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
-                    }`}
-                  >
-                    {t}
-                  </span>
-                ))}
+            <div className="relative grid grid-cols-1 gap-6 lg:gap-10 items-center lg:grid-cols-[auto_1fr_auto]">
+              <div className="relative w-24 h-24 lg:w-28 lg:h-28 flex items-center justify-center mx-auto lg:mx-0">
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.85, 0.5] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute inset-0 rounded-full bg-primary/35 blur-2xl"
+                />
+                <div className="absolute inset-2 rounded-full border-2 border-primary/40" />
+                <Sparkles className="relative w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
               </div>
-            </div>
 
-            {/* Right: completion (signed-in only — guests get the unified sign-up widget below) */}
-            {isAuthed && (
+              <div className="text-center lg:text-left space-y-3 min-w-0">
+                <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Taste Profile</p>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
+                  {displayArchetype}
+                </h2>
+                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">{archetypeDesc}</p>
+                <div className="flex flex-wrap gap-2 justify-center lg:justify-start pt-1">
+                  {tagList.map((t, i) => (
+                    <span
+                      key={t}
+                      className={`px-3 py-1 text-xs rounded-full border ${
+                        i % 2 === 0
+                          ? 'border-primary/40 bg-primary/10 text-primary'
+                          : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
+                      }`}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
               <div className="flex flex-col items-center gap-3 lg:min-w-[200px]">
                 <CircularMeter value={completion} />
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile Completion</p>
@@ -1192,38 +1188,37 @@ function ResultsView({
                   Recommendation accuracy sharpens with every swipe.
                 </p>
               </div>
-            )}
-          </div>
-
-          {/* Guests: Save & revisit every match — merged into Taste Profile widget */}
-          {!isAuthed && (
-            <div className="relative mt-6 pt-6 border-t border-primary/20">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-11 h-11 rounded-xl border border-primary/40 bg-primary/15 flex items-center justify-center shrink-0">
-                    <Heart className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-base sm:text-lg font-bold text-foreground leading-tight">Save and revisit every match</h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1 max-w-xl">
-                      Track every card you've loved, revisit recommendations, and build your collector identity over time.
-                    </p>
-                  </div>
-                </div>
-                <motion.button
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={onSignUp}
-                  className="shrink-0 h-11 px-6 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-sm inline-flex items-center gap-2 transition-colors"
-                >
-                  View My Matches
-                  <ArrowRight className="w-4 h-4" />
-                </motion.button>
-              </div>
             </div>
-          )}
-        </div>
-      </motion.section>
+          </div>
+        </motion.section>
+      ) : (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/8 via-card to-purple-500/8 p-6 sm:p-8 overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-[260px] h-[260px] bg-primary/12 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-[260px] h-[260px] bg-purple-500/12 blur-3xl rounded-full pointer-events-none" />
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <div className="w-14 h-14 rounded-2xl border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0">
+                <Heart className="w-7 h-7 text-primary" />
+              </div>
+              <div className="flex-1 text-center sm:text-left min-w-0">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">View All My Matches</h3>
+                <p className="text-sm text-muted-foreground mt-1 max-w-lg">
+                  Save every card you love, revisit your recommendations, and build your collector identity over time.
+                </p>
+              </div>
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={onSignUp}
+                className="shrink-0 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
+              >
+                View My Matches
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </div>
+        </motion.section>
+      )}
 
       {/* ── SECTION 4: Binder hero (guests) OR Your Collection Awaits (authed) ─── */}
       <motion.section {...fadeUp}>
@@ -1459,20 +1454,20 @@ function ResultsView({
           <div className="absolute -top-32 -right-32 w-[460px] h-[460px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-32 -left-32 w-[460px] h-[460px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-10 lg:gap-14 items-center">
-            {/* LEFT: recommendation accuracy meter (center-aligned) */}
-            <div className="flex flex-col items-center text-center gap-3 lg:min-w-[200px]">
+          <div className="relative flex flex-col items-center text-center gap-8">
+            {/* TOP: recommendation accuracy meter */}
+            <div className="flex flex-col items-center gap-3">
               <CircularMeter value={completion} />
               <div className="space-y-1">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-primary font-semibold">Recommendation Accuracy</p>
-                <p className="text-xs text-muted-foreground max-w-[200px] leading-snug">
+                <p className="text-xs text-muted-foreground max-w-[220px] leading-snug">
                   Sharpens with every swipe.
                 </p>
               </div>
             </div>
 
-            {/* CENTER: benefits (center-aligned) */}
-            <div className="space-y-4 flex flex-col items-center text-center">
+            {/* MIDDLE: benefits */}
+            <div className="space-y-4 flex flex-col items-center">
               <p className="text-[11px] uppercase tracking-[0.24em] text-purple-300 font-semibold">What You Unlock</p>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 mx-auto">
                 {[
@@ -1491,18 +1486,18 @@ function ResultsView({
               </ul>
             </div>
 
-            {/* RIGHT: dominant CTA */}
-            <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[280px]">
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight text-center lg:text-right leading-tight">
+            {/* BOTTOM: dominant CTA */}
+            <div className="flex flex-col items-center gap-3">
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-tight">
                 Ready for another round?
               </h3>
-              <div className="relative w-full lg:w-auto">
+              <div className="relative">
                 <div className="absolute inset-0 rounded-2xl bg-primary/40 blur-2xl opacity-70 pointer-events-none" />
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={onSignUp}
-                  className="relative w-full lg:w-auto h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_32px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_52px_hsl(var(--primary)/0.9)] transition-shadow whitespace-nowrap"
+                  className="relative h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_32px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_52px_hsl(var(--primary)/0.9)] transition-shadow whitespace-nowrap"
                 >
                   Sign Up Now
                   <ArrowRight className="w-5 h-5" />
