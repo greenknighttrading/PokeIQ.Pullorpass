@@ -103,17 +103,6 @@ export default function PullOrPass() {
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
 
-  // DEV: grant Pro membership for testing (unlimited swipes on this device).
-  useEffect(() => {
-    try {
-      const FAR_FUTURE = new Date('2099-12-31').getTime();
-      const current = Number(localStorage.getItem('pokeiq_premium_until') || '0');
-      if (current < FAR_FUTURE) {
-        localStorage.setItem('pokeiq_premium_until', String(FAR_FUTURE));
-      }
-    } catch {}
-  }, []);
-
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
@@ -122,7 +111,20 @@ export default function PullOrPass() {
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && !session.user.is_anonymous) setUserId(session.user.id);
+      if (session?.user && !session.user.is_anonymous) {
+        setUserId(session.user.id);
+        // First time we see this authed user on this device → reset daily quota
+        // so a freshly-signed-up user gets another 20 free swipes.
+        try {
+          const lastSeen = localStorage.getItem('pop_last_user_id');
+          if (lastSeen !== session.user.id) {
+            localStorage.setItem('pop_last_user_id', session.user.id);
+            const fresh = { date: todayKey(), used: 0, bonus: 0, lifetime: readQuota().lifetime };
+            writeQuota(fresh);
+            setQuota(fresh);
+          }
+        } catch {}
+      }
     });
     // Try to resume an in-progress round first
     const resume = readResume();
