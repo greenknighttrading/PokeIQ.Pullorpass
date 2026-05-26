@@ -37,6 +37,9 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     return () => {
       el.removeEventListener('scroll', update);
       ro.disconnect();
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
   }, [update, children]);
 
