@@ -1655,17 +1655,21 @@ function ResultsView({
       {/* Play Another Round / Out-of-swipes (authed) */}
       {isAuthed && (
         <motion.section {...fadeUp}>
-          {outOfSwipes ? (
+          {!premium ? (
             <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-card to-zinc-950 p-6 sm:p-8 overflow-hidden text-center">
               <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
               <div className="relative space-y-3">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Daily Limit Reached</p>
-                <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">You're out of swipes for today</h3>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">
+                  {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
+                </p>
+                <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+                  {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Pro'}
+                </h3>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  Go Premium for unlimited swipes — or earn more swipe credits by helping train PokeIQ.
+                  Earn more swipe credits by helping train PokeIQ — or go PokeIQ Pro for unlimited swipes.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
-                  <ResetCountdown />
+                  {outOfSwipes && <ResetCountdown />}
                   <Link to="/earn">
                     <motion.button
                       whileHover={{ y: -2, scale: 1.02 }}
@@ -1673,7 +1677,7 @@ function ResultsView({
                       className="h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center gap-2 hover:bg-primary/15 transition-colors"
                     >
                       <Sparkles className="w-4 h-4" />
-                      Earn Swipe Credits
+                      Earn Credits
                     </motion.button>
                   </Link>
                   <motion.button
@@ -1683,24 +1687,23 @@ function ResultsView({
                     className="h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
                   >
                     <Crown className="w-4 h-4" />
-                    Go Premium
+                    Go PokeIQ Pro
                   </motion.button>
                 </div>
                 <p className="text-[11px] text-muted-foreground/80 pt-1">
-                  Every 20 cards you train earns +10 swipes.
+                  {outOfSwipes
+                    ? 'Every 20 cards you train earns +10 swipes.'
+                    : `You have ${remaining} swipe${remaining === 1 ? '' : 's'} left today. Every 20 cards you train earns +10 more.`}
                 </p>
               </div>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 pt-2">
-              <p className="text-sm text-muted-foreground">Keep training PokeIQ to sharpen your recommendations.</p>
+              <p className="text-sm text-muted-foreground">PokeIQ Pro · unlimited swipes unlocked.</p>
               <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
                 <RotateCw className="w-4 h-4" />
                 Play Another Round
               </Button>
-              {!premium && Number.isFinite(remaining ?? Infinity) && (
-                <p className="text-xs text-muted-foreground">{remaining} swipes left today</p>
-              )}
             </div>
           )}
         </motion.section>
