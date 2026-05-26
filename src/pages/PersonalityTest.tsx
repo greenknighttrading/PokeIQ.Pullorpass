@@ -12,7 +12,6 @@ import {
   calculatePersonalityResult 
 } from '@/lib/personalityEngine';
 import { Seo } from '@/components/seo/Seo';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 
 const QUESTIONS_PER_PAGE = 6;
 const TOTAL_PAGES = Math.ceil(QUIZ_QUESTIONS.length / QUESTIONS_PER_PAGE);
@@ -66,8 +65,6 @@ export default function PersonalityTest() {
       />
       
       <div className="min-h-screen bg-background">
-        <GlobalNavBar />
-
         {/* Main Content */}
         <main className="max-w-2xl mx-auto px-4 py-8 md:py-12">
           {stage === 'quiz' && (
