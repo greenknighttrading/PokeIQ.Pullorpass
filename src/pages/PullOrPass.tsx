@@ -1424,64 +1424,92 @@ function ResultsView({
         </div>
       </motion.section>
 
+      {/* ── SECTION 5b: Save & revisit every match (guests) ───── */}
+      {!isAuthed && (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-card to-purple-500/10 p-5 sm:p-6 overflow-hidden">
+            <div className="absolute -top-16 -right-16 w-[260px] h-[260px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="w-12 h-12 rounded-xl border border-primary/40 bg-primary/15 flex items-center justify-center shrink-0">
+                  <Heart className="w-6 h-6 text-primary" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">Save and revisit every match</h3>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-xl">
+                    Track every card you've loved, revisit recommendations, and build your collector identity over time.
+                  </p>
+                </div>
+              </div>
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={onSignUp}
+                className="shrink-0 h-11 px-6 rounded-xl border border-primary/40 bg-primary/10 hover:bg-primary/20 text-primary font-semibold text-sm inline-flex items-center gap-2 transition-colors"
+              >
+                View My Matches
+                <ArrowRight className="w-4 h-4" />
+              </motion.button>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
       {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
       {!isAuthed && (
       <motion.section {...fadeUp}>
-        <div className="relative rounded-2xl border border-primary/25 bg-[#0a1414] p-5 sm:p-7 lg:p-8 overflow-hidden">
-          <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-[#0a1414] via-card to-[#0a0a14] p-8 sm:p-10 lg:p-12 overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-[460px] h-[460px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
+          <div className="absolute -bottom-32 -left-32 w-[460px] h-[460px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 lg:gap-10 items-center">
-            {/* Left: progress meter */}
-            <div className="flex items-center gap-4 lg:gap-5">
+          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-10 lg:gap-14 items-center">
+            {/* LEFT: recommendation accuracy meter */}
+            <div className="flex flex-col items-center text-center gap-3 lg:min-w-[200px]">
               <CircularMeter value={completion} />
               <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">Your Progress</p>
-                <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">Recommendation Accuracy</h3>
-                <p className="text-xs text-muted-foreground max-w-[260px] leading-snug">
-                  The more you train PokeIQ, the sharper your matches become.
-                </p>
-                <p className="text-xs text-foreground/70">
-                  Most users see major improvements after <span className="text-primary font-semibold">100+</span> swipes.
+                <p className="text-[11px] uppercase tracking-[0.24em] text-primary font-semibold">Recommendation Accuracy</p>
+                <p className="text-xs text-muted-foreground max-w-[200px] leading-snug">
+                  Sharpens with every swipe.
                 </p>
               </div>
             </div>
 
-            {/* Middle: why sign up checklist (2 cols) */}
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold mb-3">Why Sign Up?</p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5">
+            {/* CENTER: benefits */}
+            <div className="space-y-4">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-purple-300 font-semibold">What You Unlock</p>
+              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                 {[
-                  'Save & track your Taste Profile',
-                  'Get personalized recommendations',
-                  'Build your custom digital binder',
-                  'Continue unlimited 20-card rounds',
-                  'Unlock advanced insights & trends',
-                  'Your data is safe and never shared',
+                  'Save your collector profile',
+                  'Build your custom binder',
+                  'Get smarter recommendations',
+                  'Unlock unlimited rounds',
                 ].map((s) => (
-                  <li key={s} className="flex items-start gap-2.5 text-sm text-foreground/90">
-                    <Check className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <li key={s} className="flex items-center gap-3 text-[15px] text-foreground/90">
+                    <Check className="w-4 h-4 text-primary shrink-0" />
                     <span>{s}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Right: primary CTA */}
-            <div className="flex flex-col items-center lg:items-end gap-2 lg:min-w-[260px]">
-                <p className="text-sm text-foreground/90 text-center lg:text-right">
-                  Ready to continue your collector journey?
-                </p>
+            {/* RIGHT: dominant CTA */}
+            <div className="flex flex-col items-center lg:items-end gap-3 lg:min-w-[280px]">
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight text-center lg:text-right leading-tight">
+                Ready for another round?
+              </h3>
+              <div className="relative w-full lg:w-auto">
+                <div className="absolute inset-0 rounded-2xl bg-primary/40 blur-2xl opacity-70 pointer-events-none" />
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={onSignUp}
-                  className="w-full lg:w-auto h-12 px-10 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow whitespace-nowrap"
+                  className="relative w-full lg:w-auto h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_32px_hsl(var(--primary)/0.6)] hover:shadow-[0_0_52px_hsl(var(--primary)/0.9)] transition-shadow whitespace-nowrap"
                 >
-                  SIGN UP NOW
-                  <ArrowRight className="w-4 h-4" />
+                  Sign Up Now
+                  <ArrowRight className="w-5 h-5" />
                 </motion.button>
-                <p className="text-[11px] text-muted-foreground">It's free and only takes a moment.</p>
+              </div>
+              <p className="text-xs text-muted-foreground">It's free and only takes a moment.</p>
             </div>
           </div>
         </div>
