@@ -1330,7 +1330,6 @@ function ResultsView({
                 >
                   <div className="flex items-center gap-2 mb-2 px-1">
                     <Heart className="w-3.5 h-3.5 fill-primary text-primary" />
-                    <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Matches</p>
                   </div>
                   <div className="flex gap-1.5">
                     {(recs.length ? recs : pulled.map((p) => ({ image_url: p.card.image_url, card_id: p.card.card_id }))).slice(0, 4).map((c: any, i) => (
