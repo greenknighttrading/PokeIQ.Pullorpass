@@ -1347,26 +1347,27 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     /* Mobile responsive styles */
     @media (max-width: 600px) {
       .container {
-        padding: 20px 12px;
+        padding: 32px 16px 48px;
       }
 
       .section {
-        padding: 16px 12px;
-        border-radius: 12px;
-        margin-bottom: 16px;
+        padding: 28px 20px;
+        border-radius: 16px;
+        margin-bottom: 40px;
       }
 
       .header {
-        margin-bottom: 24px;
-        padding-bottom: 16px;
+        margin-bottom: 48px;
+        padding-bottom: 24px;
       }
 
       .logo {
-        font-size: 24px;
+        font-size: 28px;
       }
 
       .section-title {
-        font-size: 16px;
+        font-size: 24px;
+        margin-bottom: 20px;
       }
 
       .stats-grid {
@@ -1379,7 +1380,7 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .stat-value {
-        font-size: 20px !important;
+        font-size: 22px !important;
       }
 
       .stat-label {
@@ -1387,23 +1388,23 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .narrative-block {
-        padding: 14px 12px;
-        font-size: 13px;
-        line-height: 1.7;
+        padding: 20px 18px;
+        font-size: 16px;
+        line-height: 1.75;
         word-wrap: break-word;
         overflow-wrap: break-word;
       }
 
       .collector-profile {
-        padding: 24px 12px;
+        padding: 40px 20px;
       }
 
       .collector-type {
-        font-size: 22px;
+        font-size: 28px;
       }
 
       .collector-desc {
-        font-size: 13px;
+        font-size: 16px;
       }
 
       .allocation-legend {
@@ -1431,27 +1432,27 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       }
 
       .insight-item {
-        padding: 12px;
+        padding: 16px;
       }
 
       .insight-title {
-        font-size: 14px;
+        font-size: 15px;
       }
 
       .insight-desc {
-        font-size: 12px;
-      }
-
-      .action-item {
-        padding: 12px;
-      }
-
-      .action-title {
         font-size: 14px;
       }
 
+      .action-item {
+        padding: 16px;
+      }
+
+      .action-title {
+        font-size: 15px;
+      }
+
       .action-desc {
-        font-size: 12px;
+        font-size: 14px;
       }
 
       .target-allocation-card {
