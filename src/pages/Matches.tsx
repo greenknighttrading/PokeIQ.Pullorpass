@@ -320,7 +320,7 @@ function RecentlyLiked({ likes, onOpen }: { likes: LikedCard[]; onOpen: (s: Card
         </div>
         <p className="text-sm text-muted-foreground mt-1">The latest cards that caught your eye.</p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:thin]">
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {recent.map((c) => <RecentCard key={c.id} like={c} onOpen={onOpen} />)}
       </div>
     </section>
@@ -569,7 +569,7 @@ function RecommendedRow({ items, onOpen }: { items: RecommendedCard[]; onOpen: (
           Picked by matching the artists, sets, types, and rarities you keep liking.
         </p>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:thin]">
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((r) => <RecRowCard key={r.card_id} r={r} onOpen={onOpen} />)}
       </div>
     </section>
