@@ -1221,36 +1221,39 @@ function InvestingIdeas() {
 
       const MAX_PICK_CARDS = 9;
 
-      // Fetch sealed products >$50 and cards >$10 from this set
-      const { data: latestRow } = await supabase.from('market_snapshots')
-        .select('snapshot_date').eq('product_type', 'card').order('snapshot_date', { ascending: false }).limit(1).single();
-      const latestDate = latestRow?.snapshot_date;
+      // Recent snapshots can be incomplete (sync still running), so look back 14 days
+      // and keep the most recent row per card_id rather than locking to one date.
+      const sinceDate = new Date(Date.now() - 14 * 86400_000).toISOString().slice(0, 10);
+      const dedupeLatest = <T extends { card_id: string; snapshot_date?: string }>(rows: T[]): T[] => {
+        const map = new Map<string, T>();
+        for (const r of rows) {
+          const prev = map.get(r.card_id);
+          if (!prev || (r.snapshot_date ?? '') > (prev.snapshot_date ?? '')) map.set(r.card_id, r);
+        }
+        return Array.from(map.values());
+      };
 
-      // Also get sealed latest date
-      const { data: sealedLatest } = await supabase.from('market_snapshots')
-        .select('snapshot_date').eq('product_type', 'sealed').order('snapshot_date', { ascending: false }).limit(1).single();
-      const sealedDate = sealedLatest?.snapshot_date;
+      const SELECT_COLS = 'id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d, snapshot_date';
 
       const [sealedRes, cardsRes] = await Promise.all([
         supabase.from('market_snapshots')
-          .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
+          .select(SELECT_COLS)
           .ilike('set_name', `%${todaySet.setKey}%`)
-          .not('product_type', 'ilike', '%graded%')
-          .in('product_type', ['sealed'])
+          .eq('product_type', 'sealed')
           .gt('price', 50)
-          .not('price', 'is', null)
-          .eq('snapshot_date', sealedDate || latestDate || '')
+          .gte('snapshot_date', sinceDate)
+          .order('snapshot_date', { ascending: false })
           .order('price', { ascending: false })
-          .limit(30),
+          .limit(200),
         supabase.from('market_snapshots')
-          .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
+          .select(SELECT_COLS)
           .ilike('set_name', `%${todaySet.setKey}%`)
           .eq('product_type', 'card')
           .gt('price', 10)
-          .not('price', 'is', null)
-          .eq('snapshot_date', latestDate || '')
+          .gte('snapshot_date', sinceDate)
+          .order('snapshot_date', { ascending: false })
           .order('price', { ascending: false })
-          .limit(80),
+          .limit(400),
       ]);
 
       if (cancelled) return;
@@ -1268,14 +1271,15 @@ function InvestingIdeas() {
       // Reclassify: move sealed-like products out of card picks
       // Anything with these keywords is sealed, not a raw card
       const SEALED_NAME_RE = /\b(booster|box|pack|deck|tin|etb|elite\s*trainer|collection|bundle|case|chest|blister|sealed|lunchbox|multipack|prerelease|toolkit|ultra\s*premium|stadium|kit)\b/i;
-      const allSealed = [...(sealedRes.data ?? [])];
-      const allCards = [...(cardsRes.data ?? [])];
+      const allSealed = dedupeLatest((sealedRes.data ?? []) as any[]);
+      const allCards = dedupeLatest((cardsRes.data ?? []) as any[]);
       const misclassified = allCards.filter(c => SEALED_NAME_RE.test(c.name));
       const pureCards = allCards.filter(c => !SEALED_NAME_RE.test(c.name));
       const combinedSealed = [...allSealed, ...misclassified];
 
       const sealedData = seededShuffle(combinedSealed, seed).slice(0, MAX_PICK_CARDS) as MoverCard[];
       let cardsData = seededShuffle(pureCards, seed + 1).slice(0, MAX_PICK_CARDS) as MoverCard[];
+      let finalSealed = sealedData;
 
       // Fallback: if spotlight set has too few cards in market_snapshots,
       // backfill with top-priced cards from sister sets sharing the same
@@ -1285,23 +1289,45 @@ function InvestingIdeas() {
         const fallbackSets = PRIME_SETS.filter(s => s.setKey !== todaySet.setKey);
         const fallbackResults = await Promise.all(
           fallbackSets.map(s => supabase.from('market_snapshots')
-            .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, min_price_30d, max_price_30d, cov_price_30d, trend_slope_30d')
+            .select(SELECT_COLS)
             .ilike('set_name', `%${s.setKey}%`)
             .eq('product_type', 'card')
             .gt('price', 10)
-            .not('price', 'is', null)
-            .eq('snapshot_date', latestDate || '')
+            .gte('snapshot_date', sinceDate)
+            .order('snapshot_date', { ascending: false })
             .order('price', { ascending: false })
-            .limit(12))
+            .limit(40))
         );
-        const fallbackCards = fallbackResults.flatMap(res => res.data ?? []);
+        const fallbackCards = dedupeLatest(fallbackResults.flatMap(res => (res.data ?? []) as any[]));
         const filler = seededShuffle(fallbackCards, seed + 7)
           .filter(c => !existingIds.has(c.card_id) && !SEALED_NAME_RE.test(c.name))
           .slice(0, MAX_PICK_CARDS - cardsData.length) as MoverCard[];
         cardsData = [...cardsData, ...filler];
       }
 
-      setSealedPicks(sealedData);
+      // Same fallback for sealed: backfill from sister PRIME sets when spotlight is sparse.
+      if (finalSealed.length < MAX_PICK_CARDS) {
+        const existingIds = new Set(finalSealed.map(c => c.card_id));
+        const fallbackSets = PRIME_SETS.filter(s => s.setKey !== todaySet.setKey);
+        const fallbackResults = await Promise.all(
+          fallbackSets.map(s => supabase.from('market_snapshots')
+            .select(SELECT_COLS)
+            .ilike('set_name', `%${s.setKey}%`)
+            .eq('product_type', 'sealed')
+            .gt('price', 50)
+            .gte('snapshot_date', sinceDate)
+            .order('snapshot_date', { ascending: false })
+            .order('price', { ascending: false })
+            .limit(20))
+        );
+        const fallbackSealed = dedupeLatest(fallbackResults.flatMap(res => (res.data ?? []) as any[]));
+        const filler = seededShuffle(fallbackSealed, seed + 11)
+          .filter(c => !existingIds.has(c.card_id))
+          .slice(0, MAX_PICK_CARDS - finalSealed.length) as MoverCard[];
+        finalSealed = [...finalSealed, ...filler];
+      }
+
+      setSealedPicks(finalSealed);
       setCardPicks(cardsData);
       setLoading(false);
     })();
