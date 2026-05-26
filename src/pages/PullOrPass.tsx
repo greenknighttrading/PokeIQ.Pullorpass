@@ -240,6 +240,11 @@ export default function PullOrPass() {
       const next = { ...q, bonus: (q.bonus ?? 0) + SWIPES_PER_REDEMPTION };
       writeQuota(next);
       setQuota(next);
+      setRedemptionCount((c) => {
+        const nextC = c + 1;
+        try { sessionStorage.setItem(REDEMPTION_COUNT_KEY, String(nextC)); } catch {}
+        return nextC;
+      });
       toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
         description: `${newCredits} credits remaining.`,
         position: 'top-center',
