@@ -382,6 +382,7 @@ export default function PullOrPass() {
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
     setStage('results');
     clearResume();
+    writeResults({ records: allRecords, roundId, cards });
     if (!userId) return;
     const analysis = analyzeRound(allRecords);
 
