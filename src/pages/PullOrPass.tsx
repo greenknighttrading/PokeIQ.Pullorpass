@@ -1168,66 +1168,38 @@ function ResultsView({
       {/* ── SECTION 3: Taste Profile (authed) OR View All My Matches (guest) ─── */}
       {isAuthed ? (
         <motion.section {...fadeUp}>
-          <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px]">
-            <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-screen"
-              style={{
-                backgroundImage:
-                  'repeating-linear-gradient(120deg, hsl(var(--primary)/0.6) 0px, transparent 2px, transparent 12px), repeating-linear-gradient(60deg, hsl(280 80% 70% / 0.5) 0px, transparent 2px, transparent 14px)',
-              }}
-            />
-            <motion.div
-              aria-hidden="true"
-              animate={{ opacity: [0.15, 0.3, 0.15] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-              className="pointer-events-none absolute top-1/2 right-[12%] w-[260px] h-[260px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
-            />
-
-            <div className="relative grid grid-cols-1 gap-6 lg:gap-10 items-center lg:grid-cols-[auto_1fr_auto]">
-              <div className="relative w-24 h-24 lg:w-28 lg:h-28 flex items-center justify-center mx-auto lg:mx-0">
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.85, 0.5] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  className="absolute inset-0 rounded-full bg-primary/35 blur-2xl"
-                />
-                <div className="absolute inset-2 rounded-full border-2 border-primary/40" />
-                <Sparkles className="relative w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
-              </div>
-
-              <div className="text-center lg:text-left space-y-3 min-w-0">
-                <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Taste Profile</p>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
-                  {displayArchetype}
-                </h2>
-                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl">{archetypeDesc}</p>
-                <div className="flex flex-wrap gap-2 justify-center lg:justify-start pt-1">
-                  {tagList.map((t, i) => (
-                    <span
-                      key={t}
-                      className={`px-3 py-1 text-xs rounded-full border ${
-                        i % 2 === 0
-                          ? 'border-primary/40 bg-primary/10 text-primary'
-                          : 'border-purple-400/40 bg-purple-500/10 text-purple-300'
-                      }`}
-                    >
-                      {t}
-                    </span>
-                  ))}
+          <Link to="/matches" className="block group">
+            <div className="relative rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/12 via-card to-purple-500/12 p-8 sm:p-10 lg:p-12 overflow-hidden transition-shadow shadow-[0_0_0_hsl(var(--primary)/0)] group-hover:shadow-[0_0_60px_hsl(var(--primary)/0.35)]">
+              <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+              <div className="absolute -bottom-24 -left-24 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+              <motion.div
+                aria-hidden="true"
+                animate={{ opacity: [0.2, 0.4, 0.2] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="pointer-events-none absolute top-1/2 right-[10%] w-[280px] h-[280px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
+              />
+              <div className="relative flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center sm:text-left">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl border border-primary/40 bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-10 h-10 text-primary drop-shadow-[0_0_18px_hsl(var(--primary)/0.9)]" />
+                </div>
+                <div className="flex-1 min-w-0 space-y-2">
+                  <p className="text-[11px] uppercase tracking-[0.28em] text-primary font-semibold">Your Collector Profile</p>
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground tracking-tight leading-[1.1]">
+                    Go to your profile
+                  </h2>
+                  <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
+                    See every card you've liked, your evolving taste, and what PokeIQ has learned about you.
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  <span className="inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide shadow-[0_0_28px_hsl(var(--primary)/0.55)] group-hover:shadow-[0_0_44px_hsl(var(--primary)/0.85)] transition-shadow">
+                    View Profile
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
                 </div>
               </div>
-
-              <div className="flex flex-col items-center gap-3 lg:min-w-[200px]">
-                <CircularMeter value={completion} />
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile Completion</p>
-                <p className="text-[11px] text-muted-foreground text-center max-w-[200px] leading-snug">
-                  Recommendation accuracy sharpens with every swipe.
-                </p>
-              </div>
             </div>
-          </div>
+          </Link>
         </motion.section>
       ) : (
         <motion.section {...fadeUp}>
