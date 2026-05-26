@@ -28,8 +28,11 @@ const SWIPE_THRESHOLD = 110;
 // ─── Daily swipe quota (free tier) ───────────────────────
 const DAILY_BASE_LIMIT = 20;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 20 Earn reviews
-const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes
-const SWIPES_PER_REDEMPTION = 10;
+const CREDITS_PER_REDEMPTION = 20; // 20 credits → 20 swipes
+const SWIPES_PER_REDEMPTION = 20;
+const REDEMPTIONS_BEFORE_PRO_NUDGE = 3;
+const REDEMPTION_COUNT_KEY = 'pop_redemption_count_v1';
+const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
 
 function todayKey() {
   const d = new Date();
@@ -131,6 +134,18 @@ export default function PullOrPass() {
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [redeeming, setRedeeming] = useState(false);
+  const [redemptionCount, setRedemptionCount] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0;
+    return Number(sessionStorage.getItem(REDEMPTION_COUNT_KEY) ?? '0') || 0;
+  });
+  const [proNudgeDismissed, setProNudgeDismissed] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
+  });
+  const showProNudge =
+    !premium &&
+    redemptionCount >= REDEMPTIONS_BEFORE_PRO_NUDGE &&
+    !proNudgeDismissed;
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
