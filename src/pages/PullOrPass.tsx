@@ -18,6 +18,7 @@ import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } 
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
 import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
+import pikachuMascot from '@/assets/pikachu-mascot.png';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
@@ -981,8 +982,8 @@ function ResultsView({
     "You're drawn to iconic Pokémon, vintage energy, and bold expressive artwork that hits with nostalgia.";
   const tagList = (a.topTags.length
     ? a.topTags.map((t) => t.tag)
-    : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine']
-  ).slice(0, 5);
+    : ['Vintage Nostalgia', 'Bold & Dynamic Art', 'Gen 1 Love', 'High Energy', 'Holo & Shine', 'Chaos Energy', 'Iconic Pokémon', 'Expressive Artwork']
+  ).slice(0, 8);
   const completion = Math.min(100, Math.round(((records.length) / 100) * 100));
 
   // Build a sparse LikedCard[] from this round's pulls so we can fetch
@@ -1122,11 +1123,22 @@ function ResultsView({
 
       {/* ── SECTION 3: Taste Profile (compact horizontal card) ─── */}
       <motion.section {...fadeUp}>
-        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px] lg:max-h-[320px]">
+        <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px] lg:max-h-[340px]">
           <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
 
-          <div className="relative grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-6 lg:gap-10 items-center">
+          {/* Background mascot — playful, low-opacity, non-interactive */}
+          <img
+            src={pikachuMascot}
+            alt=""
+            aria-hidden="true"
+            loading="lazy"
+            width={768}
+            height={768}
+            className="pointer-events-none select-none absolute -right-6 -bottom-10 sm:right-4 sm:-bottom-12 w-44 sm:w-56 lg:w-72 opacity-[0.18] mix-blend-screen drop-shadow-[0_0_30px_hsl(var(--primary)/0.35)] rotate-[6deg]"
+          />
+
+          <div className={`relative grid grid-cols-1 gap-6 lg:gap-10 items-center ${isAuthed ? 'lg:grid-cols-[auto_1fr_auto]' : 'lg:grid-cols-[auto_1fr]'}`}>
             {/* Left: emblem */}
             <div className="relative w-24 h-24 lg:w-28 lg:h-28 flex items-center justify-center mx-auto lg:mx-0">
               <motion.div
@@ -1161,24 +1173,16 @@ function ResultsView({
               </div>
             </div>
 
-            {/* Right: completion + soft CTA */}
-            <div className="flex flex-col items-center gap-3 lg:min-w-[200px]">
-              <CircularMeter value={completion} />
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile Completion</p>
-              <p className="text-[11px] text-muted-foreground text-center max-w-[200px] leading-snug">
-                Recommendation accuracy sharpens with every swipe.
-              </p>
-              {!isAuthed && (
-                <motion.button
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={onSignUp}
-                  className="mt-1 h-10 px-6 rounded-full bg-primary text-primary-foreground font-semibold text-xs shadow-[0_0_24px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_36px_hsl(var(--primary)/0.7)] transition-shadow whitespace-nowrap"
-                >
-                  Create Free Account
-                </motion.button>
-              )}
-            </div>
+            {/* Right: completion (signed-in only — guests get the unified sign-up widget below) */}
+            {isAuthed && (
+              <div className="flex flex-col items-center gap-3 lg:min-w-[200px]">
+                <CircularMeter value={completion} />
+                <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile Completion</p>
+                <p className="text-[11px] text-muted-foreground text-center max-w-[200px] leading-snug">
+                  Recommendation accuracy sharpens with every swipe.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </motion.section>
