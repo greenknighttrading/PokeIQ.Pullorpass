@@ -19,7 +19,9 @@ import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infin
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 
-type Stage = 'loading' | 'swiping' | 'results';
+type Stage = 'intro' | 'loading' | 'swiping' | 'results';
+
+const INTRO_SEEN_KEY = 'pop_intro_seen_v1';
 type SwipeDir = 'left' | 'right' | 'up';
 
 const SWIPE_THRESHOLD = 110;
@@ -173,6 +175,9 @@ export default function PullOrPass() {
         } catch {}
       }
     });
+    // First-time visitors see the landing/instructions page
+    let introSeen = false;
+    try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
     // Try to resume an in-progress round first, then fall back to last results
     const resume = readResume();
     if (resume) {
@@ -189,6 +194,8 @@ export default function PullOrPass() {
         setRoundId(last.roundId);
         setIndex(last.cards.length);
         setStage('results');
+      } else if (!introSeen) {
+        setStage('intro');
       } else {
         loadRound();
       }
