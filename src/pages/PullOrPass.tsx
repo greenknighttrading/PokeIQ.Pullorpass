@@ -521,27 +521,15 @@ export default function PullOrPass() {
 
           {stage === 'swiping' && !outOfSwipes && current && (
             <>
-              {/* Progress + Matches link + quota */}
+              {/* Progress + quota */}
               <div className="flex items-center justify-between mb-3 gap-3">
                 <span className="text-sm font-medium text-muted-foreground tabular-nums">
                   Card <span className="text-foreground font-semibold">{index + 1}</span>
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
-                <Link
-                  to="/matches"
-                  className="text-xs font-semibold text-primary hover:text-primary/90 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 shadow-[0_0_18px_hsl(var(--primary)/0.25)] transition-shadow hover:shadow-[0_0_24px_hsl(var(--primary)/0.45)]"
-                >
-                  <Heart className="w-3.5 h-3.5 fill-primary" /> Matches
-                </Link>
-                {premium ? (
-                  <span className="text-[10px] uppercase tracking-wider font-semibold inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400/15 to-primary/15 border border-amber-400/40 text-amber-300">
-                    <Sparkles className="w-3 h-3" /> PokeIQ Premium
-                  </span>
-                ) : (
-                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
-                    {remaining} left today
-                  </span>
-                )}
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground tabular-nums">
+                  {remaining} left today
+                </span>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
                 <motion.div
@@ -1342,7 +1330,6 @@ function ResultsView({
                 >
                   <div className="flex items-center gap-2 mb-2 px-1">
                     <Heart className="w-3.5 h-3.5 fill-primary text-primary" />
-                    <p className="text-[10px] uppercase tracking-widest text-primary font-semibold">Matches</p>
                   </div>
                   <div className="flex gap-1.5">
                     {(recs.length ? recs : pulled.map((p) => ({ image_url: p.card.image_url, card_id: p.card.card_id }))).slice(0, 4).map((c: any, i) => (
@@ -1567,10 +1554,6 @@ function ResultsView({
 
             <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
               <div className="space-y-5">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10">
-                  <Crown className="w-3.5 h-3.5 text-amber-300" />
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-amber-300 font-semibold">PokeIQ Premium</p>
-                </div>
                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
                   {outOfSwipes ? 'Out of swipes?' : 'Want unlimited swipes?'}
                 </h2>
