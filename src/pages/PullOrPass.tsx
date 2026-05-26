@@ -18,6 +18,7 @@ import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } 
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
 import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
+import pikachuMascot from '@/assets/pikachu-mascot.png';
 
 type Stage = 'loading' | 'swiping' | 'results';
 type SwipeDir = 'left' | 'right' | 'up';
