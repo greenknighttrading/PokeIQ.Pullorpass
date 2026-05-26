@@ -16,8 +16,9 @@ import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailMo
 // ── Reward constants ────────────────────────────────────
 // Every 20 reviews → +10 PullOrPass swipes
 // Every 200 reviews → 30 days of PokeIQ Premium (unlimited swipes + premium features)
-const REVIEWS_PER_SWIPE_BATCH = 20;
+const REVIEWS_PER_SWIPE_BATCH = 10;
 const SWIPES_PER_BATCH = 10;
+const CUSTOM_TAG_BONUS_CREDITS = 1; // bonus credit per custom tag for accuracy
 const REVIEWS_FOR_PREMIUM = 200;
 const PREMIUM_DAYS = 30;
 
@@ -370,9 +371,10 @@ export default function PokeYelp() {
       return;
     }
 
-    // 1 credit per card reviewed
-    const earned = 1;
+    // 1 credit per card reviewed + bonus credits per custom tag (accuracy reward)
     const applicableTags = Array.from(selected);
+    const customBonus = custom.length * CUSTOM_TAG_BONUS_CREDITS;
+    const earned = 1 + customBonus;
 
     const tagPayload = [
       ...applicableTags,
@@ -407,19 +409,26 @@ export default function PokeYelp() {
     } catch {}
     setReviewedCount((c) => c + 1);
 
-    // Every 20 reviews → +10 PullOrPass swipes
+    // Every 10 reviews → +10 PullOrPass swipes
     if (lifetime > 0 && lifetime % REVIEWS_PER_SWIPE_BATCH === 0) {
       grantSwipeBonus(SWIPES_PER_BATCH);
       toast.success(`+${SWIPES_PER_BATCH} PullOrPass swipes unlocked!`, {
-        description: `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
+        description: customBonus > 0
+          ? `+${customBonus} bonus credits for custom tags. ${lifetime} reviews and counting.`
+          : `Thanks for training PokeIQ — ${lifetime} reviews and counting.`,
         position: 'top-center',
       });
     } else {
       const toNext = REVIEWS_PER_SWIPE_BATCH - (lifetime % REVIEWS_PER_SWIPE_BATCH);
-      toast.success('Review saved — PokeIQ just got smarter', {
+      toast.success(
+        customBonus > 0
+          ? `Review saved · +${customBonus} bonus credits`
+          : 'Review saved — PokeIQ just got smarter',
+        {
         description: `${toNext} more to unlock +${SWIPES_PER_BATCH} swipes.`,
         position: 'top-center',
-      });
+        }
+      );
     }
 
     // PokeIQ Pro is a paid subscription — training only grants swipe credits,
