@@ -79,6 +79,25 @@ function clearResume() {
   try { localStorage.removeItem(RESUME_KEY); } catch {}
 }
 
+// ─── Results state (remember the last completed round so back-nav restores it) ─
+const RESULTS_KEY = 'pop_results_v1';
+type ResultsState = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
+function readResults(): ResultsState | null {
+  try {
+    const raw = localStorage.getItem(RESULTS_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    if (!v?.records?.length) return null;
+    return v as ResultsState;
+  } catch { return null; }
+}
+function writeResults(s: ResultsState) {
+  try { localStorage.setItem(RESULTS_KEY, JSON.stringify(s)); } catch {}
+}
+function clearResults() {
+  try { localStorage.removeItem(RESULTS_KEY); } catch {}
+}
+
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
   return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
@@ -113,11 +132,14 @@ export default function PullOrPass() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) {
         setUserId(session.user.id);
-        // First time we see this authed user on this device → reset daily quota
-        // so a freshly-signed-up user gets another 20 free swipes.
+        // First time EVER for this user on this device → grant them their
+        // one-time post-signup 20 free swipes. After that, normal daily quota
+        // applies (so they must earn credits or upgrade to keep swiping).
         try {
-          const lastSeen = localStorage.getItem('pop_last_user_id');
-          if (lastSeen !== session.user.id) {
+          const bonusFlag = `pop_signup_bonus_granted_${session.user.id}`;
+          const alreadyGranted = localStorage.getItem(bonusFlag) === '1';
+          if (!alreadyGranted) {
+            localStorage.setItem(bonusFlag, '1');
             localStorage.setItem('pop_last_user_id', session.user.id);
             const fresh = { date: todayKey(), used: 0, bonus: 0, lifetime: readQuota().lifetime };
             writeQuota(fresh);
@@ -126,7 +148,7 @@ export default function PullOrPass() {
         } catch {}
       }
     });
-    // Try to resume an in-progress round first
+    // Try to resume an in-progress round first, then fall back to last results
     const resume = readResume();
     if (resume) {
       setCards(resume.cards);
@@ -135,7 +157,16 @@ export default function PullOrPass() {
       setRoundId(resume.roundId);
       setStage('swiping');
     } else {
-      loadRound();
+      const last = readResults();
+      if (last) {
+        setCards(last.cards);
+        setRecords(last.records);
+        setRoundId(last.roundId);
+        setIndex(last.cards.length);
+        setStage('results');
+      } else {
+        loadRound();
+      }
     }
     // Bonus swipes are written directly into pop_quota by the Earn page
     // (every 20 reviews → +10 swipes). Refresh on focus to pick them up.
@@ -158,6 +189,7 @@ export default function PullOrPass() {
 
   const loadRound = useCallback(async () => {
     setStage('loading');
+    clearResults();
     setIndex(0);
     setRecords([]);
     setImgError(false);
@@ -351,6 +383,7 @@ export default function PullOrPass() {
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
     setStage('results');
     clearResume();
+    writeResults({ records: allRecords, roundId, cards });
     if (!userId) return;
     const analysis = analyzeRound(allRecords);
 
