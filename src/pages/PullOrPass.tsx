@@ -1086,6 +1086,9 @@ function ResultsView({
             <div className="flex flex-col items-center gap-3 lg:min-w-[200px]">
               <CircularMeter value={completion} />
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Profile Completion</p>
+              <p className="text-[11px] text-muted-foreground text-center max-w-[200px] leading-snug">
+                Recommendation accuracy sharpens with every swipe.
+              </p>
               {!isAuthed && (
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
