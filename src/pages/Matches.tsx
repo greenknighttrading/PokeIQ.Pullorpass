@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -66,7 +65,6 @@ export default function Matches() {
     <>
       <Seo title="Your Collector Taste | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
       <div className="min-h-screen bg-background flex flex-col">
-        <GlobalNavBar />
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
           <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
