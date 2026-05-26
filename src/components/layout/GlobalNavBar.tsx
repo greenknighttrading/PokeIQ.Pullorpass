@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { TrendingUp, Search, Sparkles, User, LogOut, Bell, LogIn, Eye, ChevronDown, FileText, Mail, Menu, Scale, Package, Heart, MessageSquare, Compass, Wrench, Briefcase, Home, Users, Sun, Moon } from 'lucide-react';
+import { Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { FeedbackDialog } from '@/components/feedback/FeedbackDialog';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,23 @@ export function GlobalNavBar({
   const [alertsLoading, setAlertsLoading] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
+
+  useEffect(() => {
+    const check = () => {
+      try {
+        const until = Number(localStorage.getItem('pokeiq_premium_until') || '0');
+        setIsPremium(until > Date.now());
+      } catch { setIsPremium(false); }
+    };
+    check();
+    window.addEventListener('focus', check);
+    window.addEventListener('storage', check);
+    return () => {
+      window.removeEventListener('focus', check);
+      window.removeEventListener('storage', check);
+    };
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -374,8 +392,17 @@ export function GlobalNavBar({
           {isAuthed ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="shrink-0">
+                <Button variant="ghost" size="sm" className="shrink-0 gap-1.5">
                   <User className="w-4 h-4" />
+                  {isPremium ? (
+                    <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
+                      <Crown className="w-3 h-3" /> Pro
+                    </span>
+                  ) : (
+                    <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                      Free
+                    </span>
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="min-w-[200px]">
@@ -384,6 +411,16 @@ export function GlobalNavBar({
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       <Mail className="w-3 h-3" />
                       {userEmail}
+                    </p>
+                    <p className="text-[11px] mt-1 flex items-center gap-1.5">
+                      <span className="text-muted-foreground">Account:</span>
+                      {isPremium ? (
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-500">
+                          <Crown className="w-3 h-3" /> PokeIQ Pro
+                        </span>
+                      ) : (
+                        <span className="font-bold text-foreground">Free</span>
+                      )}
                     </p>
                   </div>
                 )}
@@ -395,6 +432,12 @@ export function GlobalNavBar({
                   <TrendingUp className="w-4 h-4 mr-2" />
                   My Portfolio
                 </DropdownMenuItem>
+                {!isPremium && (
+                  <DropdownMenuItem onClick={() => navigate('/get-started')}>
+                    <Crown className="w-4 h-4 mr-2 text-amber-500" />
+                    Go PokeIQ Pro
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="w-4 h-4 mr-2" />
                   Log Out
