@@ -1,14 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Heart, User, Trophy, ScanLine, Crown, Zap, Users, Lock, Activity,
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
-  Package, Calculator, Newspaper, ShoppingBag,
+  Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
 
 interface NavItem {
@@ -44,6 +49,21 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isPremium } = useIsPremium();
+  const [email, setEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const e = data.user?.email ?? null;
+      setEmail(data.user?.is_anonymous ? null : e);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setEmail(session?.user && !session.user.is_anonymous ? session.user.email ?? null : null);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const initial = (email?.[0] ?? '?').toUpperCase();
+
   const isPremiumPath = [...premiumCollect, ...premiumTools].some(
     (i) => location.pathname === i.href || location.pathname.startsWith(i.href + '/')
   ) || location.pathname === '/premium';
@@ -186,6 +206,43 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="flex-1 min-w-0">
+        {/* Top bar with profile in upper right */}
+        <div className="sticky top-0 z-30 flex justify-end items-center gap-2 px-5 py-3 bg-background/70 backdrop-blur-md border-b border-border/40">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="w-9 h-9 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center text-sm font-semibold hover:bg-primary/25 transition-colors"
+                aria-label="Account"
+              >
+                {email ? initial : <User className="w-4 h-4" />}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {email ? (
+                <>
+                  <DropdownMenuLabel className="truncate">{email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <User className="w-4 h-4 mr-2" /> Smart Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/premium')}>
+                    <Crown className="w-4 h-4 mr-2" /> Premium
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={async () => { await supabase.auth.signOut(); navigate('/auth'); }}
+                  >
+                    <LogOut className="w-4 h-4 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem onClick={() => navigate('/auth')}>
+                  <LogIn className="w-4 h-4 mr-2" /> Sign in
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         {children}
       </main>
     </div>
