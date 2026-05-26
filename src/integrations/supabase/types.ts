@@ -1850,6 +1850,7 @@ export type Database = {
           total_value: number
         }[]
       }
+      has_buylist_access: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
