@@ -1587,10 +1587,20 @@ function ResultsView({
                 <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">Daily Limit Reached</p>
                 <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">You're out of swipes for today</h3>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-                  Upgrade to Premium for unlimited rounds and advanced features.
+                  Go Premium for unlimited swipes — or earn more swipe credits by helping train PokeIQ.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
                   <ResetCountdown />
+                  <Link to="/earn">
+                    <motion.button
+                      whileHover={{ y: -2, scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      className="h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center gap-2 hover:bg-primary/15 transition-colors"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Earn Swipe Credits
+                    </motion.button>
+                  </Link>
                   <motion.button
                     whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
@@ -1601,6 +1611,9 @@ function ResultsView({
                     Go Premium
                   </motion.button>
                 </div>
+                <p className="text-[11px] text-muted-foreground/80 pt-1">
+                  Every 20 cards you train earns +10 swipes.
+                </p>
               </div>
             </div>
           ) : (
