@@ -236,7 +236,7 @@ export function buildPortfolioReportHtml({
       
       <div class="section">
         <h2 class="section-title">What This Says About You</h2>
-        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.8;">${archetype.whatItSays} Your core strength is <strong style="color: #4ade80;">${archetype.coreStrength}</strong>, though this comes with a trade-off: <strong style="color: #fbbf24;">${archetype.tradeOff}</strong>.</p>
+        <p>${archetype.whatItSays} Your core strength is <strong style="color: #4ade80;">${archetype.coreStrength}</strong>, though this comes with a trade-off: <strong style="color: #fbbf24;">${archetype.tradeOff}</strong>.</p>
       </div>
     `;
   };
@@ -884,8 +884,8 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
     
     .header {
       text-align: center;
-      margin-bottom: 80px;
-      padding-bottom: 40px;
+      margin-bottom: 48px;
+      padding-bottom: 28px;
       border-bottom: 1px solid rgba(59, 158, 143, 0.3);
     }
     
@@ -917,8 +917,8 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       background: rgba(17, 24, 39, 0.5);
       border: 1px solid rgba(59, 158, 143, 0.2);
       border-radius: 20px;
-      padding: 44px 48px;
-      margin-bottom: 72px;
+      padding: 28px 32px;
+      margin-bottom: 32px;
     }
 
     .section p {
@@ -944,9 +944,11 @@ ${summary && summary.holdingsInProfitPercent > 50 ? `With ${summary.holdingsInPr
       letter-spacing: -0.015em;
       line-height: 1.25;
       color: #5bb8a9;
-      margin-bottom: 28px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
+      justify-content: center;
+      text-align: center;
       gap: 10px;
     }
 
