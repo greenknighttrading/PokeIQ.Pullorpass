@@ -304,10 +304,13 @@ function ActionTicker() {
             {i > 0 && <div className="w-px h-4 bg-border/30 shrink-0" />}
             <button
               onClick={() => navigate(getHref(s))}
-              className="flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity"
+              className={cn(
+                'flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity',
+                s.title === 'Play Pull or Pass' && 'ring-1 ring-rose-400/40 rounded-full px-2.5 py-1 bg-rose-500/10'
+              )}
             >
               <div className={cn('w-5 h-5 rounded flex items-center justify-center', s.iconBg)}>{s.icon}</div>
-              <span className="text-[13px] font-semibold text-foreground whitespace-nowrap">{s.title}</span>
+              <span className={cn('text-[13px] font-semibold whitespace-nowrap', s.title === 'Play Pull or Pass' ? 'text-rose-400' : 'text-foreground')}>{s.title}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">{s.detail}</span>
             </button>
           </React.Fragment>
