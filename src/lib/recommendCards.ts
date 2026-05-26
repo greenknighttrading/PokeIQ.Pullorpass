@@ -175,21 +175,57 @@ export async function recommendForUser(
   const ranked = Array.from(candidates.values())
     .filter((c) => c.score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, Math.max(limit * 3, 30));
+    .slice(0, Math.max(limit * 6, 60));
 
-  // Diversify: cap per artist and per set
-  const perArtist = new Map<string, number>();
-  const perSet = new Map<string, number>();
-  const final: RecommendedCard[] = [];
-  for (const c of ranked.sort((a, b) => b.score - a.score)) {
-    const aKey = c.artist || '';
-    const sKey = c.set_name || '';
-    if ((perArtist.get(aKey) ?? 0) >= 3) continue;
-    if ((perSet.get(sKey) ?? 0) >= 4) continue;
-    perArtist.set(aKey, (perArtist.get(aKey) ?? 0) + 1);
-    perSet.set(sKey, (perSet.get(sKey) ?? 0) + 1);
-    final.push(c);
-    if (final.length >= limit) break;
+  // Daily seed — rotates the pool each calendar day so the row feels fresh.
+  const today = new Date();
+  const daySeed =
+    today.getUTCFullYear() * 10000 +
+    (today.getUTCMonth() + 1) * 100 +
+    today.getUTCDate();
+  function rand(seed: number) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s * 1664525 + 1013904223) >>> 0;
+      return s / 0xffffffff;
+    };
   }
-  return final;
+  const rng = rand(daySeed);
+  // Light jitter on score so high-scoring cards rotate day-to-day without
+  // collapsing the ranking.
+  const jittered = ranked
+    .map((c) => ({ c, key: c.score + rng() * 1.5 }))
+    .sort((a, b) => b.key - a.key)
+    .map((x) => x.c);
+
+  // Diversify: cap per artist and per set, but guarantee at least `limit` items.
+  function pick(maxPerArtist: number, maxPerSet: number, exclude: Set<string>) {
+    const perArtist = new Map<string, number>();
+    const perSet = new Map<string, number>();
+    const out: RecommendedCard[] = [];
+    for (const c of jittered) {
+      if (exclude.has(c.card_id)) continue;
+      const aKey = c.artist || '';
+      const sKey = c.set_name || '';
+      if ((perArtist.get(aKey) ?? 0) >= maxPerArtist) continue;
+      if ((perSet.get(sKey) ?? 0) >= maxPerSet) continue;
+      perArtist.set(aKey, (perArtist.get(aKey) ?? 0) + 1);
+      perSet.set(sKey, (perSet.get(sKey) ?? 0) + 1);
+      out.push(c);
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+
+  let final = pick(3, 4, new Set());
+  if (final.length < limit) {
+    // Relax diversification to guarantee minimum count
+    const have = new Set(final.map((c) => c.card_id));
+    const filler = pick(Infinity, Infinity, have);
+    for (const c of filler) {
+      if (final.length >= limit) break;
+      final.push(c);
+    }
+  }
+  return final.slice(0, limit);
 }
