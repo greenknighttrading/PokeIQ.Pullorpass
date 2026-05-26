@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -655,20 +655,29 @@ export default function PullOrPass() {
                   Card <span className="text-foreground font-semibold">{index + 1}</span>
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
-                {premium ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
-                    <Crown className="w-3 h-3" /> Unlimited
-                  </span>
-                ) : (
-                  <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-                    <span className="text-foreground font-semibold">{quota.used}</span>
-                    <span className="text-muted-foreground">done today</span>
-                    <span className="text-muted-foreground/50">·</span>
-                    <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
-                      {remaining} left
+                <div className="flex items-center gap-2">
+                  {premium ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
+                      <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  </span>
-                )}
+                  ) : (
+                    <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
+                      <span className="text-foreground font-semibold">{quota.used}</span>
+                      <span className="text-muted-foreground">done today</span>
+                      <span className="text-muted-foreground/50">·</span>
+                      <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
+                        {remaining} left
+                      </span>
+                    </span>
+                  )}
+                  <button
+                    onClick={() => navigate(userId ? '/profile' : '/auth')}
+                    aria-label="Account"
+                    className="md:hidden w-7 h-7 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center text-[11px] font-semibold hover:bg-primary/25 transition-colors"
+                  >
+                    <UserIcon className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
                 <motion.div
