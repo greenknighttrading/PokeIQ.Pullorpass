@@ -497,7 +497,7 @@ export default function PullOrPass() {
       <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
         <GlobalNavBar />
 
-        <main className={`flex-1 min-h-0 max-w-2xl w-full mx-auto px-4 py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto' : ''}`}>
+        <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
           {stage === 'loading' && (
