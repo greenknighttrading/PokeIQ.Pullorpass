@@ -1132,16 +1132,20 @@ function ResultsView({
         <div className="relative rounded-3xl border border-primary/25 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden lg:min-h-[260px] lg:max-h-[340px]">
           <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-24 -left-24 w-[320px] h-[320px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
-
-          {/* Background mascot — playful, low-opacity, non-interactive */}
-          <img
-            src={pikachuMascot}
-            alt=""
+          {/* Subtle holographic shimmer — replaces previous mascot artwork */}
+          <div
             aria-hidden="true"
-            loading="lazy"
-            width={768}
-            height={768}
-            className="pointer-events-none select-none absolute -right-6 -bottom-10 sm:right-4 sm:-bottom-12 w-44 sm:w-56 lg:w-72 opacity-[0.18] mix-blend-screen drop-shadow-[0_0_30px_hsl(var(--primary)/0.35)] rotate-[6deg]"
+            className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-screen"
+            style={{
+              backgroundImage:
+                'repeating-linear-gradient(120deg, hsl(var(--primary)/0.6) 0px, transparent 2px, transparent 12px), repeating-linear-gradient(60deg, hsl(280 80% 70% / 0.5) 0px, transparent 2px, transparent 14px)',
+            }}
+          />
+          <motion.div
+            aria-hidden="true"
+            animate={{ opacity: [0.15, 0.3, 0.15] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            className="pointer-events-none absolute top-1/2 right-[12%] w-[260px] h-[260px] -translate-y-1/2 rounded-full bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-2xl"
           />
 
           <div className={`relative grid grid-cols-1 gap-6 lg:gap-10 items-center ${isAuthed ? 'lg:grid-cols-[auto_1fr_auto]' : 'lg:grid-cols-[auto_1fr]'}`}>
