@@ -79,6 +79,25 @@ function clearResume() {
   try { localStorage.removeItem(RESUME_KEY); } catch {}
 }
 
+// ─── Results state (remember the last completed round so back-nav restores it) ─
+const RESULTS_KEY = 'pop_results_v1';
+type ResultsState = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
+function readResults(): ResultsState | null {
+  try {
+    const raw = localStorage.getItem(RESULTS_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    if (!v?.records?.length) return null;
+    return v as ResultsState;
+  } catch { return null; }
+}
+function writeResults(s: ResultsState) {
+  try { localStorage.setItem(RESULTS_KEY, JSON.stringify(s)); } catch {}
+}
+function clearResults() {
+  try { localStorage.removeItem(RESULTS_KEY); } catch {}
+}
+
 function tcgImage(tcgplayerId: string | null): string | null {
   if (!tcgplayerId) return null;
   return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
