@@ -6,7 +6,7 @@ import {
   Zap, LogIn, PlusCircle, CheckCircle,
   SlidersHorizontal, ChevronDown, Newspaper, ExternalLink, Layers, CreditCard,
   Briefcase, AlertTriangle, Lock, ArrowDownRight, ArrowUpRight, ShoppingCart,
-  Flame, Star, ChevronLeft, ChevronRight,
+  Flame, Star, ChevronLeft, ChevronRight, Heart,
 } from 'lucide-react';
 import sv151Logo from '@/assets/sv-151-logo.png';
 import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
@@ -318,6 +318,15 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
     interface Signal { icon: React.ReactNode; iconBg: string; title: string; detail: string; href?: string; }
     const s: Signal[] = [];
 
+    // Play Pull or Pass CTA — high visibility, placed first
+    s.push({
+      icon: <Heart className="w-3.5 h-3.5 text-rose-400" />,
+      iconBg: 'bg-rose-500/20',
+      title: 'Play Pull or Pass',
+      detail: 'Discover your collecting taste →',
+      href: '/swipe',
+    });
+
     // Market sentiment
     const isGreedy = dbCounts.cardsUpPct >= 55;
     const isFearful = dbCounts.cardsUpPct < 45;
@@ -451,10 +460,13 @@ function MarketTicker({ dbCounts, allMovers, topSets, greatestHitsData }: { dbCo
             {i > 0 && <div className="w-px h-4 bg-border/30 shrink-0" />}
             <button
               onClick={() => s.href && navigate(s.href)}
-              className="flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity"
+              className={cn(
+                'flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity',
+                s.title === 'Play Pull or Pass' && 'ring-1 ring-rose-400/40 rounded-full px-2.5 py-1 bg-rose-500/10'
+              )}
             >
               <div className={cn('w-5 h-5 rounded flex items-center justify-center', s.iconBg)}>{s.icon}</div>
-              <span className="text-[13px] font-semibold text-foreground whitespace-nowrap">{s.title}</span>
+              <span className={cn('text-[13px] font-semibold whitespace-nowrap', s.title === 'Play Pull or Pass' ? 'text-rose-400' : 'text-foreground')}>{s.title}</span>
               <span className="text-xs text-muted-foreground whitespace-nowrap">{s.detail}</span>
             </button>
           </React.Fragment>

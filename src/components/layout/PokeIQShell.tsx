@@ -91,6 +91,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               location.pathname === item.href ||
               (item.href !== '/' && location.pathname.startsWith(item.href));
             const Icon = item.icon;
+            const isPullOrPass = item.label === 'Pull or Pass';
             return (
               <Link
                 key={item.href}
@@ -98,11 +99,11 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                 className={cn(
                   'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-primary/15 text-primary'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                    ? isPullOrPass ? 'bg-rose-500/15 text-rose-400' : 'bg-primary/15 text-primary'
+                    : isPullOrPass ? 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
                 )}
               >
-                <Icon className="w-4 h-4 shrink-0" />
+                <Icon className={cn('w-4 h-4 shrink-0', isPullOrPass && 'text-rose-400')} />
                 <span className="flex-1 truncate">{item.label}</span>
                 {item.badge && (
                   <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/20 text-primary">
