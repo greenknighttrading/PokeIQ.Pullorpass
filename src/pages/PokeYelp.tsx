@@ -462,12 +462,9 @@ export default function PokeYelp() {
     if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
     setRedeeming(true);
     try {
-      const newCredits = credits - CREDITS_PER_REDEMPTION;
-      const { error } = await supabase.from('pokeiq_credits').upsert({
-        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' });
+      const { data: updated, error } = await supabase.rpc('change_pokeiq_credits', { p_delta: -CREDITS_PER_REDEMPTION });
       if (error) throw error;
-      setCredits(newCredits);
+      setCredits(typeof updated === 'number' ? updated : credits - CREDITS_PER_REDEMPTION);
       grantSwipeBonus(SWIPES_PER_REDEMPTION);
       toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
         description: 'Head to Pull or Pass to use them.',
