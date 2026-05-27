@@ -389,7 +389,12 @@ export default function PokeYelp() {
 
     // 1 credit per card reviewed + bonus credits per custom tag (accuracy reward)
     const applicableTags = Array.from(selected);
-    const customBonus = custom.length * CUSTOM_TAG_BONUS_CREDITS;
+    // Include any pending tag the user typed but didn't explicitly add
+    const pendingTag = customInput.trim();
+    const mergedCustom = pendingTag && !custom.includes(pendingTag) && custom.length < MAX_CUSTOM
+      ? [...custom, pendingTag]
+      : custom;
+    const customBonus = mergedCustom.length * CUSTOM_TAG_BONUS_CREDITS;
     const earned = 1 + customBonus;
 
     const tagPayload = [
@@ -405,7 +410,7 @@ export default function PokeYelp() {
       card_image: current.image_url,
       card_price: current.price,
       tags: tagPayload,
-      custom_tags: custom,
+      custom_tags: mergedCustom,
       credits_awarded: earned,
     });
     if (error) {
