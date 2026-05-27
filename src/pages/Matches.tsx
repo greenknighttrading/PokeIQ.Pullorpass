@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikedCard[]>([]);
   const [passes, setPasses] = useState<LikedCard[]>([]);
+  const [cardsSwiped, setCardsSwiped] = useState<number>(0);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
   const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
 
@@ -87,6 +88,14 @@ export default function Matches() {
         cached.latestLikedAt === latestLikedAt;
 
       setLikes(liked);
+      // Total swipes for this user (likes + passes + supers across all time)
+      try {
+        const { count } = await supabase
+          .from('pullorpass_swipes')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', uid);
+        setCardsSwiped(count ?? 0);
+      } catch (e) { console.warn('count swipes failed', e); }
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
       try {
@@ -182,7 +191,7 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              <TasteHero taste={taste} />
+              <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
