@@ -328,63 +328,86 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     const article = articleFor(personalityType);
     const portrait = PERSONALITY_PORTRAITS[personalityType as PersonalityType];
     return (
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
-        <div className="grid md:grid-cols-[minmax(0,0.45fr)_minmax(0,1fr)] gap-0">
-          {/* Portrait — compact, full face visible */}
-          <div className="relative aspect-square md:aspect-auto md:min-h-[220px] bg-card overflow-hidden">
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Personality — left aligned, portrait + content stacked */}
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-7">
+          <div className="flex items-start gap-5 text-left">
             {portrait ? (
-              <>
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
                 <img
                   src={portrait}
                   alt={`Illustration of ${article} ${personalityType}`}
-                  width={1024}
-                  height={1024}
+                  width={512}
+                  height={512}
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 w-full h-full object-contain object-center"
+                  className="absolute inset-0 w-full h-full object-cover object-top"
                 />
-                {/* Soft right-edge blend into the content panel */}
-                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-card hidden md:block" />
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-card md:hidden" />
-              </>
+              </div>
             ) : info ? (
-              <div className="absolute inset-0 flex items-center justify-center text-[120px]">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-card flex items-center justify-center text-5xl shrink-0 border border-border/60">
                 <span aria-hidden>{info.emoji}</span>
               </div>
             ) : null}
-          </div>
 
-          {/* Content */}
-          <div className="relative p-5 sm:p-6 md:p-7 flex flex-col justify-center">
-            <p className="text-[10px] uppercase tracking-[0.22em] text-primary font-bold mb-2">
-              Collector Personality
-            </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
-              You are {article}{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
-                {personalityType}
-              </span>
-            </h2>
-            {info?.summary && (
-              <p className="mt-3 text-sm sm:text-base text-foreground/80 leading-relaxed max-w-2xl">
-                {info.summary}
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-primary font-bold mb-2">
+                Collector Personality
               </p>
-            )}
-            <div className="flex items-center gap-4 mt-4">
-              <Button asChild size="sm" className="gap-2">
-                <Link to="/personality-types">
-                  Explore your type <ArrowRight className="w-4 h-4" />
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-[1.1]">
+                You are {article}{' '}
+                <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+                  {personalityType}
+                </span>
+              </h2>
+              {info?.summary && (
+                <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
+                  {info.summary}
+                </p>
+              )}
+              <div className="flex items-center gap-4 mt-4">
+                <Button asChild size="sm" className="gap-2">
+                  <Link to="/personality-types">
+                    Explore your type <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </Button>
+                <Link
+                  to="/test"
+                  className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+                >
+                  Retake the test
                 </Link>
-              </Button>
-              <Link
-                to="/test"
-                className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
-              >
-                Retake the test
-              </Link>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Swipe CTA — sharpen your matches */}
+        <Link
+          to="/swipe"
+          className="group relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-card p-5 sm:p-6 md:p-7 hover:border-primary/60 transition-colors flex flex-col justify-center text-left"
+        >
+          <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+          <div className="relative flex items-start gap-4">
+            <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-primary font-bold mb-2">
+                Sharpen your DNA
+              </p>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                Keep swiping for better matches
+              </h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Every pull and pass refines your taste signals and the cards we surface for you.
+              </p>
+              <Button size="sm" className="gap-2 mt-4 pointer-events-none">
+                Start swiping <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+              </Button>
+            </div>
+          </div>
+        </Link>
       </div>
     );
   }
