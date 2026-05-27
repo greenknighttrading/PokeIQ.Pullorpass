@@ -574,11 +574,18 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
           <div className="md:max-w-[62%]">
             {personalityType && (
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-4 h-4 text-amber-400" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
-                  {personalityType}
-                </span>
+              <div className="mb-4">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-400" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
+                    {personalityType}
+                  </span>
+                </div>
+                {PERSONALITY_INFO[personalityType as PersonalityType]?.tagline && (
+                  <p className="mt-2 text-sm text-foreground/70 leading-relaxed max-w-xl">
+                    {PERSONALITY_INFO[personalityType as PersonalityType].tagline}
+                  </p>
+                )}
               </div>
             )}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
@@ -649,8 +656,6 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
       </div>
 
-      {/* Personality result — sits directly under the Collector DNA widget */}
-      <PersonalityTestCTA personalityType={personalityType} />
     </section>
   );
 }
@@ -686,13 +691,15 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
 
 function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-4 flex items-center gap-3">
-      <div className={cn('w-11 h-11 rounded-xl border flex items-center justify-center shrink-0', tint)}>
-        {icon}
+    <div className="group relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card/80 via-card/60 to-card/40 backdrop-blur-xl p-6 sm:p-7 min-h-[170px] sm:min-h-[190px] flex flex-col justify-between shadow-[0_8px_24px_-12px_rgba(0,0,0,0.5)] hover:border-primary/40 hover:shadow-[0_16px_40px_-12px_hsl(var(--primary)/0.35)] transition-all duration-300">
+      {/* faint ambient glow */}
+      <div className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/10 blur-3xl opacity-60 group-hover:opacity-100 transition-opacity" />
+      <div className={cn('relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border flex items-center justify-center shrink-0 shadow-inner', tint)}>
+        <span className="[&_svg]:w-7 [&_svg]:h-7 sm:[&_svg]:w-8 sm:[&_svg]:h-8">{icon}</span>
       </div>
-      <div className="min-w-0">
-        <p className="text-xl font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
-        <p className="text-[11px] text-muted-foreground truncate">{label}</p>
+      <div className="relative min-w-0 mt-4">
+        <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground tabular-nums leading-none tracking-tight">{value}</p>
+        <p className="mt-3 text-[11px] sm:text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground truncate">{label}</p>
       </div>
     </div>
   );
