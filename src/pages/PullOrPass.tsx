@@ -670,13 +670,6 @@ export default function PullOrPass() {
                       </span>
                     </span>
                   )}
-                  <button
-                    onClick={() => navigate(userId ? '/profile' : '/auth')}
-                    aria-label="Account"
-                    className="md:hidden w-7 h-7 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center text-[11px] font-semibold hover:bg-primary/25 transition-colors"
-                  >
-                    <UserIcon className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
@@ -766,7 +759,7 @@ export default function PullOrPass() {
                   />
                 </div>
 
-                <div className="text-center space-y-1.5">
+                <div className="text-center space-y-1.5 mt-4 sm:mt-5">
                   <div className="flex items-center justify-center gap-3">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-none">
                       {current.name}
