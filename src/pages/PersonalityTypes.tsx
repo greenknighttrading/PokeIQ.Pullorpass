@@ -80,6 +80,22 @@ const TYPE_TRAINERS: Record<PersonalityType, string> = {
   Minimalist: 'N',
 };
 
+// Per-type accent color (hex). Used for icon badge, philosophy text, and trainer label.
+const TYPE_ACCENTS: Record<PersonalityType, string> = {
+  Investor: '#34d399',   // emerald
+  Archivist: '#a78bfa',  // violet
+  Dreamer: '#60a5fa',    // blue
+  Flipper: '#fbbf24',    // amber
+  Analyst: '#22d3ee',    // cyan
+  Hunter: '#f87171',     // red
+  Explorer: '#4ade80',   // green
+  Curator: '#c084fc',    // purple
+  Monk: '#2dd4bf',       // teal
+  Gambler: '#fb923c',    // orange
+  Showman: '#e879f9',    // fuchsia
+  Minimalist: '#5eead4', // mint
+};
+
 function Pokeball({ className = 'w-5 h-5' }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
