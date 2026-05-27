@@ -739,6 +739,19 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
             onOpen={onOpen}
           />
         ))}
+        <Link
+          to="/swipe"
+          className="group relative shrink-0 w-[160px] sm:w-[180px] aspect-[2.5/3.5] rounded-2xl border border-dashed border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card flex flex-col items-center justify-center text-center p-4 hover:border-primary/70 hover:from-primary/20 transition-all"
+        >
+          <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <p className="text-sm font-bold text-foreground">Keep swiping</p>
+          <p className="mt-1 text-[11px] text-muted-foreground leading-snug">Sharpen your DNA with every pull</p>
+          <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+            Start <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+          </span>
+        </Link>
       </CarouselRow>
     </section>
   );
