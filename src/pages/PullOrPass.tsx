@@ -18,6 +18,7 @@ import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
 import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infinity as InfinityIcon, Zap, BarChart3, Library } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
+import binderMockup from '@/assets/binder-mockup.jpg';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
