@@ -65,6 +65,33 @@ const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: stri
 
 const TYPES = Object.keys(PERSONALITY_INFO) as PersonalityType[];
 
+const TYPE_TRAINERS: Record<PersonalityType, string> = {
+  Investor: 'Steven Stone',
+  Archivist: 'Cynthia',
+  Dreamer: 'Lillie',
+  Flipper: 'Raihan',
+  Analyst: 'Clemont',
+  Hunter: 'Blue',
+  Explorer: 'Red',
+  Curator: 'Lenora',
+  Monk: 'Korrina',
+  Gambler: 'Volkner',
+  Showman: 'Leon',
+  Minimalist: 'N',
+};
+
+function Pokeball({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <circle cx="12" cy="12" r="11" fill="#fff" stroke="#111" strokeWidth="1.5" />
+      <path d="M1 12a11 11 0 0 1 22 0H1Z" fill="#e63946" stroke="#111" strokeWidth="1.5" />
+      <line x1="1" y1="12" x2="23" y2="12" stroke="#111" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="3" fill="#fff" stroke="#111" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="1.2" fill="#fff" stroke="#111" strokeWidth="1" />
+    </svg>
+  );
+}
+
 export default function PersonalityTypes() {
   const [selected, setSelected] = useState<PersonalityType | null>(null);
   const info = selected ? PERSONALITY_INFO[selected] : null;
@@ -118,37 +145,53 @@ export default function PersonalityTypes() {
                   onClick={() => setSelected(type)}
                   className="text-left group focus:outline-none"
                 >
-                  <Card className="h-full overflow-hidden border-border/60 hover:border-primary/60 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.35)]">
-                    <div className="aspect-[4/5] overflow-hidden bg-muted/30 relative">
-                      <img
-                        src={TYPE_IMAGES[type]}
-                        alt={`${type} collector personality illustration`}
-                        loading="lazy"
-                        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
-                      />
-                      {/* Gradient overlay so the name overlaps art bottom */}
-                      <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/85 to-transparent" />
-
-                      {/* Name + tagline overlay on art */}
-                      <div className="absolute inset-x-0 bottom-0 px-4 pt-4 pb-2">
-                        <div className="flex items-center gap-2 mb-1.5">
-                          <div className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-primary/20 border border-primary/40 backdrop-blur-sm">
-                            <Icon className="w-3.5 h-3.5 text-primary" />
-                          </div>
-                          <h3 className="text-2xl md:text-[1.6rem] font-extrabold tracking-tight leading-none text-foreground">
-                            {type}
-                          </h3>
-                        </div>
-                        <p className="text-base italic text-primary font-medium leading-snug line-clamp-2 min-h-[2.5rem] mb-1">
+                  <Card className="h-full flex flex-col overflow-hidden bg-card border-border/60 hover:border-primary/60 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.35)]">
+                    {/* Header: icon + name + philosophy */}
+                    <div className="flex items-start gap-3 px-4 pt-4 pb-3">
+                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex-shrink-0">
+                        <Icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-2xl font-extrabold tracking-tight leading-none text-foreground">
+                          {type}
+                        </h3>
+                        <p className="mt-1.5 text-xs italic text-primary font-medium leading-snug line-clamp-2">
                           "{t.philosophy}"
                         </p>
                       </div>
                     </div>
 
-                    <div className="px-4 pt-1 pb-4">
-                      <p className="text-base leading-relaxed text-foreground/80 line-clamp-3 min-h-[4.2rem]">
+                    {/* Artwork */}
+                    <div className="px-3">
+                      <div className="aspect-[3/4] overflow-hidden rounded-lg bg-muted/30">
+                        <img
+                          src={TYPE_IMAGES[type]}
+                          alt={`${type} collector personality illustration`}
+                          loading="lazy"
+                          className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div className="px-4 pt-3 pb-3 flex-1">
+                      <p className="text-sm leading-relaxed text-foreground/85 line-clamp-3">
                         {t.tagline}
                       </p>
+                    </div>
+
+                    {/* Divider + trainer footer */}
+                    <div className="mx-4 border-t border-border/60" />
+                    <div className="px-4 py-3 flex items-end justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-xs text-primary font-medium leading-tight">
+                          Associated Trainer:
+                        </p>
+                        <p className="text-base font-bold text-foreground leading-tight mt-0.5 truncate">
+                          {TYPE_TRAINERS[type]}
+                        </p>
+                      </div>
+                      <Pokeball className="w-7 h-7 flex-shrink-0" />
                     </div>
                   </Card>
                 </motion.button>
