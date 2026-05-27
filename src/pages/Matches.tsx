@@ -624,7 +624,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
 function SignalCard({ kicker, value, sub, icon, tint }: { kicker: string; value: string; sub: string; icon: React.ReactNode; tint: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 flex items-center gap-4">
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-5 flex items-center gap-4">
       <div className={cn('w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
