@@ -605,10 +605,13 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           </div>
         </div>
 
-        {/* View Full DNA — anchored to the lower-right of the hero widget */}
+      </div>
+
+      {/* View Full DNA — plain text link, generous vertical padding, right-aligned */}
+      <div className="flex justify-end py-3 sm:py-4">
         <button
           onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-          className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-card/70 backdrop-blur-md px-4 py-2 text-xs font-semibold text-primary hover:bg-card/90 hover:border-primary/50 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
         >
           View Full DNA <ArrowRight className="w-3.5 h-3.5" />
         </button>
