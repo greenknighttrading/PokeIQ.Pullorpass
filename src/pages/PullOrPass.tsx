@@ -1556,7 +1556,7 @@ function ResultsView({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => window.location.assign('/matches')}
+                  onClick={() => window.location.assign('/profile')}
                   className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
                 >
                   Go To Your Profile
