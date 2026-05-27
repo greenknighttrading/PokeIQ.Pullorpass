@@ -16,14 +16,35 @@ import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
+import investorPortrait from '@/assets/personalities/investor.jpg';
 import archivistPortrait from '@/assets/personalities/archivist.jpg';
+import dreamerPortrait from '@/assets/personalities/dreamer.jpg';
+import flipperPortrait from '@/assets/personalities/flipper.jpg';
+import analystPortrait from '@/assets/personalities/analyst.jpg';
+import hunterPortrait from '@/assets/personalities/hunter.jpg';
+import explorerPortrait from '@/assets/personalities/explorer.jpg';
+import curatorPortrait from '@/assets/personalities/curator.jpg';
+import monkPortrait from '@/assets/personalities/monk.jpg';
+import gamblerPortrait from '@/assets/personalities/gambler.jpg';
+import showmanPortrait from '@/assets/personalities/showman.jpg';
+import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 
-// Map of personality type → portrait illustration. Types without a portrait
-// fall back to the emoji avatar in `PersonalityTestCTA`.
-const PERSONALITY_PORTRAITS: Partial<Record<PersonalityType, string>> = {
+// Map of personality type → portrait illustration (matches /personality-types).
+const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
+  Investor: investorPortrait,
   Archivist: archivistPortrait,
+  Dreamer: dreamerPortrait,
+  Flipper: flipperPortrait,
+  Analyst: analystPortrait,
+  Hunter: hunterPortrait,
+  Explorer: explorerPortrait,
+  Curator: curatorPortrait,
+  Monk: monkPortrait,
+  Gambler: gamblerPortrait,
+  Showman: showmanPortrait,
+  Minimalist: minimalistPortrait,
 };
 
 // Grammar helper — "a" vs "an" based on first letter sound.
@@ -507,7 +528,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             width={1920}
             height={1080}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover object-center"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ objectPosition: '60% 40%' }}
           />
           {/* Left-to-right dark fade so text stays readable, but lighter
               than before so the artwork shows through more. */}
@@ -583,10 +605,13 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           </div>
         </div>
 
-        {/* View Full DNA — anchored to the lower-right of the hero widget */}
+      </div>
+
+      {/* View Full DNA — plain text link, generous vertical padding, right-aligned */}
+      <div className="flex justify-end py-3 sm:py-4">
         <button
           onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-          className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-card/70 backdrop-blur-md px-4 py-2 text-xs font-semibold text-primary hover:bg-card/90 hover:border-primary/50 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
         >
           View Full DNA <ArrowRight className="w-3.5 h-3.5" />
         </button>
