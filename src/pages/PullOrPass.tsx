@@ -230,7 +230,7 @@ export default function PullOrPass() {
   // Redeem 10 credits → +10 swipes (bonus added to today's quota)
   const redeemSwipes = useCallback(async () => {
     if (!userId) {
-      navigate('/auth');
+      navigate('/auth', { state: { from: '/swipe' } });
       return;
     }
     if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
@@ -828,7 +828,7 @@ export default function PullOrPass() {
                   onRedeem={redeemSwipes}
                   redeeming={redeeming}
                   isAuthed={!!userId}
-                  onSignUp={() => navigate('/auth')}
+                  onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
                   showProNudge={showProNudge}
                   onKeepTraining={() => {
                     try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
@@ -847,7 +847,7 @@ export default function PullOrPass() {
                 onRedeem={redeemSwipes}
                 redeeming={redeeming}
                 isAuthed={!!userId}
-                onSignUp={() => navigate('/auth')}
+                onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
                 showProNudge={showProNudge}
                 onKeepTraining={() => {
                   try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
@@ -862,7 +862,7 @@ export default function PullOrPass() {
               records={records}
               onPlayAgain={() => { if (!outOfSwipes) loadRound(); }}
               isAuthed={!!userId}
-              onSignUp={() => navigate('/auth')}
+              onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
               outOfSwipes={outOfSwipes}
               premium={premium}
               remaining={remaining}
@@ -873,7 +873,7 @@ export default function PullOrPass() {
         {/* Mid-session signup nudge after first 20 lifetime swipes */}
         <AnimatePresence>
           {showSignupPrompt && (
-            <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth')} />
+            <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })} />
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
