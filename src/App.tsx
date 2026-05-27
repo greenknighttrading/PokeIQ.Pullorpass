@@ -97,7 +97,7 @@ function AppRoutes() {
       <Suspense fallback={<PageFallback />}>
         <Routes>
         {/* Public pages */}
-        <Route path="/" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
+        <Route path="/" element={<PullOrPass />} />
         <Route path="/pokeiq-daily" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
         <Route path="/mintd-daily" element={<MintdDaily />} />
         <Route path="/about" element={<Landing />} />
