@@ -683,7 +683,7 @@ export default function PullOrPass() {
 
               {/* Card stack */}
               {/* Branded game title */}
-              <div className="relative flex flex-col items-center justify-center text-center mt-1 mb-3 select-none">
+              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2 select-none">
                 {/* Animated glow backdrop */}
                 <motion.div
                   aria-hidden
