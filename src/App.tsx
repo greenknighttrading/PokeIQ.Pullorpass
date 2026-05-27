@@ -10,6 +10,8 @@ import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { PokeIQShell } from "@/components/layout/PokeIQShell";
 import { PremiumGate } from "@/components/PremiumGate";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useLocation } from "react-router-dom";
 
 // Eager: home (LCP) + lightweight 404
 import PokeIQDaily from "./pages/PokeIQDaily";
@@ -89,9 +91,11 @@ function PageFallback() {
 }
 
 function AppRoutes() {
+  const location = useLocation();
   return (
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
+    <ErrorBoundary resetKey={location.pathname}>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
         {/* Public pages */}
         <Route path="/" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
         <Route path="/pokeiq-daily" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
@@ -159,8 +163,9 @@ function AppRoutes() {
         <Route path="/smart-feed/brief" element={<PremiumGate><SmartFeedBrief /></PremiumGate>} />
         <Route path="/buy-list" element={<PremiumGate><AppLayout><BuyListPicks /></AppLayout></PremiumGate>} />
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
