@@ -2428,33 +2428,40 @@ function OutOfSwipesModal({
 
 /* ── Intro / Landing Screen ── */
 function IntroScreen({ onStart }: { onStart: () => void }) {
-  // Auto-cycling swipe demo: pass → pull → super like → repeat
-  const [demoPhase, setDemoPhase] = useState<'idle' | 'pass' | 'pull' | 'super'>('idle');
-  useEffect(() => {
-    const seq: Array<'idle' | 'pass' | 'pull' | 'super'> = [
-      'idle', 'pull', 'idle', 'pass', 'idle', 'super',
-    ];
-    let i = 0;
-    const tick = () => {
-      setDemoPhase(seq[i % seq.length]);
-      i++;
-    };
-    tick();
-    const id = setInterval(tick, 1400);
-    return () => clearInterval(id);
-  }, []);
-
-  const cardMotion = (() => {
-    switch (demoPhase) {
-      case 'pull':  return { x: 120, y: -10, rotate: 14, opacity: 1 };
-      case 'pass':  return { x: -120, y: -10, rotate: -14, opacity: 1 };
-      case 'super': return { x: 0, y: -130, rotate: 0, opacity: 1 };
-      default:      return { x: 0, y: 0, rotate: 0, opacity: 1 };
-    }
-  })();
-
-  // Famous Base Set Charizard via TCGPlayer CDN
+  // Interactive draggable demo card — user actually swipes the Charizard.
+  // Pulls the famous Base Set Charizard via TCGPlayer CDN.
   const charizardImg = 'https://tcgplayer-cdn.tcgplayer.com/product/23408_in_1000x1000.jpg';
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotate = useTransform(x, [-200, 0, 200], [-18, 0, 18]);
+  const pullOpacity = useTransform(x, [40, 140], [0, 1]);
+  const passOpacity = useTransform(x, [-140, -40], [1, 0]);
+  const superOpacity = useTransform(y, [-140, -40], [1, 0]);
+  const [decision, setDecision] = useState<null | 'pull' | 'pass' | 'super'>(null);
+  const [hint, setHint] = useState(true);
+  const [resetKey, setResetKey] = useState(0);
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    setHint(false);
+    const { offset } = info;
+    if (offset.y < -110 && Math.abs(offset.y) > Math.abs(offset.x)) {
+      setDecision('super');
+    } else if (offset.x > 110) {
+      setDecision('pull');
+    } else if (offset.x < -110) {
+      setDecision('pass');
+    } else {
+      // Snap back
+      x.set(0); y.set(0);
+      return;
+    }
+    // Reset after a beat so the user can try again
+    window.setTimeout(() => {
+      setDecision(null);
+      x.set(0); y.set(0);
+      setResetKey((k) => k + 1);
+    }, 900);
+  };
 
   const rules = [
     { icon: <Heart className="w-4 h-4" />, label: '20 cards per round' },
@@ -2465,11 +2472,11 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
   return (
     <div className="flex-1 min-h-0 overflow-y-auto pb-28">
-      <div className="max-w-md mx-auto px-1 pt-4 space-y-10">
+      <div className="max-w-md md:max-w-xl mx-auto px-4 pt-4 space-y-10 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
-        <div className="text-center space-y-3 pt-2">
+        <div className="w-full text-center space-y-3 pt-2">
           <motion.h1
-            className="font-black uppercase tracking-[0.16em] text-5xl sm:text-6xl bg-clip-text text-transparent leading-none"
+            className="font-black uppercase tracking-[0.16em] text-5xl sm:text-6xl md:text-7xl bg-clip-text text-transparent leading-none"
             style={{
               backgroundImage:
                 'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
@@ -2489,28 +2496,23 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           </p>
         </div>
 
-        {/* SECTION 2 — INTERACTIVE SWIPE DEMO */}
-        <div className="relative h-[360px] flex items-center justify-center select-none">
+        {/* SECTION 2 — INTERACTIVE SWIPE DEMO (real drag) */}
+        <div className="relative w-full h-[380px] flex items-center justify-center select-none touch-none">
           {/* Ambient glows that react to demo direction */}
           <motion.div
             aria-hidden
             className="absolute inset-y-0 left-0 w-1/2 rounded-l-[3rem]"
-            animate={{ opacity: demoPhase === 'pass' ? 0.55 : 0 }}
-            transition={{ duration: 0.35 }}
+            style={{ opacity: passOpacity }}
             style={{ background: 'radial-gradient(circle at left, rgb(244 63 94 / 0.45), transparent 70%)' }}
           />
           <motion.div
             aria-hidden
             className="absolute inset-y-0 right-0 w-1/2 rounded-r-[3rem]"
-            animate={{ opacity: demoPhase === 'pull' ? 0.55 : 0 }}
-            transition={{ duration: 0.35 }}
             style={{ background: 'radial-gradient(circle at right, rgb(16 185 129 / 0.45), transparent 70%)' }}
           />
           <motion.div
             aria-hidden
             className="absolute inset-x-0 top-0 h-1/2"
-            animate={{ opacity: demoPhase === 'super' ? 0.55 : 0 }}
-            transition={{ duration: 0.35 }}
             style={{ background: 'radial-gradient(circle at top, rgb(251 191 36 / 0.45), transparent 70%)' }}
           />
 
@@ -2518,54 +2520,44 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <div className="absolute w-[210px] h-[294px] rounded-2xl bg-card border border-border/60 -rotate-[6deg] translate-x-2 translate-y-3 opacity-50" />
           <div className="absolute w-[210px] h-[294px] rounded-2xl bg-card border border-border/60 rotate-[4deg] -translate-x-2 translate-y-1 opacity-70" />
 
-          {/* Top demo card */}
+          {/* Top demo card — fully draggable by the user */}
           <motion.div
-            className="relative w-[210px] h-[294px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] border border-border/80 bg-card"
-            animate={cardMotion}
-            transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+            key={resetKey}
+            className="relative w-[230px] h-[322px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] border border-border/80 bg-card cursor-grab active:cursor-grabbing z-10"
+            drag
+            dragElastic={0.6}
+            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+            onDragStart={() => setHint(false)}
+            onDragEnd={handleDragEnd}
+            style={{ x, y, rotate }}
+            whileTap={{ scale: 0.98 }}
           >
             <img
               src={charizardImg}
               alt="Charizard sample card"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover pointer-events-none"
               loading="eager"
+              draggable={false}
             />
-            {/* Decision stamps */}
-            <AnimatePresence>
-              {demoPhase === 'pull' && (
-                <motion.div
-                  key="pull-stamp"
-                  initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
-                  animate={{ opacity: 1, scale: 1, rotate: -12 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute top-4 left-4 px-3 py-1.5 rounded-md border-[3px] border-emerald-400 text-emerald-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm"
-                >
-                  Pull
-                </motion.div>
-              )}
-              {demoPhase === 'pass' && (
-                <motion.div
-                  key="pass-stamp"
-                  initial={{ opacity: 0, scale: 0.6, rotate: 10 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 12 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute top-4 right-4 px-3 py-1.5 rounded-md border-[3px] border-rose-400 text-rose-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm"
-                >
-                  Pass
-                </motion.div>
-              )}
-              {demoPhase === 'super' && (
-                <motion.div
-                  key="super-stamp"
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md border-[3px] border-amber-400 text-amber-400 font-black uppercase tracking-widest text-base bg-background/30 backdrop-blur-sm whitespace-nowrap"
-                >
-                  ★ Super
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* Live decision stamps that fade in as you drag */}
+            <motion.div
+              style={{ opacity: pullOpacity }}
+              className="absolute top-4 left-4 px-3 py-1.5 rounded-md border-[3px] border-emerald-400 text-emerald-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm -rotate-12"
+            >
+              Pull
+            </motion.div>
+            <motion.div
+              style={{ opacity: passOpacity }}
+              className="absolute top-4 right-4 px-3 py-1.5 rounded-md border-[3px] border-rose-400 text-rose-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm rotate-12"
+            >
+              Pass
+            </motion.div>
+            <motion.div
+              style={{ opacity: superOpacity }}
+              className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md border-[3px] border-amber-400 text-amber-400 font-black uppercase tracking-widest text-base bg-background/30 backdrop-blur-sm whitespace-nowrap"
+            >
+              ★ Super
+            </motion.div>
           </motion.div>
 
           {/* Gesture labels around the card */}
@@ -2587,16 +2579,31 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
               <Star className="w-4 h-4 fill-current" />
             </div>
           </div>
+
+          {/* "Try me" nudge — disappears the moment user touches the card */}
+          <AnimatePresence>
+            {hint && (
+              <motion.div
+                key="hint"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="absolute bottom-1 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary text-[11px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm pointer-events-none"
+              >
+                ← Swipe me →
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <p className="text-center text-sm text-muted-foreground -mt-4">
+        <p className="w-full text-center text-sm text-muted-foreground -mt-4">
           Swipe <span className="text-emerald-400 font-semibold">right to pull</span>,{' '}
           <span className="text-rose-400 font-semibold">left to pass</span>,{' '}
           <span className="text-amber-400 font-semibold">up to super like</span>.
         </p>
 
         {/* SECTION 3 — QUICK RULES */}
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="w-full grid grid-cols-2 gap-2.5">
           {rules.map((r) => (
             <div
               key={r.label}
@@ -2605,13 +2612,61 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary shrink-0">
                 {r.icon}
               </span>
-              <span className="text-xs font-medium text-foreground leading-tight">{r.label}</span>
+              <span className="text-xs font-medium text-foreground leading-tight text-left">{r.label}</span>
             </div>
           ))}
         </div>
 
+        {/* SECTION 3.5 — CUSTOM BINDERS */}
+        <div className="w-full space-y-4">
+          <div className="space-y-2">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-bold">
+              Build your gallery
+            </p>
+            <h2 className="text-2xl font-black tracking-tight">
+              Custom binders, curated by you.
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Drag your favorite pulls into themed binders — cozy holos, chase grails, nostalgia,
+              chaos. Your collection, organized the way your taste actually works.
+            </p>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden border border-border/60 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
+            <img
+              src={binderMockup}
+              alt="Custom Pokémon card binder mockup with a 3x3 grid of holo cards"
+              className="w-full h-auto block"
+              width={1024}
+              height={768}
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+          </div>
+        </div>
+
+        {/* SECTION 3.75 — CURATOR PROMISE */}
+        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 p-6 text-left">
+          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+          <div className="relative space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30">
+              <Wand2 className="w-3.5 h-3.5 text-primary" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+                Your personal curator
+              </span>
+            </div>
+            <p className="text-base text-foreground leading-relaxed">
+              Your PokeIQ becomes a <span className="text-primary font-semibold">personal museum curator</span> —
+              finding the pieces that speak most to you, learning more about you in the process,
+              and telling the story of your taste and aesthetic.
+            </p>
+            <p className="text-sm text-muted-foreground italic">
+              PokeIQ learns your taste and curates a collection that tells your story.
+            </p>
+          </div>
+        </div>
+
         {/* SECTION 4 — MATCHES MOMENT */}
-        <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 text-center">
+        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 text-center">
           <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
           <motion.div
@@ -2633,11 +2688,11 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
       </div>
 
       {/* SECTION 5 — STICKY CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-5 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-5 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center">
         <Button
           onClick={onStart}
           size="lg"
-          className="w-full max-w-md mx-auto h-14 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
+          className="w-full max-w-md md:max-w-lg h-14 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
         >
           Start Swiping <ArrowRight className="w-5 h-5" />
         </Button>
