@@ -699,7 +699,7 @@ function SignalCard({ kicker, value, sub, icon, tint }: { kicker: string; value:
 function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={cn('w-11 h-11 rounded-xl border flex items-center justify-center shrink-0', tint)}>
+      <div className={cn('w-11 h-11 rounded-full flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
       <div className="min-w-0">
