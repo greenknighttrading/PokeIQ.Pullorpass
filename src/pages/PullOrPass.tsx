@@ -2432,9 +2432,9 @@ function OutOfSwipesModal({
 
 /* ── Intro / Landing Screen ── */
 function IntroScreen({ onStart }: { onStart: () => void }) {
-  // Interactive draggable demo card — user actually swipes the Charizard.
-  // Pulls the famous Base Set Charizard via TCGPlayer CDN.
-  const charizardImg = 'https://tcgplayer-cdn.tcgplayer.com/product/23408_in_1000x1000.jpg';
+  // Interactive draggable demo card — user actually swipes a chase card.
+  // Mew GG10/GG70 from Crown Zenith Galarian Gallery.
+  const charizardImg = 'https://images.pokemontcg.io/swsh12pt5gg/GG10_hires.png';
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotate = useTransform(x, [-200, 0, 200], [-18, 0, 18]);
@@ -2468,12 +2468,12 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   };
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-32 scrollbar-none">
-      <div className="max-w-md md:max-w-xl mx-auto px-4 pt-4 space-y-10 flex flex-col items-center text-center">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-24 scrollbar-none">
+      <div className="max-w-md md:max-w-xl mx-auto px-4 pt-1 space-y-3 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
-        <div className="w-full text-center space-y-3 pt-2">
+        <div className="w-full text-center space-y-1">
           <motion.h1
-            className="font-black uppercase tracking-[0.16em] text-5xl sm:text-6xl md:text-7xl bg-clip-text text-transparent leading-none"
+            className="font-black uppercase tracking-[0.16em] text-4xl sm:text-5xl md:text-6xl bg-clip-text text-transparent leading-none"
             style={{
               backgroundImage:
                 'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
@@ -2485,16 +2485,16 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           >
             Pull or<br />Pass
           </motion.h1>
-          <p className="text-base text-foreground/90 font-medium">
+          <p className="text-sm text-foreground/90 font-medium">
             An AI-powered Pokémon card discovery game.
           </p>
-          <p className="text-xs uppercase tracking-[0.3em] text-primary/80 font-semibold">
+          <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-semibold">
             Swipe. Discover. Collect.
           </p>
         </div>
 
         {/* SECTION 2 — INTERACTIVE SWIPE DEMO (real drag) */}
-        <div className="relative w-full mx-auto h-[380px] flex items-center justify-center select-none touch-none">
+        <div className="relative w-full mx-auto h-[320px] flex items-center justify-center select-none touch-none">
           {/* Ambient glows that react to demo direction */}
           <motion.div
             aria-hidden
@@ -2592,14 +2592,14 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           </AnimatePresence>
         </div>
 
-        <p className="w-full text-center text-sm text-muted-foreground -mt-4">
+        <p className="w-full text-center text-xs text-muted-foreground -mt-1">
           Swipe <span className="text-emerald-400 font-semibold">right to pull</span>,{' '}
           <span className="text-rose-400 font-semibold">left to pass</span>,{' '}
           <span className="text-amber-400 font-semibold">up to super like</span>.
         </p>
 
         {/* SIMPLE FEATURE SUMMARY */}
-        <p className="w-full text-sm text-foreground/80 leading-relaxed max-w-sm">
+        <p className="w-full text-xs text-foreground/75 leading-snug max-w-sm">
           Swipe through 20 cards a round. PokeIQ learns your taste, finds your matches, and
           curates custom binders that tell your collector story.
         </p>
@@ -2607,13 +2607,13 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
 
       {/* SECTION 5 — STICKY CTA */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)' }}
+        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-3 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
       >
         <Button
           onClick={onStart}
           size="lg"
-          className="w-full max-w-md md:max-w-lg h-14 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
+          className="w-full max-w-md md:max-w-lg h-12 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
         >
           Start Swiping <ArrowRight className="w-5 h-5" />
         </Button>
