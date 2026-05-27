@@ -683,7 +683,7 @@ export default function PullOrPass() {
 
               {/* Card stack */}
               {/* Branded game title */}
-              <div className="relative flex flex-col items-center justify-center text-center mt-1 mb-3 select-none">
+              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2 select-none">
                 {/* Animated glow backdrop */}
                 <motion.div
                   aria-hidden
@@ -730,11 +730,11 @@ export default function PullOrPass() {
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-4 relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-2 relative">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
                   className="relative aspect-[2.5/3.5] w-auto"
-                  style={{ touchAction: 'none', height: 'min(64vh, 480px)' }}
+                  style={{ touchAction: 'none', height: 'min(56vh, 420px)' }}
                 >
                   {/* Soft ambient glow behind the card */}
                   <div className="absolute -inset-8 rounded-[2.5rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
@@ -759,7 +759,7 @@ export default function PullOrPass() {
                   />
                 </div>
 
-                <div className="text-center space-y-1.5 mt-4 sm:mt-5">
+                <div className="text-center space-y-1.5 mt-2 sm:mt-3">
                   <div className="flex items-center justify-center gap-3">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-none">
                       {current.name}
