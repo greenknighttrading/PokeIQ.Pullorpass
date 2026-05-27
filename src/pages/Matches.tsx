@@ -305,38 +305,62 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   if (personalityType) {
     const info = PERSONALITY_INFO[personalityType as PersonalityType];
     const article = articleFor(personalityType);
+    const portrait = PERSONALITY_PORTRAITS[personalityType as PersonalityType];
     return (
-      <div className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-        {info && (
-          <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-3xl shrink-0">
-            <span aria-hidden>{info.emoji}</span>
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
+        <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] gap-0">
+          {/* Portrait — large, dominant */}
+          <div className="relative aspect-square md:aspect-auto md:min-h-[420px] bg-card overflow-hidden">
+            {portrait ? (
+              <>
+                <img
+                  src={portrait}
+                  alt={`Illustration of ${article} ${personalityType}`}
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Soft right-edge blend into the content panel */}
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-card hidden md:block" />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-card md:hidden" />
+              </>
+            ) : info ? (
+              <div className="absolute inset-0 flex items-center justify-center text-[180px]">
+                <span aria-hidden>{info.emoji}</span>
+              </div>
+            ) : null}
           </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-            Collector Personality
-          </p>
-          <p className="text-base sm:text-lg font-semibold text-foreground">
-            You are {article} <span className="text-primary">{personalityType}</span>
-          </p>
-          {info?.summary && (
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              {info.summary}
+
+          {/* Content */}
+          <div className="relative p-8 sm:p-10 md:p-12 flex flex-col justify-center">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-bold mb-3">
+              Collector Personality
             </p>
-          )}
-          <div className="flex items-center gap-4 mt-3">
-            <Link
-              to="/personality-types"
-              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary hover:underline underline-offset-2"
-            >
-              Learn more <ArrowRight className="w-3 h-3" />
-            </Link>
-            <Link
-              to="/test"
-              className="inline-block text-[11px] text-muted-foreground/80 hover:text-primary underline-offset-2 hover:underline"
-            >
-              Retake the test
-            </Link>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+              You are {article}{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+                {personalityType}
+              </span>
+            </h2>
+            {info?.summary && (
+              <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-2xl">
+                {info.summary}
+              </p>
+            )}
+            <div className="flex items-center gap-5 mt-7">
+              <Button asChild size="lg" className="gap-2">
+                <Link to="/personality-types">
+                  Explore your type <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Link
+                to="/test"
+                className="text-sm text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+              >
+                Retake the test
+              </Link>
+            </div>
           </div>
         </div>
       </div>
