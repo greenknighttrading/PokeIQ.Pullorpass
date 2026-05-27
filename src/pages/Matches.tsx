@@ -53,21 +53,53 @@ export default function Matches() {
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user || session.user.is_anonymous) { setLoading(false); return; }
-      setUserId(session.user.id);
-      const liked = await fetchLikes(session.user.id);
+      const uid = session.user.id;
+      setUserId(uid);
+
+      // ── Stale-while-revalidate cache (sessionStorage) ──
+      const cacheKey = `matches:v1:${uid}`;
+      let cached: {
+        likes: LikedCard[];
+        passes: LikedCard[];
+        recommendations: RecommendedCard[];
+        likedCount: number;
+        latestLikedAt: string | null;
+      } | null = null;
+      try {
+        const raw = sessionStorage.getItem(cacheKey);
+        if (raw) cached = JSON.parse(raw);
+      } catch {}
+      if (cached) {
+        setLikes(cached.likes);
+        setPasses(cached.passes);
+        setRecommendations(cached.recommendations);
+        setLoading(false);
+      }
+
+      const liked = await fetchLikes(uid);
+      const latestLikedAt = liked.reduce<string | null>(
+        (m, l) => (l.liked_at && (!m || l.liked_at > m) ? l.liked_at : m),
+        null,
+      );
+      const unchanged =
+        cached &&
+        cached.likedCount === liked.length &&
+        cached.latestLikedAt === latestLikedAt;
+
       setLikes(liked);
       // Fetch recent passes from pullorpass_swipes
+      let mapped: LikedCard[] = cached?.passes ?? [];
       try {
         const { data: passRows } = await supabase
           .from('pullorpass_swipes')
           .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
-          .eq('user_id', session.user.id)
+          .eq('user_id', uid)
           .eq('decision', 'pass')
           .order('created_at', { ascending: false })
           .limit(40);
-        const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
+        mapped = (passRows ?? []).map((r: any) => ({
           id: `pass-${r.card_id}-${r.created_at}`,
-          user_id: session.user.id,
+          user_id: uid,
           card_id: r.card_id,
           card_name: r.card_name,
           pokemon_name: null,
@@ -91,16 +123,29 @@ export default function Matches() {
         }));
         setPasses(mapped);
       } catch (e) { console.warn('fetch passes failed', e); }
-      if (liked.length > 0) {
-        try { setRecommendations(await recommendForUser(liked, 12)); }
-        catch (e) { console.warn('recommend failed', e); }
+      let recs: RecommendedCard[] = cached?.recommendations ?? [];
+      if (liked.length > 0 && !unchanged) {
+        try {
+          recs = await recommendForUser(liked, 12);
+          setRecommendations(recs);
+        } catch (e) { console.warn('recommend failed', e); }
       }
       setLoading(false);
+
+      try {
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+          likes: liked,
+          passes: mapped,
+          recommendations: recs,
+          likedCount: liked.length,
+          latestLikedAt,
+        }));
+      } catch {}
 
       // Background backfill — populate pokemon_type/artist for older likes
       // that were saved before cards_ppt had data. Refreshes the UI when done.
       if (liked.length > 0) {
-        backfillMissingTypes(session.user.id, liked, { max: 60 })
+        backfillMissingTypes(uid, liked, { max: 60 })
           .then(updated => {
             if (updated !== liked) setLikes(updated);
           })
