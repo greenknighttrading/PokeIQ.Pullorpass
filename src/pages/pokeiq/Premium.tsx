@@ -52,7 +52,7 @@ export default function Premium() {
           <Sparkles className="w-3 h-3" /> Premium features
         </div>
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-          Always know when to <br className="hidden sm:block" />buy, sell, or grade
+          Budget smarter and build a collection <br className="hidden sm:block" />that fits your lifestyle and personality
         </h2>
         <p className="text-sm text-muted-foreground mt-2">
           Powerful tools designed to help collectors make smarter decisions.
