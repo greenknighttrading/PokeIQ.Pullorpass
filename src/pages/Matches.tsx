@@ -153,7 +153,7 @@ const STAGE_LABEL: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 // Editable username card — stores in auth user_metadata.display_name
 // ─────────────────────────────────────────────────────────────
-function UsernameCard() {
+function UsernameInline() {
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [editing, setEditing] = useState(false);
@@ -188,8 +188,8 @@ function UsernameCard() {
   const initial = (name || 'C').charAt(0).toUpperCase();
 
   return (
-    <Card className="p-4 sm:p-5 flex items-center gap-4">
-      <div className="w-12 h-12 rounded-full bg-primary/15 text-primary flex items-center justify-center text-lg font-bold shrink-0">
+    <div className="flex items-center gap-3">
+      <div className="w-11 h-11 rounded-full bg-primary/20 border border-primary/30 text-primary flex items-center justify-center text-base font-bold shrink-0">
         {initial}
       </div>
       <div className="flex-1 min-w-0">
@@ -213,15 +213,72 @@ function UsernameCard() {
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <span className="text-base sm:text-lg font-semibold text-foreground truncate">{name}</span>
+            <span className="text-sm sm:text-base font-semibold text-foreground truncate">{name}</span>
             <button onClick={() => setEditing(true)} className="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted/40 transition-colors">
               <Pencil className="w-3.5 h-3.5" />
             </button>
           </div>
         )}
-        {email && <p className="text-xs text-muted-foreground truncate">{email}</p>}
+        {email && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
       </div>
-    </Card>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Personality test CTA — sits at the bottom of the Smart Profile.
+// Collector Taste = WHAT they collect; Personality Test = HOW they collect.
+// ─────────────────────────────────────────────────────────────
+function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
+  if (personalityType) {
+    return (
+      <Link
+        to="/personality-test"
+        className="group flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+      >
+        <div className="min-w-0">
+          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
+            Collector Personality
+          </p>
+          <p className="text-base sm:text-lg font-semibold text-foreground truncate">
+            You are a <span className="text-primary">{personalityType}</span>
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Retake the test to refresh how you collect.
+          </p>
+        </div>
+        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      to="/personality-test"
+      className="group block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-7 hover:border-primary/50 transition-colors"
+    >
+      <div className="flex items-start gap-4">
+        <div className="w-11 h-11 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center shrink-0">
+          <Sparkles className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] uppercase tracking-widest text-primary mb-1.5">
+            Next step
+          </p>
+          <h3 className="text-lg sm:text-xl font-bold text-foreground">
+            Take the Collector Personality Test
+          </h3>
+          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
+            Your Collector Taste shows <span className="text-foreground font-medium">what</span> you collect.
+            The personality test reveals <span className="text-foreground font-medium">how</span> you collect —
+            unlocking your archetype (Archivist, Historian, Investor, and more).
+          </p>
+          <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
+            Start the test <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </span>
+        </div>
+      </div>
+    </Link>
   );
 }
 
