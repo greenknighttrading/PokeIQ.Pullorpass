@@ -126,7 +126,6 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              <UsernameCard />
               <TasteHero taste={taste} />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
