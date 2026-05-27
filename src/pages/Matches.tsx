@@ -554,7 +554,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             loading="lazy"
             className="absolute inset-0 z-0 w-full h-full object-cover"
             style={{
-              objectPosition: '15% 88%',
+              objectPosition: '5% 88%',
               filter: 'brightness(1.02) contrast(1.05) saturate(1.06)',
             }}
           />
