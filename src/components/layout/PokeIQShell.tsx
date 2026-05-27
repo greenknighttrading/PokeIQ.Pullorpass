@@ -246,14 +246,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             location.pathname === '/swipe' ? 'hidden md:flex' : 'flex'
           )}
         >
-          <button
-            onClick={toggleTheme}
-            className="w-9 h-9 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center hover:bg-primary/25 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
