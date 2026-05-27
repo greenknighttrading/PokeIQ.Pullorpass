@@ -552,8 +552,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             width={1920}
             height={1080}
             loading="lazy"
-            className="absolute inset-0 z-0 w-full h-full object-cover opacity-95"
-            style={{ objectPosition: '72% 62%', filter: 'brightness(1.04) contrast(1.06) saturate(1.08)' }}
+            className="absolute inset-0 z-0 w-full h-full object-cover opacity-90"
+            style={{ objectPosition: '72% 58%', filter: 'brightness(0.92) contrast(1.05) saturate(1.04)' }}
           />
           <div className="absolute inset-0 z-[1] bg-gradient-to-r from-card via-card/75 md:via-card/45 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 z-[1] h-[48%] bg-gradient-to-t from-card via-card/85 to-transparent" />
@@ -567,14 +567,14 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             className="absolute inset-0 z-[2] w-full h-full object-cover"
             style={{
               objectPosition: '72% 18%',
-              transform: 'translate3d(14%, -21%, 0) scale(1.02)',
+              transform: 'translate3d(24%, -31%, 0) scale(0.86)',
               transformOrigin: 'center center',
-              filter: 'brightness(1.22) contrast(1.14) saturate(1.12)',
-              WebkitMaskImage: 'radial-gradient(ellipse 24% 38% at 49% 58%, #000 0%, #000 52%, rgba(0,0,0,0.72) 63%, transparent 78%)',
-              maskImage: 'radial-gradient(ellipse 24% 38% at 49% 58%, #000 0%, #000 52%, rgba(0,0,0,0.72) 63%, transparent 78%)',
+              filter: 'brightness(1.24) contrast(1.16) saturate(1.12)',
+              WebkitMaskImage: 'radial-gradient(ellipse 21% 32% at 49% 57%, #000 0%, #000 48%, rgba(0,0,0,0.7) 60%, transparent 76%)',
+              maskImage: 'radial-gradient(ellipse 21% 32% at 49% 57%, #000 0%, #000 48%, rgba(0,0,0,0.7) 60%, transparent 76%)',
             }}
           />
-          <div className="absolute top-[7%] right-[20%] z-[3] w-[22%] h-[34%] rounded-full bg-warning/20 blur-3xl mix-blend-screen" />
+          <div className="absolute top-[5%] right-[15%] z-[3] w-[18%] h-[30%] rounded-full bg-warning/20 blur-3xl mix-blend-screen" />
         </div>
 
         <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
