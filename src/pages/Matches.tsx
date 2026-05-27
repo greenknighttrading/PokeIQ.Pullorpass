@@ -16,14 +16,35 @@ import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
+import investorPortrait from '@/assets/personalities/investor.jpg';
 import archivistPortrait from '@/assets/personalities/archivist.jpg';
+import dreamerPortrait from '@/assets/personalities/dreamer.jpg';
+import flipperPortrait from '@/assets/personalities/flipper.jpg';
+import analystPortrait from '@/assets/personalities/analyst.jpg';
+import hunterPortrait from '@/assets/personalities/hunter.jpg';
+import explorerPortrait from '@/assets/personalities/explorer.jpg';
+import curatorPortrait from '@/assets/personalities/curator.jpg';
+import monkPortrait from '@/assets/personalities/monk.jpg';
+import gamblerPortrait from '@/assets/personalities/gambler.jpg';
+import showmanPortrait from '@/assets/personalities/showman.jpg';
+import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 
-// Map of personality type → portrait illustration. Types without a portrait
-// fall back to the emoji avatar in `PersonalityTestCTA`.
-const PERSONALITY_PORTRAITS: Partial<Record<PersonalityType, string>> = {
+// Map of personality type → portrait illustration (matches /personality-types).
+const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
+  Investor: investorPortrait,
   Archivist: archivistPortrait,
+  Dreamer: dreamerPortrait,
+  Flipper: flipperPortrait,
+  Analyst: analystPortrait,
+  Hunter: hunterPortrait,
+  Explorer: explorerPortrait,
+  Curator: curatorPortrait,
+  Monk: monkPortrait,
+  Gambler: gamblerPortrait,
+  Showman: showmanPortrait,
+  Minimalist: minimalistPortrait,
 };
 
 // Grammar helper — "a" vs "an" based on first letter sound.
