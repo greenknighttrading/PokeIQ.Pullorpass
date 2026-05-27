@@ -160,6 +160,33 @@ export default function PullOrPass() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) {
         setUserId(session.user.id);
+        // ── Per-account isolation ────────────────────────────
+        // Local storage is shared across all logins on this device. If a
+        // different account just signed in, wipe shared swipe state so one
+        // user's history (quota, seen cards, in-progress round, results)
+        // never bleeds into another's.
+        try {
+          const prevUid = localStorage.getItem('pop_last_user_id');
+          if (prevUid && prevUid !== session.user.id) {
+            [
+              'pop_quota',
+              'pop_resume_v1',
+              'pop_results_v1',
+              'pop_seen_card_ids',
+              REDEMPTION_COUNT_KEY,
+              PRO_NUDGE_DISMISSED_KEY,
+            ].forEach((k) => localStorage.removeItem(k));
+            Object.keys(localStorage)
+              .filter((k) => k.startsWith('pop_today_swiped_'))
+              .forEach((k) => localStorage.removeItem(k));
+            try { sessionStorage.removeItem(REDEMPTION_COUNT_KEY); } catch {}
+            try { sessionStorage.removeItem(PRO_NUDGE_DISMISSED_KEY); } catch {}
+            setRedemptionCount(0);
+            setProNudgeDismissed(false);
+            setQuota({ date: todayKey(), used: 0, bonus: 0, lifetime: 0 });
+          }
+          localStorage.setItem('pop_last_user_id', session.user.id);
+        } catch {}
         // First time EVER for this user on this device → grant them their
         // one-time post-signup 20 free swipes. After that, normal daily quota
         // applies (so they must earn credits or upgrade to keep swiping).
