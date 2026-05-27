@@ -2502,18 +2502,17 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <motion.div
             aria-hidden
             className="absolute inset-y-0 left-0 w-1/2 rounded-l-[3rem]"
-            style={{ opacity: passOpacity }}
-            style={{ background: 'radial-gradient(circle at left, rgb(244 63 94 / 0.45), transparent 70%)' }}
+            style={{ opacity: passOpacity, background: 'radial-gradient(circle at left, rgb(244 63 94 / 0.45), transparent 70%)' }}
           />
           <motion.div
             aria-hidden
             className="absolute inset-y-0 right-0 w-1/2 rounded-r-[3rem]"
-            style={{ background: 'radial-gradient(circle at right, rgb(16 185 129 / 0.45), transparent 70%)' }}
+            style={{ opacity: pullOpacity, background: 'radial-gradient(circle at right, rgb(16 185 129 / 0.45), transparent 70%)' }}
           />
           <motion.div
             aria-hidden
             className="absolute inset-x-0 top-0 h-1/2"
-            style={{ background: 'radial-gradient(circle at top, rgb(251 191 36 / 0.45), transparent 70%)' }}
+            style={{ opacity: superOpacity, background: 'radial-gradient(circle at top, rgb(251 191 36 / 0.45), transparent 70%)' }}
           />
 
           {/* Stacked back cards */}
