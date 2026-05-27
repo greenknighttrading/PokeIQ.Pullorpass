@@ -124,7 +124,7 @@ export default function PersonalityTypes() {
                         src={TYPE_IMAGES[type]}
                         alt={`${type} collector personality illustration`}
                         loading="lazy"
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.04]"
                       />
                       {/* Gradient overlay so the name overlaps art bottom */}
                       <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-background via-background/85 to-transparent" />
