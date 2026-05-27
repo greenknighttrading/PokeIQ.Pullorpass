@@ -2463,15 +2463,8 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
     }, 900);
   };
 
-  const rules = [
-    { icon: <Heart className="w-4 h-4" />, label: '20 cards per round' },
-    { icon: <Sparkles className="w-4 h-4" />, label: 'Learns your taste' },
-    { icon: <BookOpen className="w-4 h-4" />, label: 'Builds your Collector DNA' },
-    { icon: <Star className="w-4 h-4 fill-current" />, label: 'Finds your Matches' },
-  ];
-
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-28 scrollbar-none">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-32 scrollbar-none">
       <div className="max-w-md md:max-w-xl mx-auto px-4 pt-4 space-y-10 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
         <div className="w-full text-center space-y-3 pt-2">
@@ -2601,86 +2594,18 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <span className="text-amber-400 font-semibold">up to super like</span>.
         </p>
 
-        {/* SECTION 3 — QUICK RULES */}
-        <div className="w-full grid grid-cols-2 gap-2.5">
-          {rules.map((r) => (
-            <div
-              key={r.label}
-              className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card/60 px-3 py-3"
-            >
-              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary shrink-0">
-                {r.icon}
-              </span>
-              <span className="text-xs font-medium text-foreground leading-tight text-left">{r.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* SECTION 3.5 — MATCHES MOMENT (moved up) */}
-        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 text-center">
-          <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
-          <motion.div
-            className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/60 backdrop-blur border border-primary/40 mb-3"
-            animate={{ scale: [1, 1.05, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            <Sparkles className="w-4 h-4 text-amber-300" />
-            <span className="text-xs font-black uppercase tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-primary">
-              It's a Match
-            </span>
-            <Sparkles className="w-4 h-4 text-primary" />
-          </motion.div>
-          <p className="relative text-sm text-foreground/90 leading-relaxed">
-            Some cards are more than pulls. PokeIQ learns what truly fits your{' '}
-            <span className="text-primary font-semibold">collector DNA</span>.
-          </p>
-        </div>
-
-        {/* SECTION 4 — CUSTOM BINDER GALLERY */}
-        <div className="w-full space-y-4 text-left">
-          <div className="space-y-2 text-center">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-bold">
-              Build your gallery
-            </p>
-            <h2 className="text-2xl font-black tracking-tight">
-              Custom Binder gallery, curated by you.
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Your favorite pulls automatically go into themed binders — organized the way your
-              taste actually works.
-            </p>
-          </div>
-          <div className="relative rounded-2xl overflow-hidden border border-border/60 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
-            <img
-              src={binderMockup}
-              alt="Custom Pokémon card binder with a 3x3 grid of holo cards"
-              className="w-full h-auto block"
-              width={1024}
-              height={768}
-              loading="lazy"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-          </div>
-        </div>
-
-        {/* SECTION 4.5 — CURATOR PROMISE (simplified) */}
-        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card to-primary/10 p-5 text-center">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <Wand2 className="w-4 h-4 text-primary" />
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-              Your personal curator
-            </span>
-          </div>
-          <p className="text-sm text-foreground/90 leading-relaxed">
-            PokeIQ learns your taste and curates a collection that{' '}
-            <span className="text-primary font-semibold">tells your story</span>.
-          </p>
-        </div>
+        {/* SIMPLE FEATURE SUMMARY */}
+        <p className="w-full text-sm text-foreground/80 leading-relaxed max-w-sm">
+          Swipe through 20 cards a round. PokeIQ learns your taste, finds your matches, and
+          curates custom binders that tell your collector story.
+        </p>
       </div>
 
       {/* SECTION 5 — STICKY CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-5 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center">
+      <div
+        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.25rem)' }}
+      >
         <Button
           onClick={onStart}
           size="lg"
