@@ -1839,6 +1839,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      change_pokeiq_credits: { Args: { p_delta: number }; Returns: number }
       get_set_stats: {
         Args: never
         Returns: {
