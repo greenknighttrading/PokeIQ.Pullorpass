@@ -602,19 +602,19 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 tint="bg-purple-400/20 border-purple-400/30 backdrop-blur-md"
               />
             </div>
+
+            {/* View Full DNA — plain text link inside the hero widget, below the signal cards */}
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
+              >
+                View Full DNA <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
-      </div>
-
-      {/* View Full DNA — plain text link, generous vertical padding, right-aligned */}
-      <div className="flex justify-end py-3 sm:py-4">
-        <button
-          onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
-        >
-          View Full DNA <ArrowRight className="w-3.5 h-3.5" />
-        </button>
       </div>
 
       {/* Personality result — sits directly under the Collector DNA widget */}
