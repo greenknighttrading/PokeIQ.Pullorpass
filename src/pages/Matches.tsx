@@ -542,8 +542,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        {/* Art layer — fills the entire widget. Softer overlays so more of
-            the image is visible behind every element. */}
+        {/* Art composition: forest base, readability fades, then a masked
+            foreground Pikachu pass so the focal point stays above the haze. */}
         <div className="absolute inset-0 pointer-events-none">
           <img
             src={tasteHeroArt}
@@ -552,20 +552,32 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             width={1920}
             height={1080}
             loading="lazy"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '72% 18%' }}
+            className="absolute inset-0 z-0 w-full h-full object-cover opacity-95"
+            style={{ objectPosition: '72% 62%', filter: 'brightness(1.04) contrast(1.06) saturate(1.08)' }}
           />
-          {/* Subtle rim-light glow behind Pikachu in the upper-right clearing */}
-          <div className="absolute top-[8%] right-[10%] w-[42%] h-[55%] rounded-full bg-amber-300/10 blur-3xl" />
-          {/* Left-to-right dark fade so text stays readable on the left,
-              while the upper-right clearing where Pikachu sits stays bright. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/55 to-transparent" />
-          {/* Strong bottom fade so the Taste Signals row sits on solid card
-              and Pikachu reads as elevated above the panels. */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/90 to-transparent" />
+          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-card via-card/75 md:via-card/45 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 z-[1] h-[48%] bg-gradient-to-t from-card via-card/85 to-transparent" />
+          <img
+            src={tasteHeroArt}
+            alt=""
+            aria-hidden="true"
+            width={1920}
+            height={1080}
+            loading="lazy"
+            className="absolute inset-0 z-[2] w-full h-full object-cover"
+            style={{
+              objectPosition: '72% 18%',
+              transform: 'translate3d(14%, -21%, 0) scale(1.02)',
+              transformOrigin: 'center center',
+              filter: 'brightness(1.22) contrast(1.14) saturate(1.12)',
+              WebkitMaskImage: 'radial-gradient(ellipse 24% 38% at 49% 58%, #000 0%, #000 52%, rgba(0,0,0,0.72) 63%, transparent 78%)',
+              maskImage: 'radial-gradient(ellipse 24% 38% at 49% 58%, #000 0%, #000 52%, rgba(0,0,0,0.72) 63%, transparent 78%)',
+            }}
+          />
+          <div className="absolute top-[7%] right-[20%] z-[3] w-[22%] h-[34%] rounded-full bg-warning/20 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
+        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             <UsernameInline />
