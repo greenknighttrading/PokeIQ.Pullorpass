@@ -137,7 +137,7 @@ function AppRoutes() {
         <Route path="/tools/sealed-vs-cards" element={<SealedVsCards />} />
         <Route path="/pack-gains" element={<PackGainsCalculator />} />
         <Route path="/swipe" element={<PokeIQShell><PullOrPass /></PokeIQShell>} />
-        <Route path="/matches" element={<PokeIQShell><PokeIQLastRound /></PokeIQShell>} />
+        <Route path="/matches" element={<PokeIQShell><PullOrPass /></PokeIQShell>} />
         <Route path="/matches/:category" element={<MatchesCollection />} />
         <Route path="/profile" element={<PokeIQShell><Matches /></PokeIQShell>} />
         <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
