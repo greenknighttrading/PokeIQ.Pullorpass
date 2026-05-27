@@ -530,7 +530,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             height={1080}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '60% 40%' }}
+            style={{ objectPosition: '85% 45%' }}
           />
           {/* Left-to-right dark fade so text stays readable, but lighter
               than before so the artwork shows through more. */}
