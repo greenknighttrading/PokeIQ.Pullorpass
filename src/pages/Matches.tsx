@@ -254,7 +254,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
 
   return (
     <Link
-      to="/personality-test"
+      to="/test"
       className="group block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-7 hover:border-primary/50 transition-colors"
     >
       <div className="flex items-start gap-4">
