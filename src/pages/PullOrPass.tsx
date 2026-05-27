@@ -143,6 +143,7 @@ export default function PullOrPass() {
     if (typeof window === 'undefined') return false;
     return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
   });
+  const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
@@ -159,6 +160,33 @@ export default function PullOrPass() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user && !session.user.is_anonymous) {
         setUserId(session.user.id);
+        // ── Per-account isolation ────────────────────────────
+        // Local storage is shared across all logins on this device. If a
+        // different account just signed in, wipe shared swipe state so one
+        // user's history (quota, seen cards, in-progress round, results)
+        // never bleeds into another's.
+        try {
+          const prevUid = localStorage.getItem('pop_last_user_id');
+          if (prevUid && prevUid !== session.user.id) {
+            [
+              'pop_quota',
+              'pop_resume_v1',
+              'pop_results_v1',
+              'pop_seen_card_ids',
+              REDEMPTION_COUNT_KEY,
+              PRO_NUDGE_DISMISSED_KEY,
+            ].forEach((k) => localStorage.removeItem(k));
+            Object.keys(localStorage)
+              .filter((k) => k.startsWith('pop_today_swiped_'))
+              .forEach((k) => localStorage.removeItem(k));
+            try { sessionStorage.removeItem(REDEMPTION_COUNT_KEY); } catch {}
+            try { sessionStorage.removeItem(PRO_NUDGE_DISMISSED_KEY); } catch {}
+            setRedemptionCount(0);
+            setProNudgeDismissed(false);
+            setQuota({ date: todayKey(), used: 0, bonus: 0, lifetime: 0 });
+          }
+          localStorage.setItem('pop_last_user_id', session.user.id);
+        } catch {}
         // First time EVER for this user on this device → grant them their
         // one-time post-signup 20 free swipes. After that, normal daily quota
         // applies (so they must earn credits or upgrade to keep swiping).
@@ -1352,7 +1380,7 @@ function ResultsView({
           count={pulled.length}
           records={pulled}
           glow
-          viewProfileHref={isAuthed ? '/matches' : undefined}
+          viewProfileHref={isAuthed ? '/profile' : undefined}
         />
         <LikedDislikedPanel
           tint="purple"
@@ -1528,7 +1556,7 @@ function ResultsView({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => window.location.assign('/matches')}
+                  onClick={() => window.location.assign('/profile')}
                   className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
                 >
                   Go To Your Profile
@@ -1785,14 +1813,14 @@ onClick={() => window.location.assign('/premium')}
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-xl mx-auto">
                   Earn more swipe credits by helping train PokeIQ — or go PokeIQ Pro for unlimited swipes.
+                  {outOfSwipes && <> Your daily swipes reset in <InlineResetCountdown />.</>}
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
-                  {outOfSwipes && <ResetCountdown />}
-                  <Link to="/earn">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 max-w-md mx-auto">
+                  <Link to="/earn" className="w-full sm:w-auto">
                     <motion.button
                       whileHover={{ y: -2, scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
-                      className="h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center gap-2 hover:bg-primary/15 transition-colors"
+                      className="w-full sm:w-auto h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
                     >
                       <Sparkles className="w-4 h-4" />
                       Earn Credits
@@ -1802,7 +1830,7 @@ onClick={() => window.location.assign('/premium')}
                     whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => window.location.assign('/premium')}
-                    className="h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
+                    className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
                   >
                     <Crown className="w-4 h-4" />
                     Go PokeIQ Pro
