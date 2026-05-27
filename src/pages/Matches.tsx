@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,7 @@ export default function Matches() {
   const [loading, setLoading] = useState(true);
   const [likes, setLikes] = useState<LikedCard[]>([]);
   const [passes, setPasses] = useState<LikedCard[]>([]);
+  const [cardsSwiped, setCardsSwiped] = useState<number>(0);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
   const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
 
@@ -87,6 +88,14 @@ export default function Matches() {
         cached.latestLikedAt === latestLikedAt;
 
       setLikes(liked);
+      // Total swipes for this user (likes + passes + supers across all time)
+      try {
+        const { count } = await supabase
+          .from('pullorpass_swipes')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', uid);
+        setCardsSwiped(count ?? 0);
+      } catch (e) { console.warn('count swipes failed', e); }
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
       try {
@@ -182,7 +191,7 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              <TasteHero taste={taste} />
+              <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
@@ -398,7 +407,7 @@ function buildSignals(t: TasteProfile): { label: string; sub?: string }[] {
   return out.slice(0, 5);
 }
 
-function TasteHero({ taste }: { taste: TasteProfile }) {
+function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: number }) {
   const sentence = buildIdentitySentence(taste);
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
@@ -419,42 +428,39 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
     return () => window.removeEventListener('storage', read);
   }, []);
 
-  // Top stats for the 4 aligned boxes below the hero
   const topEra = taste.topEras[0];
   const topType = taste.topPokemonTypes[0];
-  const topArtist = taste.topArtists[0];
   const topRarity = taste.topRarities[0];
-  const stats: { label: string; value: string; sub?: string }[] = [
-    {
-      label: 'Collection Likes',
-      value: totalLikes.toLocaleString(),
-      sub: `${STAGE_LABEL[stage]} collector`,
-    },
-    {
-      label: 'Avg Card Value',
-      value: avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—',
-      sub: avgPrice > 0 ? 'across your likes' : 'no priced cards yet',
-    },
-    {
-      label: 'Top Era',
-      value: topEra ? topEra.label.split(' (')[0] : '—',
-      sub: topEra ? `${topEra.pct}% of likes` : 'keep swiping',
-    },
-    {
-      label: 'Top Type',
-      value: topType ? topType.label : (topRarity ? topRarity.label : (topArtist ? topArtist.label : '—')),
-      sub: topType
-        ? `${topType.pct}% of likes`
-        : topRarity
-          ? `${topRarity.count} cards`
-          : topArtist
-            ? `by ${topArtist.label}`
-            : 'keep swiping',
-    },
-  ];
+  const topArtist = taste.topArtists[0];
+
+  // DNA Match Rate = % of swipes that became likes (collector decisiveness)
+  const matchRate = cardsSwiped > 0
+    ? Math.round((totalLikes / cardsSwiped) * 100)
+    : 0;
+
+  // Split headline so the last word can render in the brand gradient
+  const headlineParts = ['Your', 'Collector', 'DNA'];
+  const headlineHead = headlineParts.slice(0, -1).join(' ');
+  const headlineTail = headlineParts[headlineParts.length - 1];
+
+  // Pills for "What You Gravitate Toward"
+  const gravPills: { label: string; icon: React.ReactNode; tint: string }[] = [];
+  const tier = taste.priceDistribution.find((p) => p.key !== 'unknown');
+  if (tier && (tier.key === 'grail' || tier.key === 'premium')) {
+    gravPills.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/30 bg-amber-400/5' });
+  }
+  if (topEra) gravPills.push({ label: `${topEra.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
+  if (topType) gravPills.push({ label: `${topType.label} Types`, icon: <Flame className="w-3.5 h-3.5 text-orange-400" />, tint: 'border-orange-400/30 bg-orange-400/5' });
+  if (topRarity) gravPills.push({ label: topRarity.label, icon: <Star className="w-3.5 h-3.5 text-purple-400" />, tint: 'border-purple-400/30 bg-purple-400/5' });
+  if (gravPills.length === 0 && topArtist) {
+    gravPills.push({ label: topArtist.label, icon: <Palette className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
+  }
 
   return (
-    <section className="relative space-y-4">
+    <section className="relative space-y-6">
+      {/* Username sits above the hero card — flat, no background, per reference */}
+      <UsernameInline />
+
       {/* Hero card with split content/art layout */}
       <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
         <div className="absolute inset-0 pointer-events-none">
@@ -480,110 +486,160 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
         </div>
 
         <div className="relative p-8 sm:p-12 md:max-w-[58%]">
-          {/* Inline username editor — replaces the old standalone UsernameCard */}
-          <div className="mb-6">
-            <UsernameInline />
-          </div>
-          <div className="flex items-center gap-2 mb-4">
-            <Badge variant="secondary" className="text-[10px] uppercase tracking-widest">
-              {STAGE_LABEL[stage]} collector
-            </Badge>
-            {totalLikes > 0 && (
-              <span className="text-xs text-muted-foreground tabular-nums">
-                {totalLikes} likes{avgPrice > 0 && ` · avg $${avgPrice.toFixed(0)}`}
-              </span>
-            )}
-            {personalityType && (
-              <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-primary/40 text-primary">
+          {personalityType && (
+            <div className="flex items-center gap-2 mb-4">
+              <BookOpen className="w-4 h-4 text-amber-400" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
                 {personalityType}
-              </Badge>
-            )}
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Your Collector DNA
+              </span>
+            </div>
+          )}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+            {headlineHead}{' '}
+            <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+              {headlineTail}
+            </span>
           </h1>
-          <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed">
-            {personalityType && (
-              <>
-                You are {articleFor(personalityType)}{' '}
-                <span className="text-primary font-semibold">{personalityType}</span>.{' '}
-              </>
-            )}
+          <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-xl">
             {sentence}
           </p>
 
-          {signals.length > 0 && (
-            <div className="mt-8">
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">
-                You gravitate toward
-              </p>
-              <div className="flex flex-wrap gap-2.5">
-                {signals.map((s, i) => (
-                  <motion.div
-                    key={s.label}
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="inline-flex items-baseline gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-2 backdrop-blur"
-                  >
-                    <span className="text-sm font-semibold text-foreground">{s.label}</span>
-                    {s.sub && <span className="text-[10px] text-muted-foreground tabular-nums">{s.sub}</span>}
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button
-              size="lg"
-              variant="outline"
-              className="gap-2"
-              onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-            >
-              See full DNA breakdown <ArrowRight className="w-4 h-4" />
-            </Button>
-            {nextThreshold && totalLikes < nextThreshold && totalLikes > 0 && (
-              <span className="text-xs text-muted-foreground">
-                {nextThreshold - totalLikes} more likes unlock deeper analysis
-              </span>
-            )}
-            {totalLikes === 0 && (
+          {totalLikes === 0 && (
+            <div className="mt-6">
               <Button size="lg" asChild className="gap-2">
                 <Link to="/swipe">Start swiping</Link>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 4 aligned stat boxes */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-        {stats.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 + i * 0.05 }}
-            className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6"
-          >
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2">
-              {s.label}
-            </p>
-            <p className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums truncate">
-              {s.value}
-            </p>
-            {s.sub && (
-              <p className="mt-1 text-xs text-muted-foreground truncate">{s.sub}</p>
-            )}
-          </motion.div>
-        ))}
+      {/* Your Taste Signals — 3 colored top cards */}
+      <div>
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h2 className="text-sm font-semibold text-foreground">Your Taste Signals</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <SignalCard
+            kicker="TOP ERA"
+            value={topEra ? topEra.label.split(' (')[0] : '—'}
+            sub={topEra ? 'Your strongest era connection' : 'keep swiping'}
+            icon={<Mountain className="w-6 h-6 text-primary" />}
+            tint="bg-primary/10 border-primary/30"
+          />
+          <SignalCard
+            kicker="TOP TYPE"
+            value={topType ? topType.label : '—'}
+            sub={topType ? 'Strongest type affinity' : 'keep swiping'}
+            icon={<Flame className="w-6 h-6 text-orange-400" />}
+            tint="bg-orange-400/10 border-orange-400/30"
+          />
+          <SignalCard
+            kicker="TOP STYLE"
+            value={topRarity ? topRarity.label : '—'}
+            sub={topRarity ? 'You love high rarity cards' : 'keep swiping'}
+            icon={<Star className="w-6 h-6 text-purple-400" />}
+            tint="bg-purple-400/10 border-purple-400/30"
+          />
+        </div>
+      </div>
+
+      {/* What You Gravitate Toward */}
+      {gravPills.length > 0 && (
+        <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <HeartIcon className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">What You Gravitate Toward</h2>
+            </div>
+            <button
+              onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+            >
+              View Full DNA <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {gravPills.map((p) => (
+              <span
+                key={p.label}
+                className={cn('inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium text-foreground', p.tint)}
+              >
+                {p.icon}{p.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Collector Stats — 4 inline stats */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
+          <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+          <CollectorStat
+            icon={<BookOpen className="w-5 h-5 text-primary" />}
+            tint="bg-primary/10 border-primary/30"
+            value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
+            label="Avg Card Value"
+          />
+          <CollectorStat
+            icon={<HeartIcon className="w-5 h-5 text-red-400" />}
+            tint="bg-red-400/10 border-red-400/30"
+            value={totalLikes.toLocaleString()}
+            label="Collection Likes"
+          />
+          <CollectorStat
+            icon={<Eye className="w-5 h-5 text-blue-400" />}
+            tint="bg-blue-400/10 border-blue-400/30"
+            value={cardsSwiped.toLocaleString()}
+            label="Cards Swiped"
+          />
+          <CollectorStat
+            icon={<Target className="w-5 h-5 text-purple-400" />}
+            tint="bg-purple-400/10 border-purple-400/30"
+            value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
+            label="DNA Match Rate"
+          />
+        </div>
       </div>
 
       {/* Personality test CTA — shown when user hasn't taken the test yet,
           or a compact "view your type" link once they have. */}
       <PersonalityTestCTA personalityType={personalityType} />
     </section>
+  );
+}
+
+function SignalCard({ kicker, value, sub, icon, tint }: { kicker: string; value: string; sub: string; icon: React.ReactNode; tint: string }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5 flex items-center gap-4">
+      <div className={cn('w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0', tint)}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground mb-1">{kicker}</p>
+        <p className="text-xl font-bold text-foreground leading-tight truncate">{value}</p>
+        <p className="text-xs text-muted-foreground mt-0.5 truncate">{sub}</p>
+      </div>
+    </div>
+  );
+}
+
+function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className={cn('w-11 h-11 rounded-xl border flex items-center justify-center shrink-0', tint)}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-2xl font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
+        <p className="text-xs text-muted-foreground truncate">{label}</p>
+      </div>
+    </div>
   );
 }
 
