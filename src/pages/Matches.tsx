@@ -16,8 +16,15 @@ import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
+import archivistPortrait from '@/assets/personalities/archivist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+
+// Map of personality type → portrait illustration. Types without a portrait
+// fall back to the emoji avatar in `PersonalityTestCTA`.
+const PERSONALITY_PORTRAITS: Partial<Record<PersonalityType, string>> = {
+  Archivist: archivistPortrait,
+};
 
 // Grammar helper — "a" vs "an" based on first letter sound.
 const articleFor = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
