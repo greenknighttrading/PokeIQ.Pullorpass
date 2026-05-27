@@ -556,7 +556,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             style={{ objectPosition: '72% 58%', filter: 'brightness(0.92) contrast(1.05) saturate(1.04)' }}
           />
           <div className="absolute inset-0 z-[1] bg-gradient-to-r from-card via-card/75 md:via-card/45 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 z-[1] h-[48%] bg-gradient-to-t from-card via-card/85 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 z-[1] h-[58%] bg-gradient-to-t from-card via-card/90 to-transparent" />
+          <div className="absolute left-[32%] bottom-[22%] z-[1] h-[38%] w-[40%] rounded-full bg-card/70 blur-3xl" />
           <img
             src={tasteHeroArt}
             alt=""
