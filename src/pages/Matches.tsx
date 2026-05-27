@@ -271,6 +271,22 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
 
+  // Personality test result (localStorage). Read once on mount + when storage changes.
+  const [personalityType, setPersonalityType] = useState<string | null>(null);
+  useEffect(() => {
+    const read = () => {
+      try {
+        const raw = localStorage.getItem('personalityResult');
+        if (!raw) { setPersonalityType(null); return; }
+        const parsed = JSON.parse(raw);
+        setPersonalityType(parsed?.type ?? null);
+      } catch { setPersonalityType(null); }
+    };
+    read();
+    window.addEventListener('storage', read);
+    return () => window.removeEventListener('storage', read);
+  }, []);
+
   // Top stats for the 4 aligned boxes below the hero
   const topEra = taste.topEras[0];
   const topType = taste.topPokemonTypes[0];
@@ -332,6 +348,10 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
         </div>
 
         <div className="relative p-8 sm:p-12 md:max-w-[58%]">
+          {/* Inline username editor — replaces the old standalone UsernameCard */}
+          <div className="mb-6">
+            <UsernameInline />
+          </div>
           <div className="flex items-center gap-2 mb-4">
             <Badge variant="secondary" className="text-[10px] uppercase tracking-widest">
               {STAGE_LABEL[stage]} collector
@@ -341,12 +361,17 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
                 {totalLikes} likes{avgPrice > 0 && ` · avg $${avgPrice.toFixed(0)}`}
               </span>
             )}
+            {personalityType && (
+              <Badge variant="outline" className="text-[10px] uppercase tracking-widest border-primary/40 text-primary">
+                {personalityType}
+              </Badge>
+            )}
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
             Your Collector Taste
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed">
-            {sentence}
+            {personalityType ? `You are a ${personalityType}. ` : ''}{sentence}
           </p>
 
           {signals.length > 0 && (
@@ -416,6 +441,10 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
           </motion.div>
         ))}
       </div>
+
+      {/* Personality test CTA — shown when user hasn't taken the test yet,
+          or a compact "view your type" link once they have. */}
+      <PersonalityTestCTA personalityType={personalityType} />
     </section>
   );
 }
