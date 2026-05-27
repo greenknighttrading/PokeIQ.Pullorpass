@@ -236,11 +236,9 @@ export default function PullOrPass() {
     if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
     setRedeeming(true);
     try {
-      const newCredits = credits - CREDITS_PER_REDEMPTION;
-      const { error } = await supabase.from('pokeiq_credits').upsert({
-        user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
-      });
+      const { data: updated, error } = await supabase.rpc('change_pokeiq_credits', { p_delta: -CREDITS_PER_REDEMPTION });
       if (error) throw error;
+      const newCredits = typeof updated === 'number' ? updated : credits - CREDITS_PER_REDEMPTION;
       setCredits(newCredits);
       const q = readQuota();
       const next = { ...q, bonus: (q.bonus ?? 0) + SWIPES_PER_REDEMPTION };
