@@ -243,36 +243,34 @@ function UsernameInline() {
 function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
   if (personalityType) {
     const info = PERSONALITY_INFO[personalityType as PersonalityType];
-    const desc = info ? firstSentences(info.summary, 2) : '';
     const article = articleFor(personalityType);
     return (
-      <Link
-        to="/test"
-        className="group flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors"
-      >
+      <div className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
         {info && (
           <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-3xl shrink-0">
             <span aria-hidden>{info.emoji}</span>
           </div>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
             Collector Personality
           </p>
           <p className="text-base sm:text-lg font-semibold text-foreground">
             You are {article} <span className="text-primary">{personalityType}</span>
           </p>
-          {desc && (
+          {info?.summary && (
             <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              {desc}
+              {info.summary}
             </p>
           )}
-          <p className="text-[11px] text-muted-foreground/80 mt-2">
-            Retake the test to refresh how you collect.
-          </p>
+          <Link
+            to="/test"
+            className="inline-block text-[11px] text-muted-foreground/80 hover:text-primary mt-3 underline-offset-2 hover:underline"
+          >
+            Retake the test
+          </Link>
         </div>
-        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
-      </Link>
+      </div>
     );
   }
 
@@ -541,12 +539,14 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
 // ─────────────────────────────────────────────────────────────
 
 function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void }) {
-  // Merge likes + passes, tag each with its decision, sort by date desc.
-  const tagged = [
-    ...likes.map((l) => ({ ...l, _decision: 'pull' as const })),
-    ...passes.map((p) => ({ ...p, _decision: 'pass' as const })),
-  ].sort((a, b) => (b.liked_at || '').localeCompare(a.liked_at || ''));
-  const recent = tagged.slice(0, 24);
+  // Pulls only — super likes first, then regular pulls, newest first within each group.
+  const sorted = [...likes].sort((a, b) => {
+    const aSuper = a.source === 'super_like' ? 1 : 0;
+    const bSuper = b.source === 'super_like' ? 1 : 0;
+    if (aSuper !== bSuper) return bSuper - aSuper;
+    return (b.liked_at || '').localeCompare(a.liked_at || '');
+  });
+  const recent = sorted.slice(0, 24);
   return (
     <section>
       <div className="mb-5">
@@ -555,17 +555,25 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
           <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Every card you pulled or passed on, freshest first.
+          Every card you pulled — super likes first.
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
-        {recent.map((c) => <RecentCard key={`${c._decision}-${c.id}`} like={c} decision={c._decision} onOpen={onOpen} />)}
+        {recent.map((c) => (
+          <RecentCard
+            key={`pull-${c.id}`}
+            like={c}
+            decision="pull"
+            isSuper={c.source === 'super_like'}
+            onOpen={onOpen}
+          />
+        ))}
       </CarouselRow>
     </section>
   );
 }
 
-function RecentCard({ like, decision, onOpen }: { like: LikedCard; decision: 'pull' | 'pass'; onOpen: (s: CardDetailSeed) => void }) {
+function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; decision: 'pull' | 'pass'; isSuper?: boolean; onOpen: (s: CardDetailSeed) => void }) {
   const [err, setErr] = useState(false);
   const isPass = decision === 'pass';
   return (
@@ -592,9 +600,17 @@ function RecentCard({ like, decision, onOpen }: { like: LikedCard; decision: 'pu
         )}
         <div className={cn(
           "absolute top-1.5 left-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wider backdrop-blur",
-          isPass ? "bg-destructive/80 text-destructive-foreground" : "bg-primary/80 text-primary-foreground"
+          isPass
+            ? "bg-destructive/80 text-destructive-foreground"
+            : isSuper
+              ? "bg-amber-400/90 text-background"
+              : "bg-primary/80 text-primary-foreground"
         )}>
-          {isPass ? <><XIcon className="w-2.5 h-2.5" /> Pass</> : <><HeartIcon className="w-2.5 h-2.5" /> Pull</>}
+          {isPass
+            ? <><XIcon className="w-2.5 h-2.5" /> Pass</>
+            : isSuper
+              ? <><Sparkles className="w-2.5 h-2.5" /> Super</>
+              : <><HeartIcon className="w-2.5 h-2.5" /> Pull</>}
         </div>
       </div>
       <p className="mt-2.5 text-sm text-foreground font-medium truncate">{like.card_name}</p>
