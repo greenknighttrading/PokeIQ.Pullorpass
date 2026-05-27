@@ -623,8 +623,8 @@ export default function PullOrPass() {
   return (
     <>
       <Seo
-        title="Pull or Pass — Train Your Taste Profile | PokeIQ"
-        description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving Taste Profile."
+        title="Pull or Pass — Train Your DNA Profile | PokeIQ"
+        description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving DNA Profile."
       />
       <div className={`bg-background flex flex-col ${stage === 'results' ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
 
@@ -1284,7 +1284,7 @@ function ResultsView({
         {!isAuthed ? (
           <>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Your Taste Profile Is Taking Shape <span className="inline-block">✨</span>
+              Your DNA Profile Is Taking Shape <span className="inline-block">✨</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
@@ -1532,7 +1532,7 @@ function ResultsView({
                   Go to Your Profile and<br />See Your Matches
                 </h2>
                 <p className="text-sm sm:text-base text-muted-foreground max-w-lg leading-relaxed">
-                  View all your liked cards, your evolving custom binder, and deeper insights built around your unique collector taste.
+                  View all your liked cards, your evolving custom binder, and deeper insights built around your unique collector DNA.
                 </p>
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
@@ -2454,7 +2454,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <p className="text-sm text-foreground">
             <Sparkles className="inline w-4 h-4 text-primary mr-1 -mt-0.5" />
             <strong>Matches</strong> are cards PokeIQ thinks you'll really connect with based on your
-            taste profile and swipe history.
+            DNA profile and swipe history.
           </p>
         </Card>
 

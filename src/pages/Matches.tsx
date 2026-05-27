@@ -158,7 +158,7 @@ export default function Matches() {
 
   return (
     <>
-      <Seo title="Your Collector Taste | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
+      <Seo title="Your Collector DNA | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
       <div className="min-h-screen bg-background flex flex-col">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
           <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
@@ -170,9 +170,9 @@ export default function Matches() {
           {!loading && !userId && (
             <Card className="p-10 text-center space-y-4 border-primary/30 bg-primary/5 max-w-xl mx-auto mt-12">
               <Lock className="w-10 h-10 mx-auto text-primary" />
-              <h3 className="text-2xl font-bold text-foreground">Sign up to see your Collector Taste</h3>
+              <h3 className="text-2xl font-bold text-foreground">Sign up to see your Collector DNA</h3>
               <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                Your taste profile is saved to your Collector account. Create one free to start building yours.
+                Your DNA profile is saved to your Collector account. Create one free to start building yours.
               </p>
               <Button onClick={() => navigate('/auth')} size="lg" className="gap-2">
                 <LogIn className="w-4 h-4" /> Sign up free
@@ -199,7 +199,7 @@ export default function Matches() {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SECTION 1 — Taste Profile Hero
+// SECTION 1 — DNA Profile Hero
 // ─────────────────────────────────────────────────────────────
 
 const STAGE_LABEL: Record<string, string> = {
@@ -283,7 +283,7 @@ function UsernameInline() {
 
 // ─────────────────────────────────────────────────────────────
 // Personality test CTA — sits at the bottom of the Smart Profile.
-// Collector Taste = WHAT they collect; Personality Test = HOW they collect.
+// Collector DNA = WHAT they collect; Personality Test = HOW they collect.
 // ─────────────────────────────────────────────────────────────
 function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
   if (personalityType) {
@@ -344,7 +344,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
             Take the Collector Personality Test
           </h3>
           <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Your Collector Taste shows <span className="text-foreground font-medium">what</span> you collect.
+            Your Collector DNA shows <span className="text-foreground font-medium">what</span> you collect.
             The personality test reveals <span className="text-foreground font-medium">how</span> you collect —
             unlocking your archetype (Archivist, Historian, Investor, and more).
           </p>
@@ -359,7 +359,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
 
 function buildIdentitySentence(t: TasteProfile): string {
   if (t.totalLikes === 0) return 'Start swiping to reveal your collector identity.';
-  if (t.totalLikes < 8) return 'A taste is forming — keep swiping to sharpen your collector identity.';
+  if (t.totalLikes < 8) return 'Your DNA is forming — keep swiping to sharpen your collector identity.';
   const era = t.topEras[0];
   const rarity = t.topRarities[0];
   const artist = t.topArtists[0];
@@ -371,7 +371,7 @@ function buildIdentitySentence(t: TasteProfile): string {
   if (pokemon && pokemon.count >= 3) bits.push(`${pokemon.label}-heavy picks`);
   if (artist && artist.count >= 3) bits.push(`art by ${artist.label}`);
   if (tier && tier.pct >= 30 && tier.key !== 'budget') bits.push(tier.label.toLowerCase());
-  if (bits.length === 0) return 'Your taste is eclectic — drawn to a wide range of cards and eras.';
+  if (bits.length === 0) return 'Your DNA is eclectic — drawn to a wide range of cards and eras.';
   const head = bits.slice(0, -1).join(', ');
   const tail = bits[bits.length - 1];
   const phrase = bits.length === 1 ? tail : `${head}, and ${tail}`;
@@ -500,7 +500,7 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
             )}
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Your Collector Taste
+            Your Collector DNA
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed">
             {personalityType && (
@@ -541,7 +541,7 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
               className="gap-2"
               onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              See full taste breakdown <ArrowRight className="w-4 h-4" />
+              See full DNA breakdown <ArrowRight className="w-4 h-4" />
             </Button>
             {nextThreshold && totalLikes < nextThreshold && totalLikes > 0 && (
               <span className="text-xs text-muted-foreground">

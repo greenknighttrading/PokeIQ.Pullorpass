@@ -55,7 +55,7 @@ export default function LastRound() {
         <Heart className="w-6 h-6 text-primary fill-primary" />
       </div>
       <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
-        Cards you pulled in your most recent Pull-or-Pass round. Looking for your full taste profile?
+        Cards you pulled in your most recent Pull-or-Pass round. Looking for your full DNA profile?
         <Link to="/profile" className="text-primary hover:underline ml-1">View your Profile →</Link>
       </p>
 
