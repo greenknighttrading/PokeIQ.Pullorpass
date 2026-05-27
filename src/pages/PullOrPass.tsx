@@ -2471,7 +2471,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   ];
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-28">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-28 scrollbar-none">
       <div className="max-w-md md:max-w-xl mx-auto px-4 pt-4 space-y-10 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
         <div className="w-full text-center space-y-3 pt-2">
@@ -2497,7 +2497,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
         </div>
 
         {/* SECTION 2 — INTERACTIVE SWIPE DEMO (real drag) */}
-        <div className="relative w-full h-[380px] flex items-center justify-center select-none touch-none">
+        <div className="relative w-full mx-auto h-[380px] flex items-center justify-center select-none touch-none">
           {/* Ambient glows that react to demo direction */}
           <motion.div
             aria-hidden
@@ -2616,55 +2616,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           ))}
         </div>
 
-        {/* SECTION 3.5 — CUSTOM BINDERS */}
-        <div className="w-full space-y-4">
-          <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-bold">
-              Build your gallery
-            </p>
-            <h2 className="text-2xl font-black tracking-tight">
-              Custom binders, curated by you.
-            </h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Drag your favorite pulls into themed binders — cozy holos, chase grails, nostalgia,
-              chaos. Your collection, organized the way your taste actually works.
-            </p>
-          </div>
-          <div className="relative rounded-2xl overflow-hidden border border-border/60 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
-            <img
-              src={binderMockup}
-              alt="Custom Pokémon card binder mockup with a 3x3 grid of holo cards"
-              className="w-full h-auto block"
-              width={1024}
-              height={768}
-              loading="lazy"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
-          </div>
-        </div>
-
-        {/* SECTION 3.75 — CURATOR PROMISE */}
-        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card via-card to-primary/10 p-6 text-left">
-          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-          <div className="relative space-y-3">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/15 border border-primary/30">
-              <Wand2 className="w-3.5 h-3.5 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
-                Your personal curator
-              </span>
-            </div>
-            <p className="text-base text-foreground leading-relaxed">
-              Your PokeIQ becomes a <span className="text-primary font-semibold">personal museum curator</span> —
-              finding the pieces that speak most to you, learning more about you in the process,
-              and telling the story of your taste and aesthetic.
-            </p>
-            <p className="text-sm text-muted-foreground italic">
-              PokeIQ learns your taste and curates a collection that tells your story.
-            </p>
-          </div>
-        </div>
-
-        {/* SECTION 4 — MATCHES MOMENT */}
+        {/* SECTION 3.5 — MATCHES MOMENT (moved up) */}
         <div className="w-full relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 text-center">
           <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
@@ -2682,6 +2634,47 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           <p className="relative text-sm text-foreground/90 leading-relaxed">
             Some cards are more than pulls. PokeIQ learns what truly fits your{' '}
             <span className="text-primary font-semibold">collector DNA</span>.
+          </p>
+        </div>
+
+        {/* SECTION 4 — CUSTOM BINDER GALLERY */}
+        <div className="w-full space-y-4 text-left">
+          <div className="space-y-2 text-center">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-primary/80 font-bold">
+              Build your gallery
+            </p>
+            <h2 className="text-2xl font-black tracking-tight">
+              Custom Binder gallery, curated by you.
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your favorite pulls automatically go into themed binders — organized the way your
+              taste actually works.
+            </p>
+          </div>
+          <div className="relative rounded-2xl overflow-hidden border border-border/60 shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
+            <img
+              src={binderMockup}
+              alt="Custom Pokémon card binder with a 3x3 grid of holo cards"
+              className="w-full h-auto block"
+              width={1024}
+              height={768}
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent" />
+          </div>
+        </div>
+
+        {/* SECTION 4.5 — CURATOR PROMISE (simplified) */}
+        <div className="w-full relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-card to-primary/10 p-5 text-center">
+          <div className="inline-flex items-center gap-2 mb-2">
+            <Wand2 className="w-4 h-4 text-primary" />
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+              Your personal curator
+            </span>
+          </div>
+          <p className="text-sm text-foreground/90 leading-relaxed">
+            PokeIQ learns your taste and curates a collection that{' '}
+            <span className="text-primary font-semibold">tells your story</span>.
           </p>
         </div>
       </div>
