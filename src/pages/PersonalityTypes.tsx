@@ -48,7 +48,7 @@ const TYPE_IMAGES: Record<PersonalityType, string> = {
   Minimalist: minimalistImg,
 };
 
-const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string; color?: string; style?: React.CSSProperties }>> = {
   Investor: PiggyBank,
   Archivist: ScrollText,
   Dreamer: Heart,
