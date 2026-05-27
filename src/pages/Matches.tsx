@@ -553,13 +553,13 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             height={1080}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '85% 45%' }}
+            style={{ objectPosition: '25% 45%' }}
           />
-          {/* Left-to-right dark fade so text stays readable, but lighter
-              than before so the artwork shows through more. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card/90 via-card/40 md:via-card/25 to-transparent" />
-          {/* Subtle bottom vignette for polish */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
+          {/* Left-to-right dark fade so text stays readable, lighter on the
+              right so the pikachu shows clearly in the open space. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/70 to-transparent" />
+          {/* Strong bottom fade so the Taste Signals row sits on solid card */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
         </div>
 
         <div className="relative p-6 sm:p-10 md:p-12 space-y-8">
