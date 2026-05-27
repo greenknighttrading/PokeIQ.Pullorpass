@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import {
   PersonalityResult,
   PersonalityType,
@@ -73,6 +74,19 @@ export function QuizResults({ result }: QuizResultsProps) {
   const TypeIcon = TYPE_ICONS[safeType];
 
   const [profileExpanded, setProfileExpanded] = useState(false);
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setIsAuthed(!!session?.user && !session.user.is_anonymous);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user && !session.user.is_anonymous);
+    });
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('personalityResult', JSON.stringify(result));
@@ -386,6 +400,7 @@ export function QuizResults({ result }: QuizResultsProps) {
       </motion.div>
 
       {/* Locked Premium */}
+      {isAuthed === false && (
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
       >
@@ -426,6 +441,7 @@ export function QuizResults({ result }: QuizResultsProps) {
           </div>
         </Card>
       </motion.div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
