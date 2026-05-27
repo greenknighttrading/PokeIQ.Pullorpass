@@ -91,9 +91,11 @@ function PageFallback() {
 }
 
 function AppRoutes() {
+  const location = useLocation();
   return (
-    <Suspense fallback={<PageFallback />}>
-      <Routes>
+    <ErrorBoundary resetKey={location.pathname}>
+      <Suspense fallback={<PageFallback />}>
+        <Routes>
         {/* Public pages */}
         <Route path="/" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
         <Route path="/pokeiq-daily" element={<PokeIQShell><PokeIQDaily /></PokeIQShell>} />
@@ -161,8 +163,9 @@ function AppRoutes() {
         <Route path="/smart-feed/brief" element={<PremiumGate><SmartFeedBrief /></PremiumGate>} />
         <Route path="/buy-list" element={<PremiumGate><AppLayout><BuyListPicks /></AppLayout></PremiumGate>} />
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
-      </Routes>
-    </Suspense>
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
