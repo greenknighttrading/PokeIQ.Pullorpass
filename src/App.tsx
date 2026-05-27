@@ -10,6 +10,8 @@ import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { PokeIQShell } from "@/components/layout/PokeIQShell";
 import { PremiumGate } from "@/components/PremiumGate";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useLocation } from "react-router-dom";
 
 // Eager: home (LCP) + lightweight 404
 import PokeIQDaily from "./pages/PokeIQDaily";
