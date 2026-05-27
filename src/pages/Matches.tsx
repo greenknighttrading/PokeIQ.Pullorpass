@@ -16,8 +16,15 @@ import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
+import archivistPortrait from '@/assets/personalities/archivist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+
+// Map of personality type → portrait illustration. Types without a portrait
+// fall back to the emoji avatar in `PersonalityTestCTA`.
+const PERSONALITY_PORTRAITS: Partial<Record<PersonalityType, string>> = {
+  Archivist: archivistPortrait,
+};
 
 // Grammar helper — "a" vs "an" based on first letter sound.
 const articleFor = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
@@ -298,38 +305,62 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   if (personalityType) {
     const info = PERSONALITY_INFO[personalityType as PersonalityType];
     const article = articleFor(personalityType);
+    const portrait = PERSONALITY_PORTRAITS[personalityType as PersonalityType];
     return (
-      <div className="flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-        {info && (
-          <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-3xl shrink-0">
-            <span aria-hidden>{info.emoji}</span>
+      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
+        <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)] gap-0">
+          {/* Portrait — large, dominant */}
+          <div className="relative aspect-square md:aspect-auto md:min-h-[420px] bg-card overflow-hidden">
+            {portrait ? (
+              <>
+                <img
+                  src={portrait}
+                  alt={`Illustration of ${article} ${personalityType}`}
+                  width={1024}
+                  height={1024}
+                  loading="lazy"
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+                {/* Soft right-edge blend into the content panel */}
+                <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-r from-transparent to-card hidden md:block" />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-card md:hidden" />
+              </>
+            ) : info ? (
+              <div className="absolute inset-0 flex items-center justify-center text-[180px]">
+                <span aria-hidden>{info.emoji}</span>
+              </div>
+            ) : null}
           </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
-            Collector Personality
-          </p>
-          <p className="text-base sm:text-lg font-semibold text-foreground">
-            You are {article} <span className="text-primary">{personalityType}</span>
-          </p>
-          {info?.summary && (
-            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-              {info.summary}
+
+          {/* Content */}
+          <div className="relative p-8 sm:p-10 md:p-12 flex flex-col justify-center">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary font-bold mb-3">
+              Collector Personality
             </p>
-          )}
-          <div className="flex items-center gap-4 mt-3">
-            <Link
-              to="/personality-types"
-              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary hover:underline underline-offset-2"
-            >
-              Learn more <ArrowRight className="w-3 h-3" />
-            </Link>
-            <Link
-              to="/test"
-              className="inline-block text-[11px] text-muted-foreground/80 hover:text-primary underline-offset-2 hover:underline"
-            >
-              Retake the test
-            </Link>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+              You are {article}{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+                {personalityType}
+              </span>
+            </h2>
+            {info?.summary && (
+              <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-2xl">
+                {info.summary}
+              </p>
+            )}
+            <div className="flex items-center gap-5 mt-7">
+              <Button asChild size="lg" className="gap-2">
+                <Link to="/personality-types">
+                  Explore your type <ArrowRight className="w-4 h-4" />
+                </Link>
+              </Button>
+              <Link
+                to="/test"
+                className="text-sm text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+              >
+                Retake the test
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -551,35 +582,18 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             </div>
           </div>
         </div>
+
+        {/* View Full DNA — anchored to the lower-right of the hero widget */}
+        <button
+          onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
+          className="absolute bottom-5 right-5 sm:bottom-6 sm:right-6 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-card/70 backdrop-blur-md px-4 py-2 text-xs font-semibold text-primary hover:bg-card/90 hover:border-primary/50 transition-colors"
+        >
+          View Full DNA <ArrowRight className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      {/* What You Gravitate Toward */}
-      {gravPills.length > 0 && (
-        <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-          <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              <HeartIcon className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">What You Gravitate Toward</h2>
-            </div>
-            <button
-              onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-              className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-            >
-              View Full DNA <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {gravPills.map((p) => (
-              <span
-                key={p.label}
-                className={cn('inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium text-foreground', p.tint)}
-              >
-                {p.icon}{p.label}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Personality result — sits directly under the Collector DNA widget */}
+      <PersonalityTestCTA personalityType={personalityType} />
 
       {/* Collector Stats — 4 inline stats */}
       <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
@@ -614,10 +628,6 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           />
         </div>
       </div>
-
-      {/* Personality test CTA — shown when user hasn't taken the test yet,
-          or a compact "view your type" link once they have. */}
-      <PersonalityTestCTA personalityType={personalityType} />
     </section>
   );
 }
