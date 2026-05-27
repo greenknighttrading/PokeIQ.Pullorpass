@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,11 @@ import { TrendingUp, Shield, Lightbulb, Scale, ChevronRight } from 'lucide-react
 
 export default function Auth() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const redirectTo =
+    (location.state as { from?: string } | null)?.from ||
+    new URLSearchParams(location.search).get('from') ||
+    '/pokeiq-daily';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,25 +27,25 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
-        navigate('/pokeiq-daily');
+        navigate(redirectTo, { replace: true });
       }
     };
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && !session.user.is_anonymous) {
-        navigate('/pokeiq-daily');
+        navigate(redirectTo, { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, redirectTo]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+        redirect_uri: `${window.location.origin}${redirectTo}`,
       });
       if (error) {
         toast({ title: 'Error', description: String(error), variant: 'destructive' });
@@ -102,7 +107,7 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
       } else {
-        navigate('/pokeiq-daily');
+        navigate(redirectTo, { replace: true });
       }
     } catch (err) {
       toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
