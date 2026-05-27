@@ -17,6 +17,17 @@ import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
 import { cn } from '@/lib/utils';
+import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+
+// Grammar helper — "a" vs "an" based on first letter sound.
+const articleFor = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
+
+// Take first N sentences from a paragraph.
+const firstSentences = (text: string, n = 2) => {
+  const parts = text.match(/[^.!?]+[.!?]+/g);
+  if (!parts) return text;
+  return parts.slice(0, n).join(' ').trim();
+};
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
@@ -231,23 +242,36 @@ function UsernameInline() {
 // ─────────────────────────────────────────────────────────────
 function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
   if (personalityType) {
+    const info = PERSONALITY_INFO[personalityType as PersonalityType];
+    const desc = info ? firstSentences(info.summary, 2) : '';
+    const article = articleFor(personalityType);
     return (
       <Link
         to="/test"
-        className="group flex items-center justify-between gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors"
+        className="group flex items-start gap-4 rounded-2xl border border-border/60 bg-card p-5 sm:p-6 hover:border-primary/40 hover:bg-primary/5 transition-colors"
       >
+        {info && (
+          <div className="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/30 flex items-center justify-center text-3xl shrink-0">
+            <span aria-hidden>{info.emoji}</span>
+          </div>
+        )}
         <div className="min-w-0">
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">
             Collector Personality
           </p>
-          <p className="text-base sm:text-lg font-semibold text-foreground truncate">
-            You are a <span className="text-primary">{personalityType}</span>
+          <p className="text-base sm:text-lg font-semibold text-foreground">
+            You are {article} <span className="text-primary">{personalityType}</span>
           </p>
-          <p className="text-xs text-muted-foreground mt-1">
+          {desc && (
+            <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+              {desc}
+            </p>
+          )}
+          <p className="text-[11px] text-muted-foreground/80 mt-2">
             Retake the test to refresh how you collect.
           </p>
         </div>
-        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0 mt-1" />
       </Link>
     );
   }
@@ -428,7 +452,13 @@ function TasteHero({ taste }: { taste: TasteProfile }) {
             Your Collector Taste
           </h1>
           <p className="mt-5 text-lg sm:text-xl text-foreground/85 leading-relaxed">
-            {personalityType ? `You are a ${personalityType}. ` : ''}{sentence}
+            {personalityType && (
+              <>
+                You are {articleFor(personalityType)}{' '}
+                <span className="text-primary font-semibold">{personalityType}</span>.{' '}
+              </>
+            )}
+            {sentence}
           </p>
 
           {signals.length > 0 && (
