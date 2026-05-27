@@ -628,10 +628,6 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           />
         </div>
       </div>
-
-      {/* Personality test CTA — shown when user hasn't taken the test yet,
-          or a compact "view your type" link once they have. */}
-      <PersonalityTestCTA personalityType={personalityType} />
     </section>
   );
 }
