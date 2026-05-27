@@ -48,7 +48,7 @@ const TYPE_IMAGES: Record<PersonalityType, string> = {
   Minimalist: minimalistImg,
 };
 
-const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string }>> = {
+const TYPE_ICONS: Record<PersonalityType, React.ComponentType<{ className?: string; color?: string; style?: React.CSSProperties }>> = {
   Investor: PiggyBank,
   Archivist: ScrollText,
   Dreamer: Heart,
@@ -78,6 +78,22 @@ const TYPE_TRAINERS: Record<PersonalityType, string> = {
   Gambler: 'Volkner',
   Showman: 'Leon',
   Minimalist: 'N',
+};
+
+// Per-type accent color (hex). Used for icon badge, philosophy text, and trainer label.
+const TYPE_ACCENTS: Record<PersonalityType, string> = {
+  Investor: '#34d399',   // emerald
+  Archivist: '#a78bfa',  // violet
+  Dreamer: '#60a5fa',    // blue
+  Flipper: '#fbbf24',    // amber
+  Analyst: '#22d3ee',    // cyan
+  Hunter: '#f87171',     // red
+  Explorer: '#4ade80',   // green
+  Curator: '#c084fc',    // purple
+  Monk: '#2dd4bf',       // teal
+  Gambler: '#fb923c',    // orange
+  Showman: '#e879f9',    // fuchsia
+  Minimalist: '#5eead4', // mint
 };
 
 function Pokeball({ className = 'w-5 h-5' }: { className?: string }) {
@@ -136,6 +152,7 @@ export default function PersonalityTypes() {
             {TYPES.map((type, i) => {
               const t = PERSONALITY_INFO[type];
               const Icon = TYPE_ICONS[type];
+              const accent = TYPE_ACCENTS[type];
               return (
                 <motion.button
                   key={type}
@@ -145,17 +162,31 @@ export default function PersonalityTypes() {
                   onClick={() => setSelected(type)}
                   className="text-left group focus:outline-none"
                 >
-                  <Card className="h-full flex flex-col overflow-hidden bg-card border-border/60 hover:border-primary/60 transition-all duration-300 cursor-pointer group-hover:-translate-y-1 group-hover:shadow-[0_20px_50px_-15px_hsl(var(--primary)/0.35)]">
-                    {/* Header: icon + name + philosophy */}
-                    <div className="flex items-start gap-3 px-4 pt-4 pb-3">
-                      <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary/15 border border-primary/40 flex-shrink-0">
-                        <Icon className="w-5 h-5 text-primary" />
+                  <Card
+                    style={{
+                      borderColor: `${accent}40`,
+                      ['--accent' as string]: accent,
+                    } as React.CSSProperties}
+                    className="h-full flex flex-col overflow-hidden bg-card transition-all duration-300 cursor-pointer group-hover:-translate-y-1"
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 20px 50px -15px ${accent}59`; e.currentTarget.style.borderColor = `${accent}AA`; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = `${accent}40`; }}
+                  >
+                    {/* Header: icon + name + philosophy — fixed height so images align */}
+                    <div className="flex items-start gap-3 px-4 pt-4 pb-3 h-[92px]">
+                      <div
+                        className="inline-flex items-center justify-center w-10 h-10 rounded-xl flex-shrink-0 border"
+                        style={{ backgroundColor: `${accent}26`, borderColor: `${accent}66` }}
+                      >
+                        <Icon className="w-5 h-5" color={accent} />
                       </div>
                       <div className="min-w-0">
                         <h3 className="text-2xl font-extrabold tracking-tight leading-none text-foreground">
                           {type}
                         </h3>
-                        <p className="mt-1.5 text-xs italic text-primary font-medium leading-snug line-clamp-2">
+                        <p
+                          className="mt-1.5 text-xs italic font-medium leading-snug line-clamp-2"
+                          style={{ color: accent }}
+                        >
                           "{t.philosophy}"
                         </p>
                       </div>
@@ -181,10 +212,10 @@ export default function PersonalityTypes() {
                     </div>
 
                     {/* Divider + trainer footer */}
-                    <div className="mx-4 border-t border-border/60" />
+                    <div className="mx-4 border-t" style={{ borderColor: `${accent}33` }} />
                     <div className="px-4 py-3 flex items-end justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-xs text-primary font-medium leading-tight">
+                        <p className="text-xs font-medium leading-tight" style={{ color: accent }}>
                           Associated Trainer:
                         </p>
                         <p className="text-base font-bold text-foreground leading-tight mt-0.5 truncate">
