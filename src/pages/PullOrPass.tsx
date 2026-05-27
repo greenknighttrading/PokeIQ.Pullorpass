@@ -1380,7 +1380,7 @@ function ResultsView({
           count={pulled.length}
           records={pulled}
           glow
-          viewProfileHref={isAuthed ? '/matches' : undefined}
+          viewProfileHref={isAuthed ? '/profile' : undefined}
         />
         <LikedDislikedPanel
           tint="purple"
