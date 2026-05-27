@@ -246,14 +246,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             location.pathname === '/swipe' ? 'hidden md:flex' : 'flex'
           )}
         >
-          <button
-            onClick={toggleTheme}
-            className="w-9 h-9 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center hover:bg-primary/25 transition-colors"
-            aria-label="Toggle theme"
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-          </button>
-
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
@@ -275,6 +267,11 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     <Crown className="w-4 h-4 mr-2" /> Premium
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={toggleTheme}>
+                    {theme === 'light' ? <Moon className="w-4 h-4 mr-2" /> : <Sun className="w-4 h-4 mr-2" />}
+                    {theme === 'light' ? 'Dark mode' : 'Light mode'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={async () => { await supabase.auth.signOut(); navigate('/auth'); }}
                   >
@@ -282,9 +279,16 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem onClick={() => navigate('/auth')}>
-                  <LogIn className="w-4 h-4 mr-2" /> Sign in
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem onClick={toggleTheme}>
+                    {theme === 'light' ? <Moon className="w-4 h-4 mr-2" /> : <Sun className="w-4 h-4 mr-2" />}
+                    {theme === 'light' ? 'Dark mode' : 'Light mode'}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/auth')}>
+                    <LogIn className="w-4 h-4 mr-2" /> Sign in
+                  </DropdownMenuItem>
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
