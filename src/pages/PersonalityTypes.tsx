@@ -169,7 +169,7 @@ export default function PersonalityTypes() {
                         <img
                           src={TYPE_IMAGES[selected]}
                           alt={`${selected} illustration`}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-cover object-top"
                         />
                       </div>
                     </div>
