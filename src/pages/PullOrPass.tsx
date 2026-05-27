@@ -759,7 +759,7 @@ export default function PullOrPass() {
                   />
                 </div>
 
-                <div className="text-center space-y-1.5 mt-2 sm:mt-3">
+                <div className="text-center space-y-1.5 mt-4 sm:mt-5">
                   <div className="flex items-center justify-center gap-3">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-none">
                       {current.name}
