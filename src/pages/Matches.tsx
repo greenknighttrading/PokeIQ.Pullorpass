@@ -600,34 +600,38 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             )}
           </div>
 
-          {/* Your Taste Signals — now inside the same widget. Translucent
-              cards with backdrop blur so the art still shows behind them. */}
+          {/* Collector Stats — moved into the hero widget in place of the
+              taste-signal pills. Translucent surfaces so the art still
+              breathes through. */}
           <div className="mt-auto pt-10 md:pt-16">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Your Taste Signals</h2>
+              <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
+              <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-              <SignalCard
-                kicker="TOP ERA"
-                value={topEra ? topEra.label.split(' (')[0] : '—'}
-                sub={topEra ? 'Your strongest era connection' : 'keep swiping'}
-                icon={<Mountain className="w-6 h-6 text-primary" />}
-                tint="bg-primary/20 border-primary/30 backdrop-blur-md"
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+              <HeroStat
+                icon={<BookOpen className="w-5 h-5 text-primary" />}
+                tint="bg-primary/15 border-primary/30"
+                value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
+                label="Avg Card Value"
               />
-              <SignalCard
-                kicker="TOP TYPE"
-                value={topType ? topType.label : '—'}
-                sub={topType ? 'Strongest type affinity' : 'keep swiping'}
-                icon={<Flame className="w-6 h-6 text-orange-400" />}
-                tint="bg-orange-400/20 border-orange-400/30 backdrop-blur-md"
+              <HeroStat
+                icon={<HeartIcon className="w-5 h-5 text-red-400" />}
+                tint="bg-red-400/15 border-red-400/30"
+                value={totalLikes.toLocaleString()}
+                label="Collection Likes"
               />
-              <SignalCard
-                kicker="TOP STYLE"
-                value={topRarity ? topRarity.label : '—'}
-                sub={topRarity ? 'You love high rarity cards' : 'keep swiping'}
-                icon={<Star className="w-6 h-6 text-purple-400" />}
-                tint="bg-purple-400/20 border-purple-400/30 backdrop-blur-md"
+              <HeroStat
+                icon={<Eye className="w-5 h-5 text-blue-400" />}
+                tint="bg-blue-400/15 border-blue-400/30"
+                value={cardsSwiped.toLocaleString()}
+                label="Cards Swiped"
+              />
+              <HeroStat
+                icon={<Target className="w-5 h-5 text-purple-400" />}
+                tint="bg-purple-400/15 border-purple-400/30"
+                value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
+                label="DNA Match Rate"
               />
             </div>
 
@@ -647,40 +651,6 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
       {/* Personality result — sits directly under the Collector DNA widget */}
       <PersonalityTestCTA personalityType={personalityType} />
-
-      {/* Collector Stats — 4 inline stats */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
-          <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          <CollectorStat
-            icon={<BookOpen className="w-5 h-5 text-primary" />}
-            tint="bg-primary/10 border-primary/30"
-            value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
-            label="Avg Card Value"
-          />
-          <CollectorStat
-            icon={<HeartIcon className="w-5 h-5 text-red-400" />}
-            tint="bg-red-400/10 border-red-400/30"
-            value={totalLikes.toLocaleString()}
-            label="Collection Likes"
-          />
-          <CollectorStat
-            icon={<Eye className="w-5 h-5 text-blue-400" />}
-            tint="bg-blue-400/10 border-blue-400/30"
-            value={cardsSwiped.toLocaleString()}
-            label="Cards Swiped"
-          />
-          <CollectorStat
-            icon={<Target className="w-5 h-5 text-purple-400" />}
-            tint="bg-purple-400/10 border-purple-400/30"
-            value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
-            label="DNA Match Rate"
-          />
-        </div>
-      </div>
     </section>
   );
 }
@@ -709,6 +679,20 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
       <div className="min-w-0">
         <p className="text-2xl font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
         <p className="text-xs text-muted-foreground truncate">{label}</p>
+      </div>
+    </div>
+  );
+}
+
+function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-4 flex items-center gap-3">
+      <div className={cn('w-11 h-11 rounded-xl border flex items-center justify-center shrink-0', tint)}>
+        {icon}
+      </div>
+      <div className="min-w-0">
+        <p className="text-xl font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
+        <p className="text-[11px] text-muted-foreground truncate">{label}</p>
       </div>
     </div>
   );
