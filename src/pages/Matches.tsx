@@ -263,12 +263,20 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
               {info.summary}
             </p>
           )}
-          <Link
-            to="/test"
-            className="inline-block text-[11px] text-muted-foreground/80 hover:text-primary mt-3 underline-offset-2 hover:underline"
-          >
-            Retake the test
-          </Link>
+          <div className="flex items-center gap-4 mt-3">
+            <Link
+              to="/personality-types"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary hover:underline underline-offset-2"
+            >
+              Learn more <ArrowRight className="w-3 h-3" />
+            </Link>
+            <Link
+              to="/test"
+              className="inline-block text-[11px] text-muted-foreground/80 hover:text-primary underline-offset-2 hover:underline"
+            >
+              Retake the test
+            </Link>
+          </div>
         </div>
       </div>
     );
