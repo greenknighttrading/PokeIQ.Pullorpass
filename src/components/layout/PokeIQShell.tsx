@@ -5,10 +5,12 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
+  Sun, Moon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -48,6 +50,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isPremium } = useIsPremium();
+  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -243,6 +246,14 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             location.pathname === '/swipe' ? 'hidden md:flex' : 'flex'
           )}
         >
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-full bg-primary/15 text-primary border border-primary/30 flex items-center justify-center hover:bg-primary/25 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+          </button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
