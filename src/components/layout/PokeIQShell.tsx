@@ -50,6 +50,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const { isPremium } = useIsPremium();
   const [email, setEmail] = useState<string | null>(null);
+  const [isLightMode, setIsLightMode] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -61,6 +62,28 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
     });
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('pokeiq-theme');
+    const prefersLight = stored === 'light';
+    setIsLightMode(prefersLight);
+    if (prefersLight) {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = !isLightMode;
+    setIsLightMode(next);
+    localStorage.setItem('pokeiq-theme', next ? 'light' : 'dark');
+    if (next) {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  };
 
   const initial = (email?.[0] ?? '?').toUpperCase();
 
