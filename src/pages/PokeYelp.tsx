@@ -414,9 +414,8 @@ export default function PokeYelp() {
     }
     const newCredits = credits + earned;
     setCredits(newCredits);
-    await supabase.from('pokeiq_credits').upsert({
-      user_id: userId, credits: newCredits, updated_at: new Date().toISOString(),
-    });
+    const { data: updated, error: creditErr } = await supabase.rpc('change_pokeiq_credits', { p_delta: earned });
+    if (!creditErr && typeof updated === 'number') setCredits(updated);
     // Track lifetime review count → reward milestones
     let lifetime = 0;
     try {
