@@ -458,17 +458,16 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
   return (
     <section className="relative space-y-6">
-      {/* Username sits above the hero card — flat, no background, per reference */}
-      <UsernameInline />
-
-      {/* Hero card with split content/art layout */}
+      {/* One unified hero widget — username, headline, and taste signals
+          all sit on top of the background art so more of it shows through. */}
       <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        {/* Art layer — fills the entire widget */}
+        {/* Art layer — fills the entire widget. Softer overlays so more of
+            the image is visible behind every element. */}
         <div className="absolute inset-0 pointer-events-none">
           <img
             src={tasteHeroArt}
@@ -479,69 +478,78 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
-          {/* Left-to-right dark fade so text stays readable */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/80 md:via-card/60 to-transparent" />
-          {/* Bottom vignette for polish */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card/70 via-transparent to-card/20" />
+          {/* Left-to-right dark fade so text stays readable, but lighter
+              than before so the artwork shows through more. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card/90 via-card/40 md:via-card/25 to-transparent" />
+          {/* Subtle bottom vignette for polish */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent" />
         </div>
 
-        <div className="relative p-8 sm:p-12 md:max-w-[58%]">
-          {personalityType && (
-            <div className="flex items-center gap-2 mb-4">
-              <BookOpen className="w-4 h-4 text-amber-400" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
-                {personalityType}
+        <div className="relative p-6 sm:p-10 md:p-12 space-y-8">
+          {/* Username sits inside the widget now */}
+          <div className="md:max-w-[62%]">
+            <UsernameInline />
+          </div>
+
+          <div className="md:max-w-[62%]">
+            {personalityType && (
+              <div className="flex items-center gap-2 mb-4">
+                <BookOpen className="w-4 h-4 text-amber-400" />
+                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
+                  {personalityType}
+                </span>
+              </div>
+            )}
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+              {headlineHead}{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+                {headlineTail}
               </span>
-            </div>
-          )}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
-            {headlineHead}{' '}
-            <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
-              {headlineTail}
-            </span>
-          </h1>
-          <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-xl">
-            {sentence}
-          </p>
+            </h1>
+            <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-xl">
+              {sentence}
+            </p>
 
-          {totalLikes === 0 && (
-            <div className="mt-6">
-              <Button size="lg" asChild className="gap-2">
-                <Link to="/swipe">Start swiping</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
+            {totalLikes === 0 && (
+              <div className="mt-6">
+                <Button size="lg" asChild className="gap-2">
+                  <Link to="/swipe">Start swiping</Link>
+                </Button>
+              </div>
+            )}
+          </div>
 
-      {/* Your Taste Signals — 3 colored top cards */}
-      <div>
-        <div className="flex items-center gap-2 mb-3">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <h2 className="text-sm font-semibold text-foreground">Your Taste Signals</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
-          <SignalCard
-            kicker="TOP ERA"
-            value={topEra ? topEra.label.split(' (')[0] : '—'}
-            sub={topEra ? 'Your strongest era connection' : 'keep swiping'}
-            icon={<Mountain className="w-6 h-6 text-primary" />}
-            tint="bg-primary/10 border-primary/30"
-          />
-          <SignalCard
-            kicker="TOP TYPE"
-            value={topType ? topType.label : '—'}
-            sub={topType ? 'Strongest type affinity' : 'keep swiping'}
-            icon={<Flame className="w-6 h-6 text-orange-400" />}
-            tint="bg-orange-400/10 border-orange-400/30"
-          />
-          <SignalCard
-            kicker="TOP STYLE"
-            value={topRarity ? topRarity.label : '—'}
-            sub={topRarity ? 'You love high rarity cards' : 'keep swiping'}
-            icon={<Star className="w-6 h-6 text-purple-400" />}
-            tint="bg-purple-400/10 border-purple-400/30"
-          />
+          {/* Your Taste Signals — now inside the same widget. Translucent
+              cards with backdrop blur so the art still shows behind them. */}
+          <div>
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Your Taste Signals</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              <SignalCard
+                kicker="TOP ERA"
+                value={topEra ? topEra.label.split(' (')[0] : '—'}
+                sub={topEra ? 'Your strongest era connection' : 'keep swiping'}
+                icon={<Mountain className="w-6 h-6 text-primary" />}
+                tint="bg-primary/20 border-primary/30 backdrop-blur-md"
+              />
+              <SignalCard
+                kicker="TOP TYPE"
+                value={topType ? topType.label : '—'}
+                sub={topType ? 'Strongest type affinity' : 'keep swiping'}
+                icon={<Flame className="w-6 h-6 text-orange-400" />}
+                tint="bg-orange-400/20 border-orange-400/30 backdrop-blur-md"
+              />
+              <SignalCard
+                kicker="TOP STYLE"
+                value={topRarity ? topRarity.label : '—'}
+                sub={topRarity ? 'You love high rarity cards' : 'keep swiping'}
+                icon={<Star className="w-6 h-6 text-purple-400" />}
+                tint="bg-purple-400/20 border-purple-400/30 backdrop-blur-md"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -616,7 +624,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
 function SignalCard({ kicker, value, sub, icon, tint }: { kicker: string; value: string; sub: string; icon: React.ReactNode; tint: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 flex items-center gap-4">
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-5 flex items-center gap-4">
       <div className={cn('w-14 h-14 rounded-2xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
