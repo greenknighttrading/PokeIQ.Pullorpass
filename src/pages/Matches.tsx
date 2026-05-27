@@ -509,6 +509,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
   const topRarity = taste.topRarities[0];
   const topArtist = taste.topArtists[0];
 
+  const personalityInfo = personalityType ? PERSONALITY_INFO[personalityType as PersonalityType] : null;
+
   // DNA Match Rate = % of swipes that became likes (collector decisiveness)
   const matchRate = cardsSwiped > 0
     ? Math.round((totalLikes / cardsSwiped) * 100)
@@ -588,7 +590,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
               </span>
             </h1>
             <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-xl">
-              {sentence}
+              {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}{sentence}
             </p>
 
             {totalLikes === 0 && (
