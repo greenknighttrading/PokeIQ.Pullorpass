@@ -553,13 +553,16 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             height={1080}
             loading="lazy"
             className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: '25% 45%' }}
+            style={{ objectPosition: '72% 18%' }}
           />
-          {/* Left-to-right dark fade so text stays readable, lighter on the
-              right so the pikachu shows clearly in the open space. */}
-          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/70 to-transparent" />
-          {/* Strong bottom fade so the Taste Signals row sits on solid card */}
-          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
+          {/* Subtle rim-light glow behind Pikachu in the upper-right clearing */}
+          <div className="absolute top-[8%] right-[10%] w-[42%] h-[55%] rounded-full bg-amber-300/10 blur-3xl" />
+          {/* Left-to-right dark fade so text stays readable on the left,
+              while the upper-right clearing where Pikachu sits stays bright. */}
+          <div className="absolute inset-0 bg-gradient-to-r from-card via-card/85 md:via-card/55 to-transparent" />
+          {/* Strong bottom fade so the Taste Signals row sits on solid card
+              and Pikachu reads as elevated above the panels. */}
+          <div className="absolute inset-0 bg-gradient-to-t from-card via-card/90 to-transparent" />
         </div>
 
         <div className="relative p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
