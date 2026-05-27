@@ -143,6 +143,7 @@ export default function PullOrPass() {
     if (typeof window === 'undefined') return false;
     return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
   });
+  const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const premium = isPremiumActive();
