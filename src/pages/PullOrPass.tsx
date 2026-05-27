@@ -1879,6 +1879,20 @@ function ResetCountdown() {
   );
 }
 
+function InlineResetCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+  return <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span>;
+}
+
 function StatGlowCard({
   icon, value, label, sub, tint,
 }: {
