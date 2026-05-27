@@ -2427,6 +2427,225 @@ function OutOfSwipesModal({
 
 /* ── Intro / Landing Screen ── */
 function IntroScreen({ onStart }: { onStart: () => void }) {
+  // Auto-cycling swipe demo: pass → pull → super like → repeat
+  const [demoPhase, setDemoPhase] = useState<'idle' | 'pass' | 'pull' | 'super'>('idle');
+  useEffect(() => {
+    const seq: Array<'idle' | 'pass' | 'pull' | 'super'> = [
+      'idle', 'pull', 'idle', 'pass', 'idle', 'super',
+    ];
+    let i = 0;
+    const tick = () => {
+      setDemoPhase(seq[i % seq.length]);
+      i++;
+    };
+    tick();
+    const id = setInterval(tick, 1400);
+    return () => clearInterval(id);
+  }, []);
+
+  const cardMotion = (() => {
+    switch (demoPhase) {
+      case 'pull':  return { x: 120, y: -10, rotate: 14, opacity: 1 };
+      case 'pass':  return { x: -120, y: -10, rotate: -14, opacity: 1 };
+      case 'super': return { x: 0, y: -130, rotate: 0, opacity: 1 };
+      default:      return { x: 0, y: 0, rotate: 0, opacity: 1 };
+    }
+  })();
+
+  // Famous Base Set Charizard via TCGPlayer CDN
+  const charizardImg = 'https://tcgplayer-cdn.tcgplayer.com/product/23408_in_1000x1000.jpg';
+
+  const rules = [
+    { icon: <Heart className="w-4 h-4" />, label: '20 cards per round' },
+    { icon: <Sparkles className="w-4 h-4" />, label: 'Learns your taste' },
+    { icon: <BookOpen className="w-4 h-4" />, label: 'Builds your Collector DNA' },
+    { icon: <Star className="w-4 h-4 fill-current" />, label: 'Finds your Matches' },
+  ];
+
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto pb-28">
+      <div className="max-w-md mx-auto px-1 pt-4 space-y-10">
+        {/* SECTION 1 — HERO */}
+        <div className="text-center space-y-3 pt-2">
+          <motion.h1
+            className="font-black uppercase tracking-[0.16em] text-5xl sm:text-6xl bg-clip-text text-transparent leading-none"
+            style={{
+              backgroundImage:
+                'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+              backgroundSize: '250% 100%',
+              filter: 'drop-shadow(0 0 18px hsl(var(--primary) / 0.6))',
+            }}
+            animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+          >
+            Pull or<br />Pass
+          </motion.h1>
+          <p className="text-base text-foreground/90 font-medium">
+            An AI-powered Pokémon card discovery game.
+          </p>
+          <p className="text-xs uppercase tracking-[0.3em] text-primary/80 font-semibold">
+            Swipe. Discover. Collect.
+          </p>
+        </div>
+
+        {/* SECTION 2 — INTERACTIVE SWIPE DEMO */}
+        <div className="relative h-[360px] flex items-center justify-center select-none">
+          {/* Ambient glows that react to demo direction */}
+          <motion.div
+            aria-hidden
+            className="absolute inset-y-0 left-0 w-1/2 rounded-l-[3rem]"
+            animate={{ opacity: demoPhase === 'pass' ? 0.55 : 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ background: 'radial-gradient(circle at left, rgb(244 63 94 / 0.45), transparent 70%)' }}
+          />
+          <motion.div
+            aria-hidden
+            className="absolute inset-y-0 right-0 w-1/2 rounded-r-[3rem]"
+            animate={{ opacity: demoPhase === 'pull' ? 0.55 : 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ background: 'radial-gradient(circle at right, rgb(16 185 129 / 0.45), transparent 70%)' }}
+          />
+          <motion.div
+            aria-hidden
+            className="absolute inset-x-0 top-0 h-1/2"
+            animate={{ opacity: demoPhase === 'super' ? 0.55 : 0 }}
+            transition={{ duration: 0.35 }}
+            style={{ background: 'radial-gradient(circle at top, rgb(251 191 36 / 0.45), transparent 70%)' }}
+          />
+
+          {/* Stacked back cards */}
+          <div className="absolute w-[210px] h-[294px] rounded-2xl bg-card border border-border/60 -rotate-[6deg] translate-x-2 translate-y-3 opacity-50" />
+          <div className="absolute w-[210px] h-[294px] rounded-2xl bg-card border border-border/60 rotate-[4deg] -translate-x-2 translate-y-1 opacity-70" />
+
+          {/* Top demo card */}
+          <motion.div
+            className="relative w-[210px] h-[294px] rounded-2xl overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] border border-border/80 bg-card"
+            animate={cardMotion}
+            transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+          >
+            <img
+              src={charizardImg}
+              alt="Charizard sample card"
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
+            {/* Decision stamps */}
+            <AnimatePresence>
+              {demoPhase === 'pull' && (
+                <motion.div
+                  key="pull-stamp"
+                  initial={{ opacity: 0, scale: 0.6, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: -12 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-4 left-4 px-3 py-1.5 rounded-md border-[3px] border-emerald-400 text-emerald-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm"
+                >
+                  Pull
+                </motion.div>
+              )}
+              {demoPhase === 'pass' && (
+                <motion.div
+                  key="pass-stamp"
+                  initial={{ opacity: 0, scale: 0.6, rotate: 10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 12 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-4 right-4 px-3 py-1.5 rounded-md border-[3px] border-rose-400 text-rose-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm"
+                >
+                  Pass
+                </motion.div>
+              )}
+              {demoPhase === 'super' && (
+                <motion.div
+                  key="super-stamp"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md border-[3px] border-amber-400 text-amber-400 font-black uppercase tracking-widest text-base bg-background/30 backdrop-blur-sm whitespace-nowrap"
+                >
+                  ★ Super
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Gesture labels around the card */}
+          <div className="absolute left-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-rose-400">
+            <div className="w-9 h-9 rounded-full bg-rose-400/15 border border-rose-400/40 flex items-center justify-center">
+              <X className="w-4 h-4" strokeWidth={3} />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Pass</span>
+          </div>
+          <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 text-emerald-400">
+            <div className="w-9 h-9 rounded-full bg-emerald-400/15 border border-emerald-400/40 flex items-center justify-center">
+              <Heart className="w-4 h-4 fill-current" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-wider">Pull</span>
+          </div>
+          <div className="absolute top-1 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-amber-400">
+            <span className="text-[10px] font-bold uppercase tracking-wider">Super</span>
+            <div className="w-9 h-9 rounded-full bg-amber-400/15 border border-amber-400/40 flex items-center justify-center">
+              <Star className="w-4 h-4 fill-current" />
+            </div>
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground -mt-4">
+          Swipe <span className="text-emerald-400 font-semibold">right to pull</span>,{' '}
+          <span className="text-rose-400 font-semibold">left to pass</span>,{' '}
+          <span className="text-amber-400 font-semibold">up to super like</span>.
+        </p>
+
+        {/* SECTION 3 — QUICK RULES */}
+        <div className="grid grid-cols-2 gap-2.5">
+          {rules.map((r) => (
+            <div
+              key={r.label}
+              className="flex items-center gap-2.5 rounded-xl border border-border/60 bg-card/60 px-3 py-3"
+            >
+              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary/15 text-primary shrink-0">
+                {r.icon}
+              </span>
+              <span className="text-xs font-medium text-foreground leading-tight">{r.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* SECTION 4 — MATCHES MOMENT */}
+        <div className="relative overflow-hidden rounded-2xl border border-primary/40 bg-gradient-to-br from-primary/15 via-card to-card p-6 text-center">
+          <div className="absolute -top-16 -left-16 w-48 h-48 rounded-full bg-primary/25 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -right-16 w-48 h-48 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+          <motion.div
+            className="relative inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-background/60 backdrop-blur border border-primary/40 mb-3"
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <Sparkles className="w-4 h-4 text-amber-300" />
+            <span className="text-xs font-black uppercase tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-amber-300 to-primary">
+              It's a Match
+            </span>
+            <Sparkles className="w-4 h-4 text-primary" />
+          </motion.div>
+          <p className="relative text-sm text-foreground/90 leading-relaxed">
+            Some cards are more than pulls. PokeIQ learns what truly fits your{' '}
+            <span className="text-primary font-semibold">collector DNA</span>.
+          </p>
+        </div>
+      </div>
+
+      {/* SECTION 5 — STICKY CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 px-4 pb-5 pt-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+        <Button
+          onClick={onStart}
+          size="lg"
+          className="w-full max-w-md mx-auto h-14 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
+        >
+          Start Swiping <ArrowRight className="w-5 h-5" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function __DeprecatedIntroScreen({ onStart }: { onStart: () => void }) {
   return (
     <div className="flex-1 min-h-0 overflow-y-auto pb-6">
       <div className="max-w-xl mx-auto space-y-5 pt-4">

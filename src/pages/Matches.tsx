@@ -328,9 +328,9 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     const article = articleFor(personalityType);
     const portrait = PERSONALITY_PORTRAITS[personalityType as PersonalityType];
     return (
-      <div className="grid md:grid-cols-2 gap-4">
+      <div className="grid md:grid-cols-3 gap-4">
         {/* Personality — left aligned, portrait + content stacked */}
-        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-7">
+        <div className="md:col-span-2 relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-7">
           <div className="flex items-start gap-5 text-left">
             {portrait ? (
               <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
@@ -385,14 +385,14 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
         {/* Swipe CTA — sharpen your matches */}
         <Link
           to="/swipe"
-          className="group relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-card p-5 sm:p-6 md:p-7 hover:border-primary/60 transition-colors flex flex-col justify-center text-left"
+          className="group relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-card p-5 sm:p-6 md:p-7 hover:border-primary/60 transition-colors flex flex-col items-center justify-center text-center"
         >
           <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-          <div className="relative flex items-start gap-4">
+          <div className="relative flex flex-col items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
               <Sparkles className="w-5 h-5" />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-[0.22em] text-primary font-bold mb-2">
                 Sharpen your DNA
               </p>
@@ -402,7 +402,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
               <p className="mt-2 text-sm text-muted-foreground">
                 Every pull and pass refines your taste signals and the cards we surface for you.
               </p>
-              <Button size="sm" className="gap-2 mt-4 pointer-events-none">
+              <Button size="sm" className="gap-2 mt-4 pointer-events-none mx-auto">
                 Start swiping <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </div>
@@ -554,7 +554,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             loading="lazy"
             className="absolute inset-0 z-0 w-full h-full object-cover"
             style={{
-              objectPosition: '15% 88%',
+              objectPosition: '5% 88%',
               filter: 'brightness(1.02) contrast(1.05) saturate(1.06)',
             }}
           />
