@@ -562,7 +562,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="absolute inset-0 bg-gradient-to-t from-card via-card/80 to-transparent" />
         </div>
 
-        <div className="relative p-6 sm:p-10 md:p-12 space-y-8">
+        <div className="relative p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             <UsernameInline />
@@ -598,7 +598,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
 
           {/* Your Taste Signals — now inside the same widget. Translucent
               cards with backdrop blur so the art still shows behind them. */}
-          <div>
+          <div className="mt-auto pt-10 md:pt-16">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-primary" />
               <h2 className="text-sm font-semibold text-foreground">Your Taste Signals</h2>
