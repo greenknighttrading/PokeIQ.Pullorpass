@@ -207,15 +207,20 @@ export default function PullOrPass() {
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
-    // Try to resume an in-progress round first, then fall back to last results
-    const resume = readResume();
-    if (resume) {
+    // New users always see the intro/landing first, regardless of any
+    // stale resume or results that may be lingering in storage.
+    if (!introSeen) {
+      setStage('intro');
+    } else {
+      // Try to resume an in-progress round first, then fall back to last results
+      const resume = readResume();
+      if (resume) {
       setCards(resume.cards);
       setIndex(resume.index);
       setRecords(resume.records || []);
       setRoundId(resume.roundId);
       setStage('swiping');
-    } else {
+      } else {
       const last = readResults();
       if (last) {
         setCards(last.cards);
@@ -223,10 +228,9 @@ export default function PullOrPass() {
         setRoundId(last.roundId);
         setIndex(last.cards.length);
         setStage('results');
-      } else if (!introSeen) {
-        setStage('intro');
       } else {
         loadRound();
+      }
       }
     }
     // Bonus swipes are written directly into pop_quota by the Earn page
