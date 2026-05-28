@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target, Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -224,7 +224,7 @@ export default function Matches() {
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
-              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
+              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
               <DailyLimitWidget />
             </div>
@@ -768,11 +768,21 @@ function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; deci
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void }) {
+function BinderView({ likes, taste, onOpen, userId }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void; userId: string }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [facet, setFacet] = useState<FacetKey>('all');
   const [value, setValue] = useState<string>('');
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Persisted custom order (card_id list). When null, falls back to liked_at desc.
+  const orderKey = `binder:order:${userId}`;
+  const [customOrder, setCustomOrder] = useState<string[] | null>(() => {
+    try {
+      const raw = localStorage.getItem(orderKey);
+      return raw ? (JSON.parse(raw) as string[]) : null;
+    } catch { return null; }
+  });
 
   React.useEffect(() => { setSpread(0); setDir(1); }, [facet, value]);
 
@@ -788,9 +798,23 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
     }
   }, [facet, taste]);
 
+  // Apply the user's custom order on top of the default liked_at list.
+  const ordered = useMemo(() => {
+    if (!customOrder || customOrder.length === 0) return likes;
+    const map = new Map(likes.map(l => [l.card_id, l]));
+    const seen = new Set<string>();
+    const out: LikedCard[] = [];
+    for (const id of customOrder) {
+      const l = map.get(id);
+      if (l && !seen.has(id)) { out.push(l); seen.add(id); }
+    }
+    for (const l of likes) if (!seen.has(l.card_id)) out.push(l);
+    return out;
+  }, [likes, customOrder]);
+
   const filtered = useMemo(() => {
-    if (facet === 'all' || !value) return likes;
-    return likes.filter((c) => {
+    if (facet === 'all' || !value) return ordered;
+    return ordered.filter((c) => {
       switch (facet) {
         case 'artist':    return c.artist === value;
         case 'set':       return c.set_name === value;
@@ -801,7 +825,7 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
       }
       return true;
     });
-  }, [likes, facet, value]);
+  }, [ordered, facet, value]);
 
   const totalSpreads = Math.max(1, Math.ceil(filtered.length / CARDS_PER_SPREAD));
   const start = spread * CARDS_PER_SPREAD;
@@ -811,6 +835,22 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
   const go = (delta: 1 | -1) => {
     setDir(delta);
     setSpread((s) => Math.min(Math.max(0, s + delta), totalSpreads - 1));
+  };
+
+  // Reordering is only safe when there is no active filter — positions in
+  // `ordered` directly map to slot indices on the page.
+  const canReorder = facet === 'all' && !value;
+
+  const reorder = (fromIdx: number, toIdx: number) => {
+    if (!canReorder) return;
+    if (fromIdx === toIdx) return;
+    const baseIds = ordered.map(l => l.card_id);
+    if (fromIdx < 0 || fromIdx >= baseIds.length) return;
+    const [moved] = baseIds.splice(fromIdx, 1);
+    const insertAt = Math.min(Math.max(0, toIdx), baseIds.length);
+    baseIds.splice(insertAt, 0, moved);
+    setCustomOrder(baseIds);
+    try { localStorage.setItem(orderKey, JSON.stringify(baseIds)); } catch {}
   };
 
   const labelFor = (v: string) => {
@@ -890,6 +930,19 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
           <div className="relative rounded-3xl p-3 sm:p-4 shadow-2xl border border-border/60"
                style={{ background: 'linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--muted)/0.6) 100%)', perspective: '1800px' }}>
             <div className="hidden sm:block absolute top-3 bottom-3 left-1/2 -translate-x-1/2 w-2 rounded-full bg-gradient-to-b from-border/40 via-border to-border/40 shadow-inner pointer-events-none z-10" />
+            {/* Edge drop zones — turn pages by dragging a card to the edge. */}
+            <EdgeDropZone
+              side="left"
+              visible={isDragging}
+              disabled={spread === 0}
+              onTrigger={() => spread > 0 && go(-1)}
+            />
+            <EdgeDropZone
+              side="right"
+              visible={isDragging}
+              disabled={spread >= totalSpreads - 1}
+              onTrigger={() => spread < totalSpreads - 1 && go(1)}
+            />
             <AnimatePresence mode="wait" custom={dir}>
               <motion.div
                 key={spread} custom={dir}
@@ -900,8 +953,28 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4"
                 style={{ transformStyle: 'preserve-3d' }}
               >
-                <BinderPage cards={leftCards} pageNumber={spread * 2 + 1} side="left" onOpen={onOpen} />
-                <BinderPage cards={rightCards} pageNumber={spread * 2 + 2} side="right" onOpen={onOpen} />
+                <BinderPage
+                  cards={leftCards}
+                  pageNumber={spread * 2 + 1}
+                  side="left"
+                  onOpen={onOpen}
+                  baseIndex={start}
+                  canReorder={canReorder}
+                  onReorder={reorder}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
+                />
+                <BinderPage
+                  cards={rightCards}
+                  pageNumber={spread * 2 + 2}
+                  side="right"
+                  onOpen={onOpen}
+                  baseIndex={start + CARDS_PER_PAGE}
+                  canReorder={canReorder}
+                  onReorder={reorder}
+                  onDragStart={() => setIsDragging(true)}
+                  onDragEnd={() => setIsDragging(false)}
+                />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -922,27 +995,105 @@ function BinderView({ likes, taste, onOpen }: { likes: LikedCard[]; taste: Taste
   );
 }
 
-function BinderPage({ cards, pageNumber, side, onOpen }: { cards: LikedCard[]; pageNumber: number; side: 'left' | 'right'; onOpen: (s: CardDetailSeed) => void }) {
+function BinderPage({
+  cards, pageNumber, side, onOpen, baseIndex, canReorder, onReorder, onDragStart, onDragEnd,
+}: {
+  cards: LikedCard[];
+  pageNumber: number;
+  side: 'left' | 'right';
+  onOpen: (s: CardDetailSeed) => void;
+  baseIndex: number;
+  canReorder: boolean;
+  onReorder: (from: number, to: number) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+}) {
   const slots = Array.from({ length: CARDS_PER_PAGE }, (_, i) => cards[i] ?? null);
   return (
     <div className="relative rounded-2xl p-2 sm:p-2.5 bg-background/60 ring-1 ring-border/50 shadow-inner"
          style={{ backgroundImage: 'radial-gradient(hsl(var(--muted-foreground)/0.08) 1px, transparent 1px)', backgroundSize: '14px 14px' }}>
       <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-        {slots.map((c, i) => <BinderSlot key={c?.id ?? `empty-${pageNumber}-${i}`} like={c} onOpen={onOpen} />)}
+        {slots.map((c, i) => (
+          <BinderSlot
+            key={c?.id ?? `empty-${pageNumber}-${i}`}
+            like={c}
+            onOpen={onOpen}
+            slotIndex={baseIndex + i}
+            canReorder={canReorder}
+            onReorder={onReorder}
+            onDragStart={onDragStart}
+            onDragEnd={onDragEnd}
+          />
+        ))}
       </div>
       <p className={`text-[10px] text-muted-foreground tabular-nums mt-1.5 ${side === 'left' ? 'text-left' : 'text-right'}`}>Page {pageNumber}</p>
     </div>
   );
 }
 
-function BinderSlot({ like, onOpen }: { like: LikedCard | null; onOpen: (s: CardDetailSeed) => void }) {
+function BinderSlot({
+  like, onOpen, slotIndex, canReorder, onReorder, onDragStart, onDragEnd,
+}: {
+  like: LikedCard | null;
+  onOpen: (s: CardDetailSeed) => void;
+  slotIndex: number;
+  canReorder: boolean;
+  onReorder: (from: number, to: number) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+}) {
   const [err, setErr] = useState(false);
-  if (!like) return <div className="aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed ring-border/40" />;
+  const [over, setOver] = useState(false);
+
+  const acceptDrop = (e: React.DragEvent) => {
+    if (!canReorder) return;
+    e.preventDefault();
+    setOver(false);
+    const from = Number(e.dataTransfer.getData('text/binder-index'));
+    if (Number.isFinite(from)) onReorder(from, slotIndex);
+  };
+  const dragOver = (e: React.DragEvent) => {
+    if (!canReorder) return;
+    e.preventDefault();
+    if (!over) setOver(true);
+  };
+
+  if (!like) {
+    return (
+      <Link
+        to="/swipe"
+        onDragOver={dragOver}
+        onDragLeave={() => setOver(false)}
+        onDrop={acceptDrop}
+        className={`group aspect-[2.5/3.5] rounded-md bg-muted/30 ring-1 ring-dashed flex items-center justify-center transition-all ${
+          over ? 'ring-primary/70 bg-primary/10' : 'ring-border/40 hover:ring-primary/40 hover:bg-primary/5'
+        }`}
+        title="Add a card by swiping"
+        aria-label="Add a card by swiping"
+      >
+        <Plus className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+      </Link>
+    );
+  }
+
   return (
     <motion.div
       whileHover={{ scale: 1.05, y: -3, zIndex: 5 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className="relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 ring-border/40 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] hover:ring-primary/50 cursor-pointer"
+      draggable={canReorder}
+      onDragStart={(e) => {
+        if (!canReorder) return;
+        (e as unknown as React.DragEvent).dataTransfer.setData('text/binder-index', String(slotIndex));
+        (e as unknown as React.DragEvent).dataTransfer.effectAllowed = 'move';
+        onDragStart();
+      }}
+      onDragEnd={() => { setOver(false); onDragEnd(); }}
+      onDragOver={dragOver}
+      onDragLeave={() => setOver(false)}
+      onDrop={acceptDrop}
+      className={`relative aspect-[2.5/3.5] rounded-md overflow-hidden bg-muted/40 ring-1 shadow-sm hover:shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.5)] cursor-pointer ${
+        over ? 'ring-primary ring-2' : 'ring-border/40 hover:ring-primary/50'
+      } ${canReorder ? 'cursor-grab active:cursor-grabbing' : ''}`}
       title={[like.card_name, like.set_name, like.artist && `by ${like.artist}`].filter(Boolean).join(' · ')}
       onClick={() => onOpen({
         card_id: like.card_id, card_name: like.card_name, set_name: like.set_name,
@@ -951,11 +1102,48 @@ function BinderSlot({ like, onOpen }: { like: LikedCard | null; onOpen: (s: Card
       })}
     >
       {like.image_url && !err ? (
-        <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
+        <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" draggable={false} className="w-full h-full object-cover pointer-events-none" onError={() => setErr(true)} />
       ) : (
         <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-4 h-4 text-muted-foreground" /></div>
       )}
     </motion.div>
+  );
+}
+
+// Hover-to-turn drop zone pinned to the left/right edge of the binder spread.
+// Holding a dragged card over it for ~550ms advances the page in that direction.
+function EdgeDropZone({
+  side, visible, disabled, onTrigger,
+}: { side: 'left' | 'right'; visible: boolean; disabled: boolean; onTrigger: () => void }) {
+  const timer = React.useRef<number | null>(null);
+  const clear = () => { if (timer.current) { window.clearTimeout(timer.current); timer.current = null; } };
+  React.useEffect(() => clear, []);
+
+  return (
+    <div
+      onDragEnter={(e) => {
+        if (disabled) return;
+        e.preventDefault();
+        clear();
+        timer.current = window.setTimeout(() => { onTrigger(); clear(); }, 550);
+      }}
+      onDragOver={(e) => { if (!disabled) e.preventDefault(); }}
+      onDragLeave={clear}
+      onDrop={(e) => { e.preventDefault(); clear(); }}
+      className={`absolute top-3 bottom-3 ${side === 'left' ? 'left-0' : 'right-0'} w-10 sm:w-14 z-20 rounded-${side === 'left' ? 'l' : 'r'}-3xl transition-opacity duration-200 flex items-center justify-center ${
+        visible && !disabled ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}
+      style={{
+        background: side === 'left'
+          ? 'linear-gradient(to right, hsl(var(--primary)/0.18), transparent)'
+          : 'linear-gradient(to left, hsl(var(--primary)/0.18), transparent)',
+      }}
+      aria-hidden
+    >
+      {side === 'left'
+        ? <ChevronLeft className="w-5 h-5 text-primary drop-shadow" />
+        : <ChevronRight className="w-5 h-5 text-primary drop-shadow" />}
+    </div>
   );
 }
 
