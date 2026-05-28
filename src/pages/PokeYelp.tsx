@@ -918,10 +918,10 @@ export default function PokeYelp() {
               {/* Tag picker — borderless, breathing */}
               <div className="space-y-6 min-w-0 w-full sm:flex-1">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-1">What fits this card?</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-1">What does this card feel like?</h2>
                   <div className="flex items-baseline justify-between mb-1">
                     <p className="text-xs text-muted-foreground">
-                      Tap any tag that fits. Skip the rest. <span className="text-amber-400/90">Accuracy is rewarded!</span>
+                      Pick what feels true. Your unique read helps train the AI. <span className="text-amber-400/90">Originality is rewarded — honest taste trains better AI.</span>
                     </p>
                     <span className="text-[11px] tabular-nums text-muted-foreground">
                       {selected.size} selected
@@ -980,23 +980,26 @@ export default function PokeYelp() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Add your own
+                          Create your own tag
                         </p>
                         <p className="text-[10px] uppercase tracking-wider text-amber-400/90">
-                          Add custom tags for bonus credit
+                          +{XP_PER_CUSTOM} XP · Originality bonus
                         </p>
                       </div>
+                      <p className="text-[11px] text-muted-foreground mb-2">
+                        Invent collector language. If others agree later, you get discovery credit.
+                      </p>
                       <div className="flex gap-2">
                       <Input
                         value={customInput}
                         onChange={(e) => setCustomInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
-                        placeholder="e.g. Mona Lisa pose"
+                        placeholder="e.g. Binder goblin energy"
                         maxLength={40}
                         className="h-10 text-sm bg-muted/30 border-transparent focus-visible:border-primary/40"
                       />
                       <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
-                        <Plus className="w-3.5 h-3.5" /> Add
+                        <Plus className="w-3.5 h-3.5" /> Create Tag
                       </Button>
                       </div>
                     {custom.length > 0 && (
@@ -1040,8 +1043,8 @@ export default function PokeYelp() {
                       className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
-                      <Sparkles className="w-5 h-5" />
-                      Submit Review
+                      <Zap className="w-5 h-5" />
+                      Lock In Tags
                     </Button>
                   </motion.div>
                   <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
