@@ -133,7 +133,7 @@ export default function Auth() {
             <h2 className="text-xl font-semibold text-foreground">How it works</h2>
             <div className="space-y-4">
               {[
-                { icon: Sparkles, step: '1', title: 'Every swipe reveals your collector DNA', desc: 'PokeIQ learns your taste, nostalgia, and collecting habits over time.', bg: 'bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20', iconBg: 'bg-gradient-to-br from-violet-500 to-fuchsia-500' },
+                { icon: Sparkles, step: '1', title: 'Every swipe reveals your collector DNA', desc: 'PokeIQ learns your taste and preferences over time.', bg: 'bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20', iconBg: 'bg-gradient-to-br from-violet-500 to-fuchsia-500' },
                 { icon: User, step: '2', title: 'Discover your collector type', desc: 'Investor. Historian. Gambler. Completionist. And more.', bg: 'bg-gradient-to-br from-sky-500/20 to-cyan-500/20', iconBg: 'bg-gradient-to-br from-sky-500 to-cyan-500' },
                 { icon: BarChart3, step: '3', title: 'Get smarter insights', desc: 'Personalized portfolio trends, risks, and opportunities.', bg: 'bg-gradient-to-br from-amber-500/20 to-orange-500/20', iconBg: 'bg-gradient-to-br from-amber-500 to-orange-500' },
                 { icon: Heart, step: '4', title: 'Collect with more confidence', desc: 'Find more of what brings you joy.', bg: 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20', iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500' }
