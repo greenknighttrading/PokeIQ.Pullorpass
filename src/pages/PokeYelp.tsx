@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft, Zap, Flame, Trophy, Gamepad2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -62,6 +62,27 @@ const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
 const SESSION_SHOWN_KEY = 'pokeyelp_session_shown';
 const CREDITS_PER_REDEMPTION = 20;
 const SWIPES_PER_REDEMPTION = 20;
+
+// ── Arcade XP rules ─────────────────────────────────────
+const ROUND_SIZE = 10;
+const XP_PER_TAG = 10;
+const XP_PER_CUSTOM = 25;
+const XP_PER_SUBMIT = 50;
+const XP_STREAK_BONUS = 25; // every 3-card streak
+const XP_ROUND_BONUS = 250; // 10-card completion
+
+const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe captured', 'DNA updated'];
+const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
+const CARD_FEEDBACK = ['Card trained', 'AI updated', 'Collector signal captured'];
+
+interface FloatingXp {
+  id: number;
+  amount: number;
+  label?: string;
+  x: number; // viewport %
+  y: number;
+  color?: string;
+}
 
 interface YelpCard {
   card_id: string;
