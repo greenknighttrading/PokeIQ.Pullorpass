@@ -398,7 +398,14 @@ export default function PokeYelp() {
   const toggleTag = (t: string) => {
     setSelected((p) => {
       const n = new Set(p);
-      if (n.has(t)) n.delete(t); else n.add(t);
+      if (n.has(t)) {
+        n.delete(t);
+      } else {
+        n.add(t);
+        setRoundXp((x) => x + XP_PER_TAG);
+        spawnXp(XP_PER_TAG, 'PING!');
+        flashFeedback(TAG_FEEDBACK);
+      }
       return n;
     });
   };
@@ -413,6 +420,10 @@ export default function PokeYelp() {
     }
     setCustom((p) => [...p, v]);
     setCustomInput('');
+    setRoundXp((x) => x + XP_PER_CUSTOM);
+    setCustomTagCount((c) => c + 1);
+    spawnXp(XP_PER_CUSTOM, 'ORIGINAL READ', { color: 'amber' });
+    flashFeedback(CUSTOM_FEEDBACK);
   };
 
   const removeCustom = (t: string) => setCustom((p) => p.filter((x) => x !== t));
