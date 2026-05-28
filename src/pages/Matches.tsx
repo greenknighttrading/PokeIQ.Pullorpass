@@ -661,13 +661,13 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
 
 function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-4 flex items-center gap-3">
-      <div className={cn('w-11 h-11 rounded-xl border flex items-center justify-center shrink-0', tint)}>
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-5 flex items-center gap-3.5">
+      <div className={cn('w-[52px] h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
       <div className="min-w-0">
-        <p className="text-xl font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
-        <p className="text-[11px] text-muted-foreground truncate">{label}</p>
+        <p className="text-[24px] font-bold text-foreground tabular-nums leading-tight truncate">{value}</p>
+        <p className="text-[13px] text-muted-foreground truncate">{label}</p>
       </div>
     </div>
   );
