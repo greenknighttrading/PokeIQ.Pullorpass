@@ -1239,7 +1239,7 @@ export default function PokeYelp() {
                   <div className="text-foreground font-semibold tabular-nums">{cardResult.tagCount}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Custom</div>
+                  <div className="text-muted-foreground">Original</div>
                   <div className="text-amber-400 font-semibold tabular-nums">{cardResult.customCount}</div>
                 </div>
                 <div>
@@ -1249,6 +1249,16 @@ export default function PokeYelp() {
                   </div>
                 </div>
               </div>
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono">
+                <Coins className="w-3.5 h-3.5" />
+                +{cardResult.creditsEarned} CREDIT{cardResult.creditsEarned === 1 ? '' : 'S'}
+                <span className="text-amber-400/60">· swipe currency</span>
+              </div>
+              {cardResult.dailyBonusXp > 0 && (
+                <div className="mb-3 text-xs text-amber-400 font-mono tracking-wider">
+                  +{cardResult.dailyBonusXp} XP · DAY {cardResult.dailyCount} DAILY BONUS 🔥
+                </div>
+              )}
               {cardResult.streakBonus && (
                 <div className="mb-4 text-xs text-amber-400 font-mono tracking-wider">
                   +{XP_STREAK_BONUS} XP STREAK BONUS
