@@ -1141,8 +1141,8 @@ export default function PokeYelp() {
                       className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
-                      <Zap className="w-5 h-5" />
-                      Lock In Tags
+                       <Zap className="w-5 h-5" />
+                      Submit Tags
                     </Button>
                   </motion.div>
                   <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
