@@ -542,7 +542,6 @@ export default function PokeYelp() {
     const streakBonus = newStreak > 0 && newStreak % 3 === 0;
     const bonusXp = (streakBonus ? XP_STREAK_BONUS : 0);
     const submitXp = XP_PER_SUBMIT + bonusXp;
-    const earnedXp = submitXp; // tag/custom XP was already added when selected
     setRoundXp((x) => x + submitXp);
     setStreak(newStreak);
     setLongestStreak((l) => Math.max(l, newStreak));
