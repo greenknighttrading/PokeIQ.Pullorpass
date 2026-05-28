@@ -212,14 +212,14 @@ function ValueProp({
   title,
   body,
 }: {
-  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>;
   title: string;
   body: string;
 }) {
   return (
     <div className="flex gap-3">
       <div className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-violet-500/10 border border-violet-500/30">
-        <Icon className="w-4 h-4 text-violet-300" strokeWidth={2} />
+        <Icon className="w-4 h-4 text-violet-300" />
       </div>
       <div>
         <div className="text-sm font-semibold leading-snug">{title}</div>
