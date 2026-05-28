@@ -460,10 +460,26 @@ export default function PokeYelp() {
       } else {
         n.add(t);
         setRoundXp((x) => x + XP_PER_TAG);
-        spawnXp(XP_PER_TAG, 'PING!');
+        spawnXp(XP_PER_TAG);
         flashFeedback(TAG_FEEDBACK);
       }
       return n;
+    });
+  };
+
+  const [clickedDecoys, setClickedDecoys] = useState<Set<string>>(new Set());
+  const decoyTag = useMemo(() => (current ? pickDecoy(current.card_id) : ''), [current?.card_id]);
+
+  const hitDecoy = () => {
+    if (!current) return;
+    if (clickedDecoys.has(current.card_id)) return;
+    setClickedDecoys((p) => new Set(p).add(current.card_id));
+    setRoundXp((x) => Math.max(0, x - 5));
+    setStreak(0);
+    spawnXp(-5, 'FALSE SIGNAL', { color: 'magenta' });
+    toast.error('False signal detected', {
+      description: 'PokeIQ is getting confused (−5 XP)',
+      position: 'top-center',
     });
   };
 
