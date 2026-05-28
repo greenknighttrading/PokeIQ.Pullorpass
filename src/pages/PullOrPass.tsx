@@ -1095,12 +1095,13 @@ function DraggableCard({
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotate = useTransform(x, [-200, 0, 200], [-15, 0, 15]);
-  // Overlays begin fading in almost immediately on drag, then ramp up gradually.
-  const passOpacity = useTransform(x, [-90, -40, -8, 0], [1, 0.55, 0.12, 0]);
-  const passScale = useTransform(x, [-120, -40, 0], [1.3, 0.85, 0.6]);
-  const pullOpacity = useTransform(x, [0, 8, 40, 90], [0, 0.12, 0.55, 1]);
-  const pullScale = useTransform(x, [0, 40, 120], [0.6, 0.85, 1.3]);
-  const loveOpacity = useTransform(y, [-90, -40, -8, 0], [1, 0.55, 0.12, 0]);
+  // Overlays begin fading in almost immediately on drag, then ramp up quickly
+  // so they're fully visible at roughly half the previous distance.
+  const passOpacity = useTransform(x, [-45, -20, -4, 0], [1, 0.55, 0.12, 0]);
+  const passScale = useTransform(x, [-60, -20, 0], [1.3, 0.85, 0.6]);
+  const pullOpacity = useTransform(x, [0, 4, 20, 45], [0, 0.12, 0.55, 1]);
+  const pullScale = useTransform(x, [0, 20, 60], [0.6, 0.85, 1.3]);
+  const loveOpacity = useTransform(y, [-45, -20, -4, 0], [1, 0.55, 0.12, 0]);
 
   const [frozen, setFrozen] = React.useState<{ x: number; y: number; rot: number } | null>(null);
 
