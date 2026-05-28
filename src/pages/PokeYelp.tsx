@@ -95,6 +95,27 @@ const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe c
 const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
 const CARD_FEEDBACK = ['Card trained', 'AI updated', 'Collector signal captured'];
 
+const DECOY_TAGS = [
+  'Tastes like ham',
+  'Smells like feet',
+  'Made of cheese',
+  'WWII memorabilia',
+  'Powered by diesel',
+  'Available at IKEA',
+  'Vintage 1850s oil painting',
+  'Officially endorsed by NASA',
+  'Edible',
+  'Glows in the dark (it does not)',
+  'Banned in 12 countries',
+  'Hand-signed by Shakespeare',
+];
+
+function pickDecoy(cardId: string): string {
+  let h = 0;
+  for (let i = 0; i < cardId.length; i++) h = (h * 31 + cardId.charCodeAt(i)) >>> 0;
+  return DECOY_TAGS[h % DECOY_TAGS.length];
+}
+
 interface FloatingXp {
   id: number;
   amount: number;
@@ -439,10 +460,26 @@ export default function PokeYelp() {
       } else {
         n.add(t);
         setRoundXp((x) => x + XP_PER_TAG);
-        spawnXp(XP_PER_TAG, 'PING!');
+        spawnXp(XP_PER_TAG);
         flashFeedback(TAG_FEEDBACK);
       }
       return n;
+    });
+  };
+
+  const [clickedDecoys, setClickedDecoys] = useState<Set<string>>(new Set());
+  const decoyTag = useMemo(() => (current ? pickDecoy(current.card_id) : ''), [current?.card_id]);
+
+  const hitDecoy = () => {
+    if (!current) return;
+    if (clickedDecoys.has(current.card_id)) return;
+    setClickedDecoys((p) => new Set(p).add(current.card_id));
+    setRoundXp((x) => Math.max(0, x - 5));
+    setStreak(0);
+    spawnXp(-5, 'FALSE SIGNAL', { color: 'magenta' });
+    toast.error('False signal detected', {
+      description: 'PokeIQ is getting confused (−5 XP)',
+      position: 'top-center',
     });
   };
 
@@ -602,7 +639,7 @@ export default function PokeYelp() {
     setRoundXp((x) => x + submitXp);
     setStreak(newStreak);
     setLongestStreak((l) => Math.max(l, newStreak));
-    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'LOCK IN', { color: streakBonus ? 'amber' : undefined });
+    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'SUBMIT', { color: streakBonus ? 'amber' : undefined });
     flashFeedback(CARD_FEEDBACK);
 
     const totalCardXp = tagXp + customXp + submitXp;
@@ -1032,6 +1069,22 @@ export default function PokeYelp() {
                             </motion.button>
                           );
                         })}
+                        {decoyTag && !suggestLoading && suggestions.length > 0 && (() => {
+                          const used = clickedDecoys.has(current!.card_id);
+                          return (
+                            <motion.button
+                              key={`decoy-${current!.card_id}`}
+                              initial={{ opacity: 0, scale: 0.92 }}
+                              animate={{ opacity: used ? 0.35 : 1, scale: 1 }}
+                              onClick={hitDecoy}
+                              disabled={used}
+                              whileTap={{ scale: 0.94 }}
+                              className="px-4 py-2 text-sm rounded-full transition-all duration-200 bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed"
+                            >
+                              {decoyTag}
+                            </motion.button>
+                          );
+                        })()}
                       </AnimatePresence>
                     </div>
                   </div>
@@ -1104,8 +1157,8 @@ export default function PokeYelp() {
                       className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
-                      <Zap className="w-5 h-5" />
-                      Lock In Tags
+                       <Zap className="w-5 h-5" />
+                      Submit Tags
                     </Button>
                   </motion.div>
                   <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
@@ -1179,7 +1232,7 @@ export default function PokeYelp() {
                   : '0 0 12px hsl(var(--primary) / 0.8)',
               }}
             >
-              <div className="text-2xl">+{f.amount} XP</div>
+              <div className="text-2xl">{f.amount >= 0 ? `+${f.amount}` : f.amount} XP</div>
               {f.label && <div className="text-[10px] tracking-[0.2em] text-center mt-0.5">{f.label}</div>}
             </motion.div>
           ))}
@@ -1222,7 +1275,7 @@ export default function PokeYelp() {
               className="relative max-w-sm w-full rounded-3xl p-7 text-center bg-card border-2 border-primary/60"
               style={{ boxShadow: '0 0 48px hsl(var(--primary) / 0.45)' }}
             >
-              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">Training Complete</div>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">PokeIQ Is Getting Smarter</div>
               <div
                 className="text-5xl font-black tabular-nums text-primary mb-4"
                 style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.7)' }}
