@@ -70,6 +70,26 @@ const XP_PER_CUSTOM = 25;
 const XP_PER_SUBMIT = 50;
 const XP_STREAK_BONUS = 25; // every 3-card streak
 const XP_ROUND_BONUS = 250; // 10-card completion
+const XP_DAILY_BONUS_BASE = 100; // first card of the day
+const XP_DAILY_BONUS_PER_DAY = 25; // +25 per consecutive day, capped
+const XP_DAILY_BONUS_CAP = 500;
+
+const DAILY_STREAK_KEY = 'pokeiq_daily_streak';
+
+function loadDailyStreak(): { count: number; lastDate: string | null } {
+  try {
+    const raw = localStorage.getItem(DAILY_STREAK_KEY);
+    if (!raw) return { count: 0, lastDate: null };
+    const v = JSON.parse(raw);
+    return { count: Number(v.count) || 0, lastDate: v.lastDate ?? null };
+  } catch { return { count: 0, lastDate: null }; }
+}
+
+function yesterdayKey() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
 
 const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe captured', 'DNA updated'];
 const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
