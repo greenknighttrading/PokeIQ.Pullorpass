@@ -542,7 +542,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="absolute top-[6%] right-[10%] z-[2] w-[26%] h-[34%] rounded-full bg-warning/10 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col gap-0 px-[50px] py-[13px]">
+        <div className="relative z-10 p-6 sm:p-8 md:p-10 space-y-6 min-h-[360px] md:min-h-[400px] flex flex-col gap-0 px-[40px] py-[10px]">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             <UsernameInline />
@@ -557,7 +557,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 </span>
               </div>
             )}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground leading-[1.05]">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.05]">
               {headlineHead}{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                 {headlineTail}
