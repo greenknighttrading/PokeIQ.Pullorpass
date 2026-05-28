@@ -86,7 +86,7 @@ export default function Leaderboard() {
   );
 
   return (
-    <div className="px-6 lg:px-10 py-8 max-w-[1500px] mx-auto">
+    <div className="px-4 sm:px-6 lg:px-10 py-8 max-w-[1500px] mx-auto">
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         {/* Main column */}
         <div>
@@ -120,39 +120,43 @@ export default function Leaderboard() {
           </div>
 
           <div className="rounded-xl border border-border/60 bg-card/30 overflow-hidden">
-            <div className="grid grid-cols-[60px_1fr_120px_120px_120px] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
-              <div>Rank</div>
-              <div>Collector</div>
-              <div className="flex items-center gap-1.5"><BookOpen className="w-3 h-3" /> Cards Swiped</div>
-              <div className="flex items-center gap-1.5"><Tag className="w-3 h-3" /> Cards Tagged</div>
-              <div className="flex items-center gap-1.5 justify-end"><Sparkles className="w-3 h-3" /> Total Points</div>
-            </div>
-            {sorted.map((c) => (
-              <div
-                key={c.name}
-                className="grid grid-cols-[60px_1fr_120px_120px_120px] gap-4 px-5 py-3 border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors items-center"
-              >
-                <div>{c.rank <= 3 ? <MedalIcon rank={c.rank} /> : <div className="text-sm text-muted-foreground font-medium pl-2">{c.rank}</div>}</div>
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-muted/40 overflow-hidden shrink-0 flex items-center justify-center">
-                    <img src={avatarUrl(c.pokemonId)} alt="" className="w-full h-full object-contain" loading="lazy" />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold truncate">{c.name}</span>
-                      <span className={cn('text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded border', tierBadge(c.tier))}>{c.tier}</span>
+            <div className="overflow-x-auto">
+              <div className="min-w-[640px]">
+                <div className="grid grid-cols-[60px_minmax(200px,1fr)_120px_120px_120px] gap-4 px-5 py-3 text-[10px] uppercase tracking-wider text-muted-foreground border-b border-border/60">
+                  <div>Rank</div>
+                  <div>Collector</div>
+                  <div className="flex items-center gap-1.5"><BookOpen className="w-3 h-3" /> Cards Swiped</div>
+                  <div className="flex items-center gap-1.5"><Tag className="w-3 h-3" /> Cards Tagged</div>
+                  <div className="flex items-center gap-1.5 justify-end"><Sparkles className="w-3 h-3" /> Total Points</div>
+                </div>
+                {sorted.map((c) => (
+                  <div
+                    key={c.name}
+                    className="grid grid-cols-[60px_minmax(200px,1fr)_120px_120px_120px] gap-4 px-5 py-3 border-b border-border/40 last:border-0 hover:bg-muted/20 transition-colors items-center"
+                  >
+                    <div>{c.rank <= 3 ? <MedalIcon rank={c.rank} /> : <div className="text-sm text-muted-foreground font-medium pl-2">{c.rank}</div>}</div>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-full bg-muted/40 overflow-hidden shrink-0 flex items-center justify-center">
+                        <img src={avatarUrl(c.pokemonId)} alt="" className="w-full h-full object-contain" loading="lazy" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold truncate">{c.name}</span>
+                          <span className={cn('text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded border whitespace-nowrap', tierBadge(c.tier))}>{c.tier}</span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground truncate">{c.title}</div>
+                      </div>
                     </div>
-                    <div className="text-[11px] text-muted-foreground truncate">{c.title}</div>
+                    <div className="text-sm tabular-nums">{c.cardsSwiped.toLocaleString()}</div>
+                    <div className="text-sm tabular-nums">{c.cardsTagged.toLocaleString()}</div>
+                    <div className={cn('text-right text-sm font-bold tabular-nums whitespace-nowrap', pointsColor(c.rank))}>
+                      {pts(c).toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">pts</span>
+                    </div>
                   </div>
-                </div>
-                <div className="text-sm tabular-nums">{c.cardsSwiped.toLocaleString()}</div>
-                <div className="text-sm tabular-nums">{c.cardsTagged.toLocaleString()}</div>
-                <div className={cn('text-right text-sm font-bold tabular-nums', pointsColor(c.rank))}>
-                  {pts(c).toLocaleString()} <span className="text-[10px] font-normal text-muted-foreground">pts</span>
-                </div>
+                ))}
               </div>
-            ))}
-            <div className="px-5 py-3 text-[11px] text-muted-foreground flex items-center gap-2 justify-center">
+            </div>
+            <div className="px-5 py-3 text-[11px] text-muted-foreground flex flex-wrap items-center gap-x-2 gap-y-1 justify-center text-center border-t border-border/40">
               <Trophy className="w-3 h-3" /> Leaderboard updates every hour · Points are earned by swiping, tagging, and helping train PokeIQ ·
               <Link to="/pokeyelp" className="text-primary hover:underline">Learn more</Link>
             </div>
