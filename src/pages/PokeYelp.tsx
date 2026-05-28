@@ -608,6 +608,9 @@ export default function PokeYelp() {
       customCount: customTags.length,
       streak: newStreak,
       streakBonus,
+      creditsEarned,
+      dailyBonusXp,
+      dailyCount: newDailyCount,
     });
 
     const newRoundCards = roundCards + 1;
