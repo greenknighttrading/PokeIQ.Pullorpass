@@ -11,6 +11,8 @@ import {
   TrendingDown,
   ArrowUpRight,
   Flame,
+  LineChart,
+  SquareDashed,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -34,33 +36,69 @@ export default function Premium() {
 
   return (
     <div className="px-6 lg:px-10 py-10 max-w-[820px] mx-auto">
+      {/* Eyebrow */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-violet-300 mb-3">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 px-5 py-2 rounded-full border border-violet-500/30 bg-violet-500/5">
           <Crown className="w-3.5 h-3.5" /> PokeIQ Premium
         </div>
-        <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
-          Built for collectors chasing JOY, not just ROI.
-        </h1>
-        <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-          Most apps optimize for market value.<br />
-          PokeIQ optimizes for what makes you genuinely excited to collect.
-        </p>
-        <p className="text-sm text-muted-foreground max-w-xl mx-auto mt-3">
-          Every swipe teaches PokeIQ more about your taste, your aesthetic, and the kinds of cards that actually bring you joy — not just what’s trending.
-        </p>
       </div>
 
-      {/* Premium feature previews */}
-      <div className="text-center mb-6">
-        <div className="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.18em] text-violet-300 mb-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/30">
-          <Sparkles className="w-3 h-3" /> Premium features
+      {/* Hero headline */}
+      <h1 className="text-center text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] mb-8">
+        Built for collectors chasing{' '}
+        <span className="bg-gradient-to-b from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">JOY</span>
+        , not just ROI.
+      </h1>
+
+      {/* Subtle glow divider */}
+      <div className="relative h-px max-w-md mx-auto mb-10 bg-gradient-to-r from-transparent via-violet-400/60 to-transparent">
+        <div className="absolute inset-x-0 -top-2 h-4 bg-violet-400/20 blur-md" />
+      </div>
+
+      {/* 3-column value props */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-12">
+        <ValueProp
+          icon={LineChart}
+          title="Most apps optimize"
+          body="for market value."
+        />
+        <ValueProp
+          icon={Heart}
+          title="PokeIQ optimizes"
+          body="for what makes you genuinely excited to collect."
+        />
+        <ValueProp
+          icon={SquareDashed}
+          title="Every swipe teaches"
+          body="PokeIQ more about your taste, your aesthetic, and the cards that actually bring you joy — not just what’s trending."
+        />
+      </div>
+
+      {/* Premium features pill */}
+      <div className="text-center mb-5">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 px-5 py-2 rounded-full border border-violet-500/30 bg-violet-500/5">
+          <Sparkles className="w-3.5 h-3.5" /> Premium Features
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-          The only app that helps you collect smarter, not harder
-        </h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          By learning more about you and finding cards that'll bring you JOY.
-        </p>
+      </div>
+
+      {/* Featured callout card */}
+      <div className="relative rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-card/60 to-card/30 p-6 md:p-8 mb-10 overflow-hidden">
+        <div className="pointer-events-none absolute -top-20 -right-20 w-60 h-60 rounded-full bg-violet-500/15 blur-3xl" />
+        <div className="relative flex items-center gap-5">
+          <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-violet-300 shrink-0" strokeWidth={1.5} />
+          <div className="h-14 w-px bg-violet-500/30 shrink-0" />
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight leading-tight">
+              The only app that helps you collect{' '}
+              <span className="bg-gradient-to-b from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">smarter</span>
+              , not harder.
+            </h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              By learning more about you and finding cards that'll bring you{' '}
+              <span className="text-violet-300 font-medium">JOY</span>.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-5 mb-10">
@@ -164,6 +202,28 @@ export default function Premium() {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ValueProp({
+  icon: Icon,
+  title,
+  body,
+}: {
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>;
+  title: string;
+  body: string;
+}) {
+  return (
+    <div className="flex gap-3">
+      <div className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-violet-500/10 border border-violet-500/30">
+        <Icon className="w-4 h-4 text-violet-300" />
+      </div>
+      <div>
+        <div className="text-sm font-semibold leading-snug">{title}</div>
+        <p className="text-sm text-muted-foreground leading-relaxed mt-0.5">{body}</p>
       </div>
     </div>
   );
