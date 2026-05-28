@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, Shield, Lightbulb, Scale, ChevronRight } from 'lucide-react';
+import { Sparkles, User, BarChart3, Heart, ChevronRight } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
