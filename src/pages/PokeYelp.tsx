@@ -731,7 +731,7 @@ export default function PokeYelp() {
               transition={{ delay: 0.25, duration: 0.7 }}
               className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
-              Teach the AI what collectors actually love. Every tag helps PokeIQ learn collector DNA.
+              Every tag helps uncode the Collectr DNA.
             </motion.p>
 
             {/* Arcade scoreboard */}
@@ -744,11 +744,18 @@ export default function PokeYelp() {
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="XP" value={roundXp.toLocaleString()} accent />
-                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Streak" value={String(streak)} />
-                <ArcadeStat icon={<Sparkles className="w-3 h-3 text-amber-400" />} label="Custom" value={String(customTagCount)} />
-                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(trainingCredits)} />
+                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="Round XP" value={roundXp.toLocaleString()} accent />
+                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Card Streak" value={String(streak)} />
+                <ArcadeStat icon={<Trophy className="w-3 h-3 text-amber-400" />} label="Daily 🔥" value={`${dailyStreak}d`} />
+                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(credits)} />
               </div>
+              <p className="mt-3 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                <span className="text-primary font-semibold">XP</span> is your arcade score — bragging rights only.{' '}
+                <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
+                <span className="text-foreground">1 per card</span> tagged, plus{' '}
+                <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.
+                Trade <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits → {SWIPES_PER_REDEMPTION} Pull or Pass swipes</span>.
+              </p>
             </div>
 
             {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
