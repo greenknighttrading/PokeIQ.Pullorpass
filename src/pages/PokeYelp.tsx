@@ -1069,6 +1069,22 @@ export default function PokeYelp() {
                             </motion.button>
                           );
                         })}
+                        {decoyTag && !suggestLoading && suggestions.length > 0 && (() => {
+                          const used = clickedDecoys.has(current!.card_id);
+                          return (
+                            <motion.button
+                              key={`decoy-${current!.card_id}`}
+                              initial={{ opacity: 0, scale: 0.92 }}
+                              animate={{ opacity: used ? 0.35 : 1, scale: 1 }}
+                              onClick={hitDecoy}
+                              disabled={used}
+                              whileTap={{ scale: 0.94 }}
+                              className="px-4 py-2 text-sm rounded-full transition-all duration-200 bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed"
+                            >
+                              {decoyTag}
+                            </motion.button>
+                          );
+                        })()}
                       </AnimatePresence>
                     </div>
                   </div>
