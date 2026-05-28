@@ -180,6 +180,18 @@ export default function PokeYelp() {
   const [longestStreak, setLongestStreak] = useState(0);
   const [customTagCount, setCustomTagCount] = useState(0);
   const [trainingCredits, setTrainingCredits] = useState(0);
+  const [dailyStreak, setDailyStreak] = useState<number>(() => {
+    const s = loadDailyStreak();
+    const today = todayKey();
+    const yest = yesterdayKey();
+    // If lastDate isn't today or yesterday, streak resets to 0 visually until they train today
+    if (s.lastDate === today) return s.count;
+    if (s.lastDate === yest) return s.count; // still alive, will increment on first card today
+    return 0;
+  });
+  const [dailyAwardedToday, setDailyAwardedToday] = useState<boolean>(() => {
+    return loadDailyStreak().lastDate === todayKey();
+  });
   const [floatingXps, setFloatingXps] = useState<FloatingXp[]>([]);
   const [feedbackMsg, setFeedbackMsg] = useState<{ id: number; text: string } | null>(null);
   const [cardResult, setCardResult] = useState<null | {
