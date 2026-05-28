@@ -585,25 +585,25 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <HeroStat
-                icon={<BookOpen className="w-5 h-5 text-primary" />}
+                icon={<BookOpen className="w-6 h-6 text-primary" />}
                 tint="bg-primary/15 border-primary/30"
                 value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
                 label="Avg Card Value"
               />
               <HeroStat
-                icon={<HeartIcon className="w-5 h-5 text-red-400" />}
+                icon={<HeartIcon className="w-6 h-6 text-red-400" />}
                 tint="bg-red-400/15 border-red-400/30"
                 value={totalLikes.toLocaleString()}
                 label="Collection Likes"
               />
               <HeroStat
-                icon={<Eye className="w-5 h-5 text-blue-400" />}
+                icon={<Eye className="w-6 h-6 text-blue-400" />}
                 tint="bg-blue-400/15 border-blue-400/30"
                 value={cardsSwiped.toLocaleString()}
                 label="Cards Swiped"
               />
               <HeroStat
-                icon={<Target className="w-5 h-5 text-purple-400" />}
+                icon={<Target className="w-6 h-6 text-purple-400" />}
                 tint="bg-purple-400/15 border-purple-400/30"
                 value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
                 label="DNA Match Rate"
