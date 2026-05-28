@@ -123,8 +123,9 @@ export default function Auth() {
         <div className="max-w-md mx-auto space-y-8">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Welcome to PokeIQ</h1>
-            <p className="text-lg text-muted-foreground">
-              Your Pokémon financial advisor on demand.
+            <p className="text-xl font-semibold text-foreground mt-2">Home of Pull or Pass</p>
+            <p className="text-lg text-muted-foreground mt-2">
+              The first AI-powered app focused on the joy of collecting.
             </p>
           </div>
 
@@ -132,10 +133,10 @@ export default function Auth() {
             <h2 className="text-xl font-semibold text-foreground">How it works:</h2>
             <div className="space-y-4">
               {[
-                { icon: TrendingUp, step: '1', title: 'Upload your collection', desc: 'Export from Collectr or use our CSV template' },
-                { icon: Shield, step: '2', title: 'Discover your collector role', desc: 'Understand your natural collecting style' },
-                { icon: Lightbulb, step: '3', title: 'Get portfolio insights', desc: 'See concentration, risk, and opportunities' },
-                { icon: Scale, step: '4', title: 'Set allocation targets', desc: 'Plan your next purchases intentionally' }
+                { icon: TrendingUp, step: '1', title: 'Every swipe reveals what brings you joy', desc: 'As you rate cards and collections, PokeIQ learns your preferences, habits, nostalgia, and motivations — building your unique collector DNA over time.' },
+                { icon: Shield, step: '2', title: 'Discover your collector personality', desc: 'Find out whether you\'re an investor, historian, gambler, completionist, and more.' },
+                { icon: Lightbulb, step: '3', title: 'Get personalized portfolio insights', desc: 'See strengths, risks, concentration trends, and opportunities tailored to your collecting style.' },
+                { icon: Scale, step: '4', title: 'Make smarter collecting decisions', desc: 'Use your collector DNA and insights to guide future purchases, trades, and long-term goals.' }
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
