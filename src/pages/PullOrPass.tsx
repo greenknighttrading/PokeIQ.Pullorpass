@@ -2468,7 +2468,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   };
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-24 scrollbar-none">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-6 scrollbar-none">
       <div className="max-w-md md:max-w-xl mx-auto px-4 pt-1 space-y-3 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
         <div className="w-full text-center space-y-1">
