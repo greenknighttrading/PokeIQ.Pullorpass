@@ -226,6 +226,7 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} />
               <DeepTasteInsights taste={taste} />
+              <DailyLimitWidget />
             </div>
           )}
         </main>
@@ -1088,5 +1089,102 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
         })}
       </ul>
     </Card>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// Daily Limit Widget — moved from Pull or Pass results
+// ─────────────────────────────────────────────────────────────
+function DailyLimitWidget() {
+  const DAILY_BASE_LIMIT = 20;
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  };
+  const readQuota = () => {
+    try {
+      const raw = localStorage.getItem('pop_quota');
+      if (!raw) return { date: todayKey(), used: 0, bonus: 0 };
+      const q = JSON.parse(raw);
+      if (q.date !== todayKey()) return { date: todayKey(), used: 0, bonus: 0 };
+      return { date: q.date, used: q.used ?? 0, bonus: q.bonus ?? 0 };
+    } catch { return { date: todayKey(), used: 0, bonus: 0 }; }
+  };
+
+  const [quota, setQuota] = useState(() => readQuota());
+  useEffect(() => {
+    const refresh = () => setQuota(readQuota());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
+  const remaining = Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = remaining <= 0;
+
+  // Countdown to midnight
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0);
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3_600_000);
+  const m = Math.floor((ms % 3_600_000) / 60_000);
+
+  return (
+    <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+      <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-card to-zinc-950 p-6 sm:p-8 overflow-hidden text-center">
+        <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+        <div className="relative space-y-3">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">
+            {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
+          </p>
+          <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
+            {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Pro'}
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Pro for unlimited swipes.
+            {outOfSwipes && (
+              <> Your daily swipes reset in{' '}
+                <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span>.
+              </>
+            )}
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 max-w-md mx-auto">
+            <Link to="/earn" className="w-full sm:w-auto">
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="w-full sm:w-auto h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
+              >
+                <Sparkles className="w-4 h-4" />
+                Earn Credits
+              </motion.button>
+            </Link>
+            <motion.button
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => window.location.assign('/premium')}
+              className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
+            >
+              <Crown className="w-4 h-4" />
+              Go PokeIQ Pro
+            </motion.button>
+          </div>
+          <p className="text-[11px] text-muted-foreground/80 pt-1">
+            {outOfSwipes
+              ? 'Every 20 cards you train earns +10 swipes.'
+              : `You have ${remaining} swipe${remaining === 1 ? '' : 's'} left today. Every 20 cards you train earns +10 more.`}
+          </p>
+        </div>
+      </div>
+    </motion.section>
   );
 }
