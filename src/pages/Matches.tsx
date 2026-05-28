@@ -542,7 +542,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="absolute top-[6%] right-[10%] z-[2] w-[26%] h-[34%] rounded-full bg-warning/10 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col gap-0 py-[11px] px-[50px]">
+        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col gap-0 px-[50px] py-[13px]">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             <UsernameInline />
