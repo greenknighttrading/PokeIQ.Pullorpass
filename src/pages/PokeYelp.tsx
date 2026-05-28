@@ -212,6 +212,7 @@ export default function PokeYelp() {
   }>(null);
   const xpIdRef = useRef(0);
   const fbIdRef = useRef(0);
+  const proceedNextCardRef = useRef<() => void>(() => {});
 
   const spawnXp = useCallback((amount: number, label?: string, opts?: { x?: number; y?: number; color?: string }) => {
     const id = ++xpIdRef.current;
