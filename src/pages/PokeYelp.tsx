@@ -1088,6 +1088,192 @@ export default function PokeYelp() {
         </main>
       </div>
       <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+
+      {/* CRT scanline overlay */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[60] opacity-[0.06] mix-blend-overlay"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, hsl(var(--primary)) 0 1px, transparent 1px 3px)',
+        }}
+      />
+
+      {/* Floating XP */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-[70]">
+        <AnimatePresence>
+          {floatingXps.map((f) => (
+            <motion.div
+              key={f.id}
+              initial={{ opacity: 0, y: 0, scale: 0.8 }}
+              animate={{ opacity: 1, y: -60, scale: 1 }}
+              exit={{ opacity: 0, y: -90 }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
+              className="absolute font-mono font-bold"
+              style={{
+                left: `${f.x}%`,
+                top: `${f.y}%`,
+                color: f.color === 'amber' ? 'hsl(45 95% 60%)' : 'hsl(var(--primary))',
+                textShadow: f.color === 'amber'
+                  ? '0 0 12px hsl(45 95% 60% / 0.8)'
+                  : '0 0 12px hsl(var(--primary) / 0.8)',
+              }}
+            >
+              <div className="text-2xl">+{f.amount} XP</div>
+              {f.label && <div className="text-[10px] tracking-[0.2em] text-center mt-0.5">{f.label}</div>}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Mini feedback chip */}
+      <AnimatePresence>
+        {feedbackMsg && (
+          <motion.div
+            key={feedbackMsg.id}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="pointer-events-none fixed bottom-24 left-1/2 -translate-x-1/2 z-[75] px-3 py-1.5 rounded-full font-mono text-[11px] tracking-[0.15em] uppercase bg-background/80 border border-primary/40 text-primary backdrop-blur"
+            style={{ boxShadow: '0 0 16px hsl(var(--primary) / 0.3)' }}
+          >
+            ⚡ {feedbackMsg.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Per-card result panel */}
+      <AnimatePresence>
+        {cardResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={proceedNextCard}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-sm w-full rounded-3xl p-7 text-center bg-card border-2 border-primary/60"
+              style={{ boxShadow: '0 0 48px hsl(var(--primary) / 0.45)' }}
+            >
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">Training Complete</div>
+              <div
+                className="text-5xl font-black tabular-nums text-primary mb-4"
+                style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.7)' }}
+              >
+                +{cardResult.xp} XP
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs mb-5">
+                <div>
+                  <div className="text-muted-foreground">Tags</div>
+                  <div className="text-foreground font-semibold tabular-nums">{cardResult.tagCount}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Custom</div>
+                  <div className="text-amber-400 font-semibold tabular-nums">{cardResult.customCount}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Streak</div>
+                  <div className={`font-semibold tabular-nums ${cardResult.streakBonus ? 'text-amber-400' : 'text-foreground'}`}>
+                    🔥 {cardResult.streak}
+                  </div>
+                </div>
+              </div>
+              {cardResult.streakBonus && (
+                <div className="mb-4 text-xs text-amber-400 font-mono tracking-wider">
+                  +{XP_STREAK_BONUS} XP STREAK BONUS
+                </div>
+              )}
+              <Button
+                onClick={proceedNextCard}
+                className="w-full h-12 rounded-xl font-bold gap-2"
+                style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
+              >
+                Next Card <Zap className="w-4 h-4" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Round-complete arcade screen */}
+      <AnimatePresence>
+        {roundComplete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[85] bg-background/95 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              className="relative max-w-md w-full rounded-3xl p-8 text-center bg-card border-2 border-primary"
+              style={{ boxShadow: '0 0 80px hsl(var(--primary) / 0.5)' }}
+            >
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-400 text-background font-mono text-[10px] tracking-[0.3em] font-bold">
+                ROUND COMPLETE
+              </div>
+              <Trophy className="w-12 h-12 mx-auto text-amber-400 mt-2 mb-3"
+                style={{ filter: 'drop-shadow(0 0 12px hsl(45 95% 60% / 0.8))' }} />
+              <div
+                className="text-6xl font-black tabular-nums text-primary mb-1"
+                style={{ textShadow: '0 0 32px hsl(var(--primary) / 0.7)' }}
+              >
+                {roundComplete.xp.toLocaleString()}
+              </div>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-6">Total XP</div>
+              <div className="grid grid-cols-3 gap-3 text-sm mb-6">
+                <ArcadeStatLg label="Cards" value={String(roundComplete.cards)} />
+                <ArcadeStatLg label="Custom" value={String(roundComplete.custom)} accent />
+                <ArcadeStatLg label="Longest 🔥" value={String(roundComplete.longest)} />
+              </div>
+              <div className="text-xs text-muted-foreground mb-5">Collector DNA updated ✨</div>
+              <div className="space-y-2">
+                <Button onClick={startNewRound} className="w-full h-12 rounded-xl font-bold gap-2"
+                  style={{ boxShadow: '0 0 24px hsl(var(--primary) / 0.5)' }}>
+                  <Gamepad2 className="w-4 h-4" /> Train Another Round
+                </Button>
+                <Button onClick={() => navigate('/pokeiq/last-round')} variant="outline" className="w-full h-11 rounded-xl">
+                  View My Collector DNA
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
+  );
+}
+
+function ArcadeStat({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      className={`rounded-lg border px-3 py-2 bg-card/40 backdrop-blur ${accent ? 'border-primary/60' : 'border-border/60'}`}
+      style={accent ? { boxShadow: '0 0 14px hsl(var(--primary) / 0.25)' } : undefined}
+    >
+      <div className="flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
+        {icon} {label}
+      </div>
+      <div className={`text-lg font-black tabular-nums font-mono ${accent ? 'text-primary' : 'text-foreground'}`}
+        style={accent ? { textShadow: '0 0 10px hsl(var(--primary) / 0.6)' } : undefined}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ArcadeStatLg({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/20 px-2 py-3">
+      <div className={`text-2xl font-black tabular-nums font-mono ${accent ? 'text-amber-400' : 'text-foreground'}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">{label}</div>
+    </div>
   );
 }
