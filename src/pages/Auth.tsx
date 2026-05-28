@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { TrendingUp, Shield, Lightbulb, Scale, ChevronRight } from 'lucide-react';
+import { Sparkles, User, BarChart3, Heart, ChevronRight } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -123,24 +123,24 @@ export default function Auth() {
         <div className="max-w-md mx-auto space-y-8">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Welcome to PokeIQ</h1>
-            <p className="text-xl font-semibold text-foreground mt-2">Home of Pull or Pass</p>
+            <p className="text-xl font-semibold bg-gradient-to-r from-pink-400 via-rose-400 to-amber-300 bg-clip-text text-transparent mt-2">Home of Pull or Pass</p>
             <p className="text-lg text-muted-foreground mt-2">
-              The first AI-powered app focused on the joy of collecting.
+              The AI that discovers what you love to collect.
             </p>
           </div>
 
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-foreground">How it works:</h2>
+            <h2 className="text-xl font-semibold text-foreground">How it works</h2>
             <div className="space-y-4">
               {[
-                { icon: TrendingUp, step: '1', title: 'Every swipe reveals what brings you joy', desc: 'As you rate cards and collections, PokeIQ learns your preferences, habits, nostalgia, and motivations — building your unique collector DNA over time.' },
-                { icon: Shield, step: '2', title: 'Discover your collector personality', desc: 'Find out whether you\'re an investor, historian, gambler, completionist, and more.' },
-                { icon: Lightbulb, step: '3', title: 'Get personalized portfolio insights', desc: 'See strengths, risks, concentration trends, and opportunities tailored to your collecting style.' },
-                { icon: Scale, step: '4', title: 'Make smarter collecting decisions', desc: 'Use your collector DNA and insights to guide future purchases, trades, and long-term goals.' }
+                { icon: Sparkles, step: '1', title: 'Every swipe reveals your collector DNA', desc: 'PokeIQ learns your taste, nostalgia, and collecting habits over time.', bg: 'bg-gradient-to-br from-violet-500/20 to-fuchsia-500/20', iconBg: 'bg-gradient-to-br from-violet-500 to-fuchsia-500' },
+                { icon: User, step: '2', title: 'Discover your collector type', desc: 'Investor. Historian. Gambler. Completionist. And more.', bg: 'bg-gradient-to-br from-sky-500/20 to-cyan-500/20', iconBg: 'bg-gradient-to-br from-sky-500 to-cyan-500' },
+                { icon: BarChart3, step: '3', title: 'Get smarter insights', desc: 'Personalized portfolio trends, risks, and opportunities.', bg: 'bg-gradient-to-br from-amber-500/20 to-orange-500/20', iconBg: 'bg-gradient-to-br from-amber-500 to-orange-500' },
+                { icon: Heart, step: '4', title: 'Collect with more confidence', desc: 'Find more of what brings you joy.', bg: 'bg-gradient-to-br from-emerald-500/20 to-teal-500/20', iconBg: 'bg-gradient-to-br from-emerald-500 to-teal-500' }
               ].map((item) => (
-                <div key={item.step} className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <item.icon className="w-5 h-5 text-primary" />
+                <div key={item.step} className={`flex items-start gap-4 p-4 rounded-2xl ${item.bg} border border-white/5 backdrop-blur-sm`}>
+                  <div className={`w-10 h-10 rounded-xl ${item.iconBg} flex items-center justify-center flex-shrink-0 shadow-lg`}>
+                    <item.icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <p className="font-medium text-foreground">{item.title}</p>
