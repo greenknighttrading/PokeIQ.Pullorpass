@@ -742,18 +742,11 @@ export default function PokeYelp() {
 
             {/* Arcade scoreboard */}
             <div className="mt-6 max-w-2xl mx-auto">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Gamepad2 className="w-4 h-4 text-primary" />
-                <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-primary/90"
-                  style={{ textShadow: '0 0 10px hsl(var(--primary) / 0.6)' }}>
-                  Round 1 · {roundCards} / {ROUND_SIZE} Cards
-                </span>
-              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="Round XP" value={roundXp.toLocaleString()} accent />
-                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Card Streak" value={String(streak)} />
-                <ArcadeStat icon={<Trophy className="w-3 h-3 text-amber-400" />} label="Daily 🔥" value={`${dailyStreak}d`} />
-                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(credits)} />
+                <ArcadeStat icon={<Zap className="w-3 h-3" />} label="Score" value={`${roundXp.toLocaleString()} XP`} color="primary" accent />
+                <ArcadeStat icon={<Flame className="w-3 h-3" />} label="Card Streak" value={`${streak} 🔥`} color="amber" />
+                <ArcadeStat icon={<Trophy className="w-3 h-3" />} label={`Daily 🔥`} value={`${dailyStreak}d`} color="magenta" />
+                <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits" value={`${credits} ◎`} color="amber" accent />
               </div>
               <p className="mt-3 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
                 <span className="text-primary font-semibold">XP</span> is your arcade score — bragging rights only.{' '}
@@ -770,39 +763,56 @@ export default function PokeYelp() {
               const toNext = REVIEWS_PER_SWIPE_BATCH - inRound;
               const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
               return (
-                <div className="mt-8 max-w-md mx-auto">
-                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                    <span className="inline-flex items-center gap-1.5">
-                      <Coins className="w-3.5 h-3.5 text-amber-400" />
-                      <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
-                      <span>/ {REVIEWS_PER_SWIPE_BATCH} reviewed</span>
-                    </span>
-                    <span className="tabular-nums">
-                      {toNext} to <span className="text-primary font-semibold">+{SWIPES_PER_BATCH} swipes</span>
-                    </span>
+                <div className="mt-8 max-w-2xl mx-auto flex items-center gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Coins className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
+                        <span>/ {REVIEWS_PER_SWIPE_BATCH} reviewed</span>
+                      </span>
+                      <span className="tabular-nums">
+                        {toNext} to <span className="text-primary font-semibold">+{SWIPES_PER_BATCH} swipes</span>
+                      </span>
+                    </div>
+                    <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                      <motion.div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                        style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
+                      />
+                    </div>
                   </div>
-                  <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                    <motion.div
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                      style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
-                    />
-                  </div>
+                  <button
+                    onClick={() => {
+                      if (todaysMode && (todaysRemaining ?? 0) > 0) {
+                        toast.message('Filters locked', {
+                          description: `Tag the ${todaysRemaining ?? ''} cards you swiped today first to teach PokeIQ your vibe.`,
+                        });
+                        return;
+                      }
+                      toast.message('Premium unlocks card-level training', {
+                        description: 'PokeIQ Pro lets you pick specific cards to train so your favorites get the most accurate tags.',
+                      });
+                    }}
+                    className="shrink-0 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
+                  >
+                    <Filter className="w-3.5 h-3.5" />
+                    Filters locked
+                    {activeFiltersCount > 0 && (
+                      <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
+                    )}
+                  </button>
                 </div>
               );
             })()}
 
-            {/* Subtle filter / credits row */}
-            <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1.5">
-                <Coins className="w-3.5 h-3.5 text-amber-400" />
-                <span className="tabular-nums text-foreground font-medium">{credits}</span> credits
-              </span>
-              {credits >= CREDITS_PER_REDEMPTION && (
-                <>
-                  <span className="w-px h-3 bg-border" />
+            {/* Redeem / today-left row */}
+            {(credits >= CREDITS_PER_REDEMPTION || (todaysMode && todaysRemaining != null && todaysRemaining > 0)) && (
+              <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+                {credits >= CREDITS_PER_REDEMPTION && (
                   <button
                     onClick={redeemCredits}
                     disabled={redeeming}
@@ -812,36 +822,15 @@ export default function PokeYelp() {
                     <RotateCw className="w-3 h-3" />
                     {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} → ${SWIPES_PER_REDEMPTION} swipes`}
                   </button>
-                </>
-              )}
-              <span className="w-px h-3 bg-border" />
-              <button
-                onClick={() => {
-                  if (todaysMode && (todaysRemaining ?? 0) > 0) {
-                    toast.message('Filters locked', {
-                      description: `Tag the ${todaysRemaining ?? ''} cards you swiped today first to teach PokeIQ your vibe.`,
-                    });
-                    return;
-                  }
-                  toast.message('Premium unlocks card-level training', {
-                    description: 'PokeIQ Pro lets you pick specific cards to train so your favorites get the most accurate tags.',
-                  });
-                }}
-                className="inline-flex items-center gap-1.5 hover:text-foreground transition-colors"
-              >
-                <Filter className="w-3.5 h-3.5" />
-                Filters locked
-                {activeFiltersCount > 0 && (
-                  <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
                 )}
-              </button>
-              {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
-                <>
-                  <span className="w-px h-3 bg-border" />
-                  <span><span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left</span>
-                </>
-              )}
-            </div>
+                {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
+                  <>
+                    {credits >= CREDITS_PER_REDEMPTION && <span className="w-px h-3 bg-border" />}
+                    <span><span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left</span>
+                  </>
+                )}
+              </div>
+            )}
           </header>
 
           {/* Filters panel */}
@@ -1327,17 +1316,40 @@ export default function PokeYelp() {
   );
 }
 
-function ArcadeStat({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
+function ArcadeStat({
+  icon,
+  label,
+  value,
+  accent,
+  color = 'primary',
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent?: boolean;
+  color?: 'primary' | 'amber' | 'magenta';
+}) {
+  const palette = {
+    primary: { hsl: '174 47% 43%', text: 'text-primary', label: 'text-primary/80' },
+    amber:   { hsl: '38 92% 55%',  text: 'text-amber-400', label: 'text-amber-300/80' },
+    magenta: { hsl: '320 85% 62%', text: 'text-pink-400', label: 'text-pink-300/80' },
+  }[color];
+  const glow = accent ? 0.55 : 0.25;
   return (
     <div
-      className={`rounded-lg border px-3 py-2 bg-card/40 backdrop-blur ${accent ? 'border-primary/60' : 'border-border/60'}`}
-      style={accent ? { boxShadow: '0 0 14px hsl(var(--primary) / 0.25)' } : undefined}
+      className="relative rounded-lg px-3 py-2 bg-card/60 backdrop-blur font-mono"
+      style={{
+        border: `1.5px solid hsl(${palette.hsl} / ${accent ? 0.9 : 0.55})`,
+        boxShadow: `0 0 ${accent ? 18 : 10}px hsl(${palette.hsl} / ${glow}), inset 0 0 12px hsl(${palette.hsl} / 0.08)`,
+      }}
     >
-      <div className="flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
-        {icon} {label}
+      <div className={`flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.25em] ${palette.label}`}>
+        <span className={palette.text}>{icon}</span> {label}
       </div>
-      <div className={`text-lg font-black tabular-nums font-mono ${accent ? 'text-primary' : 'text-foreground'}`}
-        style={accent ? { textShadow: '0 0 10px hsl(var(--primary) / 0.6)' } : undefined}>
+      <div
+        className={`text-xl font-black tabular-nums leading-tight ${palette.text}`}
+        style={{ textShadow: `0 0 10px hsl(${palette.hsl} / ${accent ? 0.75 : 0.45})` }}
+      >
         {value}
       </div>
     </div>
