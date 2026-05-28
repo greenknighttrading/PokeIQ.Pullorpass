@@ -639,7 +639,7 @@ export default function PokeYelp() {
     setRoundXp((x) => x + submitXp);
     setStreak(newStreak);
     setLongestStreak((l) => Math.max(l, newStreak));
-    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'LOCK IN', { color: streakBonus ? 'amber' : undefined });
+    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'SUBMIT', { color: streakBonus ? 'amber' : undefined });
     flashFeedback(CARD_FEEDBACK);
 
     const totalCardXp = tagXp + customXp + submitXp;
