@@ -123,10 +123,10 @@ export default function Auth() {
         <div className="max-w-md mx-auto space-y-8">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">Welcome to PokeIQ</h1>
-            <p className="text-xl font-semibold bg-gradient-to-r from-pink-400 via-rose-400 to-amber-300 bg-clip-text text-transparent mt-2">Home of Pull or Pass</p>
             <p className="text-lg text-muted-foreground mt-2">
               The AI that discovers what you love to collect.
             </p>
+            <p className="text-xl font-semibold bg-gradient-to-r from-pink-400 via-rose-400 to-amber-300 bg-clip-text text-transparent mt-2">Home of Pull or Pass</p>
           </div>
 
           <div className="space-y-6">
