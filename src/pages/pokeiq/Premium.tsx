@@ -214,6 +214,81 @@ function FeatureCard({
   );
 }
 
+function PullOrPassCard() {
+  return (
+    <div className="relative rounded-2xl border border-border/60 bg-card/40 p-6 md:p-7 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-transparent to-fuchsia-500/5 pointer-events-none" />
+      <div className="relative grid md:grid-cols-[1fr,1.1fr] gap-6 items-center">
+        <div>
+          <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-violet-500/15 border border-violet-500/30 mb-3">
+            <Heart className="w-4 h-4 text-violet-300" />
+          </div>
+          <h3 className="text-xl font-semibold mb-2 flex items-center gap-2 flex-wrap">
+            Unlimited Pull or Pass
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              CORE
+            </span>
+          </h3>
+          <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
+            The complete Pull or Pass experience. Unlimited swipes, custom filters, and profile analytics.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-x-4 gap-y-2">
+            {coreFeatures.map((f) => (
+              <div key={f} className="flex items-start gap-2 text-xs">
+                <Check className="w-3.5 h-3.5 text-violet-300 shrink-0 mt-0.5" />
+                <span className="text-muted-foreground">{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="relative">
+          <PullOrPassPreview />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PullOrPassPreview() {
+  return (
+    <PreviewShell>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Heart className="w-4 h-4 text-violet-300" />
+          <span className="text-xs font-semibold">Pull or Pass</span>
+        </div>
+        <span className="text-[10px] text-amber-400 flex items-center gap-1">
+          <Flame className="w-3 h-3" /> Streak 12
+        </span>
+      </div>
+
+      {/* Active card with swipe overlay */}
+      <div className="relative rounded-lg border border-violet-500/30 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 p-4 mb-3 overflow-hidden">
+        <div className="absolute top-2 right-2 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
+          PULL
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-14 rounded bg-gradient-to-br from-amber-300/40 to-orange-400/30 border border-amber-300/40 shrink-0" />
+          <div>
+            <div className="text-xs font-semibold">Mew GG10/GG70</div>
+            <div className="text-[10px] text-violet-300">Crown Zenith · GG</div>
+            <div className="text-[10px] text-muted-foreground mt-0.5">$45 market</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom filters */}
+      <div className="flex flex-wrap gap-1.5">
+        {['Vintage only', '>$50', 'Slabs'].map((f) => (
+          <span key={f} className="text-[9px] uppercase tracking-wider px-2 py-1 rounded-full bg-violet-500/10 border border-violet-500/25 text-violet-200">
+            {f}
+          </span>
+        ))}
+      </div>
+    </PreviewShell>
+  );
+}
+
 /* ============ Mock previews ============ */
 
 function PreviewShell({ children }: { children: React.ReactNode }) {
