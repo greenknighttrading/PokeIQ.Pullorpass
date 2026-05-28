@@ -192,7 +192,7 @@ export default function Premium() {
               <Heart className="w-4 h-4 text-violet-300" />
               <span className="text-sm font-semibold">Unlimited Pull or Pass included</span>
             </div>
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 font-sans font-semibold text-slate-50 text-5xl">
               {coreFeatures.map((f) => (
                 <div key={f} className="flex items-start gap-2 text-xs">
                   <Check className="w-3.5 h-3.5 text-violet-300 shrink-0 mt-0.5" />
