@@ -618,6 +618,11 @@ export default function PokeYelp() {
 
     const newRoundCards = roundCards + 1;
     setRoundCards(newRoundCards);
+
+    // Auto-advance to next card after the summary lingers briefly
+    window.setTimeout(() => {
+      proceedNextCardRef.current?.();
+    }, 1800);
   };
 
   const proceedNextCard = () => {
