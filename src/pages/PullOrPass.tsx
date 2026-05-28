@@ -509,7 +509,12 @@ export default function PullOrPass() {
     setStage('results');
     clearResume();
     writeResults({ records: allRecords, roundId, cards });
-    if (!userId) return;
+    if (!userId) {
+      // New/unauthed user just finished a round — nudge them to create an
+      // account (or log in) so their picks + Collector Profile are saved.
+      setShowSignupPrompt(true);
+      return;
+    }
     const analysis = analyzeRound(allRecords);
 
     // Update / upsert DNA
@@ -906,7 +911,11 @@ export default function PullOrPass() {
         {/* Mid-session signup nudge after first 20 lifetime swipes */}
         <AnimatePresence>
           {showSignupPrompt && (
-            <SignupNudge onClose={() => setShowSignupPrompt(false)} onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })} />
+            <SignupNudge
+              onClose={() => setShowSignupPrompt(false)}
+              onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
+              onLogin={() => navigate('/auth', { state: { from: '/swipe', mode: 'login' } })}
+            />
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
