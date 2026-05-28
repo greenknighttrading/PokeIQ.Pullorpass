@@ -196,7 +196,7 @@ export default function Matches() {
   return (
     <>
       <Seo title="Your Collector DNA | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
-      <div className="min-h-screen bg-background flex flex-col">
+      <div className="min-h-screen bg-background flex flex-col gap-0">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
           <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
             <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
@@ -511,7 +511,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
     <section className="relative space-y-6">
       {/* One unified hero widget — username, headline, and taste signals
           all sit on top of the background art so more of it shows through. */}
-      <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card">
+      <div className="relative overflow-hidden border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card rounded-3xl shadow-none">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
@@ -541,7 +541,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="absolute top-[6%] right-[10%] z-[2] w-[26%] h-[34%] rounded-full bg-warning/10 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col">
+        <div className="relative z-10 p-6 sm:p-10 md:p-12 space-y-8 min-h-[460px] md:min-h-[520px] flex flex-col gap-0 py-[11px] px-[50px]">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             <UsernameInline />
@@ -550,8 +550,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           <div className="md:max-w-[62%]">
             {personalityType && (
               <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="w-4 h-4 text-amber-400" />
-                <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-amber-400">
+                <BookOpen className="text-amber-400 w-[22px] h-[19px]" />
+                <span className="font-bold uppercase tracking-[0.2em] text-amber-400 text-base">
                   {personalityType}
                 </span>
               </div>
@@ -562,7 +562,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 {headlineTail}
               </span>
             </h1>
-            <p className="mt-5 text-base sm:text-lg text-foreground/80 leading-relaxed max-w-xl">
+            <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-xl font-semibold">
               {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}{sentence}
             </p>
 
@@ -578,7 +578,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
           {/* Collector Stats — moved into the hero widget in place of the
               taste-signal pills. Translucent surfaces so the art still
               breathes through. */}
-          <div className="mt-auto pt-10 md:pt-16">
+          <div className="mt-auto pt-10 md:pt-16 px-0 py-[4px]">
             <div className="flex items-center gap-2 mb-3">
               <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
               <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
@@ -614,7 +614,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline underline-offset-4"
+                className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline underline-offset-4 text-lg px-0 py-[11px] mx-px"
               >
                 View Full DNA <ArrowRight className="w-3.5 h-3.5" />
               </button>
