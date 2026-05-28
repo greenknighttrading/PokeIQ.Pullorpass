@@ -38,13 +38,13 @@ export default function Premium() {
     <div className="px-6 lg:px-10 py-10 max-w-[820px] mx-auto">
       {/* Eyebrow */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 px-5 py-2 rounded-full border border-violet-500/30 bg-violet-500/5">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 rounded-full border border-violet-500/30 bg-violet-500/5 px-[19px] py-[7px]">
           <Crown className="w-3.5 h-3.5" /> PokeIQ Premium
         </div>
       </div>
 
       {/* Hero headline */}
-      <h1 className="text-center text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] mb-8">
+      <h1 className="text-center text-4xl font-bold tracking-tight leading-[1.05] mb-8 md:text-3xl px-[79px]">
         Built for collectors chasing{' '}
         <span className="bg-gradient-to-b from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">JOY</span>
         , not just ROI.
@@ -65,18 +65,18 @@ export default function Premium() {
         <ValueProp
           icon={Heart}
           title="PokeIQ optimizes"
-          body="for what makes you genuinely excited to collect."
+          body="for what cards makes you genuinely excited"
         />
         <ValueProp
           icon={SquareDashed}
           title="Every swipe teaches"
-          body="PokeIQ more about your taste, your aesthetic, and the cards that actually bring you joy — not just what’s trending."
+          body="PokeIQ more about what you like."
         />
       </div>
 
       {/* Premium features pill */}
-      <div className="text-center mb-5">
-        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 px-5 py-2 rounded-full border border-violet-500/30 bg-violet-500/5">
+      <div className="text-center mb-5 py-0 mx-[38px]">
+        <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 rounded-full border border-violet-500/30 bg-violet-500/5 px-[19px] py-[7px]">
           <Sparkles className="w-3.5 h-3.5" /> Premium Features
         </div>
       </div>
@@ -217,7 +217,7 @@ function ValueProp({
   body: string;
 }) {
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-3 px-0">
       <div className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-violet-500/10 border border-violet-500/30">
         <Icon className="w-4 h-4 text-violet-300" />
       </div>
