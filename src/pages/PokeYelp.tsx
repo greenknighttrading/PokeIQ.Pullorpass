@@ -95,6 +95,27 @@ const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe c
 const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
 const CARD_FEEDBACK = ['Card trained', 'AI updated', 'Collector signal captured'];
 
+const DECOY_TAGS = [
+  'Tastes like ham',
+  'Smells like feet',
+  'Made of cheese',
+  'WWII memorabilia',
+  'Powered by diesel',
+  'Available at IKEA',
+  'Vintage 1850s oil painting',
+  'Officially endorsed by NASA',
+  'Edible',
+  'Glows in the dark (it does not)',
+  'Banned in 12 countries',
+  'Hand-signed by Shakespeare',
+];
+
+function pickDecoy(cardId: string): string {
+  let h = 0;
+  for (let i = 0; i < cardId.length; i++) h = (h * 31 + cardId.charCodeAt(i)) >>> 0;
+  return DECOY_TAGS[h % DECOY_TAGS.length];
+}
+
 interface FloatingXp {
   id: number;
   amount: number;
