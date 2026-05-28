@@ -60,6 +60,7 @@ export default function Premium() {
       </div>
 
       <div className="flex flex-col gap-5 mb-10">
+        <PullOrPassCard />
         <FeatureCard
           icon={BarChart3}
           title="Advanced portfolio analytics"
