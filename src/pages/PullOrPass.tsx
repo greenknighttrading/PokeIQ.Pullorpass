@@ -2678,7 +2678,7 @@ function __DeprecatedIntroScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
-function SignupNudge({ onClose, onSignUp }: { onClose: () => void; onSignUp: () => void }) {
+function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSignUp: () => void; onLogin?: () => void }) {
   return (
     <motion.div
       className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
@@ -2714,6 +2714,11 @@ function SignupNudge({ onClose, onSignUp }: { onClose: () => void; onSignUp: () 
               <Button onClick={onSignUp} size="lg" className="gap-2">
                 <LogIn className="w-4 h-4" /> Build my Collector Profile
               </Button>
+              {onLogin && (
+                <Button onClick={onLogin} size="lg" variant="outline" className="gap-2">
+                  Log in to existing account
+                </Button>
+              )}
               <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">
                 Keep swiping for now
               </button>
