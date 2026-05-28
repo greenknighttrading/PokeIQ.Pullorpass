@@ -212,6 +212,7 @@ export default function PokeYelp() {
   }>(null);
   const xpIdRef = useRef(0);
   const fbIdRef = useRef(0);
+  const proceedNextCardRef = useRef<() => void>(() => {});
 
   const spawnXp = useCallback((amount: number, label?: string, opts?: { x?: number; y?: number; color?: string }) => {
     const id = ++xpIdRef.current;
@@ -618,6 +619,11 @@ export default function PokeYelp() {
 
     const newRoundCards = roundCards + 1;
     setRoundCards(newRoundCards);
+
+    // Auto-advance to next card after the summary lingers briefly
+    window.setTimeout(() => {
+      proceedNextCardRef.current?.();
+    }, 1800);
   };
 
   const proceedNextCard = () => {
@@ -636,6 +642,7 @@ export default function PokeYelp() {
     }
     nextCard();
   };
+  proceedNextCardRef.current = proceedNextCard;
 
   const startNewRound = () => {
     setRoundComplete(null);
@@ -1253,13 +1260,9 @@ export default function PokeYelp() {
                   +{XP_STREAK_BONUS} XP STREAK BONUS
                 </div>
               )}
-              <Button
-                onClick={proceedNextCard}
-                className="w-full h-12 rounded-xl font-bold gap-2"
-                style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
-              >
-                Next Card <Zap className="w-4 h-4" />
-              </Button>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+                Next card loading…
+              </div>
             </motion.div>
           </motion.div>
         )}
