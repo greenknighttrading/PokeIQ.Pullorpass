@@ -1216,7 +1216,7 @@ export default function PokeYelp() {
                   : '0 0 12px hsl(var(--primary) / 0.8)',
               }}
             >
-              <div className="text-2xl">+{f.amount} XP</div>
+              <div className="text-2xl">{f.amount >= 0 ? `+${f.amount}` : f.amount} XP</div>
               {f.label && <div className="text-[10px] tracking-[0.2em] text-center mt-0.5">{f.label}</div>}
             </motion.div>
           ))}
