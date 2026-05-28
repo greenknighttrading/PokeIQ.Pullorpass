@@ -2468,7 +2468,7 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
   };
 
   return (
-    <div className="flex-1 min-h-0 overflow-y-auto pb-24 scrollbar-none">
+    <div className="flex-1 min-h-0 overflow-y-auto pb-6 scrollbar-none">
       <div className="max-w-md md:max-w-xl mx-auto px-4 pt-1 space-y-3 flex flex-col items-center text-center">
         {/* SECTION 1 — HERO */}
         <div className="w-full text-center space-y-1">
@@ -2603,20 +2603,17 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           Swipe through 20 cards a round. PokeIQ learns your taste, finds your matches, and
           curates custom binders that tell your collector story.
         </p>
-      </div>
 
-      {/* SECTION 5 — STICKY CTA */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-40 px-4 pt-3 bg-gradient-to-t from-background via-background/95 to-transparent flex justify-center"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 0.75rem)' }}
-      >
-        <Button
-          onClick={onStart}
-          size="lg"
-          className="w-full max-w-md md:max-w-lg h-12 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
-        >
-          Start Swiping <ArrowRight className="w-5 h-5" />
-        </Button>
+        {/* CTA — placed immediately after description */}
+        <div className="w-full flex justify-center">
+          <Button
+            onClick={onStart}
+            size="lg"
+            className="w-full max-w-xs sm:max-w-sm h-12 text-base font-bold bg-gradient-to-r from-primary via-cyan-500 to-purple-500 hover:opacity-90 text-primary-foreground shadow-[0_0_30px_hsl(var(--primary)/0.55)] flex"
+          >
+            Start Swiping <ArrowRight className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
     </div>
   );
