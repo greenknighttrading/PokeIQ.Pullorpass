@@ -1259,7 +1259,7 @@ export default function PokeYelp() {
               className="relative max-w-sm w-full rounded-3xl p-7 text-center bg-card border-2 border-primary/60"
               style={{ boxShadow: '0 0 48px hsl(var(--primary) / 0.45)' }}
             >
-              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">Training Complete</div>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">PokeIQ Is Getting Smarter</div>
               <div
                 className="text-5xl font-black tabular-nums text-primary mb-4"
                 style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.7)' }}
