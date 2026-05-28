@@ -671,7 +671,7 @@ export default function PokeYelp() {
               className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
               style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
             >
-              PokeIQ Training <span className="inline-block">✨</span>
+              PokeIQ Training Arcade <span className="inline-block">✨</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -679,8 +679,25 @@ export default function PokeYelp() {
               transition={{ delay: 0.25, duration: 0.7 }}
               className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
-              Help train smarter recommendations for yourself and collectors everywhere.
+              Teach the AI what collectors actually love. Every tag helps PokeIQ learn collector DNA.
             </motion.p>
+
+            {/* Arcade scoreboard */}
+            <div className="mt-6 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Gamepad2 className="w-4 h-4 text-primary" />
+                <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-primary/90"
+                  style={{ textShadow: '0 0 10px hsl(var(--primary) / 0.6)' }}>
+                  Round 1 · {roundCards} / {ROUND_SIZE} Cards
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="XP" value={roundXp.toLocaleString()} accent />
+                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Streak" value={String(streak)} />
+                <ArcadeStat icon={<Sparkles className="w-3 h-3 text-amber-400" />} label="Custom" value={String(customTagCount)} />
+                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(trainingCredits)} />
+              </div>
+            </div>
 
             {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
             {(() => {
