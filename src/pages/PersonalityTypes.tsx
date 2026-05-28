@@ -122,7 +122,7 @@ export default function PersonalityTypes() {
 
       <div className="min-h-screen bg-background">
         <main className="max-w-6xl mx-auto px-4 py-8 md:py-12">
-          <div className="mb-10 grid md:grid-cols-[1fr_auto] gap-6 md:gap-8 items-center">
+          <div className="mb-10 grid md:grid-cols-[1fr_auto] gap-6 md:gap-8 items-center text-center">
             <div className="space-y-3">
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
                 Collector Personality Types
