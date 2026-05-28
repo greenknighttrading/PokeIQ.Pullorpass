@@ -200,6 +200,9 @@ export default function PokeYelp() {
     customCount: number;
     streak: number;
     streakBonus: boolean;
+    creditsEarned: number;
+    dailyBonusXp: number;
+    dailyCount: number;
   }>(null);
   const [roundComplete, setRoundComplete] = useState<null | {
     xp: number;
