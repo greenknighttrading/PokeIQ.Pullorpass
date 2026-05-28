@@ -153,6 +153,48 @@ export default function PokeYelp() {
   const [setQuery, setSetQuery] = useState<string>('');
   const [eraId, setEraId] = useState<string>('');
 
+  // ── Arcade state ──
+  const [roundXp, setRoundXp] = useState(0);
+  const [roundCards, setRoundCards] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [customTagCount, setCustomTagCount] = useState(0);
+  const [trainingCredits, setTrainingCredits] = useState(0);
+  const [floatingXps, setFloatingXps] = useState<FloatingXp[]>([]);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ id: number; text: string } | null>(null);
+  const [cardResult, setCardResult] = useState<null | {
+    xp: number;
+    tagCount: number;
+    customCount: number;
+    streak: number;
+    streakBonus: boolean;
+  }>(null);
+  const [roundComplete, setRoundComplete] = useState<null | {
+    xp: number;
+    cards: number;
+    custom: number;
+    longest: number;
+  }>(null);
+  const xpIdRef = useRef(0);
+  const fbIdRef = useRef(0);
+
+  const spawnXp = useCallback((amount: number, label?: string, opts?: { x?: number; y?: number; color?: string }) => {
+    const id = ++xpIdRef.current;
+    const x = opts?.x ?? 40 + Math.random() * 20;
+    const y = opts?.y ?? 50 + Math.random() * 10;
+    setFloatingXps((p) => [...p, { id, amount, label, x, y, color: opts?.color }]);
+    setTimeout(() => setFloatingXps((p) => p.filter((f) => f.id !== id)), 1400);
+  }, []);
+
+  const flashFeedback = useCallback((pool: string[]) => {
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    const id = ++fbIdRef.current;
+    setFeedbackMsg({ id, text });
+    setTimeout(() => {
+      setFeedbackMsg((curr) => (curr && curr.id === id ? null : curr));
+    }, 1200);
+  }, []);
+
   // Prioritize cards the user PullOrPassed today — filters locked until done
   const [todaysMode, setTodaysMode] = useState(true);
   const [todaysRemaining, setTodaysRemaining] = useState<number | null>(null);
