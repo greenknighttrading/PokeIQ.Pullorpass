@@ -642,6 +642,7 @@ export default function PokeYelp() {
     }
     nextCard();
   };
+  proceedNextCardRef.current = proceedNextCard;
 
   const startNewRound = () => {
     setRoundComplete(null);
@@ -1259,13 +1260,9 @@ export default function PokeYelp() {
                   +{XP_STREAK_BONUS} XP STREAK BONUS
                 </div>
               )}
-              <Button
-                onClick={proceedNextCard}
-                className="w-full h-12 rounded-xl font-bold gap-2"
-                style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
-              >
-                Next Card <Zap className="w-4 h-4" />
-              </Button>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground">
+                Next card loading…
+              </div>
             </motion.div>
           </motion.div>
         )}
