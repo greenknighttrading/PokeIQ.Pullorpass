@@ -126,6 +126,22 @@
     @apply border-border;
   }
 
+  /* Global desktop scale-down (~80%).
+   * Tailwind sizes/spacing are rem-based, so reducing the root font-size
+   * proportionally scales the entire design system — typography, padding,
+   * gaps, max-widths in rem, radii — preserving every spacing ratio.
+   * Mobile keeps the default scale so touch targets remain comfortable.
+   */
+  html {
+    font-size: 100%;
+  }
+  @media (min-width: 768px) {
+    html { font-size: 87.5%; } /* 14px */
+  }
+  @media (min-width: 1280px) {
+    html { font-size: 81.25%; } /* 13px — ~equivalent to old 75% zoom */
+  }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
