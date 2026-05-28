@@ -70,6 +70,26 @@ const XP_PER_CUSTOM = 25;
 const XP_PER_SUBMIT = 50;
 const XP_STREAK_BONUS = 25; // every 3-card streak
 const XP_ROUND_BONUS = 250; // 10-card completion
+const XP_DAILY_BONUS_BASE = 100; // first card of the day
+const XP_DAILY_BONUS_PER_DAY = 25; // +25 per consecutive day, capped
+const XP_DAILY_BONUS_CAP = 500;
+
+const DAILY_STREAK_KEY = 'pokeiq_daily_streak';
+
+function loadDailyStreak(): { count: number; lastDate: string | null } {
+  try {
+    const raw = localStorage.getItem(DAILY_STREAK_KEY);
+    if (!raw) return { count: 0, lastDate: null };
+    const v = JSON.parse(raw);
+    return { count: Number(v.count) || 0, lastDate: v.lastDate ?? null };
+  } catch { return { count: 0, lastDate: null }; }
+}
+
+function yesterdayKey() {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
 
 const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe captured', 'DNA updated'];
 const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
@@ -160,6 +180,18 @@ export default function PokeYelp() {
   const [longestStreak, setLongestStreak] = useState(0);
   const [customTagCount, setCustomTagCount] = useState(0);
   const [trainingCredits, setTrainingCredits] = useState(0);
+  const [dailyStreak, setDailyStreak] = useState<number>(() => {
+    const s = loadDailyStreak();
+    const today = todayKey();
+    const yest = yesterdayKey();
+    // If lastDate isn't today or yesterday, streak resets to 0 visually until they train today
+    if (s.lastDate === today) return s.count;
+    if (s.lastDate === yest) return s.count; // still alive, will increment on first card today
+    return 0;
+  });
+  const [dailyAwardedToday, setDailyAwardedToday] = useState<boolean>(() => {
+    return loadDailyStreak().lastDate === todayKey();
+  });
   const [floatingXps, setFloatingXps] = useState<FloatingXp[]>([]);
   const [feedbackMsg, setFeedbackMsg] = useState<{ id: number; text: string } | null>(null);
   const [cardResult, setCardResult] = useState<null | {
@@ -168,6 +200,9 @@ export default function PokeYelp() {
     customCount: number;
     streak: number;
     streakBonus: boolean;
+    creditsEarned: number;
+    dailyBonusXp: number;
+    dailyCount: number;
   }>(null);
   const [roundComplete, setRoundComplete] = useState<null | {
     xp: number;
@@ -541,7 +576,28 @@ export default function PokeYelp() {
     const newStreak = streak + 1;
     const streakBonus = newStreak > 0 && newStreak % 3 === 0;
     const bonusXp = (streakBonus ? XP_STREAK_BONUS : 0);
-    const submitXp = XP_PER_SUBMIT + bonusXp;
+
+    // Daily streak bonus — once per day on the first card you tag
+    let dailyBonusXp = 0;
+    let newDailyCount = dailyStreak;
+    if (!dailyAwardedToday) {
+      const s = loadDailyStreak();
+      const today = todayKey();
+      const yest = yesterdayKey();
+      if (s.lastDate === yest) newDailyCount = (s.count || 0) + 1;
+      else if (s.lastDate === today) newDailyCount = s.count || 1;
+      else newDailyCount = 1;
+      try { localStorage.setItem(DAILY_STREAK_KEY, JSON.stringify({ count: newDailyCount, lastDate: today })); } catch {}
+      dailyBonusXp = Math.min(
+        XP_DAILY_BONUS_CAP,
+        XP_DAILY_BONUS_BASE + (newDailyCount - 1) * XP_DAILY_BONUS_PER_DAY,
+      );
+      setDailyStreak(newDailyCount);
+      setDailyAwardedToday(true);
+      spawnXp(dailyBonusXp, `DAY ${newDailyCount} BONUS`, { color: 'amber' });
+    }
+
+    const submitXp = XP_PER_SUBMIT + bonusXp + dailyBonusXp;
     setRoundXp((x) => x + submitXp);
     setStreak(newStreak);
     setLongestStreak((l) => Math.max(l, newStreak));
@@ -555,6 +611,9 @@ export default function PokeYelp() {
       customCount: customTags.length,
       streak: newStreak,
       streakBonus,
+      creditsEarned,
+      dailyBonusXp,
+      dailyCount: newDailyCount,
     });
 
     const newRoundCards = roundCards + 1;
@@ -678,7 +737,7 @@ export default function PokeYelp() {
               transition={{ delay: 0.25, duration: 0.7 }}
               className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
-              Teach the AI what collectors actually love. Every tag helps PokeIQ learn collector DNA.
+              Every tag helps uncode the Collectr DNA.
             </motion.p>
 
             {/* Arcade scoreboard */}
@@ -691,11 +750,18 @@ export default function PokeYelp() {
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="XP" value={roundXp.toLocaleString()} accent />
-                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Streak" value={String(streak)} />
-                <ArcadeStat icon={<Sparkles className="w-3 h-3 text-amber-400" />} label="Custom" value={String(customTagCount)} />
-                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(trainingCredits)} />
+                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="Round XP" value={roundXp.toLocaleString()} accent />
+                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Card Streak" value={String(streak)} />
+                <ArcadeStat icon={<Trophy className="w-3 h-3 text-amber-400" />} label="Daily 🔥" value={`${dailyStreak}d`} />
+                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(credits)} />
               </div>
+              <p className="mt-3 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
+                <span className="text-primary font-semibold">XP</span> is your arcade score — bragging rights only.{' '}
+                <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
+                <span className="text-foreground">1 per card</span> tagged, plus{' '}
+                <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.
+                Trade <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits → {SWIPES_PER_REDEMPTION} Pull or Pass swipes</span>.
+              </p>
             </div>
 
             {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
@@ -1173,7 +1239,7 @@ export default function PokeYelp() {
                   <div className="text-foreground font-semibold tabular-nums">{cardResult.tagCount}</div>
                 </div>
                 <div>
-                  <div className="text-muted-foreground">Custom</div>
+                  <div className="text-muted-foreground">Original</div>
                   <div className="text-amber-400 font-semibold tabular-nums">{cardResult.customCount}</div>
                 </div>
                 <div>
@@ -1183,6 +1249,16 @@ export default function PokeYelp() {
                   </div>
                 </div>
               </div>
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 text-xs font-mono">
+                <Coins className="w-3.5 h-3.5" />
+                +{cardResult.creditsEarned} CREDIT{cardResult.creditsEarned === 1 ? '' : 'S'}
+                <span className="text-amber-400/60">· swipe currency</span>
+              </div>
+              {cardResult.dailyBonusXp > 0 && (
+                <div className="mb-3 text-xs text-amber-400 font-mono tracking-wider">
+                  +{cardResult.dailyBonusXp} XP · DAY {cardResult.dailyCount} DAILY BONUS 🔥
+                </div>
+              )}
               {cardResult.streakBonus && (
                 <div className="mb-4 text-xs text-amber-400 font-mono tracking-wider">
                   +{XP_STREAK_BONUS} XP STREAK BONUS
