@@ -457,7 +457,7 @@ export default function PokeYelp() {
         description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
       });
-      nextCard();
+      finishCardArcade(0, [], []);
       return;
     }
 
@@ -530,10 +530,70 @@ export default function PokeYelp() {
     if (todaysMode) {
       setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
+    setTrainingCredits((c) => c + earned);
+    finishCardArcade(earned, applicableTags, mergedCustom);
+  };
+
+  // Award arcade XP + show per-card result panel
+  const finishCardArcade = (creditsEarned: number, tags: string[], customTags: string[]) => {
+    const tagXp = tags.length * XP_PER_TAG; // already counted live, but we surface in panel
+    const customXp = customTags.length * XP_PER_CUSTOM;
+    const newStreak = streak + 1;
+    const streakBonus = newStreak > 0 && newStreak % 3 === 0;
+    const bonusXp = (streakBonus ? XP_STREAK_BONUS : 0);
+    const submitXp = XP_PER_SUBMIT + bonusXp;
+    const earnedXp = submitXp; // tag/custom XP was already added when selected
+    setRoundXp((x) => x + submitXp);
+    setStreak(newStreak);
+    setLongestStreak((l) => Math.max(l, newStreak));
+    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'LOCK IN', { color: streakBonus ? 'amber' : undefined });
+    flashFeedback(CARD_FEEDBACK);
+
+    const totalCardXp = tagXp + customXp + submitXp;
+    setCardResult({
+      xp: totalCardXp,
+      tagCount: tags.length,
+      customCount: customTags.length,
+      streak: newStreak,
+      streakBonus,
+    });
+
+    const newRoundCards = roundCards + 1;
+    setRoundCards(newRoundCards);
+  };
+
+  const proceedNextCard = () => {
+    setCardResult(null);
+    if (roundCards >= ROUND_SIZE) {
+      const finalXp = roundXp + XP_ROUND_BONUS;
+      setRoundXp(finalXp);
+      setRoundComplete({
+        xp: finalXp,
+        cards: ROUND_SIZE,
+        custom: customTagCount,
+        longest: longestStreak,
+      });
+      spawnXp(XP_ROUND_BONUS, 'ROUND COMPLETE', { color: 'amber' });
+      return;
+    }
     nextCard();
   };
 
-  const skip = () => nextCard();
+  const startNewRound = () => {
+    setRoundComplete(null);
+    setRoundXp(0);
+    setRoundCards(0);
+    setStreak(0);
+    setLongestStreak(0);
+    setCustomTagCount(0);
+    setTrainingCredits(0);
+    nextCard();
+  };
+
+  const skip = () => {
+    setStreak(0); // skipping breaks the streak
+    nextCard();
+  };
 
   const [redeeming, setRedeeming] = useState(false);
   const redeemCredits = useCallback(async () => {
