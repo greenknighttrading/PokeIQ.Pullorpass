@@ -39,10 +39,14 @@ export default function Premium() {
           <Crown className="w-3.5 h-3.5" /> PokeIQ Premium
         </div>
         <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-3">
-          Unlock the full collector toolkit
+          Built for collectors chasing JOY, not just ROI.
         </h1>
         <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-          The complete Pull or Pass experience — plus advanced portfolio analytics as a bonus.
+          Most apps optimize for market value.<br />
+          PokeIQ optimizes for what makes you genuinely excited to collect.
+        </p>
+        <p className="text-sm text-muted-foreground max-w-xl mx-auto mt-3">
+          Every swipe teaches PokeIQ more about your taste, your aesthetic, and the kinds of cards that actually bring you joy — not just what’s trending.
         </p>
       </div>
 
