@@ -573,7 +573,28 @@ export default function PokeYelp() {
     const newStreak = streak + 1;
     const streakBonus = newStreak > 0 && newStreak % 3 === 0;
     const bonusXp = (streakBonus ? XP_STREAK_BONUS : 0);
-    const submitXp = XP_PER_SUBMIT + bonusXp;
+
+    // Daily streak bonus — once per day on the first card you tag
+    let dailyBonusXp = 0;
+    let newDailyCount = dailyStreak;
+    if (!dailyAwardedToday) {
+      const s = loadDailyStreak();
+      const today = todayKey();
+      const yest = yesterdayKey();
+      if (s.lastDate === yest) newDailyCount = (s.count || 0) + 1;
+      else if (s.lastDate === today) newDailyCount = s.count || 1;
+      else newDailyCount = 1;
+      try { localStorage.setItem(DAILY_STREAK_KEY, JSON.stringify({ count: newDailyCount, lastDate: today })); } catch {}
+      dailyBonusXp = Math.min(
+        XP_DAILY_BONUS_CAP,
+        XP_DAILY_BONUS_BASE + (newDailyCount - 1) * XP_DAILY_BONUS_PER_DAY,
+      );
+      setDailyStreak(newDailyCount);
+      setDailyAwardedToday(true);
+      spawnXp(dailyBonusXp, `DAY ${newDailyCount} BONUS`, { color: 'amber' });
+    }
+
+    const submitXp = XP_PER_SUBMIT + bonusXp + dailyBonusXp;
     setRoundXp((x) => x + submitXp);
     setStreak(newStreak);
     setLongestStreak((l) => Math.max(l, newStreak));
