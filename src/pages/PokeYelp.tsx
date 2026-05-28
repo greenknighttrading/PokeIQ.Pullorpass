@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, MessageSquare, Wand2, Filter, ArrowLeft, Zap, Flame, Trophy, Gamepad2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -62,6 +62,27 @@ const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
 const SESSION_SHOWN_KEY = 'pokeyelp_session_shown';
 const CREDITS_PER_REDEMPTION = 20;
 const SWIPES_PER_REDEMPTION = 20;
+
+// ── Arcade XP rules ─────────────────────────────────────
+const ROUND_SIZE = 10;
+const XP_PER_TAG = 10;
+const XP_PER_CUSTOM = 25;
+const XP_PER_SUBMIT = 50;
+const XP_STREAK_BONUS = 25; // every 3-card streak
+const XP_ROUND_BONUS = 250; // 10-card completion
+
+const TAG_FEEDBACK = ['Nice read', 'Taste logged', 'Collector instinct', 'Vibe captured', 'DNA updated'];
+const CUSTOM_FEEDBACK = ['Original read', 'New collector language', 'Trendsetter energy', 'Fresh tag created', 'PokeIQ learned something new'];
+const CARD_FEEDBACK = ['Card trained', 'AI updated', 'Collector signal captured'];
+
+interface FloatingXp {
+  id: number;
+  amount: number;
+  label?: string;
+  x: number; // viewport %
+  y: number;
+  color?: string;
+}
 
 interface YelpCard {
   card_id: string;
@@ -131,6 +152,48 @@ export default function PokeYelp() {
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [setQuery, setSetQuery] = useState<string>('');
   const [eraId, setEraId] = useState<string>('');
+
+  // ── Arcade state ──
+  const [roundXp, setRoundXp] = useState(0);
+  const [roundCards, setRoundCards] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
+  const [customTagCount, setCustomTagCount] = useState(0);
+  const [trainingCredits, setTrainingCredits] = useState(0);
+  const [floatingXps, setFloatingXps] = useState<FloatingXp[]>([]);
+  const [feedbackMsg, setFeedbackMsg] = useState<{ id: number; text: string } | null>(null);
+  const [cardResult, setCardResult] = useState<null | {
+    xp: number;
+    tagCount: number;
+    customCount: number;
+    streak: number;
+    streakBonus: boolean;
+  }>(null);
+  const [roundComplete, setRoundComplete] = useState<null | {
+    xp: number;
+    cards: number;
+    custom: number;
+    longest: number;
+  }>(null);
+  const xpIdRef = useRef(0);
+  const fbIdRef = useRef(0);
+
+  const spawnXp = useCallback((amount: number, label?: string, opts?: { x?: number; y?: number; color?: string }) => {
+    const id = ++xpIdRef.current;
+    const x = opts?.x ?? 40 + Math.random() * 20;
+    const y = opts?.y ?? 50 + Math.random() * 10;
+    setFloatingXps((p) => [...p, { id, amount, label, x, y, color: opts?.color }]);
+    setTimeout(() => setFloatingXps((p) => p.filter((f) => f.id !== id)), 1400);
+  }, []);
+
+  const flashFeedback = useCallback((pool: string[]) => {
+    const text = pool[Math.floor(Math.random() * pool.length)];
+    const id = ++fbIdRef.current;
+    setFeedbackMsg({ id, text });
+    setTimeout(() => {
+      setFeedbackMsg((curr) => (curr && curr.id === id ? null : curr));
+    }, 1200);
+  }, []);
 
   // Prioritize cards the user PullOrPassed today — filters locked until done
   const [todaysMode, setTodaysMode] = useState(true);
@@ -335,7 +398,14 @@ export default function PokeYelp() {
   const toggleTag = (t: string) => {
     setSelected((p) => {
       const n = new Set(p);
-      if (n.has(t)) n.delete(t); else n.add(t);
+      if (n.has(t)) {
+        n.delete(t);
+      } else {
+        n.add(t);
+        setRoundXp((x) => x + XP_PER_TAG);
+        spawnXp(XP_PER_TAG, 'PING!');
+        flashFeedback(TAG_FEEDBACK);
+      }
       return n;
     });
   };
@@ -350,6 +420,10 @@ export default function PokeYelp() {
     }
     setCustom((p) => [...p, v]);
     setCustomInput('');
+    setRoundXp((x) => x + XP_PER_CUSTOM);
+    setCustomTagCount((c) => c + 1);
+    spawnXp(XP_PER_CUSTOM, 'ORIGINAL READ', { color: 'amber' });
+    flashFeedback(CUSTOM_FEEDBACK);
   };
 
   const removeCustom = (t: string) => setCustom((p) => p.filter((x) => x !== t));
@@ -383,7 +457,7 @@ export default function PokeYelp() {
         description: 'Create a free account so your reviews count toward swipe bonuses and Premium.',
         action: { label: 'Sign up', onClick: () => navigate('/auth') },
       });
-      nextCard();
+      finishCardArcade(0, [], []);
       return;
     }
 
@@ -456,10 +530,69 @@ export default function PokeYelp() {
     if (todaysMode) {
       setTodaysRemaining((n) => (n == null ? n : Math.max(0, n - 1)));
     }
+    setTrainingCredits((c) => c + earned);
+    finishCardArcade(earned, applicableTags, mergedCustom);
+  };
+
+  // Award arcade XP + show per-card result panel
+  const finishCardArcade = (creditsEarned: number, tags: string[], customTags: string[]) => {
+    const tagXp = tags.length * XP_PER_TAG; // already counted live, but we surface in panel
+    const customXp = customTags.length * XP_PER_CUSTOM;
+    const newStreak = streak + 1;
+    const streakBonus = newStreak > 0 && newStreak % 3 === 0;
+    const bonusXp = (streakBonus ? XP_STREAK_BONUS : 0);
+    const submitXp = XP_PER_SUBMIT + bonusXp;
+    setRoundXp((x) => x + submitXp);
+    setStreak(newStreak);
+    setLongestStreak((l) => Math.max(l, newStreak));
+    spawnXp(submitXp, streakBonus ? `STREAK ×${newStreak}` : 'LOCK IN', { color: streakBonus ? 'amber' : undefined });
+    flashFeedback(CARD_FEEDBACK);
+
+    const totalCardXp = tagXp + customXp + submitXp;
+    setCardResult({
+      xp: totalCardXp,
+      tagCount: tags.length,
+      customCount: customTags.length,
+      streak: newStreak,
+      streakBonus,
+    });
+
+    const newRoundCards = roundCards + 1;
+    setRoundCards(newRoundCards);
+  };
+
+  const proceedNextCard = () => {
+    setCardResult(null);
+    if (roundCards >= ROUND_SIZE) {
+      const finalXp = roundXp + XP_ROUND_BONUS;
+      setRoundXp(finalXp);
+      setRoundComplete({
+        xp: finalXp,
+        cards: ROUND_SIZE,
+        custom: customTagCount,
+        longest: longestStreak,
+      });
+      spawnXp(XP_ROUND_BONUS, 'ROUND COMPLETE', { color: 'amber' });
+      return;
+    }
     nextCard();
   };
 
-  const skip = () => nextCard();
+  const startNewRound = () => {
+    setRoundComplete(null);
+    setRoundXp(0);
+    setRoundCards(0);
+    setStreak(0);
+    setLongestStreak(0);
+    setCustomTagCount(0);
+    setTrainingCredits(0);
+    nextCard();
+  };
+
+  const skip = () => {
+    setStreak(0); // skipping breaks the streak
+    nextCard();
+  };
 
   const [redeeming, setRedeeming] = useState(false);
   const redeemCredits = useCallback(async () => {
@@ -537,7 +670,7 @@ export default function PokeYelp() {
               className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
               style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
             >
-              PokeIQ Training <span className="inline-block">✨</span>
+              PokeIQ Training Arcade <span className="inline-block">✨</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -545,8 +678,25 @@ export default function PokeYelp() {
               transition={{ delay: 0.25, duration: 0.7 }}
               className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
-              Help train smarter recommendations for yourself and collectors everywhere.
+              Teach the AI what collectors actually love. Every tag helps PokeIQ learn collector DNA.
             </motion.p>
+
+            {/* Arcade scoreboard */}
+            <div className="mt-6 max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Gamepad2 className="w-4 h-4 text-primary" />
+                <span className="text-[10px] uppercase tracking-[0.25em] font-mono text-primary/90"
+                  style={{ textShadow: '0 0 10px hsl(var(--primary) / 0.6)' }}>
+                  Round 1 · {roundCards} / {ROUND_SIZE} Cards
+                </span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                <ArcadeStat icon={<Zap className="w-3 h-3 text-primary" />} label="XP" value={roundXp.toLocaleString()} accent />
+                <ArcadeStat icon={<Flame className="w-3 h-3 text-amber-400" />} label="Streak" value={String(streak)} />
+                <ArcadeStat icon={<Sparkles className="w-3 h-3 text-amber-400" />} label="Custom" value={String(customTagCount)} />
+                <ArcadeStat icon={<Coins className="w-3 h-3 text-amber-400" />} label="Credits" value={String(trainingCredits)} />
+              </div>
+            </div>
 
             {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
             {(() => {
@@ -767,10 +917,10 @@ export default function PokeYelp() {
               {/* Tag picker — borderless, breathing */}
               <div className="space-y-6 min-w-0 w-full sm:flex-1">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-1">What fits this card?</h2>
+                  <h2 className="text-lg font-semibold text-foreground mb-1">What does this card feel like?</h2>
                   <div className="flex items-baseline justify-between mb-1">
                     <p className="text-xs text-muted-foreground">
-                      Tap any tag that fits. Skip the rest. <span className="text-amber-400/90">Accuracy is rewarded!</span>
+                      Pick what feels true. Your unique read helps train the AI. <span className="text-amber-400/90">Originality is rewarded — honest taste trains better AI.</span>
                     </p>
                     <span className="text-[11px] tabular-nums text-muted-foreground">
                       {selected.size} selected
@@ -829,23 +979,26 @@ export default function PokeYelp() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Add your own
+                          Create your own tag
                         </p>
                         <p className="text-[10px] uppercase tracking-wider text-amber-400/90">
-                          Add custom tags for bonus credit
+                          +{XP_PER_CUSTOM} XP · Originality bonus
                         </p>
                       </div>
+                      <p className="text-[11px] text-muted-foreground mb-2">
+                        Invent collector language. If others agree later, you get discovery credit.
+                      </p>
                       <div className="flex gap-2">
                       <Input
                         value={customInput}
                         onChange={(e) => setCustomInput(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
-                        placeholder="e.g. Mona Lisa pose"
+                        placeholder="e.g. Binder goblin energy"
                         maxLength={40}
                         className="h-10 text-sm bg-muted/30 border-transparent focus-visible:border-primary/40"
                       />
                       <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
-                        <Plus className="w-3.5 h-3.5" /> Add
+                        <Plus className="w-3.5 h-3.5" /> Create Tag
                       </Button>
                       </div>
                     {custom.length > 0 && (
@@ -889,8 +1042,8 @@ export default function PokeYelp() {
                       className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
-                      <Sparkles className="w-5 h-5" />
-                      Submit Review
+                      <Zap className="w-5 h-5" />
+                      Lock In Tags
                     </Button>
                   </motion.div>
                   <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground">
@@ -934,6 +1087,192 @@ export default function PokeYelp() {
         </main>
       </div>
       <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+
+      {/* CRT scanline overlay */}
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[60] opacity-[0.06] mix-blend-overlay"
+        style={{
+          backgroundImage: 'repeating-linear-gradient(0deg, hsl(var(--primary)) 0 1px, transparent 1px 3px)',
+        }}
+      />
+
+      {/* Floating XP */}
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-[70]">
+        <AnimatePresence>
+          {floatingXps.map((f) => (
+            <motion.div
+              key={f.id}
+              initial={{ opacity: 0, y: 0, scale: 0.8 }}
+              animate={{ opacity: 1, y: -60, scale: 1 }}
+              exit={{ opacity: 0, y: -90 }}
+              transition={{ duration: 1.2, ease: 'easeOut' }}
+              className="absolute font-mono font-bold"
+              style={{
+                left: `${f.x}%`,
+                top: `${f.y}%`,
+                color: f.color === 'amber' ? 'hsl(45 95% 60%)' : 'hsl(var(--primary))',
+                textShadow: f.color === 'amber'
+                  ? '0 0 12px hsl(45 95% 60% / 0.8)'
+                  : '0 0 12px hsl(var(--primary) / 0.8)',
+              }}
+            >
+              <div className="text-2xl">+{f.amount} XP</div>
+              {f.label && <div className="text-[10px] tracking-[0.2em] text-center mt-0.5">{f.label}</div>}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
+      {/* Mini feedback chip */}
+      <AnimatePresence>
+        {feedbackMsg && (
+          <motion.div
+            key={feedbackMsg.id}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="pointer-events-none fixed bottom-24 left-1/2 -translate-x-1/2 z-[75] px-3 py-1.5 rounded-full font-mono text-[11px] tracking-[0.15em] uppercase bg-background/80 border border-primary/40 text-primary backdrop-blur"
+            style={{ boxShadow: '0 0 16px hsl(var(--primary) / 0.3)' }}
+          >
+            ⚡ {feedbackMsg.text}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Per-card result panel */}
+      <AnimatePresence>
+        {cardResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={proceedNextCard}
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 18 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative max-w-sm w-full rounded-3xl p-7 text-center bg-card border-2 border-primary/60"
+              style={{ boxShadow: '0 0 48px hsl(var(--primary) / 0.45)' }}
+            >
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-primary mb-2">Training Complete</div>
+              <div
+                className="text-5xl font-black tabular-nums text-primary mb-4"
+                style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.7)' }}
+              >
+                +{cardResult.xp} XP
+              </div>
+              <div className="grid grid-cols-3 gap-3 text-xs mb-5">
+                <div>
+                  <div className="text-muted-foreground">Tags</div>
+                  <div className="text-foreground font-semibold tabular-nums">{cardResult.tagCount}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Custom</div>
+                  <div className="text-amber-400 font-semibold tabular-nums">{cardResult.customCount}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Streak</div>
+                  <div className={`font-semibold tabular-nums ${cardResult.streakBonus ? 'text-amber-400' : 'text-foreground'}`}>
+                    🔥 {cardResult.streak}
+                  </div>
+                </div>
+              </div>
+              {cardResult.streakBonus && (
+                <div className="mb-4 text-xs text-amber-400 font-mono tracking-wider">
+                  +{XP_STREAK_BONUS} XP STREAK BONUS
+                </div>
+              )}
+              <Button
+                onClick={proceedNextCard}
+                className="w-full h-12 rounded-xl font-bold gap-2"
+                style={{ boxShadow: '0 0 20px hsl(var(--primary) / 0.4)' }}
+              >
+                Next Card <Zap className="w-4 h-4" />
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Round-complete arcade screen */}
+      <AnimatePresence>
+        {roundComplete && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[85] bg-background/95 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.8, y: 30 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+              className="relative max-w-md w-full rounded-3xl p-8 text-center bg-card border-2 border-primary"
+              style={{ boxShadow: '0 0 80px hsl(var(--primary) / 0.5)' }}
+            >
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-amber-400 text-background font-mono text-[10px] tracking-[0.3em] font-bold">
+                ROUND COMPLETE
+              </div>
+              <Trophy className="w-12 h-12 mx-auto text-amber-400 mt-2 mb-3"
+                style={{ filter: 'drop-shadow(0 0 12px hsl(45 95% 60% / 0.8))' }} />
+              <div
+                className="text-6xl font-black tabular-nums text-primary mb-1"
+                style={{ textShadow: '0 0 32px hsl(var(--primary) / 0.7)' }}
+              >
+                {roundComplete.xp.toLocaleString()}
+              </div>
+              <div className="font-mono text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-6">Total XP</div>
+              <div className="grid grid-cols-3 gap-3 text-sm mb-6">
+                <ArcadeStatLg label="Cards" value={String(roundComplete.cards)} />
+                <ArcadeStatLg label="Custom" value={String(roundComplete.custom)} accent />
+                <ArcadeStatLg label="Longest 🔥" value={String(roundComplete.longest)} />
+              </div>
+              <div className="text-xs text-muted-foreground mb-5">Collector DNA updated ✨</div>
+              <div className="space-y-2">
+                <Button onClick={startNewRound} className="w-full h-12 rounded-xl font-bold gap-2"
+                  style={{ boxShadow: '0 0 24px hsl(var(--primary) / 0.5)' }}>
+                  <Gamepad2 className="w-4 h-4" /> Train Another Round
+                </Button>
+                <Button onClick={() => navigate('/pokeiq/last-round')} variant="outline" className="w-full h-11 rounded-xl">
+                  View My Collector DNA
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
+  );
+}
+
+function ArcadeStat({ icon, label, value, accent }: { icon: React.ReactNode; label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      className={`rounded-lg border px-3 py-2 bg-card/40 backdrop-blur ${accent ? 'border-primary/60' : 'border-border/60'}`}
+      style={accent ? { boxShadow: '0 0 14px hsl(var(--primary) / 0.25)' } : undefined}
+    >
+      <div className="flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.2em] text-muted-foreground font-mono">
+        {icon} {label}
+      </div>
+      <div className={`text-lg font-black tabular-nums font-mono ${accent ? 'text-primary' : 'text-foreground'}`}
+        style={accent ? { textShadow: '0 0 10px hsl(var(--primary) / 0.6)' } : undefined}>
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function ArcadeStatLg({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/20 px-2 py-3">
+      <div className={`text-2xl font-black tabular-nums font-mono ${accent ? 'text-amber-400' : 'text-foreground'}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">{label}</div>
+    </div>
   );
 }
