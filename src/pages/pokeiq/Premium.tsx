@@ -326,28 +326,38 @@ function PullOrPassPreview() {
         </span>
       </div>
 
-      {/* Active card with swipe overlay */}
-      <div className="relative rounded-lg border border-violet-500/30 bg-gradient-to-br from-violet-500/20 to-fuchsia-500/10 p-4 mb-3 overflow-hidden">
-        <div className="absolute top-2 right-2 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 rounded">
-          PULL
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-14 rounded bg-gradient-to-br from-amber-300/40 to-orange-400/30 border border-amber-300/40 shrink-0" />
-          <div>
-            <div className="text-xs font-semibold">Mew GG10/GG70</div>
-            <div className="text-[10px] text-violet-300">Crown Zenith · GG</div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">$45 market</div>
+      {/* Swipe card stack — mirrors the actual Pull or Pass game */}
+      <div className="relative h-[170px] mb-4 flex items-center justify-center">
+        {/* Back card */}
+        <div className="absolute w-[110px] h-[154px] rounded-lg bg-gradient-to-br from-violet-500/15 to-fuchsia-500/10 border border-border/60 rotate-[6deg] translate-x-4 translate-y-1" />
+        {/* Middle card */}
+        <div className="absolute w-[110px] h-[154px] rounded-lg bg-gradient-to-br from-violet-500/20 to-fuchsia-500/15 border border-border/70 -rotate-[4deg] -translate-x-3" />
+        {/* Top active card — tilted right = PULL */}
+        <div className="relative w-[112px] h-[158px] rounded-lg overflow-hidden border border-violet-400/50 bg-gradient-to-br from-amber-300/30 via-violet-500/25 to-fuchsia-500/20 rotate-[8deg] shadow-[0_12px_30px_-10px_rgba(139,92,246,0.6)]">
+          {/* Faux card art */}
+          <div className="absolute inset-1.5 rounded-md bg-gradient-to-br from-amber-200/40 via-orange-300/30 to-rose-400/30 border border-white/10" />
+          <div className="absolute bottom-2 left-2 right-2">
+            <div className="text-[8px] font-bold text-white/90 leading-tight">Mew GG10</div>
+            <div className="text-[7px] text-white/60">Crown Zenith</div>
+          </div>
+          {/* PULL stamp */}
+          <div className="absolute top-2 right-2 -rotate-12 text-[8px] font-extrabold tracking-wider text-emerald-300 border-2 border-emerald-400/80 px-1.5 py-0.5 rounded">
+            PULL
           </div>
         </div>
       </div>
 
-      {/* Custom filters */}
-      <div className="flex flex-wrap gap-1.5">
-        {['Vintage only', '>$50', 'Slabs'].map((f) => (
-          <span key={f} className="text-[9px] uppercase tracking-wider px-2 py-1 rounded-full bg-violet-500/10 border border-violet-500/25 text-violet-200">
-            {f}
-          </span>
-        ))}
+      {/* Pass / Pull action buttons */}
+      <div className="flex items-center justify-center gap-6">
+        <div className="w-10 h-10 rounded-full border border-rose-400/50 bg-rose-500/10 flex items-center justify-center">
+          <span className="text-rose-300 text-lg leading-none">✕</span>
+        </div>
+        <div className="w-12 h-12 rounded-full border border-emerald-400/60 bg-emerald-500/15 flex items-center justify-center shadow-[0_0_20px_rgba(16,185,129,0.35)]">
+          <Heart className="w-5 h-5 text-emerald-300 fill-emerald-300/40" />
+        </div>
+        <div className="w-10 h-10 rounded-full border border-violet-400/50 bg-violet-500/10 flex items-center justify-center">
+          <Sparkles className="w-4 h-4 text-violet-300" />
+        </div>
       </div>
     </PreviewShell>
   );
