@@ -216,8 +216,18 @@ export default function PullOrPass() {
         setIndex(last.cards.length);
         setStage('results');
       } else {
-        // No completed round yet — fall back to starting one.
-        loadRound();
+        // No completed round — fall back to in-progress round so the user
+        // still sees their day's likes/dislikes so far.
+        const resume = readResume();
+        if (resume && (resume.records?.length ?? 0) > 0) {
+          setCards(resume.cards);
+          setRecords(resume.records);
+          setRoundId(resume.roundId);
+          setIndex(resume.cards.length);
+          setStage('results');
+        } else {
+          loadRound();
+        }
       }
       const refresh = () => setQuota(readQuota());
       window.addEventListener('focus', refresh);
@@ -1349,7 +1359,7 @@ function ResultsView({
             <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
             <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Complete</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Your Matches</p>
         </motion.div>
         {!isAuthed ? (
           <>
@@ -1363,7 +1373,7 @@ function ResultsView({
         ) : (
           <>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Round Complete <span className="inline-block">✨</span>
+              Your Matches <span className="inline-block">✨</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.

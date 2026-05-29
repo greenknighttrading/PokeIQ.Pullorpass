@@ -27,7 +27,7 @@ interface NavItem {
 }
 
 const primaryNav: NavItem[] = [
-  { label: 'Pull or Pass', href: '/swipe', icon: Heart },
+  { label: 'Pull or Pass', href: '/swipe', icon: Layers },
   { label: 'Matches', href: '/matches', icon: Heart },
   { label: 'Smart Profile', href: '/profile', icon: User },
   { label: 'Training', href: '/pokeyelp', icon: Zap },
