@@ -43,9 +43,7 @@ const premiumCollect: NavItem[] = [
   { label: 'Smart Feed', href: '/smart-feed', icon: Sparkles },
 ];
 
-const premiumTools: NavItem[] = [
-  { label: 'Buy List', href: '/buylist/list', icon: ShoppingBag },
-];
+const premiumTools: NavItem[] = [];
 
 export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -155,13 +153,12 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
           )}
         >
           <Crown className="w-4 h-4 shrink-0 text-violet-300" />
-          <span className="flex-1 truncate text-left">Premium</span>
+          <span className="flex-1 truncate text-left">
+            {isPremium ? 'Premium User' : 'Premium'}
+          </span>
           {isPremium && (
-            <span
-              className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400"
-              title="Premium active"
-            >
-              <Check className="w-3 h-3" strokeWidth={3} />
+            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/25 text-violet-200 border border-violet-400/40">
+              Active
             </span>
           )}
           {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
@@ -190,7 +187,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   onClick={(e) => handlePremiumLink(e, item.href)}
                   className={cn(
                     'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                    active ? 'bg-primary/10 text-primary' : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30'
+                    active ? 'bg-violet-500/15 text-violet-300' : 'text-muted-foreground/70 hover:text-violet-200 hover:bg-violet-500/10'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -214,7 +211,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   onClick={(e) => handlePremiumLink(e, item.href)}
                   className={cn(
                     'flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs font-medium transition-colors',
-                    active ? 'bg-primary/10 text-primary' : 'text-muted-foreground/70 hover:text-foreground hover:bg-muted/30'
+                    active ? 'bg-violet-500/15 text-violet-300' : 'text-muted-foreground/70 hover:text-violet-200 hover:bg-violet-500/10'
                   )}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -230,12 +227,12 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
       {/* Go Premium card */}
       <div className="p-4">
         {isPremium ? (
-          <div className="w-full rounded-xl border border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 to-emerald-500/5 p-4 text-center">
+          <div className="w-full rounded-xl border border-violet-500/30 bg-gradient-to-b from-violet-500/15 to-violet-500/5 p-4 text-center">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                <Check className="w-5 h-5 text-emerald-400" strokeWidth={3} />
+              <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-violet-300" />
               </div>
-              <div className="font-semibold text-sm">You're a Premium User</div>
+              <div className="font-semibold text-sm text-violet-200">You're a Premium User</div>
               <p className="text-[11px] text-muted-foreground leading-snug">
                 with unlocked swipes, advanced insights, and exclusive rewards.
               </p>
