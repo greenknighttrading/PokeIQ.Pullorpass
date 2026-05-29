@@ -851,7 +851,7 @@ export default function PokeYelp() {
             <div className="mt-6 max-w-2xl mx-auto">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <ArcadeStat icon={<Zap className="w-3 h-3" />} label="Score" value={`${roundXp.toLocaleString()} XP`} color="primary" accent />
-                <ArcadeStat icon={<Flame className="w-3 h-3" />} label="Card Streak" value={`${streak} 🔥`} color="amber" />
+                <ArcadeStat icon={<Flame className="w-3 h-3" />} label="Cards Reviewed" value={`${reviewedCount}`} color="amber" />
                 <ArcadeStat icon={<Trophy className="w-3 h-3" />} label={`Daily 🔥`} value={`${dailyStreak}d`} color="magenta" />
                 <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits Earned" value={`${credits} ◎`} color="amber" accent />
               </div>
@@ -864,41 +864,50 @@ export default function PokeYelp() {
               </p>
             </div>
 
-            {/* Consolidated reviewed + redeem strip */}
-            <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <CheckCircle2 className="w-4 h-4 text-primary" />
-                <span className="text-foreground font-semibold tabular-nums">{reviewedCount}</span>
-                <span>cards reviewed</span>
-              </div>
-              {(() => {
-                const canRedeem = credits >= CREDITS_PER_REDEMPTION && credits % CREDITS_PER_REDEMPTION === 0;
-                const needed = credits < CREDITS_PER_REDEMPTION
-                  ? CREDITS_PER_REDEMPTION - credits
-                  : CREDITS_PER_REDEMPTION - (credits % CREDITS_PER_REDEMPTION);
-                const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
-                return canRedeem ? (
-                  <button
-                    onClick={redeemCredits}
-                    disabled={redeeming}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors disabled:opacity-50"
-                  >
-                    <RotateCw className="w-3.5 h-3.5" />
-                    {redeeming ? 'Redeeming…' : `Redeem ${redeemAmount} credits → ${redeemAmount} swipes`}
-                  </button>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted/40 text-muted-foreground text-xs">
-                    <Coins className="w-3.5 h-3.5" />
-                    Get {needed} more credit{needed === 1 ? '' : 's'} to redeem
-                  </span>
-                );
-              })()}
-              {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  <span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left
-                </span>
-              )}
-            </div>
+            {/* Round progress + redeem */}
+            {(() => {
+              const inRound = reviewedCount % REVIEWS_PER_SWIPE_BATCH;
+              const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
+              const canRedeem = credits >= CREDITS_PER_REDEMPTION && credits % CREDITS_PER_REDEMPTION === 0;
+              const needed = credits < CREDITS_PER_REDEMPTION
+                ? CREDITS_PER_REDEMPTION - credits
+                : CREDITS_PER_REDEMPTION - (credits % CREDITS_PER_REDEMPTION);
+              const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
+              return (
+                <div className="mt-8 max-w-2xl mx-auto">
+                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                    <span className="inline-flex items-center gap-1.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                      <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
+                      <span>/ {REVIEWS_PER_SWIPE_BATCH} this round</span>
+                    </span>
+                    {canRedeem ? (
+                      <button
+                        onClick={redeemCredits}
+                        disabled={redeeming}
+                        className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-semibold normal-case tracking-normal transition-colors disabled:opacity-50"
+                      >
+                        <RotateCw className="w-3.5 h-3.5" />
+                        {redeeming ? 'Redeeming…' : `Redeem ${redeemAmount} credits → ${redeemAmount} swipes`}
+                      </button>
+                    ) : (
+                      <span className="normal-case tracking-normal tabular-nums">
+                        {needed} more credit{needed === 1 ? '' : 's'} to redeem
+                      </span>
+                    )}
+                  </div>
+                  <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                    <motion.div
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
           </header>
 
           {/* Filters panel */}
