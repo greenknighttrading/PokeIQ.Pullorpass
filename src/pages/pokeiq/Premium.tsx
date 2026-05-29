@@ -22,6 +22,7 @@ import { PaymentTestModeBanner } from '@/components/PaymentTestModeBanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useIsPremium } from '@/hooks/useIsPremium';
 
 const coreFeatures = [
   'Unlimited Pull or Pass swipes',
@@ -38,6 +39,24 @@ export default function Premium() {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const navigate = useNavigate();
+  const { isPremium } = useIsPremium();
+  const [currentInterval, setCurrentInterval] = useState<'month' | 'year' | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('subscriptions')
+      .select('price_id,status,current_period_end')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) return;
+        if (data.price_id?.includes('annual')) setCurrentInterval('year');
+        else if (data.price_id?.includes('monthly')) setCurrentInterval('month');
+      });
+  }, [user]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
