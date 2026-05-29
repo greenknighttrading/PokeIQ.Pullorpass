@@ -773,7 +773,7 @@ export default function PokeYelp() {
               className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
               style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
             >
-              Training Lab. Earn swipe credits, help uncode the Collectr DNA
+              Training Lab.
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
@@ -781,7 +781,7 @@ export default function PokeYelp() {
               transition={{ delay: 0.25, duration: 0.7 }}
               className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
             >
-              Every tag helps uncode the Collectr DNA.
+              Earn swipe credits, help uncode the Collector DNA.
             </motion.p>
 
             {/* Arcade scoreboard */}
