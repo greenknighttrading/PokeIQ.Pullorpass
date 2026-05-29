@@ -11,13 +11,17 @@ import {
   ChevronDown,
   ChevronRight,
   Sparkles,
+  Wrench,
+  Search,
+  TrendingUp,
+  Eye,
+  Package,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePortfolio } from '@/contexts/PortfolioContext';
 import { CreditsModal } from '@/components/upload/CreditsModal';
 import { ComparisonUpload } from '@/components/upload/ComparisonUpload';
 import { ManualCardEntry } from '@/components/upload/ManualCardEntry';
-import { GlobalNavBar } from '@/components/layout/GlobalNavBar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +48,14 @@ const insightsSubItems = [
   { name: 'Signals', href: '/insights', icon: Lightbulb },
 ];
 
+const toolsSubItems = [
+  { name: 'Scanner', href: '/buylist/scanner', icon: Search },
+  { name: 'Smart List', href: '/buylist/movers', icon: TrendingUp },
+  { name: 'Watchlist', href: '/buylist/watchlist', icon: Eye },
+  { name: 'Pack Gains', href: '/pack-gains', icon: Package },
+  { name: 'Sealed vs Cards', href: '/tools/sealed-vs-cards', icon: Scale },
+];
+
 function NavArrow() {
   return null;
 }
@@ -58,13 +70,12 @@ export function AppLayout({ children }: AppLayoutProps) {
 
   const isInsightsActive = location.pathname === '/winners' || location.pathname === '/insights';
   const isBuyListActive = location.pathname === '/buy-list';
+  const isToolsActive = toolsSubItems.some(i => location.pathname.startsWith(i.href));
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <GlobalNavBar />
-
       {/* Sub-navigation bar */}
-      <div className="sticky top-12 z-30 bg-background/95 backdrop-blur-xl border-b border-border">
+      <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-xl border-b border-border">
         <nav className="max-w-7xl mx-auto px-4 flex items-center gap-0.5 overflow-x-auto scrollbar-hide py-2">
           {navigation.map((item, index) => {
             const isActive = location.pathname === item.href;
@@ -108,6 +119,35 @@ export function AppLayout({ children }: AppLayoutProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="start">
                         {insightsSubItems.map((sub) => (
+                          <DropdownMenuItem key={sub.href} onClick={() => navigate(sub.href)}>
+                            <sub.icon className="w-4 h-4 mr-2" />
+                            {sub.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </>
+                )}
+
+                {/* Insert Tools dropdown after Smart Feed */}
+                {item.name === 'Smart Feed' && (
+                  <>
+                    <NavArrow />
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        className={cn(
+                          'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap transition-colors outline-none',
+                          isToolsActive
+                            ? 'bg-primary/10 text-primary'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                        )}
+                      >
+                        <Wrench className="w-4 h-4" />
+                        <span className="hidden sm:inline">Tools</span>
+                        <ChevronDown className="w-3 h-3" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        {toolsSubItems.map((sub) => (
                           <DropdownMenuItem key={sub.href} onClick={() => navigate(sub.href)}>
                             <sub.icon className="w-4 h-4 mr-2" />
                             {sub.name}
