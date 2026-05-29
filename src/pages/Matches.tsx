@@ -226,7 +226,7 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
-              <div className="!-mt-8 sm:!-mt-10">
+              <div>
                 <DailyLimitWidget />
               </div>
             </div>
@@ -586,7 +586,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
               <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
               <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <HeroStat
                 icon={<BookOpen className="w-6 h-6 text-primary" />}
                 tint="bg-primary/15 border-primary/30"
@@ -664,18 +664,18 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
 
 function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-5 flex flex-row items-center gap-2.5 sm:gap-3.5 min-w-0">
-      <div className={cn('w-9 h-9 sm:w-[52px] sm:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md px-4 py-4 sm:p-5 flex flex-row items-center gap-3 sm:gap-3.5 min-w-0 min-h-[76px]">
+      <div className={cn('w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
       <div className="min-w-0 flex-1">
         <p
-          className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap overflow-hidden text-ellipsis"
-          style={{ fontSize: 'clamp(1rem, 4.2vw, 1.5rem)', wordBreak: 'keep-all' }}
+          className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap"
+          style={{ fontSize: 'clamp(1.25rem, 4.2vw, 1.5rem)', wordBreak: 'keep-all' }}
         >
           {value}
         </p>
-        <p className="text-[11px] sm:text-[13px] text-muted-foreground leading-tight truncate">{label}</p>
+        <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-tight whitespace-nowrap">{label}</p>
       </div>
     </div>
   );
