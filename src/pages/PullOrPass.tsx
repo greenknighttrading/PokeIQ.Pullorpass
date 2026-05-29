@@ -1445,28 +1445,53 @@ function ResultsView({
         </>
       ) : (
         <motion.section {...fadeUp}>
-          <div className="relative rounded-2xl border border-primary/25 bg-gradient-to-br from-primary/8 via-card to-purple-500/8 p-6 sm:p-8 overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-[260px] h-[260px] bg-primary/12 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-[260px] h-[260px] bg-purple-500/12 blur-3xl rounded-full pointer-events-none" />
-            <div className="flex flex-col sm:flex-row items-center gap-5">
-              <div className="w-14 h-14 rounded-2xl border border-primary/30 bg-primary/10 flex items-center justify-center shrink-0">
-                <Heart className="w-7 h-7 text-primary" />
+          <div className="relative rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/12 via-card to-purple-500/12 p-8 sm:p-12 overflow-hidden shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
+            <div className="absolute -top-32 -right-32 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute -bottom-32 -left-32 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
+            <div className="relative flex flex-col items-center gap-6 text-center">
+              <div className="w-20 h-20 rounded-3xl border border-primary/40 bg-primary/15 flex items-center justify-center shadow-[0_0_28px_hsl(var(--primary)/0.5)]">
+                <Heart className="w-10 h-10 text-primary fill-primary/40" />
               </div>
-              <div className="flex-1 text-center sm:text-left min-w-0">
-                <h3 className="text-lg sm:text-xl font-bold text-foreground leading-tight">View All My Matches</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-lg">
-                  Sign up to save every card you liked, revisit your recommendations, and build your collector identity over time.
+              <div className="space-y-2 max-w-2xl">
+                <h3 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
+                  View All My Matches
+                </h3>
+                <p className="text-base sm:text-lg text-muted-foreground">
+                  Sign up to save every card you liked, unlock your full match list, and open your personalized Smart Portfolio.
                 </p>
               </div>
               <motion.button
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={onSignUp}
-                className="shrink-0 h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
+                className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-extrabold text-lg sm:text-xl tracking-wide inline-flex items-center gap-3 shadow-[0_0_44px_hsl(var(--primary)/0.7)] hover:shadow-[0_0_64px_hsl(var(--primary)/0.9)] transition-shadow uppercase"
               >
                 Sign Up
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-6 h-6" />
               </motion.button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto pt-2">
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onSignUp}
+                  className="h-12 px-7 rounded-xl border border-primary/40 bg-primary/10 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
+                >
+                  <Heart className="w-4 h-4 text-primary" />
+                  View All My Matches
+                </motion.button>
+                <motion.button
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={onSignUp}
+                  className="h-12 px-7 rounded-xl border border-purple-400/40 bg-purple-500/10 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 hover:bg-purple-500/15 transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4 text-purple-300" />
+                  View My Smart Portfolio
+                </motion.button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Free account · saves your matches forever
+              </p>
             </div>
           </div>
         </motion.section>
