@@ -800,7 +800,7 @@ export default function PokeYelp() {
                 <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
                 <span className="text-foreground">1 per card</span> tagged, plus{' '}
                 <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.
-                Trade <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits → {SWIPES_PER_REDEMPTION} Pull or Pass swipes</span>.
+                Trade <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits → {SWIPES_PER_REDEMPTION} Pull or Pass swipes</span> (1 credit = 1 swipe).
               </p>
             </div>
 
@@ -812,12 +812,12 @@ export default function PokeYelp() {
               return (
                 <div className="mt-8 max-w-2xl mx-auto flex items-center gap-4">
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                      <span className="inline-flex items-center gap-1.5">
-                        <Coins className="w-3.5 h-3.5 text-amber-400" />
-                        <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
-                        <span>/ {REVIEWS_PER_SWIPE_BATCH} reviewed</span>
-                      </span>
+                     <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                       <span className="inline-flex items-center gap-1.5">
+                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                         <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
+                         <span>/ {REVIEWS_PER_SWIPE_BATCH} cards reviewed</span>
+                       </span>
                       <span className="tabular-nums">
                         {toNext} to <span className="text-primary font-semibold">+{SWIPES_PER_BATCH} swipes</span>
                       </span>
