@@ -104,8 +104,8 @@ export function analyzeRound(records: SwipeRecord[]): RoundAnalysis {
   return { pulls: pulls.length, passes: passes.length, topTags, topTrait, archetype, favoriteSets, avgPullPrice, summary };
 }
 
-// Deterministic diverse 20-card sampler from a candidate pool
-export function pickDiverse20(pool: SwipeCard[]): SwipeCard[] {
+// Deterministic diverse N-card sampler from a candidate pool (defaults to 20)
+export function pickDiverse20(pool: SwipeCard[], count: number = 20): SwipeCard[] {
   // Bucket by price tier x set, then take round-robin
   const tier = (p: number) => (p < 15 ? 'low' : p < 50 ? 'mid' : p < 200 ? 'high' : 'chase');
   const buckets = new Map<string, SwipeCard[]>();
@@ -118,12 +118,12 @@ export function pickDiverse20(pool: SwipeCard[]): SwipeCard[] {
   const keys = Array.from(buckets.keys()).sort(() => Math.random() - 0.5);
   const out: SwipeCard[] = [];
   let i = 0;
-  while (out.length < 20 && keys.length > 0) {
+  while (out.length < count && keys.length > 0) {
     const k = keys[i % keys.length];
     const arr = buckets.get(k)!;
     if (arr.length) out.push(arr.shift()!);
     else { keys.splice(i % keys.length, 1); continue; }
     i++;
   }
-  return out.slice(0, 20);
+  return out.slice(0, count);
 }
