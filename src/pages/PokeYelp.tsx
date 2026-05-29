@@ -742,6 +742,66 @@ export default function PokeYelp() {
       />
       <div className="min-h-screen bg-background flex flex-col">
 
+        {/* Redeem celebration burst */}
+        <AnimatePresence>
+          {redeemBurst && (
+            <motion.div
+              key="redeem-burst"
+              className="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="absolute w-[420px] h-[420px] rounded-full bg-[radial-gradient(circle,hsl(var(--primary)/0.45),transparent_65%)] blur-2xl"
+                initial={{ scale: 0.4, opacity: 0 }}
+                animate={{ scale: 1.3, opacity: [0, 1, 0] }}
+                transition={{ duration: 1.6, ease: 'easeOut' }}
+              />
+              {[...Array(18)].map((_, i) => {
+                const angle = (i / 18) * Math.PI * 2;
+                const dist = 180 + (i % 3) * 40;
+                return (
+                  <motion.span
+                    key={i}
+                    className="absolute w-2 h-2 rounded-full"
+                    style={{
+                      background: i % 2 === 0 ? 'hsl(var(--primary))' : '#fbbf24',
+                      boxShadow: '0 0 12px currentColor',
+                    }}
+                    initial={{ x: 0, y: 0, opacity: 0, scale: 0.5 }}
+                    animate={{
+                      x: Math.cos(angle) * dist,
+                      y: Math.sin(angle) * dist,
+                      opacity: [0, 1, 0],
+                      scale: [0.5, 1.2, 0.6],
+                    }}
+                    transition={{ duration: 1.4, ease: 'easeOut', delay: 0.05 * (i % 6) }}
+                  />
+                );
+              })}
+              <motion.div
+                initial={{ scale: 0.6, opacity: 0, y: 10 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.8, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 280, damping: 18 }}
+                className="relative z-10 px-6 py-4 rounded-2xl bg-background/90 border border-primary/40 backdrop-blur-md text-center shadow-2xl"
+                style={{ boxShadow: '0 0 40px hsl(var(--primary) / 0.45)' }}
+              >
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Sparkles className="w-5 h-5" />
+                  <span className="text-xs uppercase tracking-[0.2em] font-semibold">Redeemed</span>
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div className="mt-1 text-2xl font-bold tabular-nums">
+                  +{SWIPES_PER_REDEMPTION} <span className="text-primary">swipes</span>
+                </div>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">unlocked in Pull or Pass</div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col select-none">
           {/* Cinematic hero */}
           <header className="relative text-center mb-10 pt-4">
