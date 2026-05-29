@@ -859,7 +859,7 @@ export default function PokeYelp() {
                 <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
                 <span className="text-foreground">1 per card</span> tagged, plus{' '}
                 <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.
-                Trade <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits → {SWIPES_PER_REDEMPTION} Pull or Pass swipes</span>.
+                <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits = {SWIPES_PER_REDEMPTION} swipes</span>.
               </p>
             </div>
 
