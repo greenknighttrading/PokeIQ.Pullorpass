@@ -853,7 +853,7 @@ export default function PokeYelp() {
                 <ArcadeStat icon={<Zap className="w-3 h-3" />} label="Score" value={`${roundXp.toLocaleString()} XP`} color="primary" accent />
                 <ArcadeStat icon={<Flame className="w-3 h-3" />} label="Card Streak" value={`${streak} 🔥`} color="amber" />
                 <ArcadeStat icon={<Trophy className="w-3 h-3" />} label={`Daily 🔥`} value={`${dailyStreak}d`} color="magenta" />
-                <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits" value={`${credits} ◎`} color="amber" accent />
+                <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits Earned" value={`${credits} ◎`} color="amber" accent />
               </div>
               <p className="mt-3 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed">
                 <span className="text-primary font-semibold">XP</span> is your arcade score — bragging rights only.{' '}
@@ -864,80 +864,41 @@ export default function PokeYelp() {
               </p>
             </div>
 
-            {/* Milestone progress strip — one clear goal: 10 reviews → +10 swipes */}
-            {(() => {
-              const inRound = reviewedCount % REVIEWS_PER_SWIPE_BATCH;
-              const toNext = REVIEWS_PER_SWIPE_BATCH - inRound;
-              const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
-              return (
-                <div className="mt-8 max-w-2xl mx-auto flex items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                     <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
-                       <span className="inline-flex items-center gap-1.5">
-                         <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                         <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
-                         <span>/ {REVIEWS_PER_SWIPE_BATCH} cards reviewed</span>
-                       </span>
-                      <span className="tabular-nums">
-                        {toNext} to <span className="text-primary font-semibold">+{SWIPES_PER_BATCH} swipes</span>
-                      </span>
-                    </div>
-                    <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                      <motion.div
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                        style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
-                      />
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      if (todaysMode && (todaysRemaining ?? 0) > 0) {
-                        toast.message('Filters locked', {
-                          description: `Tag the ${todaysRemaining ?? ''} cards you swiped today first to teach PokeIQ your vibe.`,
-                        });
-                        return;
-                      }
-                      toast.message('Premium unlocks card-level training', {
-                        description: 'PokeIQ Pro lets you pick specific cards to train so your favorites get the most accurate tags.',
-                      });
-                    }}
-                    className="shrink-0 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
-                  >
-                    <Filter className="w-3.5 h-3.5" />
-                    Filters locked
-                    {activeFiltersCount > 0 && (
-                      <span className="text-[10px] font-bold text-primary">· {activeFiltersCount}</span>
-                    )}
-                  </button>
-                </div>
-              );
-            })()}
-
-            {/* Redeem / today-left row */}
-            {(credits >= CREDITS_PER_REDEMPTION || (todaysMode && todaysRemaining != null && todaysRemaining > 0)) && (
-              <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                {credits >= CREDITS_PER_REDEMPTION && (
+            {/* Consolidated reviewed + redeem strip */}
+            <div className="mt-8 max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
+                <span className="text-foreground font-semibold tabular-nums">{reviewedCount}</span>
+                <span>cards reviewed</span>
+              </div>
+              {(() => {
+                const canRedeem = credits >= CREDITS_PER_REDEMPTION && credits % CREDITS_PER_REDEMPTION === 0;
+                const needed = credits < CREDITS_PER_REDEMPTION
+                  ? CREDITS_PER_REDEMPTION - credits
+                  : CREDITS_PER_REDEMPTION - (credits % CREDITS_PER_REDEMPTION);
+                const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
+                return canRedeem ? (
                   <button
                     onClick={redeemCredits}
                     disabled={redeeming}
-                    className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
-                    title={`Trade ${CREDITS_PER_REDEMPTION} credits for ${SWIPES_PER_REDEMPTION} swipes`}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors disabled:opacity-50"
                   >
-                    <RotateCw className="w-3 h-3" />
-                    {redeeming ? 'Redeeming…' : `Redeem ${CREDITS_PER_REDEMPTION} → ${SWIPES_PER_REDEMPTION} swipes`}
+                    <RotateCw className="w-3.5 h-3.5" />
+                    {redeeming ? 'Redeeming…' : `Redeem ${redeemAmount} credits → ${redeemAmount} swipes`}
                   </button>
-                )}
-                {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
-                  <>
-                    {credits >= CREDITS_PER_REDEMPTION && <span className="w-px h-3 bg-border" />}
-                    <span><span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left</span>
-                  </>
-                )}
-              </div>
-            )}
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted/40 text-muted-foreground text-xs">
+                    <Coins className="w-3.5 h-3.5" />
+                    Get {needed} more credit{needed === 1 ? '' : 's'} to redeem
+                  </span>
+                );
+              })()}
+              {todaysMode && todaysRemaining != null && todaysRemaining > 0 && (
+                <span className="text-xs text-muted-foreground">
+                  <span className="text-foreground font-medium tabular-nums">{todaysRemaining}</span> from today left
+                </span>
+              )}
+            </div>
           </header>
 
           {/* Filters panel */}
