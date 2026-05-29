@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Crown,
   Check,
@@ -16,6 +16,12 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { StripeEmbeddedCheckoutForm } from '@/components/StripeEmbeddedCheckout';
+import { PaymentTestModeBanner } from '@/components/PaymentTestModeBanner';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const coreFeatures = [
   'Unlimited Pull or Pass swipes',
@@ -29,13 +35,35 @@ const coreFeatures = [
 
 export default function Premium() {
   const [billing, setBilling] = useState<'monthly' | 'annual'>('annual');
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) setUser({ id: data.user.id, email: data.user.email ?? undefined });
+    });
+  }, []);
+
   const monthlyPrice = 5;
   const annualTotal = 49;
   const annualMonthly = (annualTotal / 12).toFixed(2); // 4.08
   const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
+  const priceId = billing === 'annual' ? 'premium_annual' : 'premium_monthly';
+
+  const handleGetPremium = () => {
+    if (!user) {
+      toast.info('Sign in to subscribe to Premium');
+      navigate('/auth?redirect=/premium');
+      return;
+    }
+    setCheckoutOpen(true);
+  };
 
   return (
-    <div className="px-6 lg:px-10 py-10 max-w-[820px] mx-auto">
+    <div>
+      <PaymentTestModeBanner />
+      <div className="px-6 lg:px-10 py-10 max-w-[820px] mx-auto">
       {/* Eyebrow */}
       <div className="text-center mb-8">
         <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 rounded-full border border-violet-500/30 bg-violet-500/5 px-[19px] py-[7px]">
@@ -180,6 +208,7 @@ export default function Premium() {
           </div>
           <Button
             size="lg"
+            onClick={handleGetPremium}
             className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0 mb-8"
             style={{ boxShadow: '0 0 30px rgba(139, 92, 246, 0.45)' }}
           >
@@ -203,6 +232,25 @@ export default function Premium() {
           </div>
         </div>
       </div>
+      </div>
+
+      <Dialog open={checkoutOpen} onOpenChange={setCheckoutOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Crown className="w-5 h-5 text-violet-300" />
+              PokeIQ Premium — {billing === 'annual' ? '$49 / year' : '$5 / month'}
+            </DialogTitle>
+          </DialogHeader>
+          {checkoutOpen && user && (
+            <StripeEmbeddedCheckoutForm
+              priceId={priceId}
+              userId={user.id}
+              customerEmail={user.email}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
