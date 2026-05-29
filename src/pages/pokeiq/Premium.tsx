@@ -46,10 +46,10 @@ export default function Premium() {
   }, []);
 
   const monthlyPrice = 5;
-  const annualTotal = 49;
-  const annualMonthly = (annualTotal / 12).toFixed(2); // 4.08
+  const annualTotal = 48;
+  const annualMonthly = (annualTotal / 12).toFixed(2); // 4.00
   const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
-  const priceId = billing === 'annual' ? 'premium_annual' : 'premium_monthly';
+  const priceId = billing === 'annual' ? 'premium_annual_v2' : 'premium_monthly';
 
   const handleGetPremium = () => {
     if (!user) {
@@ -239,7 +239,7 @@ export default function Premium() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-violet-300" />
-              PokeIQ Premium — {billing === 'annual' ? '$49 / year' : '$5 / month'}
+              PokeIQ Premium — {billing === 'annual' ? '$48 / year' : '$5 / month'}
             </DialogTitle>
           </DialogHeader>
           {checkoutOpen && user && (
