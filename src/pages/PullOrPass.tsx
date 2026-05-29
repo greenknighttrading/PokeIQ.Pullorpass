@@ -204,39 +204,6 @@ export default function PullOrPass() {
         } catch {}
       }
     });
-    // If user explicitly visits /matches, always show the post-swipe
-    // results (round-complete) page using the last completed round.
-    const wantsMatches = typeof window !== 'undefined' && window.location.pathname.startsWith('/matches');
-    if (wantsMatches) {
-      const last = readResults();
-      if (last) {
-        setCards(last.cards);
-        setRecords(last.records);
-        setRoundId(last.roundId);
-        setIndex(last.cards.length);
-        setStage('results');
-      } else {
-        // No completed round — fall back to in-progress round so the user
-        // still sees their day's likes/dislikes so far.
-        const resume = readResume();
-        if (resume && (resume.records?.length ?? 0) > 0) {
-          setCards(resume.cards);
-          setRecords(resume.records);
-          setRoundId(resume.roundId);
-          setIndex(resume.cards.length);
-          setStage('results');
-        } else {
-          loadRound();
-        }
-      }
-      const refresh = () => setQuota(readQuota());
-      window.addEventListener('focus', refresh);
-      window.addEventListener('storage', refresh);
-      return () => {
-        window.removeEventListener('focus', refresh);
-        window.removeEventListener('storage', refresh);
-      };
-    }
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
@@ -1258,7 +1225,7 @@ function DraggableCard({
   );
 }
 
-function ResultsView({
+export function ResultsView({
   records,
   onPlayAgain,
   isAuthed,
