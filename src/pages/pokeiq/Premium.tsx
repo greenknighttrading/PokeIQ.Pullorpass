@@ -225,14 +225,29 @@ export default function Premium() {
           <div className="text-xs text-muted-foreground mb-6">
             {billing === 'annual' ? `$${annualTotal} billed annually` : 'Billed monthly · cancel anytime'}
           </div>
-          <Button
-            size="lg"
-            onClick={handleGetPremium}
-            className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0 mb-8"
-            style={{ boxShadow: '0 0 30px rgba(139, 92, 246, 0.45)' }}
-          >
-            <Crown className="w-4 h-4" /> Get Premium
-          </Button>
+          {isPremium && currentInterval === 'year' ? (
+            <div className="w-full max-w-sm mx-auto mb-8 rounded-md border border-violet-500/40 bg-violet-500/10 px-4 py-3 text-sm text-violet-200 flex items-center justify-center gap-2">
+              <Check className="w-4 h-4" /> You're on Premium Annual
+            </div>
+          ) : isPremium && currentInterval === 'month' ? (
+            <Button
+              size="lg"
+              onClick={() => { setBilling('annual'); handleGetPremium(); }}
+              className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0 mb-8"
+              style={{ boxShadow: '0 0 30px rgba(139, 92, 246, 0.45)' }}
+            >
+              <Crown className="w-4 h-4" /> Upgrade to Annual
+            </Button>
+          ) : (
+            <Button
+              size="lg"
+              onClick={handleGetPremium}
+              className="w-full max-w-sm mx-auto gap-2 bg-violet-500 hover:bg-violet-600 text-white border-0 mb-8"
+              style={{ boxShadow: '0 0 30px rgba(139, 92, 246, 0.45)' }}
+            >
+              <Crown className="w-4 h-4" /> Get Premium
+            </Button>
+          )}
 
           {/* Unlimited Pull or Pass — included perks */}
           <div className="pt-6 border-t border-violet-500/25 text-left max-w-md mx-auto">
