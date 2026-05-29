@@ -411,7 +411,14 @@ export default function PullOrPass() {
         rarity: c.rarity,
       }));
 
-    const picked = pickDiverse20(pool);
+    // New/unauthed users get a shorter 10-card first round so we can prompt
+    // them to sign up sooner. Returning guests + signed-in users get the
+    // full 20-card round.
+    const { data: { session: liveSession } } = await supabase.auth.getSession();
+    const isGuest = !liveSession?.user || liveSession.user.is_anonymous;
+    const isFirstRound = isGuest && readQuota().lifetime === 0;
+    const roundSize = isFirstRound ? 10 : 20;
+    const picked = pickDiverse20(pool, roundSize);
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
