@@ -8,15 +8,17 @@ import {
   PERSONALITY_INFO,
   TraitScores,
 } from '@/lib/personalityEngine';
+import { TYPE_IMAGES, TYPE_TRAINERS } from '@/lib/personalityAssets';
 import {
   PiggyBank, ScrollText, Heart, Zap, Calculator, Target,
   Compass, LayoutGrid, Mountain,
   Lock, TrendingUp, PieChart, BarChart3, ChevronRight,
   CheckCircle2, AlertCircle, AlertTriangle, Sparkles, ExternalLink,
-  Dice5, Crown, Leaf,
+  Dice5, Crown, Leaf, Share2, Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
 import {
   Accordion,
   AccordionContent,
@@ -75,6 +77,33 @@ export function QuizResults({ result }: QuizResultsProps) {
 
   const [profileExpanded, setProfileExpanded] = useState(false);
   const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const shareUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/collector/${safeType.toLowerCase()}`
+    : '';
+
+  const handleShare = async () => {
+    const shareData = {
+      title: `I'm The ${safeType} — PokeIQ Collector Type`,
+      text: `I took the PokeIQ Collector Personality Test and I'm The ${safeType}! ${info.philosophy}`,
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch { /* fall through to clipboard */ }
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareCopied(true);
+      toast({ title: 'Link copied!', description: 'Share your collector type with friends.' });
+      setTimeout(() => setShareCopied(false), 2200);
+    } catch {
+      toast({ title: 'Could not copy link', variant: 'destructive' });
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -117,6 +146,24 @@ export function QuizResults({ result }: QuizResultsProps) {
           </h1>
           <p className="text-lg text-primary italic">"{info.philosophy}"</p>
         </div>
+        {/* Archetype portrait + trainer */}
+        <div className="mx-auto w-full max-w-[260px] pt-2">
+          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 via-muted/40 to-background border-2 border-primary/40 shadow-[0_15px_45px_-10px_hsl(var(--primary)/0.45)] p-2">
+            <div className="relative w-full h-full rounded-xl overflow-hidden bg-muted/40 border border-primary/20">
+              <img
+                src={TYPE_IMAGES[safeType]}
+                alt={`${safeType} collector personality illustration`}
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+          </div>
+          <div className="mt-3">
+            <p className="text-xs uppercase tracking-wider text-primary/80 font-medium">
+              Associated Trainer
+            </p>
+            <p className="text-xl font-bold text-foreground">{TYPE_TRAINERS[safeType]}</p>
+          </div>
+        </div>
         <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base">
           {info.tagline}
         </p>
@@ -130,6 +177,12 @@ export function QuizResults({ result }: QuizResultsProps) {
               {t}
             </span>
           ))}
+        </div>
+        <div className="pt-3">
+          <Button onClick={handleShare} variant="outline" size="sm" className="gap-2">
+            {shareCopied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
+            {shareCopied ? 'Link copied' : 'Share my collector type'}
+          </Button>
         </div>
       </motion.div>
 
@@ -447,10 +500,13 @@ export function QuizResults({ result }: QuizResultsProps) {
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
         className="text-center pt-4"
       >
-        <Link to="/">
-          <Button variant="outline" size="lg" className="gap-2">
-            <ExternalLink className="w-4 h-4" />
-            Learn More About PokeIQ
+        <Link to="/swipe">
+          <Button size="lg" className="gap-2 h-auto py-5 px-6 text-base whitespace-normal text-center max-w-xl">
+            <Sparkles className="w-5 h-5 flex-shrink-0" />
+            <span>
+              Play Pull or Swipe: we know <span className="underline">HOW</span> you collect — now let's learn more about <span className="underline">WHAT</span> you like to collect
+            </span>
+            <ChevronRight className="w-5 h-5 flex-shrink-0" />
           </Button>
         </Link>
       </motion.div>
