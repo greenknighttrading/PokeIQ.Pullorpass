@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
+  SwipeCard, SwipeRecord, analyzeRound, pickDiverse20, mulberry32, hashStringToSeed,
 } from '@/lib/pullorpass';
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
