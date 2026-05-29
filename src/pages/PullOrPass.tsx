@@ -19,6 +19,7 @@ import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infin
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
+import { DailyLimitWidget } from '@/pages/Matches';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
