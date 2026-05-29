@@ -1928,6 +1928,13 @@ function LikedDislikedPanel({
 }) {
   const border = tint === 'primary' ? 'border-primary/20' : 'border-purple-500/20';
   const headColor = tint === 'primary' ? 'text-primary' : 'text-purple-300';
+  const [page, setPage] = React.useState(0);
+  const ITEMS_PER_PAGE = 6;
+  const totalPages = Math.max(1, Math.ceil(records.length / ITEMS_PER_PAGE));
+  const currentRecords = records.slice(page * ITEMS_PER_PAGE, (page + 1) * ITEMS_PER_PAGE);
+  const canPrev = page > 0;
+  const canNext = page < totalPages - 1;
+
   return (
     <div className={`rounded-2xl border ${border} bg-card/60 p-5`}>
       <div className="flex items-center justify-between mb-3">
@@ -1940,7 +1947,7 @@ function LikedDislikedPanel({
         {records.length === 0 && (
           <p className="col-span-3 text-xs text-muted-foreground text-center py-6">No cards</p>
         )}
-        {records.slice(0, 6).map((r) => (
+        {currentRecords.map((r) => (
           <motion.div
             key={r.card.card_id}
             whileHover={{ scale: 1.06, y: -6 }}
@@ -1965,6 +1972,38 @@ function LikedDislikedPanel({
           </motion.div>
         ))}
       </div>
+
+      {/* Pagination */}
+      {records.length > ITEMS_PER_PAGE && (
+        <div className="flex items-center justify-end gap-2 mt-4">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={!canPrev}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              canPrev
+                ? 'bg-muted hover:bg-muted/80 text-foreground'
+                : 'bg-muted/40 text-muted-foreground cursor-not-allowed'
+            }`}
+          >
+            Previous
+          </button>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={!canNext}
+            className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
+              canNext
+                ? 'bg-muted hover:bg-muted/80 text-foreground'
+                : 'bg-muted/40 text-muted-foreground cursor-not-allowed'
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
+
       {viewProfileHref && (
         <div className="mt-4 pt-4 border-t border-primary/15">
           <Link
