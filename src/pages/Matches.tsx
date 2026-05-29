@@ -617,7 +617,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline underline-offset-4 text-lg px-0 py-[11px] mx-px"
               >
-                View Full DNA <ArrowRight className="w-3.5 h-3.5" />
+                View taste insights <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
