@@ -1330,7 +1330,7 @@ export function DailyLimitWidget() {
 
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-950/40 via-card to-zinc-950 p-6 sm:p-8 overflow-hidden text-center my-[3px] mx-0">
+      <div className="relative rounded-2xl border border-purple-500/30 bg-black p-6 sm:p-8 overflow-hidden text-center my-[3px] mx-0">
         <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
         <div className="relative space-y-3">
           <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">
