@@ -61,6 +61,7 @@ const PackGainsCalculator = lazy(() => import("./pages/PackGainsCalculator"));
 const MintdDaily = lazy(() => import("./pages/MintdDaily"));
 const PullOrPass = lazy(() => import("./pages/PullOrPass"));
 const Matches = lazy(() => import("./pages/Matches"));
+const MatchesResults = lazy(() => import("./pages/MatchesResults"));
 const MatchesCollection = lazy(() => import("./pages/MatchesCollection"));
 const PokeYelp = lazy(() => import("./pages/PokeYelp"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -137,7 +138,7 @@ function AppRoutes() {
         <Route path="/tools/sealed-vs-cards" element={<SealedVsCards />} />
         <Route path="/pack-gains" element={<PackGainsCalculator />} />
         <Route path="/swipe" element={<PokeIQShell><PullOrPass /></PokeIQShell>} />
-        <Route path="/matches" element={<PokeIQShell><PullOrPass /></PokeIQShell>} />
+        <Route path="/matches" element={<PokeIQShell><MatchesResults /></PokeIQShell>} />
         <Route path="/matches/:category" element={<MatchesCollection />} />
         <Route path="/profile" element={<PokeIQShell><Matches /></PokeIQShell>} />
         <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
