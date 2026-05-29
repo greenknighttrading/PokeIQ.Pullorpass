@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { QuizPage } from '@/components/quiz/QuizPage';
 import { EmailCapture } from '@/components/quiz/EmailCapture';
 import { AnalyzingLoader } from '@/components/quiz/AnalyzingLoader';
@@ -26,6 +27,19 @@ export default function PersonalityTest() {
   const [result, setResult] = useState<PersonalityResult | null>(null);
   const [userEmail, setUserEmail] = useState('');
   const [userGender, setUserGender] = useState('');
+  const [isAuthed, setIsAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      setIsAuthed(!!session?.user && !session.user.is_anonymous);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsAuthed(!!session?.user && !session.user.is_anonymous);
+    });
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   const handleAnswer = useCallback((questionId: number, value: LikertValue) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -35,10 +49,10 @@ export default function PersonalityTest() {
     if (currentPage < TOTAL_PAGES - 1) {
       setCurrentPage(prev => prev + 1);
     } else {
-      // Move to email capture
-      setStage('email');
+      // Skip email capture for logged-in users
+      setStage(isAuthed ? 'analyzing' : 'email');
     }
-  }, [currentPage]);
+  }, [currentPage, isAuthed]);
 
   const handlePrevPage = useCallback(() => {
     if (currentPage > 0) {
