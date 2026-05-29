@@ -698,6 +698,7 @@ export default function PokeYelp() {
   };
 
   const [redeeming, setRedeeming] = useState(false);
+  const [redeemBurst, setRedeemBurst] = useState(false);
   const redeemCredits = useCallback(async () => {
     if (!userId) { navigate('/auth?next=/earn'); return; }
     if (credits < CREDITS_PER_REDEMPTION || redeeming) return;
@@ -707,6 +708,8 @@ export default function PokeYelp() {
       if (error) throw error;
       setCredits(typeof updated === 'number' ? updated : credits - CREDITS_PER_REDEMPTION);
       grantSwipeBonus(SWIPES_PER_REDEMPTION);
+      setRedeemBurst(true);
+      setTimeout(() => setRedeemBurst(false), 1800);
       toast.success(`+${SWIPES_PER_REDEMPTION} swipes unlocked!`, {
         description: 'Head to Pull or Pass to use them.',
         position: 'top-center',
