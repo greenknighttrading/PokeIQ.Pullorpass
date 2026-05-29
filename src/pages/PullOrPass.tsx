@@ -1452,7 +1452,7 @@ export function ResultsView({
         {/* Train PokeIQ widget */}
         <motion.section {...fadeUp}>
           <Link to="/earn" className="block group">
-            <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/12 via-card to-primary/10 p-6 sm:p-8 overflow-hidden transition-shadow group-hover:shadow-[0_0_44px_hsl(var(--primary)/0.35)]">
+            <div className="relative rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/12 via-card to-primary/10 p-6 sm:p-8 overflow-hidden transition-shadow group-hover:shadow-[0_0_44px_hsl(var(--primary)/0.35)] py-[22px]">
               <div className="absolute -top-24 -right-24 w-[300px] h-[300px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
               <div className="absolute -bottom-24 -left-24 w-[300px] h-[300px] bg-primary/10 blur-3xl rounded-full pointer-events-none" />
               <div className="relative flex flex-col sm:flex-row items-center gap-5 sm:gap-7 text-center sm:text-left">
