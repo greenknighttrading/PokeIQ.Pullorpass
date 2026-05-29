@@ -1481,7 +1481,7 @@ export function ResultsView({
 
       {/* ── SECTION 4: Your Collection Awaits (authed → /profile, guest → /auth) + binder hero for guests ─── */}
       <motion.section {...fadeUp}>
-        {(
+        {!isAuthed && (
           <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
