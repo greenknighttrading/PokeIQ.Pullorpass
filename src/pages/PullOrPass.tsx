@@ -2344,6 +2344,9 @@ function OutOfSwipesModal({
                   <Sparkles className="w-4 h-4 text-primary" />
                   Keep training PokeIQ
                 </button>
+                <Link to="/matches" className="block text-xs text-primary hover:underline">
+                  See your matches →
+                </Link>
               </div>
             </div>
           ) : (
@@ -2413,12 +2416,18 @@ function OutOfSwipesModal({
                     <Sparkles className="w-4 h-4" /> Earn credits
                   </Button>
                 </Link>
+                <Link to="/matches" className="block text-center text-xs text-primary hover:underline pt-1">
+                  See your matches →
+                </Link>
               </div>
             ) : (
               <div className="space-y-2 pt-1">
                 <Button size="lg" className="w-full gap-2" onClick={onSignUp}>
                   <LogIn className="w-4 h-4" /> Sign up — get 20 free swipes
                 </Button>
+                <Link to="/matches" className="block text-center text-xs text-primary hover:underline pt-1">
+                  See your matches →
+                </Link>
               </div>
             )}
           </div>
