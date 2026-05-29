@@ -77,8 +77,61 @@ export default function CollectorShare() {
           </motion.div>
 
           <Card className="p-6 space-y-3">
-            <h2 className="text-lg font-semibold text-foreground">Core Identity</h2>
-            <p className="text-sm text-foreground/85 leading-relaxed">{info.fullProfile.coreIdentity}</p>
+            <h2 className="text-sm uppercase tracking-wider text-muted-foreground">Summary</h2>
+            <p className="text-foreground/85 leading-relaxed">{info.summary}</p>
+          </Card>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card className="p-5 bg-success/5 border-success/20 space-y-2">
+              <h3 className="text-sm uppercase tracking-wider text-success">Strength</h3>
+              <p className="text-sm text-foreground/85 leading-relaxed">{info.strengthLong}</p>
+            </Card>
+            <Card className="p-5 bg-warning/5 border-warning/20 space-y-2">
+              <h3 className="text-sm uppercase tracking-wider text-warning">Weakness</h3>
+              <p className="text-sm text-foreground/85 leading-relaxed">{info.weaknessLong}</p>
+            </Card>
+          </div>
+
+          <Card className="p-6 space-y-5">
+            {[
+              { title: 'Core Identity', body: info.fullProfile.coreIdentity },
+              { title: 'Collecting Mindset', body: info.fullProfile.collectingMindset },
+              { title: 'Inner World', body: info.fullProfile.innerWorld },
+              { title: 'Blind Spots', body: info.fullProfile.blindSpots },
+            ].map((s) => (
+              <div key={s.title}>
+                <h3 className="text-xs uppercase tracking-wider text-primary font-medium mb-1.5">{s.title}</h3>
+                <p className="text-sm text-foreground/85 leading-relaxed">{s.body}</p>
+              </div>
+            ))}
+          </Card>
+
+          <Card className="p-6 bg-primary/5 border-primary/20 space-y-2">
+            <h3 className="text-sm uppercase tracking-wider text-primary">Growth Path</h3>
+            <p className="text-foreground/85 leading-relaxed">{info.fullProfile.growthPath}</p>
+          </Card>
+
+          <Card className="p-6 space-y-4">
+            <div>
+              <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Collection Style</h3>
+              <ul className="text-sm text-foreground/85 list-disc pl-5 space-y-1">
+                {info.collectionStyle.map((item, i) => <li key={i}>{item}</li>)}
+              </ul>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4 pt-2 border-t border-border/50">
+              <div>
+                <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Signature Move</h3>
+                <p className="text-sm italic text-foreground/85">"{info.famousBehavior}"</p>
+              </div>
+              <div>
+                <h3 className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Try This</h3>
+                <p className="text-sm text-foreground/85">{info.recommendedAction}</p>
+              </div>
+            </div>
+            <div className="pt-2 border-t border-border/50">
+              <h3 className="text-xs uppercase tracking-wider text-destructive mb-1">Danger Zone</h3>
+              <p className="text-sm text-foreground/85">{info.dangerZone}</p>
+            </div>
           </Card>
 
           <div className="text-center space-y-3 pt-2">
