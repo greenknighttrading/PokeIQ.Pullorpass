@@ -773,7 +773,7 @@ export default function PokeYelp() {
               className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
               style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
             >
-              Training Lab.
+              PokeIQ Training Lab
             </motion.h1>
             <motion.p
               initial={{ opacity: 0 }}
