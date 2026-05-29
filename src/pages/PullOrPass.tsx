@@ -30,9 +30,9 @@ const SWIPE_THRESHOLD = 110;
 
 // ─── Daily swipe quota (free tier) ───────────────────────
 const DAILY_BASE_LIMIT = 20;
-const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 20 Earn reviews
-const CREDITS_PER_REDEMPTION = 20; // 20 credits → 20 swipes
-const SWIPES_PER_REDEMPTION = 20;
+const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 10 Earn reviews
+const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes (1 credit = 1 swipe)
+const SWIPES_PER_REDEMPTION = 10;
 const REDEMPTIONS_BEFORE_PRO_NUDGE = 3;
 const REDEMPTION_COUNT_KEY = 'pop_redemption_count_v1';
 const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
