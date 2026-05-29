@@ -1678,6 +1678,7 @@ export function ResultsView({
       </motion.section>
 
       {/* ── SECTION 5: Hand-picked recommendations row ────────── */}
+      {!isAuthed && (
       <motion.section {...fadeUp} className="flex flex-col gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -1711,6 +1712,7 @@ export function ResultsView({
           )}
         </div>
       </motion.section>
+      )}
 
       {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
       {!isAuthed && (
