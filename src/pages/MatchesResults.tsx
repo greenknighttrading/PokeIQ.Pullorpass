@@ -10,6 +10,35 @@ import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 
 type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
 
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Every swipe of the day (across rounds) is appended here by PullOrPass.
+function readTodayRecords(): SwipeRecord[] {
+  try {
+    const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((x: any) => x && x.card_id && (x.decision === 'pull' || x.decision === 'pass'))
+      .map((x: any): SwipeRecord => ({
+        card: {
+          card_id: x.card_id,
+          name: x.name ?? '',
+          set_name: x.set_name ?? null,
+          image_url: x.image_url ?? null,
+          price: typeof x.price === 'number' ? x.price : 0,
+          rarity: x.rarity ?? null,
+        },
+        decision: x.decision,
+        tags: Array.isArray(x.tags) ? x.tags : [],
+      }));
+  } catch { return []; }
+}
+
 function readResults(): Stored | null {
   try {
     const raw = localStorage.getItem('pop_results_v1');
@@ -36,8 +65,15 @@ export default function MatchesResults() {
   const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
-    const stored = readResults() ?? readResume();
-    setRecords(stored?.records ?? []);
+    // Prefer the full day's swipe history (covers in-progress and completed
+    // rounds alike), then fall back to last round / resume.
+    const today = readTodayRecords();
+    if (today.length) {
+      setRecords(today);
+    } else {
+      const stored = readResults() ?? readResume();
+      setRecords(stored?.records ?? []);
+    }
     supabase.auth.getUser().then(({ data }) => {
       setIsAuthed(!!data.user && !data.user.is_anonymous);
     });
