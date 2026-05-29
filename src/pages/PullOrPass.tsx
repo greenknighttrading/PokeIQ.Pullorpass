@@ -683,7 +683,7 @@ export default function PullOrPass() {
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm">Pulling 20 wildly different cards…</p>
+              <p className="text-sm">Loading 20 wildly different cards to learn about your taste…</p>
             </div>
           )}
 
