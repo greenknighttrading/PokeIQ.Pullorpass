@@ -504,10 +504,6 @@ export default function PullOrPass() {
     setQuota((q) => {
       const next = { ...q, used: q.used + 1, lifetime: q.lifetime + 1 };
       writeQuota(next);
-      // After 20 lifetime swipes, nudge unauthed users to sign up
-      if (!userId && next.lifetime === 20) {
-        setShowSignupPrompt(true);
-      }
       return next;
     });
   };
