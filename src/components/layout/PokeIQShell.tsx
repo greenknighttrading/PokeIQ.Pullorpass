@@ -310,7 +310,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     <User className="w-4 h-4 mr-2" /> Smart Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/premium')}>
-                    <Crown className="w-4 h-4 mr-2" /> Premium
+                    <Crown className="w-4 h-4 mr-2" /> Premium User
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={toggleTheme}>
