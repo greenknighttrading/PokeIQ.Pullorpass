@@ -2430,7 +2430,7 @@ function OutOfSwipesModal({
 }
 
 /* ── Intro / Landing Screen ── */
-function IntroScreen({ onStart }: { onStart: () => void }) {
+function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAuth?: () => void; isAuthed?: boolean }) {
   // Interactive draggable demo card — user actually swipes a chase card.
   // Mew GG10/GG70 from Crown Zenith Galarian Gallery.
   const charizardImg = 'https://images.pokemontcg.io/swsh12pt5gg/GG10_hires.png';
@@ -2603,8 +2603,8 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           curates custom binders that tell your collector story.
         </p>
 
-        {/* CTA — placed immediately after description */}
-        <div className="w-full flex justify-center">
+        {/* CTA — start swiping, plus sign-in for returning users */}
+        <div className="w-full flex flex-col items-center gap-2">
           <Button
             onClick={onStart}
             size="lg"
@@ -2612,6 +2612,17 @@ function IntroScreen({ onStart }: { onStart: () => void }) {
           >
             Start Swiping <ArrowRight className="w-5 h-5" />
           </Button>
+          {!isAuthed && onAuth && (
+            <Button
+              onClick={onAuth}
+              size="lg"
+              variant="outline"
+              className="w-full max-w-xs sm:max-w-sm h-11 text-sm font-semibold gap-2"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In / Sign Up
+            </Button>
+          )}
         </div>
       </div>
     </div>
