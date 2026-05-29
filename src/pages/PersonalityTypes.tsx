@@ -309,11 +309,11 @@ export default function PersonalityTypes() {
 
                   <div className="grid sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Famous Behavior</h4>
+                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Signature Move</h4>
                       <p className="text-foreground/80 text-sm italic">{info.famousBehavior}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Recommended Action</h4>
+                      <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Try This</h4>
                       <p className="text-foreground/80 text-sm">{info.recommendedAction}</p>
                     </div>
                   </div>
