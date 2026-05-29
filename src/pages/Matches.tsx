@@ -226,7 +226,7 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
-              <div className="!mt-0">
+              <div className="!-mt-8 sm:!-mt-10">
                 <DailyLimitWidget />
               </div>
             </div>
@@ -1330,8 +1330,7 @@ export function DailyLimitWidget() {
 
   return (
     <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="relative rounded-2xl border border-purple-500/30 bg-black p-6 sm:p-8 overflow-hidden text-center my-[3px] mx-0">
-        <div className="absolute -top-24 -right-24 w-[360px] h-[360px] bg-purple-500/10 blur-3xl rounded-full pointer-events-none" />
+      <div className="relative rounded-2xl border border-purple-500/30 bg-transparent p-6 sm:p-8 overflow-hidden text-center mx-0">
         <div className="relative space-y-3">
           <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">
             {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
