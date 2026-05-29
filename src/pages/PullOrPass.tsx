@@ -697,6 +697,13 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
+                  <Link
+                    to="/matches"
+                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Heart className="w-3 h-3" /> See matches
+                  </Link>
+                  <span className="text-muted-foreground/40">·</span>
                   {premium ? (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
