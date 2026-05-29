@@ -53,7 +53,6 @@ const toolsSubItems = [
   { name: 'Smart List', href: '/buylist/movers', icon: TrendingUp },
   { name: 'Watchlist', href: '/buylist/watchlist', icon: Eye },
   { name: 'Pack Gains', href: '/pack-gains', icon: Package },
-  { name: 'Sealed vs Cards', href: '/tools/sealed-vs-cards', icon: Scale },
 ];
 
 function NavArrow() {
