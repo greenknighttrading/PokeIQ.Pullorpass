@@ -2710,7 +2710,7 @@ function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSi
             </p>
             <div className="flex flex-col gap-2 pt-2">
               <Button onClick={onSignUp} size="lg" className="gap-2">
-                <LogIn className="w-4 h-4" /> Build my Collector Profile
+                <LogIn className="w-4 h-4" /> SIGN UP NOW
               </Button>
               {onLogin && (
                 <Button onClick={onLogin} size="lg" variant="outline" className="gap-2">
@@ -2718,7 +2718,7 @@ function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSi
                 </Button>
               )}
               <button onClick={onClose} className="text-xs text-muted-foreground hover:text-foreground">
-                Keep swiping for now
+                Review my matches
               </button>
             </div>
           </div>
