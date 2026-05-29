@@ -2708,10 +2708,10 @@ function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSi
           </button>
           <div className="text-center space-y-3">
             <Sparkles className="w-8 h-8 mx-auto text-primary" />
-            <h3 className="text-lg font-bold text-foreground">You're 20 swipes in — nice taste.</h3>
+            <h3 className="text-lg font-bold text-foreground">Create an account to remember your matches</h3>
             <p className="text-sm text-muted-foreground">
-              Create a free account to start building your <strong className="text-foreground">Collector Profile</strong> —
-              your vibes, your favorite sets, and the cards that actually feel like you.
+              Sign up so PokeIQ can save the cards you liked and{' '}
+              <strong className="text-foreground">build your Collector Profile</strong> — the more it learns, the better your matches get.
             </p>
             <div className="flex flex-col gap-2 pt-2">
               <Button onClick={onSignUp} size="lg" className="gap-2">
