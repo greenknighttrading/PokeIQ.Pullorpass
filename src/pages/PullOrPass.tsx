@@ -1414,8 +1414,8 @@ function ResultsView({
         />
       </motion.section>
 
-      {/* ── SECTION 3: Train PokeIQ (authed) OR View All My Matches (guest) ─── */}
-      {isAuthed ? (
+      {/* ── SECTION 3: Train PokeIQ (authed only) ─── */}
+      {isAuthed && (
         <>
         {/* Train PokeIQ widget */}
         <motion.section {...fadeUp}>
@@ -1445,63 +1445,11 @@ function ResultsView({
           </Link>
         </motion.section>
         </>
-      ) : (
-        <motion.section {...fadeUp}>
-          <div className="relative rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/12 via-card to-purple-500/12 p-8 sm:p-12 overflow-hidden shadow-[0_0_60px_hsl(var(--primary)/0.25)]">
-            <div className="absolute -top-32 -right-32 w-[360px] h-[360px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-32 -left-32 w-[360px] h-[360px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
-            <div className="relative flex flex-col items-center gap-6 text-center">
-              <div className="w-20 h-20 rounded-3xl border border-primary/40 bg-primary/15 flex items-center justify-center shadow-[0_0_28px_hsl(var(--primary)/0.5)]">
-                <Heart className="w-10 h-10 text-primary fill-primary/40" />
-              </div>
-              <div className="space-y-2 max-w-2xl">
-                <h3 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight tracking-tight">
-                  View All My Matches
-                </h3>
-                <p className="text-base sm:text-lg text-muted-foreground">
-                  Sign up to save every card you liked, unlock your full match list, and open your personalized Smart Portfolio.
-                </p>
-              </div>
-              <motion.button
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={onSignUp}
-                className="h-16 px-12 rounded-2xl bg-primary text-primary-foreground font-extrabold text-lg sm:text-xl tracking-wide inline-flex items-center gap-3 shadow-[0_0_44px_hsl(var(--primary)/0.7)] hover:shadow-[0_0_64px_hsl(var(--primary)/0.9)] transition-shadow uppercase"
-              >
-                Sign Up
-                <ArrowRight className="w-6 h-6" />
-              </motion.button>
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto pt-2">
-                <motion.button
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={onSignUp}
-                  className="h-12 px-7 rounded-xl border border-primary/40 bg-primary/10 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
-                >
-                  <Heart className="w-4 h-4 text-primary" />
-                  View All My Matches
-                </motion.button>
-                <motion.button
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={onSignUp}
-                  className="h-12 px-7 rounded-xl border border-purple-400/40 bg-purple-500/10 text-foreground font-semibold text-sm inline-flex items-center justify-center gap-2 hover:bg-purple-500/15 transition-colors"
-                >
-                  <BarChart3 className="w-4 h-4 text-purple-300" />
-                  View My Smart Portfolio
-                </motion.button>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Free account · saves your matches forever
-              </p>
-            </div>
-          </div>
-        </motion.section>
       )}
 
-      {/* ── SECTION 4: Binder hero (guests) OR Your Collection Awaits (authed) ─── */}
+      {/* ── SECTION 4: Your Collection Awaits (authed → /profile, guest → /auth) + binder hero for guests ─── */}
       <motion.section {...fadeUp}>
-        {isAuthed ? (
+        {(
           <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
@@ -1604,16 +1552,23 @@ function ResultsView({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => window.location.assign('/profile')}
+                  onClick={() => {
+                    if (isAuthed) {
+                      window.location.assign('/profile');
+                    } else {
+                      onSignUp();
+                    }
+                  }}
                   className="h-12 px-8 rounded-xl bg-primary text-primary-foreground font-bold text-sm tracking-wide inline-flex items-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_44px_hsl(var(--primary)/0.8)] transition-shadow"
                 >
-                  Go To Your Profile
+                  {isAuthed ? 'Go To Your Profile' : 'Create Your Account'}
                   <ArrowRight className="w-4 h-4" />
                 </motion.button>
               </div>
             </div>
           </div>
-        ) : (
+        )}
+        {!isAuthed && (
         <div className="relative rounded-2xl border border-white/5 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
           <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
           <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-primary/15 blur-3xl rounded-full pointer-events-none" />
