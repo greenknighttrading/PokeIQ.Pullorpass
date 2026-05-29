@@ -1431,11 +1431,14 @@ function ArcadeStat({
         boxShadow: `0 0 ${accent ? 18 : 10}px hsl(${palette.hsl} / ${glow}), inset 0 0 12px hsl(${palette.hsl} / 0.08)`,
       }}
     >
-      <div className={`flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.25em] ${palette.label}`}>
-        <span className={palette.text}>{icon}</span> {label}
+      <div
+        className={`flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.25em] leading-tight text-center min-h-[1.75rem] ${palette.label}`}
+      >
+        <span className={palette.text}>{icon}</span>
+        <span className="whitespace-nowrap">{label}</span>
       </div>
       <div
-        className={`text-xl font-black tabular-nums leading-tight ${palette.text}`}
+        className={`mt-1 text-xl font-black tabular-nums leading-none text-center ${palette.text}`}
         style={{ textShadow: `0 0 10px hsl(${palette.hsl} / ${accent ? 0.75 : 0.45})` }}
       >
         {value}
