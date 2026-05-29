@@ -2313,13 +2313,18 @@ function OutOfSwipesModal({
             </div>
             <div className="space-y-1.5">
               <h2 className="text-2xl font-bold text-foreground tracking-tight">You're out of swipes</h2>
-              <p className="text-sm text-muted-foreground">
-                {canRedeem
-                  ? 'Redeem your credits to keep swiping.'
-                  : isAuthed
-                  ? 'Earn more credits or go Pro for unlimited swipes.'
-                  : 'Sign up to earn credits and unlock more swipes.'}
-              </p>
+              {canRedeem ? (
+                <p className="text-sm text-muted-foreground">Redeem your credits to keep swiping.</p>
+              ) : isAuthed ? (
+                <p className="text-sm text-muted-foreground">
+                  You've used up your free 20 swipes a day limit — you can{' '}
+                  <Link to="/earn" className="text-primary font-semibold hover:underline">earn credits</Link>{' '}
+                  or{' '}
+                  <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Pro</Link>.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">Sign up to earn credits and unlock more swipes.</p>
+              )}
             </div>
 
             {/* Credits chip */}
