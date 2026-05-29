@@ -229,23 +229,37 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
 
       {/* Go Premium card */}
       <div className="p-4">
-        <button
-          onClick={() => navigate('/premium')}
-          className="w-full rounded-xl border border-primary/30 bg-gradient-to-b from-primary/15 to-primary/5 p-4 text-left transition-all hover:border-primary/60 hover:from-primary/25"
-        >
-          <div className="flex flex-col items-center text-center gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-              <Crown className="w-5 h-5 text-primary" />
+        {isPremium ? (
+          <div className="w-full rounded-xl border border-emerald-500/30 bg-gradient-to-b from-emerald-500/10 to-emerald-500/5 p-4 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-emerald-400" strokeWidth={3} />
+              </div>
+              <div className="font-semibold text-sm">You're a Premium User</div>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                with unlocked swipes, advanced insights, and exclusive rewards.
+              </p>
             </div>
-            <div className="font-semibold text-sm">Go Premium</div>
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              Unlock unlimited swipes, advanced insights, and exclusive rewards.
-            </p>
-            <Button size="sm" variant="outline" className="w-full mt-1 h-8 text-xs border-primary/40 hover:border-primary hover:bg-primary/10">
-              Upgrade Now
-            </Button>
           </div>
-        </button>
+        ) : (
+          <button
+            onClick={() => navigate('/premium')}
+            className="w-full rounded-xl border border-primary/30 bg-gradient-to-b from-primary/15 to-primary/5 p-4 text-left transition-all hover:border-primary/60 hover:from-primary/25"
+          >
+            <div className="flex flex-col items-center text-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                <Crown className="w-5 h-5 text-primary" />
+              </div>
+              <div className="font-semibold text-sm">Go Premium</div>
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Unlock unlimited swipes, advanced insights, and exclusive rewards.
+              </p>
+              <Button size="sm" variant="outline" className="w-full mt-1 h-8 text-xs border-primary/40 hover:border-primary hover:bg-primary/10">
+                Upgrade Now
+              </Button>
+            </div>
+          </button>
+        )}
       </div>
     </>
   );
