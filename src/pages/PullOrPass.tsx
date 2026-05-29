@@ -676,6 +676,8 @@ export default function PullOrPass() {
                 try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
                 loadRound();
               }}
+              onAuth={() => navigate('/auth', { state: { from: '/swipe' } })}
+              isAuthed={!!userId}
             />
           )}
           {stage === 'loading' && (
