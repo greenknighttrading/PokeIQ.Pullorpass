@@ -76,7 +76,6 @@ async function createCheckoutSession(options: {
     mode: isRecurring ? "subscription" : "payment",
     ui_mode: "embedded_page" as any,
     return_url: options.returnUrl,
-    managed_payments: { enabled: true } as any,
     ...(customerId && { customer: customerId }),
     ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
     ...(options.userId && {
