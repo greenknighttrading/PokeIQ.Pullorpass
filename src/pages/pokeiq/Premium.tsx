@@ -159,6 +159,15 @@ export default function Premium() {
       <div className="flex justify-center mb-4">
         <div className="inline-flex items-center bg-card/60 border border-border/60 rounded-full p-1">
           <button
+            onClick={() => setBilling('monthly')}
+            className={cn(
+              'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
+              billing === 'monthly' ? 'bg-violet-500 text-white' : 'text-muted-foreground'
+            )}
+          >
+            Monthly
+          </button>
+          <button
             onClick={() => setBilling('annual')}
             className={cn(
               'px-4 py-1.5 rounded-full text-xs font-medium transition-all flex items-center gap-1.5',
@@ -172,15 +181,6 @@ export default function Premium() {
             )}>
               Save 18%
             </span>
-          </button>
-          <button
-            onClick={() => setBilling('monthly')}
-            className={cn(
-              'px-4 py-1.5 rounded-full text-xs font-medium transition-all',
-              billing === 'monthly' ? 'bg-violet-500 text-white' : 'text-muted-foreground'
-            )}
-          >
-            Monthly
           </button>
         </div>
       </div>
