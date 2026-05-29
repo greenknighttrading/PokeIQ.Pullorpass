@@ -1363,7 +1363,8 @@ function ResultsView({
           />
         </div>
 
-        {/* Swipe Again CTA */}
+        {/* Swipe Again CTA — hidden for guests; we want them to sign up first */}
+        {isAuthed && (
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1388,6 +1389,7 @@ function ResultsView({
             </p>
           )}
         </motion.div>
+        )}
       </motion.section>
 
       {/* ── SECTION 2: Liked vs Disliked ──────────────────────── */}
