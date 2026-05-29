@@ -683,7 +683,7 @@ export default function PullOrPass() {
           {stage === 'loading' && (
             <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm">Pulling 20 wildly different cards…</p>
+              <p className="text-sm">Loading 20 wildly different cards to learn about your taste…</p>
             </div>
           )}
 
@@ -697,6 +697,13 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
+                  <Link
+                    to="/matches"
+                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                  >
+                    <Heart className="w-3 h-3" /> See matches
+                  </Link>
+                  <span className="text-muted-foreground/40">·</span>
                   {premium ? (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
@@ -2313,13 +2320,18 @@ function OutOfSwipesModal({
             </div>
             <div className="space-y-1.5">
               <h2 className="text-2xl font-bold text-foreground tracking-tight">You're out of swipes</h2>
-              <p className="text-sm text-muted-foreground">
-                {canRedeem
-                  ? 'Redeem your credits to keep swiping.'
-                  : isAuthed
-                  ? 'Earn more credits or go Pro for unlimited swipes.'
-                  : 'Sign up to earn credits and unlock more swipes.'}
-              </p>
+              {canRedeem ? (
+                <p className="text-sm text-muted-foreground">Redeem your credits to keep swiping.</p>
+              ) : isAuthed ? (
+                <p className="text-sm text-muted-foreground">
+                  You've used up your free 20 swipes a day limit — you can{' '}
+                  <Link to="/earn" className="text-primary font-semibold hover:underline">earn credits</Link>{' '}
+                  or{' '}
+                  <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Pro</Link>.
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">Sign up to earn credits and unlock more swipes.</p>
+              )}
             </div>
 
             {/* Credits chip */}
