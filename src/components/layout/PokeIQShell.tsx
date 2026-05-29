@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Sun, Moon, Menu,
+  Sun, Moon, Menu, Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -156,6 +156,14 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
         >
           <Crown className="w-4 h-4 shrink-0 text-violet-300" />
           <span className="flex-1 truncate text-left">Premium</span>
+          {isPremium && (
+            <span
+              className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400"
+              title="Premium active"
+            >
+              <Check className="w-3 h-3" strokeWidth={3} />
+            </span>
+          )}
           {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
         </button>
 
