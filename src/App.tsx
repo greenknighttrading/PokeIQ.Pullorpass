@@ -155,18 +155,18 @@ function AppRoutes() {
         <Route path="/report/generated" element={<GeneratedReport />} />
         <Route path="/report/print" element={<PrintReport />} />
 
-        {/* All other pages with AppLayout */}
-        <Route path="/home" element={<PremiumGate><AppLayout><Index /></AppLayout></PremiumGate>} />
-        <Route path="/collection" element={<AppLayout><MyCollection /></AppLayout>} />
-        <Route path="/insights" element={<AppLayout><Insights /></AppLayout>} />
-        <Route path="/winners" element={<AppLayout><Winners /></AppLayout>} />
-        <Route path="/items" element={<AppLayout><FilteredItems /></AppLayout>} />
-        <Route path="/rebalance" element={<AppLayout><Rebalance /></AppLayout>} />
-        <Route path="/era-allocation" element={<AppLayout><EraAllocation /></AppLayout>} />
-        <Route path="/report" element={<PremiumGate><AppLayout><Report /></AppLayout></PremiumGate>} />
-        <Route path="/smart-feed" element={<PremiumGate><SmartFeed /></PremiumGate>} />
-        <Route path="/smart-feed/brief" element={<PremiumGate><SmartFeedBrief /></PremiumGate>} />
-        <Route path="/buy-list" element={<PremiumGate><AppLayout><BuyListPicks /></AppLayout></PremiumGate>} />
+        {/* Advanced Analytics — premium gated, wrapped in PokeIQShell so left sidebar is always present */}
+        <Route path="/home" element={<PremiumGate><PokeIQShell><AppLayout><Index /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/collection" element={<PremiumGate><PokeIQShell><AppLayout><MyCollection /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/insights" element={<PremiumGate><PokeIQShell><AppLayout><Insights /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/winners" element={<PremiumGate><PokeIQShell><AppLayout><Winners /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/items" element={<PremiumGate><PokeIQShell><AppLayout><FilteredItems /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/rebalance" element={<PremiumGate><PokeIQShell><AppLayout><Rebalance /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/era-allocation" element={<PremiumGate><PokeIQShell><AppLayout><EraAllocation /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/report" element={<PremiumGate><PokeIQShell><AppLayout><Report /></AppLayout></PokeIQShell></PremiumGate>} />
+        <Route path="/smart-feed" element={<PremiumGate><PokeIQShell><SmartFeed /></PokeIQShell></PremiumGate>} />
+        <Route path="/smart-feed/brief" element={<PremiumGate><PokeIQShell><SmartFeedBrief /></PokeIQShell></PremiumGate>} />
+        <Route path="/buy-list" element={<PremiumGate><PokeIQShell><AppLayout><BuyListPicks /></AppLayout></PokeIQShell></PremiumGate>} />
         <Route path="*" element={<AppLayout><NotFound /></AppLayout>} />
         </Routes>
       </Suspense>
