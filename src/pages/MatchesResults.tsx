@@ -12,7 +12,9 @@ type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
 
 function todayKey() {
   const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // MUST match PullOrPass.tsx's todayKey() (non-padded) so we read the
+  // same localStorage key it writes to.
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
 // Every swipe of the day (across rounds) is appended here by PullOrPass.
@@ -65,18 +67,54 @@ export default function MatchesResults() {
   const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
-    // Prefer the full day's swipe history (covers in-progress and completed
-    // rounds alike), then fall back to last round / resume.
-    const today = readTodayRecords();
-    if (today.length) {
-      setRecords(today);
-    } else {
+    (async () => {
+      // 1) For authed users, prefer their server-side swipe history so it
+      //    survives across devices/sessions.
+      let serverRecords: SwipeRecord[] | null = null;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const authed = !!session?.user && !session.user.is_anonymous;
+        setIsAuthed(authed);
+        if (authed) {
+          const { data } = await supabase
+            .from('pullorpass_swipes')
+            .select('card_id, card_name, card_set, card_image, card_price, card_rarity, decision, tags, created_at')
+            .eq('user_id', session!.user.id)
+            .order('created_at', { ascending: false })
+            .limit(500);
+          if (data && data.length) {
+            serverRecords = data.map((x: any): SwipeRecord => ({
+              card: {
+                card_id: x.card_id,
+                name: x.card_name ?? '',
+                set_name: x.card_set ?? null,
+                image_url: x.card_image ?? null,
+                price: typeof x.card_price === 'number' ? x.card_price : Number(x.card_price) || 0,
+                rarity: x.card_rarity ?? null,
+              },
+              decision: x.decision,
+              tags: Array.isArray(x.tags) ? x.tags : [],
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('matches: server fetch failed', e);
+      }
+
+      if (serverRecords && serverRecords.length) {
+        setRecords(serverRecords);
+        return;
+      }
+
+      // 2) Otherwise use today's local swipe history, then last round / resume.
+      const today = readTodayRecords();
+      if (today.length) {
+        setRecords(today);
+        return;
+      }
       const stored = readResults() ?? readResume();
       setRecords(stored?.records ?? []);
-    }
-    supabase.auth.getUser().then(({ data }) => {
-      setIsAuthed(!!data.user && !data.user.is_anonymous);
-    });
+    })();
   }, []);
 
   if (records === null) return null;

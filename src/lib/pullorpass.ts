@@ -104,18 +104,24 @@ export function analyzeRound(records: SwipeRecord[]): RoundAnalysis {
   return { pulls: pulls.length, passes: passes.length, topTags, topTrait, archetype, favoriteSets, avgPullPrice, summary };
 }
 
-// Deterministic diverse N-card sampler from a candidate pool (defaults to 20)
-export function pickDiverse20(pool: SwipeCard[], count: number = 20): SwipeCard[] {
+// Deterministic diverse N-card sampler from a candidate pool (defaults to 20).
+// Pass `rand` (a seeded PRNG returning [0,1)) to make the selection stable
+// per user/day — so reloading shows the same cards.
+export function pickDiverse20(
+  pool: SwipeCard[],
+  count: number = 20,
+  rand: () => number = Math.random,
+): SwipeCard[] {
   // Bucket by price tier x set, then take round-robin
   const tier = (p: number) => (p < 15 ? 'low' : p < 50 ? 'mid' : p < 200 ? 'high' : 'chase');
   const buckets = new Map<string, SwipeCard[]>();
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const shuffled = [...pool].sort(() => rand() - 0.5);
   for (const c of shuffled) {
     const key = `${tier(c.price)}::${c.set_name ?? '?'}`;
     if (!buckets.has(key)) buckets.set(key, []);
     buckets.get(key)!.push(c);
   }
-  const keys = Array.from(buckets.keys()).sort(() => Math.random() - 0.5);
+  const keys = Array.from(buckets.keys()).sort(() => rand() - 0.5);
   const out: SwipeCard[] = [];
   let i = 0;
   while (out.length < count && keys.length > 0) {
@@ -126,4 +132,26 @@ export function pickDiverse20(pool: SwipeCard[], count: number = 20): SwipeCard[
     i++;
   }
   return out.slice(0, count);
+}
+
+// Tiny seeded PRNG (mulberry32) — same seed always produces the same stream.
+export function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0;
+    a = (a + 0x6D2B79F5) | 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export function hashStringToSeed(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
 }

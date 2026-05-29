@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import {
-  SwipeCard, SwipeRecord, analyzeRound, pickDiverse20,
+  SwipeCard, SwipeRecord, analyzeRound, pickDiverse20, mulberry32, hashStringToSeed,
 } from '@/lib/pullorpass';
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
@@ -324,7 +324,30 @@ export default function PullOrPass() {
     setMatchCard(null);
     setPendingMatchAdvance(null);
     setMatchCount(0);
-    setRoundId(crypto.randomUUID());
+    // Deterministic seed: same user (or guest device) gets the same cards
+    // on the same day, so reloads / new sessions show the same round until
+    // they actually swipe through it. Authed users seed by user_id; guests
+    // by a stable device id stored in localStorage.
+    let identity = '';
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && !session.user.is_anonymous) {
+        identity = `user:${session.user.id}`;
+      } else {
+        let dev = localStorage.getItem('pop_device_id');
+        if (!dev) {
+          dev = (crypto.randomUUID?.() ?? `${Date.now()}-${Math.random()}`);
+          localStorage.setItem('pop_device_id', dev);
+        }
+        identity = `guest:${dev}`;
+      }
+    } catch {
+      identity = 'guest:fallback';
+    }
+    const seedStr = `${identity}|${todayKey()}`;
+    const rand = mulberry32(hashStringToSeed(seedStr));
+    // Stable round id per identity+day so resume/results keys line up.
+    setRoundId(`r-${hashStringToSeed(seedStr).toString(16)}`);
 
     // Build an exclusion set of every card this user has ever swiped, so we
     // never show the same card twice. For signed-in users we pull from the
@@ -362,12 +385,13 @@ export default function PullOrPass() {
     const TIERS: Array<[number, number]> = [
       [5, 15], [15, 40], [40, 100], [100, 300], [300, 1000], [1000, 100000],
     ];
-    // Shuffle tier order + use a random offset within each tier for variety.
-    const shuffledTiers = [...TIERS].sort(() => Math.random() - 0.5);
+    // Shuffle tier order + use a seeded offset within each tier so the same
+    // identity+day deterministically draws the same pool.
+    const shuffledTiers = [...TIERS].sort(() => rand() - 0.5);
     const rows: any[] = [];
     let lastError: any = null;
     for (const [lo, hi] of shuffledTiers) {
-      const offset = Math.floor(Math.random() * 400);
+      const offset = Math.floor(rand() * 400);
       const { data: chunk, error: e } = await supabase
         .from('market_snapshots')
         .select('card_id, tcgplayer_id, name, set_name, price, rarity')
@@ -418,7 +442,7 @@ export default function PullOrPass() {
     const isGuest = !liveSession?.user || liveSession.user.is_anonymous;
     const isFirstRound = isGuest && readQuota().lifetime === 0;
     const roundSize = isFirstRound ? 10 : 20;
-    const picked = pickDiverse20(pool, roundSize);
+    const picked = pickDiverse20(pool, roundSize, rand);
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
