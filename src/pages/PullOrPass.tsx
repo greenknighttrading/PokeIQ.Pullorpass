@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -204,6 +204,29 @@ export default function PullOrPass() {
         } catch {}
       }
     });
+    // If user explicitly visits /matches, always show the post-swipe
+    // results (round-complete) page using the last completed round.
+    const wantsMatches = typeof window !== 'undefined' && window.location.pathname.startsWith('/matches');
+    if (wantsMatches) {
+      const last = readResults();
+      if (last) {
+        setCards(last.cards);
+        setRecords(last.records);
+        setRoundId(last.roundId);
+        setIndex(last.cards.length);
+        setStage('results');
+      } else {
+        // No completed round yet — fall back to starting one.
+        loadRound();
+      }
+      const refresh = () => setQuota(readQuota());
+      window.addEventListener('focus', refresh);
+      window.addEventListener('storage', refresh);
+      return () => {
+        window.removeEventListener('focus', refresh);
+        window.removeEventListener('storage', refresh);
+      };
+    }
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
@@ -697,12 +720,12 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
-                  <Link
-                    to="/matches"
-                    className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
-                  >
-                    <Heart className="w-3 h-3" /> See matches
-                  </Link>
+                   <Link
+                     to="/matches"
+                     className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                   >
+                     <Layers className="w-3 h-3" /> See matches
+                   </Link>
                   <span className="text-muted-foreground/40">·</span>
                   {premium ? (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
