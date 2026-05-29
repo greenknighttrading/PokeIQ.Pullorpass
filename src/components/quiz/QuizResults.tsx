@@ -286,7 +286,7 @@ export function QuizResults({ result }: QuizResultsProps) {
         </Card>
       </motion.div>
 
-      {/* Collection Style + Famous Behavior */}
+      {/* Collection Style + Signature Move */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
       >
@@ -305,7 +305,7 @@ export function QuizResults({ result }: QuizResultsProps) {
           </ul>
           <div className="pt-3 border-t border-border/50">
             <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-              Famous behavior
+              Signature Move
             </p>
             <p className="text-foreground italic">"{info.famousBehavior}"</p>
           </div>
@@ -386,14 +386,14 @@ export function QuizResults({ result }: QuizResultsProps) {
         </Card>
       </motion.div>
 
-      {/* Recommended Action */}
+      {/* Try This */}
       <motion.div
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
       >
         <Card className="p-6 bg-accent/10 border-accent/30">
           <h3 className="font-semibold text-foreground mb-2 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-accent" />
-            Recommended Action
+            Try This
           </h3>
           <p className="text-foreground">{result.recommendedAction}</p>
         </Card>
