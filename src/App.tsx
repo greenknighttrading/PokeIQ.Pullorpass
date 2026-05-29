@@ -39,6 +39,7 @@ const GeneratedReport = lazy(() => import("./pages/GeneratedReport"));
 const PrintReport = lazy(() => import("./pages/PrintReport"));
 const PersonalityTest = lazy(() => import("./pages/PersonalityTest"));
 const PersonalityTypes = lazy(() => import("./pages/PersonalityTypes"));
+const CollectorShare = lazy(() => import("./pages/CollectorShare"));
 const MyCollection = lazy(() => import("./pages/MyCollection"));
 const SmartFeed = lazy(() => import("./pages/SmartFeed"));
 const SmartFeedBrief = lazy(() => import("./pages/SmartFeedBrief"));
@@ -108,6 +109,7 @@ function AppRoutes() {
         <Route path="/privacy" element={<PrivacyPolicy />} />
         <Route path="/test" element={<PokeIQShell><PersonalityTest /></PokeIQShell>} />
         <Route path="/personality-types" element={<PokeIQShell><PersonalityTypes /></PokeIQShell>} />
+        <Route path="/collector/:slug" element={<PokeIQShell><CollectorShare /></PokeIQShell>} />
         <Route path="/get-started" element={<GetStarted />} />
 
         {/* Portfolio Simulator */}
