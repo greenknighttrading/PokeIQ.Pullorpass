@@ -1283,7 +1283,7 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
 // ─────────────────────────────────────────────────────────────
 // Daily Limit Widget — moved from Pull or Pass results
 // ─────────────────────────────────────────────────────────────
-function DailyLimitWidget() {
+export function DailyLimitWidget() {
   const DAILY_BASE_LIMIT = 20;
   const todayKey = () => {
     const d = new Date();

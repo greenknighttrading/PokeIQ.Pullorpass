@@ -19,6 +19,7 @@ import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infin
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
+import { DailyLimitWidget } from '@/pages/Matches';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -1480,7 +1481,7 @@ export function ResultsView({
 
       {/* ── SECTION 4: Your Collection Awaits (authed → /profile, guest → /auth) + binder hero for guests ─── */}
       <motion.section {...fadeUp}>
-        {(
+        {!isAuthed && (
           <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-purple-500/10 p-6 sm:p-8 lg:p-10 overflow-hidden shadow-2xl">
             <div className="absolute -top-32 -left-32 w-[420px] h-[420px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
             <div className="absolute -bottom-32 -right-32 w-[420px] h-[420px] bg-purple-500/15 blur-3xl rounded-full pointer-events-none" />
@@ -1677,6 +1678,7 @@ export function ResultsView({
       </motion.section>
 
       {/* ── SECTION 5: Hand-picked recommendations row ────────── */}
+      {!isAuthed && (
       <motion.section {...fadeUp} className="flex flex-col gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -1710,6 +1712,7 @@ export function ResultsView({
           )}
         </div>
       </motion.section>
+      )}
 
       {/* ── SECTION 6: Sign Up (guests) OR Premium upsell (authed, non-premium) ─ */}
       {!isAuthed && (
@@ -1774,64 +1777,6 @@ export function ResultsView({
       </motion.section>
       )}
 
-      {/* Premium upsell — authed users who are NOT premium */}
-      {isAuthed && !premium && (
-        <motion.section {...fadeUp}>
-          <div className="relative rounded-2xl border border-amber-400/30 bg-gradient-to-br from-[#1a1410] via-[#0f0a06] to-black p-6 sm:p-8 lg:p-10 overflow-hidden shadow-[0_30px_80px_-30px_rgba(251,191,36,0.25)]">
-            <div className="absolute -top-32 -right-32 w-[420px] h-[420px] bg-amber-400/15 blur-3xl rounded-full pointer-events-none" />
-            <div className="absolute -bottom-32 -left-32 w-[420px] h-[420px] bg-amber-600/10 blur-3xl rounded-full pointer-events-none" />
-
-            <div className="relative grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-8 items-center">
-              <div className="space-y-5">
-                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground tracking-tight leading-[1.05]">
-                  {outOfSwipes ? 'Out of swipes?' : 'Want unlimited swipes?'}
-                </h2>
-                <p className="text-sm sm:text-base text-muted-foreground max-w-xl leading-relaxed">
-                  Upgrade to Premium for deeper collector insights and unlimited rounds.
-                </p>
-
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 pt-2 max-w-xl">
-                  {[
-                    { icon: <InfinityIcon className="w-4 h-4" />, label: 'Unlimited swipes' },
-                    { icon: <BarChart3 className="w-4 h-4" />, label: 'Advanced portfolio analytics' },
-                    { icon: <TrendingUpIcon className="w-4 h-4" />, label: 'Collection value tracking' },
-                    { icon: <Wand2 className="w-4 h-4" />, label: 'Recommendation tuning' },
-                    { icon: <Sparkles className="w-4 h-4" />, label: 'Deep collector insights' },
-                    { icon: <Library className="w-4 h-4" />, label: 'Binder customization' },
-                    { icon: <Zap className="w-4 h-4" />, label: 'Market trend tracking' },
-                    { icon: <Crown className="w-4 h-4" />, label: 'Personalized portfolio analysis' },
-                  ].map((f) => (
-                    <li key={f.label} className="flex items-center gap-2.5 text-sm text-foreground/90">
-                      <span className="text-amber-300 shrink-0">{f.icon}</span>
-                      <span>{f.label}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex flex-col items-center gap-3 lg:min-w-[240px] lg:pr-8 xl:pr-16">
-                <div className="text-center">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-amber-300/80 font-semibold">Only</p>
-                  <p className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight">
-                    $5<span className="text-base text-muted-foreground font-medium">/month</span>
-                  </p>
-                </div>
-                <motion.button
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  whileTap={{ scale: 0.97 }}
-onClick={() => window.location.assign('/premium')}
-                  className="w-full lg:w-auto h-12 px-10 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm tracking-wide inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)] hover:shadow-[0_0_44px_rgba(251,191,36,0.85)] transition-shadow whitespace-nowrap"
-                >
-                  <Crown className="w-4 h-4" />
-                  Go Premium
-                </motion.button>
-                <p className="text-[11px] text-muted-foreground">Cancel anytime.</p>
-              </div>
-            </div>
-          </div>
-        </motion.section>
-      )}
-
       {/* Play Another Round (premium only) — daily-limit widget moved to /profile */}
       {isAuthed && premium && (
         <motion.section {...fadeUp}>
@@ -1844,6 +1789,9 @@ onClick={() => window.location.assign('/premium')}
           </div>
         </motion.section>
       )}
+
+      {/* Daily Limit Widget — bottom of matches for both guests and authed users */}
+      <DailyLimitWidget />
     </div>
   );
 }
