@@ -8,6 +8,26 @@ const corsHeaders = {
 
 const MAX_HTML_SIZE = 5 * 1024 * 1024; // 5MB limit
 
+// Strip script tags, inline event handlers, and javascript: URLs so that
+// authenticated callers cannot execute arbitrary JS inside the headless
+// browser (mitigates SSRF / sandbox abuse via Browserless).
+function sanitizeHtml(input: string): string {
+  let out = input;
+  // Remove <script>...</script> blocks (including malformed/unclosed)
+  out = out.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "");
+  out = out.replace(/<script\b[^>]*>/gi, "");
+  // Remove <iframe>, <object>, <embed>
+  out = out.replace(/<\/?(iframe|object|embed)\b[^>]*>/gi, "");
+  // Remove inline event handlers: on*="..." or on*='...'
+  out = out.replace(/\son[a-z]+\s*=\s*"(?:[^"\\]|\\.)*"/gi, "");
+  out = out.replace(/\son[a-z]+\s*=\s*'(?:[^'\\]|\\.)*'/gi, "");
+  out = out.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, "");
+  // Neutralize javascript: URLs in href/src
+  out = out.replace(/(href|src)\s*=\s*"(\s*javascript:[^"]*)"/gi, '$1="#"');
+  out = out.replace(/(href|src)\s*=\s*'(\s*javascript:[^']*)'/gi, "$1='#'");
+  return out;
+}
+
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -60,6 +80,8 @@ serve(async (req) => {
       );
     }
 
+    const safeHtml = sanitizeHtml(String(html));
+
     const browserlessToken = Deno.env.get("BROWSERLESS_TOKEN");
     if (!browserlessToken) {
       return new Response(
@@ -71,7 +93,7 @@ serve(async (req) => {
     console.log("Starting PDF generation via Browserless /function endpoint...");
 
     // Build the complete HTML with all print-optimized styles
-    const fullHtml = buildFullHtml(html);
+    const fullHtml = buildFullHtml(safeHtml);
 
     // Use Browserless /function endpoint - allows full puppeteer control
     const functionCode = `

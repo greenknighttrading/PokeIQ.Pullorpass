@@ -46,8 +46,8 @@ serve(async (req) => {
   // ── Auth guard: require service role or anon key ──
   const authHeader = req.headers.get("authorization") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-  if (!authHeader.includes(serviceKey) && !authHeader.includes(anonKey)) {
+  // Service-role only — the public anon key must not grant access here.
+  if (!serviceKey || !authHeader.includes(serviceKey)) {
     return json({ error: "Unauthorized" }, 401);
   }
 

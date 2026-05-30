@@ -34,8 +34,16 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Auth: accept any caller — function is protected by verify_jwt=false in config
-  // and only performs data sync (no sensitive reads)
+  // Require the service role key: only cron / admin tooling may invoke this
+  // — it triggers expensive paid-API syncs and writes to market_snapshots.
+  const authHeader = req.headers.get("authorization") || "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (!serviceKey || !authHeader.includes(serviceKey)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const JUSTTCG_API_KEY = Deno.env.get("JUSTTCG_API_KEY");
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");

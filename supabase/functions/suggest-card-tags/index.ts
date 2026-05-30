@@ -25,6 +25,21 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return jsonResponse({ error: "Method not allowed" }, 405);
 
   try {
+    // ── Require authenticated user to prevent AI credit abuse ──
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return jsonResponse({ error: "Unauthenticated" }, 401);
+    }
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const { data: userData, error: userErr } = await authClient.auth.getUser();
+    if (userErr || !userData?.user) {
+      return jsonResponse({ error: "Unauthenticated" }, 401);
+    }
+
     const body = await req.json().catch(() => null);
     const cardId = body?.card_id;
     const cardName = typeof body?.card_name === "string" ? body.card_name : "";

@@ -13,8 +13,10 @@ Deno.serve(async (req) => {
 
   const authHeader = req.headers.get("authorization") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
-  if (!authHeader.includes(serviceKey) && !authHeader.includes(anonKey)) {
+  // Only the service role key (used by scheduled cron jobs / internal admin
+  // tooling) may invoke this function. The anon key is public and must NOT
+  // grant access here.
+  if (!serviceKey || !authHeader.includes(serviceKey)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
