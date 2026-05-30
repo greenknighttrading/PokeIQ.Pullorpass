@@ -1292,7 +1292,7 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
 // Daily Limit Widget — moved from Pull or Pass results
 // ─────────────────────────────────────────────────────────────
 export function DailyLimitWidget() {
-  const { isPremium } = useIsPremium();
+  const { isPremium, loading: premiumLoading } = useIsPremium();
   const DAILY_BASE_LIMIT = 20;
   const todayKey = () => {
     const d = new Date();
@@ -1321,7 +1321,7 @@ export function DailyLimitWidget() {
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
-  const outOfSwipes = !isPremium && remaining <= 0;
+  const outOfSwipes = !premiumLoading && !isPremium && remaining <= 0;
 
   // Countdown to midnight
   const [now, setNow] = useState(() => Date.now());
