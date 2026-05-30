@@ -587,7 +587,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
               <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
               <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <HeroStat
                 icon={<BookOpen className="w-6 h-6 text-primary" />}
                 tint="bg-primary/15 border-primary/30"
