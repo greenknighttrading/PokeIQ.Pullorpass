@@ -13,6 +13,7 @@ import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
@@ -1291,6 +1292,7 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
 // Daily Limit Widget — moved from Pull or Pass results
 // ─────────────────────────────────────────────────────────────
 export function DailyLimitWidget() {
+  const { isPremium } = useIsPremium();
   const DAILY_BASE_LIMIT = 20;
   const todayKey = () => {
     const d = new Date();
@@ -1318,8 +1320,8 @@ export function DailyLimitWidget() {
   }, []);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
-  const remaining = Math.max(0, dailyLimit - quota.used);
-  const outOfSwipes = remaining <= 0;
+  const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = !isPremium && remaining <= 0;
 
   // Countdown to midnight
   const [now, setNow] = useState(() => Date.now());
@@ -1341,10 +1343,10 @@ export function DailyLimitWidget() {
             {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
           </p>
           <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-            {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Pro'}
+            {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Premium'}
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Pro for unlimited swipes.
+            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Premium for unlimited swipes.
             {outOfSwipes && (
               <> Your daily swipes reset in{' '}
                 <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span>.
@@ -1369,7 +1371,7 @@ export function DailyLimitWidget() {
               className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
             >
               <Crown className="w-4 h-4" />
-              Go PokeIQ Pro
+              Go PokeIQ Premium
             </motion.button>
           </div>
           <p className="text-[11px] text-muted-foreground/80 pt-1">
