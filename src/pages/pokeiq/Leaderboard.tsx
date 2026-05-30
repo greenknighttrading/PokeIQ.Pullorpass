@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Trophy, BookOpen, Tag, Sparkles, Users, ArrowRight, ChevronDown } from 'lucide-react';
+import { Crown, Trophy, BookOpen, Tag, Sparkles, Users, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
@@ -40,9 +40,6 @@ const collectors: Collector[] = baseCollectors
   .sort((a, b) => pts(b) - pts(a))
   .map((c, i) => ({ ...c, rank: i + 1 }));
 
-const tabs = ['Friends', 'Top Taggers', 'Top Swipers'] as const;
-type Tab = (typeof tabs)[number];
-
 const tierBadge = (tier: Collector['tier']) =>
   tier === 'Expert'
     ? 'bg-amber-500/15 text-amber-400 border-amber-500/30'
@@ -66,15 +63,10 @@ function MedalIcon({ rank }: { rank: number }) {
 }
 
 export default function Leaderboard() {
-  const [tab, setTab] = useState<Tab>('Top Swipers');
-
   const sorted = useMemo(() => {
-    const arr = [...collectors];
-    if (tab === 'Top Taggers') arr.sort((a, b) => b.cardsTagged - a.cardsTagged);
-    else if (tab === 'Top Swipers') arr.sort((a, b) => b.cardsSwiped - a.cardsSwiped);
-    else arr.sort((a, b) => pts(b) - pts(a));
+    const arr = [...collectors].sort((a, b) => b.cardsSwiped - a.cardsSwiped);
     return arr.map((c, i) => ({ ...c, rank: i + 1 }));
-  }, [tab]);
+  }, []);
 
   // Mock current user
   const me = { rank: 24, percentile: 'Top 3%', name: 'PokeNovice', title: 'Rising Collector', cardsSwiped: 1250, cardsTagged: 244 };
@@ -98,26 +90,6 @@ export default function Leaderboard() {
           <p className="text-sm text-muted-foreground mb-6 max-w-2xl">
             Top collectors shaping the future of PokeIQ. Swipe, tag, and help build smarter recommendations for everyone.
           </p>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-            <div className="flex items-center gap-1 p-1 rounded-lg bg-muted/30 border border-border/50 overflow-x-auto">
-              {tabs.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setTab(t)}
-                  className={cn(
-                    'px-3 py-1.5 rounded-md text-xs font-medium transition-colors whitespace-nowrap',
-                    tab === t ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
-            <Button variant="outline" size="sm" className="gap-2 text-xs">
-              All Time <ChevronDown className="w-3 h-3" />
-            </Button>
-          </div>
 
           <div className="rounded-xl border border-border/60 bg-card/30 overflow-hidden">
             <div className="overflow-x-auto">
