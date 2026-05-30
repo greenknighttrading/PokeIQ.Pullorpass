@@ -5,12 +5,15 @@ import { Eye, TrendingUp, TrendingDown, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { MoverCard, getImageUrl, getChangeForTime } from '@/components/buylist/shared/signalHelpers';
+import { useIsPremium } from '@/hooks/useIsPremium';
+import { Crown } from 'lucide-react';
 
 export function WatchlistSection() {
   const navigate = useNavigate();
   const { items: watchlistItems, loading: wlLoading } = useWatchlist();
   const [watchlistData, setWatchlistData] = useState<MoverCard[]>([]);
   const [isAuthed, setIsAuthed] = useState(false);
+  const { isPremium } = useIsPremium();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -53,7 +56,16 @@ export function WatchlistSection() {
       </div>
 
       {!isAuthed || sorted.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Sign in and add items to your watchlist to track price movements.</p>
+        !isPremium ? (
+          <button
+            onClick={() => navigate('/premium')}
+            className="w-full rounded-lg border border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 transition-colors p-4 flex items-center justify-center gap-2 text-sm font-semibold text-violet-300"
+          >
+            <Crown className="w-4 h-4" /> Unlock with Premium
+          </button>
+        ) : (
+          <p className="text-sm text-muted-foreground">Sign in and add items to your watchlist to track price movements.</p>
+        )
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {sorted.map(card => {
