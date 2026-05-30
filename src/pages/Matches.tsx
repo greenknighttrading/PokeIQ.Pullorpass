@@ -1225,7 +1225,7 @@ function DeepTasteInsights({ taste }: { taste: TasteProfile }) {
   return (
     <section id="deep-insights">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Deep taste insights</h2>
+        <h2 className="text-2xl font-bold text-foreground">Taste insights</h2>
         <p className="text-sm text-muted-foreground mt-1">The hard patterns behind your likes.</p>
       </div>
 
