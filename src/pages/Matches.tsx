@@ -226,7 +226,7 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
-              <div>
+              <div className="-mt-8 sm:-mt-10">
                 <DailyLimitWidget />
               </div>
             </div>
