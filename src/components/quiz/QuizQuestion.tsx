@@ -60,8 +60,8 @@ export function QuizQuestion({ question, currentAnswer, onAnswer, questionIndex 
             <span className="text-[10px] md:text-xs font-medium text-muted-foreground whitespace-nowrap hidden md:block">
               {option.label}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground md:hidden">
-              {option.shortLabel}
+            <span className="text-[9px] font-medium text-muted-foreground md:hidden leading-tight text-center">
+              {option.label}
             </span>
           </button>
         ))}
