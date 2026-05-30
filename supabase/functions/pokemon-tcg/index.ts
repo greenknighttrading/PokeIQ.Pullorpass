@@ -139,6 +139,21 @@ function formatCard(card: any) {
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  // ── Require authenticated user ──
+  const authHeader = req.headers.get("Authorization") || "";
+  if (!authHeader.startsWith("Bearer ")) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  const authClient = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } } },
+  );
+  const { data: userData, error: userErr } = await authClient.auth.getUser();
+  if (userErr || !userData?.user) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
   // ── Rate limiting ──
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited(clientIp)) {
