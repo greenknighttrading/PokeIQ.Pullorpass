@@ -129,6 +129,7 @@ function AppRoutes() {
         <Route path="/daily-report" element={<DailyReport />} />
         <Route path="/buylist/watchlist" element={<BuyListWatchlist />} />
         <Route path="/buylist/movers" element={<BuyListMovers />} />
+        <Route path="/smartlist" element={<PokeIQShell><SmartList /></PokeIQShell>} />
         <Route path="/buylist/scanner" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/buylist/list" element={<PremiumGate><BuyListMain /></PremiumGate>} />
         <Route path="/buylist/pick/:id" element={<BuyListPickDetail />} />
