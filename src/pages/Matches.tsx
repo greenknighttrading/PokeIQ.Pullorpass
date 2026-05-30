@@ -1340,45 +1340,53 @@ export function DailyLimitWidget() {
       <div className="relative rounded-2xl border border-purple-500/30 bg-transparent p-6 sm:p-8 overflow-hidden text-center mx-0">
         <div className="relative space-y-3">
           <p className="text-[11px] uppercase tracking-[0.22em] text-purple-300 font-semibold">
-            {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
+            {isPremium ? 'Unlimited Rounds' : outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
           </p>
           <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
             {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Premium'}
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Premium for unlimited swipes.
-            {outOfSwipes && (
+            {isPremium ? (
+              <>Help Train the PokeIQ by going to the PokeIQ Training Lab.</>
+            ) : (
+              <>Earn more swipe credits by helping train PokeIQ — or go PokeIQ Premium for unlimited swipes.</>
+            )}
+            {!isPremium && outOfSwipes && (
               <> Your daily swipes reset in{' '}
                 <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span>.
               </>
             )}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 max-w-md mx-auto">
-            <Link to="/earn" className="w-full sm:w-auto">
+            <Link to="/pokeyelp" className="w-full sm:w-auto">
               <motion.button
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 className="w-full sm:w-auto h-11 px-8 rounded-xl border border-primary/40 bg-primary/10 text-primary font-bold text-sm inline-flex items-center justify-center gap-2 hover:bg-primary/15 transition-colors"
               >
                 <Sparkles className="w-4 h-4" />
-                Earn Credits
+                Train PokeIQ
               </motion.button>
             </Link>
-            <motion.button
-              whileHover={{ y: -2, scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => window.location.assign('/premium')}
-              className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
-            >
-              <Crown className="w-4 h-4" />
-              Go PokeIQ Premium
-            </motion.button>
+            {!isPremium && (
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => window.location.assign('/premium')}
+                className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
+              >
+                <Crown className="w-4 h-4" />
+                Go PokeIQ Premium
+              </motion.button>
+            )}
           </div>
-          <p className="text-[11px] text-muted-foreground/80 pt-1">
-            {outOfSwipes
-              ? 'Every 20 cards you train earns +10 swipes.'
-              : `You have ${remaining} swipe${remaining === 1 ? '' : 's'} left today. Every 20 cards you train earns +10 more.`}
-          </p>
+          {!isPremium && (
+            <p className="text-[11px] text-muted-foreground/80 pt-1">
+              {outOfSwipes
+                ? 'Every 20 cards you train earns +10 swipes.'
+                : `You have ${remaining} swipe${remaining === 1 ? '' : 's'} left today. Every 20 cards you train earns +10 more.`}
+            </p>
+          )}
         </div>
       </div>
     </motion.section>
