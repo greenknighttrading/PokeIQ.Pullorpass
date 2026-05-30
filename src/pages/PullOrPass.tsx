@@ -897,39 +897,6 @@ export default function PullOrPass() {
                 </>
               </div>
               </div>
-              {outOfSwipes && (
-                <OutOfSwipesModal
-                  credits={credits}
-                  canRedeem={canRedeem}
-                  onRedeem={redeemSwipes}
-                  redeeming={redeeming}
-                  isAuthed={!!userId}
-                  onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
-                  showProNudge={showProNudge}
-                  onKeepTraining={() => {
-                    try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
-                    setProNudgeDismissed(true);
-                  }}
-                />
-              )}
-            </div>
-          )}
-
-          {stage === 'swiping' && !current && outOfSwipes && (
-            <div className="relative flex-1 min-h-0 flex items-center justify-center">
-              <OutOfSwipesModal
-                credits={credits}
-                canRedeem={canRedeem}
-                onRedeem={redeemSwipes}
-                redeeming={redeeming}
-                isAuthed={!!userId}
-                onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
-                showProNudge={showProNudge}
-                onKeepTraining={() => {
-                  try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
-                  setProNudgeDismissed(true);
-                }}
-              />
             </div>
           )}
 
