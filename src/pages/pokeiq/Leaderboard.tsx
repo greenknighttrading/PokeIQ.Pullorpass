@@ -172,21 +172,21 @@ export default function Leaderboard() {
           <div className="rounded-xl border border-border/60 bg-card/30 p-5">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Leaderboard Insights</div>
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 my-[8px] py-[5px]">
                 <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center"><BookOpen className="w-4 h-4 text-primary" /></div>
                 <div>
                   <div className="font-bold tabular-nums">{(totals.swiped / 1000).toFixed(1)}K+</div>
                   <div className="text-[11px] text-muted-foreground">Total cards swiped by all collectors</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 my-[8px] py-[5px]">
                 <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center"><Tag className="w-4 h-4 text-primary" /></div>
                 <div>
                   <div className="font-bold tabular-nums">{(totals.tagged / 1000).toFixed(1)}K+</div>
                   <div className="text-[11px] text-muted-foreground">Total cards tagged by the community</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 my-[8px] py-[5px]">
                 <div className="w-9 h-9 rounded-lg bg-primary/15 flex items-center justify-center"><Users className="w-4 h-4 text-primary" /></div>
                 <div>
                   <div className="font-bold tabular-nums">{collectors.length}+</div>
