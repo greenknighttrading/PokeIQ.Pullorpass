@@ -163,11 +163,11 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
               <img referrerPolicy="no-referrer"
                 src={imgUrl}
                 alt={card.name}
-                className="w-20 h-28 object-contain rounded-lg"
+                className="w-full h-auto aspect-[5/7] object-contain rounded-lg"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             ) : (
-              <div className="w-20 h-28 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-[10px]">
+              <div className="w-full aspect-[5/7] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-[10px]">
                 No img
               </div>
             )}
