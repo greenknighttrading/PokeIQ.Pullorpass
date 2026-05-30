@@ -89,10 +89,7 @@ export default function PersonalityTest() {
                   <h1 className="text-3xl font-bold text-foreground">
                     Collector Personality Test
                   </h1>
-                  <p className="text-muted-foreground">
-                    Answer {QUIZ_QUESTIONS.length} quick questions to discover your collecting style.
-                  </p>
-                  <p className="text-sm text-muted-foreground/80 max-w-xl mx-auto pt-2">
+                  <p className="text-sm text-foreground/90 max-w-xl mx-auto pt-2">
                     In just 10 minutes, uncover the hidden psychology behind how you collect, spend, hold, chase, and connect with Pokémon.
                   </p>
                   <div className="pt-3">
