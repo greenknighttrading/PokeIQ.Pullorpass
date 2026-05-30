@@ -14,8 +14,15 @@ export function MarketOverviewSection() {
 
   useEffect(() => {
     (async () => {
+      // Find the latest snapshot_date that actually has tradable cards (price > 5).
+      // The very latest snapshot can be a partial / low-price sync with no movers.
       const { data: latestRow } = await supabase.from('market_snapshots')
-        .select('snapshot_date').order('snapshot_date', { ascending: false }).limit(1).single();
+        .select('snapshot_date')
+        .gt('price', 5)
+        .not('price_change_7d', 'is', null)
+        .order('snapshot_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       const d = latestRow?.snapshot_date;
 
       const qGainers = supabase.from('market_snapshots')
