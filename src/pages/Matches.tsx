@@ -334,10 +334,10 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     return (
       <div>
         {/* Personality — left aligned, portrait + content stacked */}
-        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-7">
-          <div className="flex items-start gap-5 text-left">
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
             {portrait ? (
-              <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
                 <img
                   src={portrait}
                   alt={`Illustration of ${article} ${personalityType}`}
@@ -349,35 +349,35 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
                 />
               </div>
             ) : info ? (
-              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-card flex items-center justify-center text-5xl shrink-0 border border-border/60">
+              <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl bg-card flex items-center justify-center text-5xl shrink-0 border border-border/60">
                 <span aria-hidden>{info.emoji}</span>
               </div>
             ) : null}
 
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-primary font-bold mb-2">
+              <p className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-primary font-bold mb-2">
                 Collector Personality
               </p>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground leading-[1.1]">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
                 You are {article}{' '}
                 <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                   {personalityType}
                 </span>
               </h2>
               {info?.summary && (
-                <p className="mt-2 text-sm text-foreground/80 leading-relaxed">
+                <p className="mt-2 sm:mt-3 text-sm sm:text-base text-foreground/80 leading-relaxed">
                   {info.summary}
                 </p>
               )}
-              <div className="flex items-center gap-4 mt-4">
-                <Button asChild size="sm" className="gap-2">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
+                <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
                   <Link to="/personality-types">
-                    Explore your type <ArrowRight className="w-4 h-4" />
+                    Explore your type <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                   </Link>
                 </Button>
                 <Link
                   to="/test"
-                  className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+                  className="text-sm sm:text-base font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
                 >
                   Retake the test
                 </Link>
