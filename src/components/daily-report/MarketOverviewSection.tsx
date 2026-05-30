@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Zap, TrendingUp, TrendingDown, ChevronRight } from 'lucide-react';
+import { Zap, TrendingUp, TrendingDown, ChevronRight, Crown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { MoverCard, getImageUrl } from '@/components/buylist/shared/signalHelpers';
+import { useIsPremium } from '@/hooks/useIsPremium';
 
 export function MarketOverviewSection() {
   const navigate = useNavigate();
+  const { isPremium } = useIsPremium();
   const [allMovers, setAllMovers] = useState<MoverCard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -92,7 +94,18 @@ export function MarketOverviewSection() {
             {/* Gainers */}
             <div>
               <p className="text-sm font-bold text-success mb-3">▲ Gainers · 7D</p>
-              <div className="space-y-1">
+              <div className={cn("space-y-1 relative", !isPremium && "pointer-events-none")}>
+                {!isPremium && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/40 backdrop-blur-sm rounded-lg pointer-events-auto">
+                    <button
+                      onClick={() => navigate('/premium')}
+                      className="rounded-lg border border-violet-500/30 bg-violet-500/15 hover:bg-violet-500/25 transition-colors px-4 py-2 flex items-center gap-2 text-xs font-semibold text-violet-300"
+                    >
+                      <Crown className="w-3.5 h-3.5" /> Unlock with Premium
+                    </button>
+                  </div>
+                )}
+                <div className={cn(!isPremium && "blur-sm select-none")}>
                 {gainers.map((card, i) => {
                   const imgUrl = getImageUrl(card);
                   const change = card.price_change_7d ?? 0;
@@ -122,13 +135,25 @@ export function MarketOverviewSection() {
                   );
                 })}
                 {gainers.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No gainers found</p>}
+                </div>
               </div>
             </div>
 
             {/* Pullbacks */}
             <div>
               <p className="text-sm font-bold text-warning mb-3">▼ Pullbacks · 7D</p>
-              <div className="space-y-1">
+              <div className={cn("space-y-1 relative", !isPremium && "pointer-events-none")}>
+                {!isPremium && (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/40 backdrop-blur-sm rounded-lg pointer-events-auto">
+                    <button
+                      onClick={() => navigate('/premium')}
+                      className="rounded-lg border border-violet-500/30 bg-violet-500/15 hover:bg-violet-500/25 transition-colors px-4 py-2 flex items-center gap-2 text-xs font-semibold text-violet-300"
+                    >
+                      <Crown className="w-3.5 h-3.5" /> Unlock with Premium
+                    </button>
+                  </div>
+                )}
+                <div className={cn(!isPremium && "blur-sm select-none")}>
                 {pullbacks.map((card, i) => {
                   const imgUrl = getImageUrl(card);
                   const change = card.price_change_7d ?? 0;
@@ -158,6 +183,7 @@ export function MarketOverviewSection() {
                   );
                 })}
                 {pullbacks.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">No pullbacks found</p>}
+                </div>
               </div>
             </div>
           </div>
