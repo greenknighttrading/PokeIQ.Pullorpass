@@ -2362,7 +2362,7 @@ function OutOfSwipesModal({
                     <Sparkles className="w-4 h-4" /> Earn credits
                   </Button>
                 </Link>
-                <Link to="/matches" className="block text-center text-xs text-primary hover:underline pt-1">
+                <Link to="/matches" className="block text-center text-primary hover:underline pt-1 text-base font-sans font-medium">
                   See your matches →
                 </Link>
               </div>
@@ -2371,7 +2371,7 @@ function OutOfSwipesModal({
                 <Button size="lg" className="w-full gap-2" onClick={onSignUp}>
                   <LogIn className="w-4 h-4" /> Sign up — get 20 free swipes
                 </Button>
-                <Link to="/matches" className="block text-center text-xs text-primary hover:underline pt-1">
+                <Link to="/matches" className="block text-center text-primary hover:underline pt-1 text-base font-sans font-medium">
                   See your matches →
                 </Link>
               </div>
