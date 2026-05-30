@@ -216,7 +216,7 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
 
           {imgUrl && (
             <img referrerPolicy="no-referrer" src={imgUrl} alt={card.name}
-              className="w-20 h-28 object-contain rounded-lg flex-shrink-0 cursor-pointer"
+              className="w-40 h-56 object-contain rounded-lg flex-shrink-0 cursor-pointer"
               onClick={() => navigate(buildDetailUrl())}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
