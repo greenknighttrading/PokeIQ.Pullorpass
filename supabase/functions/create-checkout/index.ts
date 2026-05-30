@@ -1,4 +1,5 @@
 import { type StripeEnv, createStripeClient } from "../_shared/stripe.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -93,16 +94,64 @@ Deno.serve(async (req) => {
     return new Response("Method not allowed", { status: 405, headers: corsHeaders });
   }
   try {
+    // ── Require authenticated user; derive userId/email from the JWT ──
+    const authHeader = req.headers.get("Authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } },
+    );
+    const { data: userData, error: userErr } = await supabase.auth.getUser();
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const authedUserId = userData.user.id;
+    const authedEmail = userData.user.email ?? undefined;
+
     const body = await req.json();
-    const { priceId, quantity, customerEmail, userId, returnUrl, environment } = body;
+    const { priceId, quantity, returnUrl, environment } = body;
     if (!priceId || !returnUrl || !environment) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    // Validate returnUrl origin against the request origin to prevent
+    // attacker-controlled return targets.
+    try {
+      const ru = new URL(returnUrl);
+      const reqOrigin = req.headers.get("origin");
+      if (reqOrigin) {
+        const ro = new URL(reqOrigin);
+        if (ru.origin !== ro.origin) {
+          return new Response(JSON.stringify({ error: "Invalid returnUrl" }), {
+            status: 400,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+    } catch {
+      return new Response(JSON.stringify({ error: "Invalid returnUrl" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const clientSecret = await createCheckoutSession({
-      priceId, quantity, customerEmail, userId, returnUrl, environment,
+      priceId,
+      quantity,
+      customerEmail: authedEmail,
+      userId: authedUserId,
+      returnUrl,
+      environment,
     });
     return new Response(JSON.stringify({ clientSecret }), {
       status: 200,
