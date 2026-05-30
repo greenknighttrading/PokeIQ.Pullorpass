@@ -155,7 +155,7 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
       >
         <div className="flex gap-3">
           {/* Rank badge overlaid on image area */}
-          <div className="relative flex-shrink-0 w-20">
+          <div className="relative flex-shrink-0 w-32 sm:w-40">
             <div className="absolute -top-1 -left-1 z-10 w-6 h-6 rounded-md bg-primary/20 text-primary flex items-center justify-center font-bold text-[10px]">
               {index + 1}
             </div>
@@ -163,11 +163,11 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
               <img referrerPolicy="no-referrer"
                 src={imgUrl}
                 alt={card.name}
-                className="w-20 h-28 object-contain rounded-lg"
+                className="w-full h-auto aspect-[5/7] object-contain rounded-lg"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             ) : (
-              <div className="w-20 h-28 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-[10px]">
+              <div className="w-full aspect-[5/7] rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-[10px]">
                 No img
               </div>
             )}
@@ -216,7 +216,7 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
 
           {imgUrl && (
             <img referrerPolicy="no-referrer" src={imgUrl} alt={card.name}
-              className="w-20 h-28 object-contain rounded-lg flex-shrink-0 cursor-pointer"
+              className="w-40 h-56 object-contain rounded-lg flex-shrink-0 cursor-pointer"
               onClick={() => navigate(buildDetailUrl())}
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
             />
