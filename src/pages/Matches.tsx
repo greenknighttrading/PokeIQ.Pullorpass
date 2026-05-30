@@ -335,9 +335,9 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
       <div>
         {/* Personality — left aligned, portrait + content stacked */}
         <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
             {portrait ? (
-              <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
+              <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
                 <img
                   src={portrait}
                   alt={`Illustration of ${article} ${personalityType}`}
@@ -349,7 +349,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
                 />
               </div>
             ) : info ? (
-              <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl bg-card flex items-center justify-center text-5xl shrink-0 border border-border/60">
+              <div className="w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl bg-card flex items-center justify-center text-5xl shrink-0 border border-border/60">
                 <span aria-hidden>{info.emoji}</span>
               </div>
             ) : null}
