@@ -21,18 +21,18 @@ function pts(c: Pick<Collector, 'cardsSwiped' | 'cardsTagged'>) {
 }
 
 const baseCollectors: Omit<Collector, 'rank'>[] = [
-  { name: 'VintageVibes', title: 'Vintage Hunter', tier: 'Expert', pokemonId: 25, cardsSwiped: 12842, cardsTagged: 3948 },
-  { name: 'HoloChaser', title: 'Holo Collector', tier: 'Expert', pokemonId: 94, cardsSwiped: 11394, cardsTagged: 3503 },
-  { name: 'ArtfulArcanine', title: 'Art Curator', tier: 'Expert', pokemonId: 59, cardsSwiped: 9672, cardsTagged: 2756 },
-  { name: 'MysticMew', title: 'Mystic Seeker', tier: 'Advanced', pokemonId: 151, cardsSwiped: 7890, cardsTagged: 2278 },
-  { name: 'CozyCollector', title: 'Cozy Enjoyer', tier: 'Advanced', pokemonId: 143, cardsSwiped: 6445, cardsTagged: 1989 },
-  { name: 'NightShade', title: 'Dark Enthusiast', tier: 'Advanced', pokemonId: 197, cardsSwiped: 5982, cardsTagged: 1734 },
-  { name: 'ShinySeeker', title: 'Shiny Collector', tier: 'Rising', pokemonId: 282, cardsSwiped: 5210, cardsTagged: 1512 },
-  { name: 'DragonHeart', title: 'Dragon Tamer', tier: 'Rising', pokemonId: 6, cardsSwiped: 4876, cardsTagged: 1308 },
-  { name: 'PsychicPulse', title: 'Psy Channeler', tier: 'Rising', pokemonId: 65, cardsSwiped: 4321, cardsTagged: 1186 },
-  { name: 'ForestFox', title: 'Grass Wanderer', tier: 'Rising', pokemonId: 196, cardsSwiped: 3987, cardsTagged: 1054 },
-  { name: 'AquaArtist', title: 'Water Trainer', tier: 'Rising', pokemonId: 9, cardsSwiped: 3712, cardsTagged: 928 },
-  { name: 'EmberKnight', title: 'Fire Specialist', tier: 'Rising', pokemonId: 38, cardsSwiped: 3401, cardsTagged: 842 },
+  { name: 'mike_chen', title: 'Investor', tier: 'Expert', pokemonId: 25, cardsSwiped: 2568, cardsTagged: 790 },
+  { name: 'sarah.kim', title: 'Archivist', tier: 'Expert', pokemonId: 94, cardsSwiped: 2279, cardsTagged: 701 },
+  { name: 'jrodriguez', title: 'Curator', tier: 'Expert', pokemonId: 59, cardsSwiped: 1934, cardsTagged: 551 },
+  { name: 'emma_w', title: 'Dreamer', tier: 'Advanced', pokemonId: 151, cardsSwiped: 1578, cardsTagged: 456 },
+  { name: 'david.p', title: 'Hunter', tier: 'Advanced', pokemonId: 143, cardsSwiped: 1289, cardsTagged: 398 },
+  { name: 'alex_t', title: 'Analyst', tier: 'Advanced', pokemonId: 197, cardsSwiped: 1196, cardsTagged: 347 },
+  { name: 'rachel.lee', title: 'Explorer', tier: 'Rising', pokemonId: 282, cardsSwiped: 1042, cardsTagged: 302 },
+  { name: 'tom_brady', title: 'Flipper', tier: 'Rising', pokemonId: 6, cardsSwiped: 975, cardsTagged: 262 },
+  { name: 'nina_g', title: 'Showman', tier: 'Rising', pokemonId: 65, cardsSwiped: 864, cardsTagged: 237 },
+  { name: 'chris.h', title: 'Monk', tier: 'Rising', pokemonId: 196, cardsSwiped: 797, cardsTagged: 211 },
+  { name: 'jessica_m', title: 'Minimalist', tier: 'Rising', pokemonId: 9, cardsSwiped: 742, cardsTagged: 186 },
+  { name: 'ryan_ok', title: 'Gambler', tier: 'Rising', pokemonId: 38, cardsSwiped: 680, cardsTagged: 168 },
 ];
 
 const collectors: Collector[] = baseCollectors
