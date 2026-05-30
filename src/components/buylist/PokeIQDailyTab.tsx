@@ -1578,7 +1578,12 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
       }
 
       const { data: latestRow } = await supabase.from('market_snapshots')
-        .select('snapshot_date').order('snapshot_date', { ascending: false }).limit(1).single();
+        .select('snapshot_date')
+        .gt('price', 5)
+        .not('price_change_7d', 'is', null)
+        .order('snapshot_date', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       const latestDate = latestRow?.snapshot_date;
 
       const moverSelect = 'id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url, printing';
