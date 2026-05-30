@@ -196,7 +196,7 @@ export function MarketOverviewSection() {
           </div>
 
           <div className="mt-5 pt-4 border-t border-border text-center">
-            <Link to="/buylist/movers" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+            <Link to="/smartlist" className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors">
               See More <ChevronRight className="w-3 h-3" />
             </Link>
           </div>

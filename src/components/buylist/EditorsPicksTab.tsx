@@ -316,8 +316,8 @@ function ActionTicker() {
       'Buy Opportunity': '/buylist/watchlist',
       'New High': '/winners',
       'Portfolio': '/home',
-      '🏆 Greatest Hits': '/buylist/movers',
-      '✏️ Create Your Own': '/buylist/movers',
+      '🏆 Greatest Hits': '/smartlist',
+      '✏️ Create Your Own': '/smartlist',
       '🧠 Know Your Personality?': '/personality-test',
     };
     const path = base[s.title] || '/daily-report';
@@ -375,8 +375,8 @@ function MarketTicker({ dbCounts, allMovers }: { dbCounts: { cards: number; card
     s.push({ icon: <CreditCard className="w-3 h-3 text-primary" />, iconBg: 'bg-primary/10', title: 'Cards Tracked', detail: `${dbCounts.cards.toLocaleString()} cards`, href: '/buylist/scanner' });
 
     // Gainers vs losers
-    s.push({ icon: <ArrowUpRight className="w-3 h-3 text-success" />, iconBg: 'bg-success/10', title: 'Gainers', detail: `${dbCounts.cardsUp.toLocaleString()} cards trending up`, href: '/buylist/movers' });
-    s.push({ icon: <ArrowDownRight className="w-3 h-3 text-destructive" />, iconBg: 'bg-destructive/10', title: 'Pullbacks', detail: `${dbCounts.cardsDown.toLocaleString()} cards trending down`, href: '/buylist/movers' });
+    s.push({ icon: <ArrowUpRight className="w-3 h-3 text-success" />, iconBg: 'bg-success/10', title: 'Gainers', detail: `${dbCounts.cardsUp.toLocaleString()} cards trending up`, href: '/smartlist' });
+    s.push({ icon: <ArrowDownRight className="w-3 h-3 text-destructive" />, iconBg: 'bg-destructive/10', title: 'Pullbacks', detail: `${dbCounts.cardsDown.toLocaleString()} cards trending down`, href: '/smartlist' });
 
     // Top movers from allMovers
     const gainers = allMovers.filter(m => (m.price_change_7d ?? 0) > 0).sort((a, b) => (b.price_change_7d ?? 0) - (a.price_change_7d ?? 0));
@@ -396,8 +396,8 @@ function MarketTicker({ dbCounts, allMovers }: { dbCounts: { cards: number; card
     s.push({ icon: <AlertTriangle className="w-3 h-3 text-warning" />, iconBg: 'bg-warning/10', title: '⚠️ Risk Alerts', detail: 'Spot over-concentration early', href: '/auth' });
 
     // Greatest Hits & Create Your Own smart lists
-    s.push({ icon: <Layers className="w-3 h-3 text-warning" />, iconBg: 'bg-warning/10', title: '🏆 Greatest Hits', detail: 'Top cards trending now', href: '/buylist/movers' });
-    s.push({ icon: <PlusCircle className="w-3 h-3 text-primary" />, iconBg: 'bg-primary/10', title: '✏️ Create Your Own', detail: 'Build a custom smart list', href: '/buylist/movers' });
+    s.push({ icon: <Layers className="w-3 h-3 text-warning" />, iconBg: 'bg-warning/10', title: '🏆 Greatest Hits', detail: 'Top cards trending now', href: '/smartlist' });
+    s.push({ icon: <PlusCircle className="w-3 h-3 text-primary" />, iconBg: 'bg-primary/10', title: '✏️ Create Your Own', detail: 'Build a custom smart list', href: '/smartlist' });
 
     // Personality test
     s.push({ icon: <Zap className="w-3 h-3 text-warning" />, iconBg: 'bg-warning/10', title: '🧠 Know Your Personality?', detail: 'Take the collector quiz', href: '/personality-test' });
@@ -661,7 +661,7 @@ function WatchlistBrief({ isAuthed }: { isAuthed: boolean }) {
         <p className="text-xs text-muted-foreground">
           Use the <PlusCircle className="w-3 h-3 inline" /> button on any card below to add it to your personalized brief.
         </p>
-        <Button variant="outline" size="sm" onClick={() => navigate('/buylist/movers')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/smartlist')}>
           <SlidersHorizontal className="w-4 h-4 mr-2" /> Browse Smart List
         </Button>
       </div>
