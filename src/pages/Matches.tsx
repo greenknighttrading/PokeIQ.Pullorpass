@@ -13,6 +13,7 @@ import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { CarouselRow } from '@/components/CarouselRow';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import tasteHeroArt from '@/assets/taste-hero-art.jpg';
