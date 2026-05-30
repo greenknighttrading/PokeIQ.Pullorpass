@@ -20,6 +20,7 @@ import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailMo
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
 import { DailyLimitWidget } from '@/pages/Matches';
+import { useIsPremium } from '@/hooks/useIsPremium';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
