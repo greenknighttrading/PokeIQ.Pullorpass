@@ -230,23 +230,25 @@ export default function PersonalityTypes() {
             })}
           </div>
 
-          <div className="mt-14 flex flex-col items-center text-center gap-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              Ready to find your collector personality?
-            </h2>
-            <p className="text-muted-foreground max-w-xl">
-              Take the 30-question PokeIQ test and discover which of these 12 types you really are.
-            </p>
-            <Link to="/test" className="inline-block group">
-              <Button
-                size="lg"
-                className="h-auto py-7 px-10 text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_15px_50px_-10px_hsl(var(--primary)/0.8)] transition-all"
-              >
-                <Sparkles className="w-6 h-6 mr-2" />
-                Find Your Collector Personality
-                <ArrowRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </Link>
+          <div className="mt-12 md:mt-14">
+            <div className="mx-auto max-w-2xl rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-10 flex flex-col items-center text-center gap-4 shadow-[0_10px_40px_-15px_hsl(var(--primary)/0.4)]">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">
+                Ready to find your collector personality?
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
+                Take the 30-question PokeIQ test and discover which of these 12 types you really are.
+              </p>
+              <Link to="/test" className="inline-block group w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto h-auto py-5 sm:py-7 px-6 sm:px-10 text-base sm:text-lg md:text-xl font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-[0_10px_40px_-10px_hsl(var(--primary)/0.6)] hover:shadow-[0_15px_50px_-10px_hsl(var(--primary)/0.8)] transition-all whitespace-normal"
+                >
+                  <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 flex-shrink-0" />
+                  Find Your Collector Personality
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 flex-shrink-0 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </main>
 
