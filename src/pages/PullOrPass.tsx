@@ -924,6 +924,25 @@ export default function PullOrPass() {
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+        {/* Persistent out-of-swipes overlay — stays up across stage transitions
+            (e.g. last swipe finalizing into results) until the user picks an action. */}
+        {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (
+          <div className="fixed inset-0 z-50">
+            <OutOfSwipesModal
+              credits={credits}
+              canRedeem={canRedeem}
+              onRedeem={redeemSwipes}
+              redeeming={redeeming}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
+              showProNudge={showProNudge}
+              onKeepTraining={() => {
+                try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
+                setProNudgeDismissed(true);
+              }}
+            />
+          </div>
+        )}
       </div>
     </>
   );
