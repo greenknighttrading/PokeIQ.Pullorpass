@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { PokeIQShell } from "@/components/layout/PokeIQShell";
+import SmartList from "@/pages/SmartList";
 import { PremiumGate } from "@/components/PremiumGate";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useLocation } from "react-router-dom";
@@ -129,6 +130,7 @@ function AppRoutes() {
         <Route path="/daily-report" element={<DailyReport />} />
         <Route path="/buylist/watchlist" element={<BuyListWatchlist />} />
         <Route path="/buylist/movers" element={<BuyListMovers />} />
+        <Route path="/smartlist" element={<PokeIQShell><SmartList /></PokeIQShell>} />
         <Route path="/buylist/scanner" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/buylist/list" element={<PremiumGate><BuyListMain /></PremiumGate>} />
         <Route path="/buylist/pick/:id" element={<BuyListPickDetail />} />
