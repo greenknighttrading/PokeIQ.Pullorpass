@@ -345,7 +345,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
                   height={512}
                   loading="lazy"
                   decoding="async"
-                  className="absolute inset-0 w-full h-full object-cover object-top"
+                  className="absolute inset-0 w-full h-full object-top px-0 py-0 my-0 object-scale-down rounded-none"
                 />
               </div>
             ) : info ? (
