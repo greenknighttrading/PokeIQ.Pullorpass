@@ -30,9 +30,9 @@ const primaryNav: NavItem[] = [
   { label: 'Pull or Pass', href: '/swipe', icon: Layers },
   { label: 'Matches', href: '/matches', icon: Heart },
   { label: 'Smart Profile', href: '/profile', icon: User },
-  { label: 'Earn Credits', href: '/pokeyelp', icon: Zap },
+  { label: 'Training Lab', href: '/pokeyelp', icon: Zap },
   { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, badge: 'NEW' },
-  { label: 'Personality Test', href: '/test', icon: Users },
+  { label: 'Personality Test', href: '/personality-types', icon: Users },
   { label: 'Market Report', href: '/pokeiq-daily', icon: Activity },
   { label: 'Card Scanner', href: '/buylist/scanner', icon: ScanLine },
 ];
