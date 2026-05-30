@@ -134,24 +134,40 @@ export default function CollectorShare() {
             </div>
           </Card>
 
-          <div className="text-center space-y-3 pt-2">
-            <p className="text-muted-foreground">Want to know your own collector type?</p>
-            <Link to="/test">
-              <Button size="lg" className="gap-2">
-                <Sparkles className="w-5 h-5" />
-                Take the Test
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-            <div className="pt-4">
-              <Link to="/swipe">
-                <Button variant="outline" className="gap-2">
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-card p-8 md:p-10 text-center space-y-5"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,hsl(var(--primary)/0.18),transparent_60%)] pointer-events-none" />
+            <div className="relative space-y-2">
+              <p className="text-xs uppercase tracking-[0.2em] text-primary font-medium">
+                Your turn
+              </p>
+              <h3 className="text-2xl md:text-3xl font-bold text-foreground">
+                Discover your collector type
+              </h3>
+              <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                Take the 10-minute test to uncover the psychology behind how you collect.
+              </p>
+            </div>
+            <div className="relative flex flex-col sm:flex-row gap-3 justify-center items-center pt-1">
+              <Link to="/test" className="w-full sm:w-auto">
+                <Button size="lg" className="gap-2 w-full sm:w-auto shadow-[0_8px_24px_-8px_hsl(var(--primary)/0.6)]">
+                  <Sparkles className="w-4 h-4" />
+                  Take the Test
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+              <Link to="/swipe" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="gap-2 w-full sm:w-auto border-primary/30 hover:bg-primary/10">
                   Play Pull or Swipe
                   <ChevronRight className="w-4 h-4" />
                 </Button>
               </Link>
             </div>
-          </div>
+          </motion.div>
         </main>
       </div>
     </>

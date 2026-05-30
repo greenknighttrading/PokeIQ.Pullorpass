@@ -23,14 +23,12 @@ export function QuizQuestion({ question, currentAnswer, onAnswer, questionIndex 
 
   const handleClick = (value: LikertValue) => {
     onAnswer(question.id, value);
-    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-      setTimeout(() => {
-        const next = containerRef.current?.nextElementSibling as HTMLElement | null;
-        if (next) {
-          next.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }, 250);
-    }
+    setTimeout(() => {
+      const next = containerRef.current?.nextElementSibling as HTMLElement | null;
+      if (next) {
+        next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 250);
   };
 
   return (
