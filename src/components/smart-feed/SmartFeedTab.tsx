@@ -543,7 +543,7 @@ function WatchlistBrief() {
         <PlusCircle className="w-8 h-8 text-muted-foreground mx-auto" />
         <p className="text-sm font-semibold">Your watchlist is empty</p>
         <p className="text-xs text-muted-foreground">Browse the market to add cards to your watchlist.</p>
-        <Button variant="outline" size="sm" onClick={() => navigate('/buylist/movers')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/smartlist')}>
           <SlidersHorizontal className="w-4 h-4 mr-2" /> Browse Smart List
         </Button>
       </div>

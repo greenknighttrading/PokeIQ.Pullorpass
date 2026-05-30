@@ -284,8 +284,8 @@ function ActionTicker() {
       'Buy Opportunity': '/buylist/watchlist',
       'New High': '/winners',
       'Portfolio': '/home',
-      '🏆 Greatest Hits': '/buylist/movers',
-      '✏️ Create Your Own': '/buylist/movers',
+      '🏆 Greatest Hits': '/smartlist',
+      '✏️ Create Your Own': '/smartlist',
       '🧠 Know Your Personality?': '/personality-test',
       'Play Pull or Pass': '/swipe',
     };
@@ -719,7 +719,7 @@ function WatchlistBrief({ isAuthed }: { isAuthed: boolean }) {
         <p className="text-xs text-muted-foreground">
           Use the <PlusCircle className="w-3 h-3 inline" /> button on any card below to add it to your personalized brief.
         </p>
-        <Button variant="outline" size="sm" onClick={() => navigate('/buylist/movers')}>
+        <Button variant="outline" size="sm" onClick={() => navigate('/smartlist')}>
           <SlidersHorizontal className="w-4 h-4 mr-2" /> Browse Smart List
         </Button>
       </div>
