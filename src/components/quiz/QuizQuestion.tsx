@@ -19,8 +19,23 @@ const LIKERT_OPTIONS: { value: LikertValue; label: string; shortLabel: string }[
 ];
 
 export function QuizQuestion({ question, currentAnswer, onAnswer, questionIndex }: QuizQuestionProps) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleClick = (value: LikertValue) => {
+    onAnswer(question.id, value);
+    if (typeof window !== 'undefined' && window.innerWidth < 768) {
+      setTimeout(() => {
+        const next = containerRef.current?.nextElementSibling as HTMLElement | null;
+        if (next) {
+          next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 250);
+    }
+  };
+
   return (
     <motion.div
+      ref={containerRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
@@ -40,7 +55,7 @@ export function QuizQuestion({ question, currentAnswer, onAnswer, questionIndex 
         {LIKERT_OPTIONS.map((option) => (
           <button
             key={option.value}
-            onClick={() => onAnswer(question.id, option.value)}
+            onClick={() => handleClick(option.value)}
             className={cn(
               "group relative flex flex-col items-center gap-1.5 px-3 py-3 md:px-4 md:py-4 rounded-xl border-2 transition-all duration-200",
               "min-w-[52px] md:min-w-[72px]",
