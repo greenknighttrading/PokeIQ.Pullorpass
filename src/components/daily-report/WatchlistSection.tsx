@@ -12,6 +12,7 @@ export function WatchlistSection() {
   const navigate = useNavigate();
   const { items: watchlistItems, loading: wlLoading } = useWatchlist();
   const [watchlistData, setWatchlistData] = useState<MoverCard[]>([]);
+  const [fallbackData, setFallbackData] = useState<MoverCard[]>([]);
   const [isAuthed, setIsAuthed] = useState(false);
   const { isPremium } = useIsPremium();
 
@@ -33,15 +34,37 @@ export function WatchlistSection() {
       });
   }, [isAuthed, watchlistItems]);
 
+  // Fallback: when user has no watchlist, show Greatest Hits cards
+  // (same filter as Smart List > Greatest Hits: high-value Charizard/Umbreon/Lugia/Rayquaza)
+  useEffect(() => {
+    if (isAuthed && watchlistItems.length > 0) return;
+    const names = ['charizard', 'umbreon', 'lugia', 'rayquaza'];
+    const nameFilter = names.map(n => `name.ilike.%${n}%`).join(',');
+    supabase
+      .from('market_snapshots')
+      .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type, image_url')
+      .gt('price', 50)
+      .or(nameFilter)
+      .not('price_change_7d', 'is', null)
+      .not('printing', 'ilike', '%reverse%')
+      .not('product_type', 'ilike', '%graded%')
+      .order('price_change_7d', { ascending: false })
+      .limit(40)
+      .then(({ data }) => {
+        setFallbackData((data ?? []) as unknown as MoverCard[]);
+      });
+  }, [isAuthed, watchlistItems.length]);
+
+  const source = isAuthed && watchlistData.length > 0 ? watchlistData : fallbackData;
   const deduped = useMemo(() => {
     const seen = new Set<string>();
-    return watchlistData.filter(c => {
+    return source.filter(c => {
       const key = c.card_id || c.id;
       if (seen.has(key)) return false;
       seen.add(key);
       return true;
     });
-  }, [watchlistData]);
+  }, [source]);
 
   const sorted = useMemo(() => [...deduped].sort((a, b) =>
     Math.abs(getChangeForTime(b, '7d') ?? 0) - Math.abs(getChangeForTime(a, '7d') ?? 0)
@@ -55,17 +78,8 @@ export function WatchlistSection() {
         </Link>
       </div>
 
-      {!isAuthed || sorted.length === 0 ? (
-        !isPremium ? (
-          <button
-            onClick={() => navigate('/premium')}
-            className="w-full rounded-lg border border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 transition-colors p-4 flex items-center justify-center gap-2 text-sm font-semibold text-violet-300"
-          >
-            <Crown className="w-4 h-4" /> Unlock with Premium
-          </button>
-        ) : (
-          <p className="text-sm text-muted-foreground">Sign in and add items to your watchlist to track price movements.</p>
-        )
+      {sorted.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-6">Loading…</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {sorted.map(card => {
