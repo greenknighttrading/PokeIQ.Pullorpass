@@ -157,9 +157,9 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
             {isPremium ? 'Premium User' : 'Premium'}
           </span>
           {isPremium && (
-            <Check className="w-3.5 h-3.5 text-violet-400" strokeWidth={3} />
+            <Check className="lucide lucide-check w-3.5 h-3.5 text-violet-400 mx-[12px] my-0 px-0 py-0" strokeWidth={3} />
           )}
-          {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          {premiumOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="lucide lucide-chevron-right w-3.5 h-3.5 px-0 my-0 mx-px" />}
         </button>
 
         {premiumOpen && (
