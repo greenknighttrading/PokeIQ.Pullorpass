@@ -1325,7 +1325,7 @@ export function ResultsView({
   } as const;
 
   return (
-    <div className="flex-1 flex flex-col gap-10 py-8 w-full max-w-[1400px] mx-auto px-4 sm:px-8 lg:px-12">
+    <div className="flex-1 flex flex-col w-full max-w-[1400px] px-4 lg:px-12 sm:px-0 py-[32px] mx-0 my-[19px] gap-[13px]">
       {/* ── SECTION 1: Hero ───────────────────────────────────── */}
       <motion.section {...fadeUp} className="text-center space-y-4">
         <motion.div
