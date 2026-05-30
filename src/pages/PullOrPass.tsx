@@ -149,7 +149,7 @@ export default function PullOrPass() {
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
-  const premium = isPremiumActive();
+  const { isPremium: premium } = useIsPremium();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premium && remaining <= 0;
   const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
