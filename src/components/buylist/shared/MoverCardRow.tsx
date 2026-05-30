@@ -155,7 +155,7 @@ export default function MoverCardRow({ card, index, timeFilter, movementFilter }
       >
         <div className="flex gap-3">
           {/* Rank badge overlaid on image area */}
-          <div className="relative flex-shrink-0 w-20">
+          <div className="relative flex-shrink-0 w-32 sm:w-40">
             <div className="absolute -top-1 -left-1 z-10 w-6 h-6 rounded-md bg-primary/20 text-primary flex items-center justify-center font-bold text-[10px]">
               {index + 1}
             </div>
