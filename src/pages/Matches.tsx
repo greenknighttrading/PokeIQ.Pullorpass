@@ -1369,7 +1369,7 @@ export function DailyLimitWidget() {
               className="w-full sm:w-auto h-11 px-8 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-sm inline-flex items-center justify-center gap-2 shadow-[0_0_24px_rgba(251,191,36,0.5)]"
             >
               <Crown className="w-4 h-4" />
-              Go PokeIQ Pro
+              Go PokeIQ Premium
             </motion.button>
           </div>
           <p className="text-[11px] text-muted-foreground/80 pt-1">

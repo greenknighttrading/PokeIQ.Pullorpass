@@ -1420,7 +1420,7 @@ export function ResultsView({
             <p className="mt-2.5 text-xs text-muted-foreground">
               You're out of swipes — go to{' '}
               <Link to="/earn" className="text-primary underline underline-offset-2 hover:text-primary/80">Earn Credits</Link>{' '}
-              or upgrade to Pro.
+              or upgrade to Premium.
             </p>
           )}
         </motion.div>
@@ -1749,7 +1749,7 @@ export function ResultsView({
       {isAuthed && premium && (
         <motion.section {...fadeUp}>
           <div className="flex flex-col items-center gap-3 pt-2">
-            <p className="text-sm text-muted-foreground">PokeIQ Pro · unlimited swipes unlocked.</p>
+            <p className="text-sm text-muted-foreground">PokeIQ Premium · unlimited swipes unlocked.</p>
             <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
               <RotateCw className="w-4 h-4" />
               Play Another Round
@@ -2205,7 +2205,7 @@ function OutOfSwipesView({
             className="w-full gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400 font-semibold"
             onClick={() => toast.success('PokeIQ Pro launches soon — you\'re on the early list.')}
           >
-            <Trophy className="w-4 h-4" /> Upgrade to Pro
+            <Trophy className="w-4 h-4" /> Upgrade to Premium
           </Button>
         </Card>
       </div>
@@ -2270,7 +2270,7 @@ function OutOfSwipesModal({
               <div className="space-y-1.5">
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">Swiping a lot lately?</h2>
                 <p className="text-sm text-muted-foreground">
-                  Skip the credit grind. Go PokeIQ Pro for unlimited swipes — or keep training and earning.
+                  Skip the credit grind. Go PokeIQ Premium for unlimited swipes — or keep training and earning.
                 </p>
               </div>
               <div className="space-y-2.5 pt-1">
@@ -2281,7 +2281,7 @@ function OutOfSwipesModal({
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
                 >
                   <Crown className="w-5 h-5" />
-                  Go PokeIQ Pro — unlimited
+                  Go PokeIQ Premium — unlimited
                 </motion.button>
                 <button
                   onClick={onKeepTraining}
@@ -2309,7 +2309,7 @@ function OutOfSwipesModal({
                   You've used up your free 20 swipes a day limit — you can{' '}
                   <Link to="/earn" className="text-primary font-semibold hover:underline">earn credits</Link>{' '}
                   or{' '}
-                  <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Pro</Link>.
+                  <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Premium</Link>.
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">Sign up to earn credits and unlock more swipes.</p>
@@ -2355,7 +2355,7 @@ function OutOfSwipesModal({
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
                 >
                   <Crown className="w-5 h-5" />
-                  Go PokeIQ Pro — unlimited
+                  Go PokeIQ Premium — unlimited
                 </motion.button>
                 <Link to="/earn" className="block">
                   <Button variant="outline" size="lg" className="w-full gap-2">

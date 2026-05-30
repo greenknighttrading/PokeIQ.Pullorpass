@@ -438,7 +438,7 @@ export function GlobalNavBar({
                 {!isPremium && (
                   <DropdownMenuItem onClick={() => navigate('/get-started')}>
                     <Crown className="w-4 h-4 mr-2 text-amber-500" />
-                    Go PokeIQ Pro
+                    Go PokeIQ Premium
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={handleLogout}>
