@@ -2203,7 +2203,7 @@ function OutOfSwipesView({
           <Button
             size="lg"
             className="w-full gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-black hover:from-amber-300 hover:to-amber-400 font-semibold"
-            onClick={() => toast.success('PokeIQ Pro launches soon — you\'re on the early list.')}
+            onClick={() => toast.success('PokeIQ Premium launches soon — you\'re on the early list.')}
           >
             <Trophy className="w-4 h-4" /> Upgrade to Premium
           </Button>
@@ -2277,7 +2277,7 @@ function OutOfSwipesModal({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.01 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => toast.success("PokeIQ Pro launches soon — you're on the early list.")}
+                  onClick={() => toast.success("PokeIQ Premium launches soon — you're on the early list.")}
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
                 >
                   <Crown className="w-5 h-5" />
@@ -2351,7 +2351,7 @@ function OutOfSwipesModal({
                 <motion.button
                   whileHover={{ y: -2, scale: 1.01 }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => toast.success("PokeIQ Pro launches soon — you're on the early list.")}
+                  onClick={() => toast.success("PokeIQ Premium launches soon — you're on the early list.")}
                   className="w-full h-14 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_rgba(251,191,36,0.55)]"
                 >
                   <Crown className="w-5 h-5" />

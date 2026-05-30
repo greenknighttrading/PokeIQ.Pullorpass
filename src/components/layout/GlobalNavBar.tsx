@@ -419,7 +419,7 @@ export function GlobalNavBar({
                       <span className="text-muted-foreground">Account:</span>
                       {isPremium ? (
                         <span className="inline-flex items-center gap-1 font-bold text-amber-500">
-                          <Crown className="w-3 h-3" /> PokeIQ Pro
+                          <Crown className="w-3 h-3" /> PokeIQ Premium
                         </span>
                       ) : (
                         <span className="font-bold text-foreground">Free</span>

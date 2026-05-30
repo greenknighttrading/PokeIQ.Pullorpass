@@ -1341,10 +1341,10 @@ export function DailyLimitWidget() {
             {outOfSwipes ? 'Daily Limit Reached' : 'Want Another Round?'}
           </p>
           <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-            {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Pro'}
+            {outOfSwipes ? "You're out of swipes for today" : 'Keep swiping with PokeIQ Premium'}
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Pro for unlimited swipes.
+            Earn more swipe credits by helping train PokeIQ — or go PokeIQ Premium for unlimited swipes.
             {outOfSwipes && (
               <> Your daily swipes reset in{' '}
                 <span className="font-semibold text-purple-200 tabular-nums">{h}h {m}m</span>.
