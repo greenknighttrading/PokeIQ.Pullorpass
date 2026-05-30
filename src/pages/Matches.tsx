@@ -220,6 +220,7 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
+              <DailyLimitWidget />
               <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
@@ -227,9 +228,6 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
-              <div className="-mt-8 sm:-mt-10">
-                <DailyLimitWidget />
-              </div>
             </div>
           )}
         </main>
