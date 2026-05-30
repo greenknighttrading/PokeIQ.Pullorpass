@@ -9,6 +9,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import { PokeIQShell } from "@/components/layout/PokeIQShell";
+import SmartList from "@/pages/SmartList";
 import { PremiumGate } from "@/components/PremiumGate";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useLocation } from "react-router-dom";
