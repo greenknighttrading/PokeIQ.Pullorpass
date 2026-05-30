@@ -665,18 +665,18 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
 
 function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md px-4 py-4 sm:p-5 flex flex-row items-center gap-3 sm:gap-3.5 min-w-0 min-h-[76px]">
-      <div className={cn('w-10 h-10 sm:w-[52px] sm:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-4 xl:p-5 flex flex-col xl:flex-row items-start xl:items-center gap-2 xl:gap-3.5 min-w-0 min-h-[76px]">
+      <div className={cn('w-10 h-10 xl:w-[52px] xl:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0 flex-1 w-full">
         <p
           className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap"
-          style={{ fontSize: 'clamp(1.25rem, 4.2vw, 1.5rem)', wordBreak: 'keep-all' }}
+          style={{ fontSize: 'clamp(1.1rem, 3.2vw, 1.5rem)', wordBreak: 'keep-all' }}
         >
           {value}
         </p>
-        <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-tight whitespace-nowrap">{label}</p>
+        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto">{label}</p>
       </div>
     </div>
   );
