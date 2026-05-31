@@ -701,14 +701,6 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
-          {/* When the user is out of swipes, replace ALL stage views with a
-              consistent, blurred Pull-or-Pass backdrop so the gating modal
-              always appears over the same swipe-game shell — never on top of
-              the results screen or a loading spinner. */}
-          {outOfSwipes ? (
-            <OutOfSwipesBackdrop />
-          ) : (
-          <>
           {stage === 'intro' && (
             <IntroScreen
               onStart={() => {
@@ -923,8 +915,6 @@ export default function PullOrPass() {
               premium={premium}
               remaining={remaining}
             />
-          )}
-          </>
           )}
         </main>
 
