@@ -1401,7 +1401,7 @@ export function ResultsView({
           transition={{ delay: 0.35, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="pt-6 px-0 mx-0"
         >
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-6 sm:gap-8">
             <motion.button
               whileHover={{ y: -2, scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
