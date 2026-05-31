@@ -1019,15 +1019,16 @@ export default function PokeYelp() {
                       <span className="text-xs">No image</span>
                     </div>
                   )}
+                  {/* Bottom info strip overlay */}
+                  <div className="absolute inset-x-0 bottom-0 px-2.5 py-1.5 bg-gradient-to-t from-black/85 via-black/65 to-transparent text-left">
+                    <p className="text-[12px] font-semibold text-white truncate leading-tight drop-shadow">{current.name}</p>
+                    <p className="text-[10px] text-white/75 truncate leading-tight">
+                      {current.set_name ?? 'Unknown set'}
+                      {current.rarity && ` • ${current.rarity}`}
+                      {` • $${current.price.toFixed(2)}`}
+                    </p>
+                  </div>
                 </button>
-                </div>
-                <div className="text-center sm:text-left">
-                  <p className="text-sm font-semibold text-foreground truncate leading-tight">{current.name}</p>
-                  <p className="text-[11px] text-muted-foreground truncate leading-tight">
-                    {current.set_name ?? 'Unknown set'}
-                    {current.rarity && ` • ${current.rarity}`}
-                    {` • $${current.price.toFixed(2)}`}
-                  </p>
                 </div>
               </div>
 
