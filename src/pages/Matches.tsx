@@ -220,8 +220,8 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              <DailyLimitWidget />
               <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
+              <DailyLimitWidget />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
@@ -1320,6 +1320,10 @@ export function DailyLimitWidget() {
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premiumLoading && !isPremium && remaining <= 0;
+
+  // Only render this widget when the user has actually run out of swipes.
+  // Premium users or anyone with remaining swipes shouldn't see it at all.
+  if (premiumLoading || isPremium || !outOfSwipes) return null;
 
   // Countdown to midnight
   const [now, setNow] = useState(() => Date.now());

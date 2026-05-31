@@ -252,14 +252,6 @@ export default function PullOrPass() {
     };
   }, []);
 
-  // When the user runs out of swipes, skip any "out of swipes" popup and
-  // send them straight to /matches per product spec. Guard on stage so we
-  // don't yank users mid-intro or mid-loading.
-  useEffect(() => {
-    if (outOfSwipes && stage !== 'intro' && stage !== 'loading') {
-      navigate('/matches', { replace: true });
-    }
-  }, [outOfSwipes, stage, navigate]);
 
   // Fetch credits balance (signed-in users)
   const refreshCredits = useCallback(async (uid?: string | null) => {
@@ -706,7 +698,7 @@ export default function PullOrPass() {
         title="Pull or Pass — Train Your DNA Profile | PokeIQ"
         description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving DNA Profile."
       />
-      <div className={`bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
+      <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
 
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
@@ -939,6 +931,23 @@ export default function PullOrPass() {
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+        <AnimatePresence>
+          {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (
+            <OutOfSwipesModal
+              credits={credits}
+              canRedeem={canRedeem}
+              onRedeem={redeemSwipes}
+              redeeming={redeeming}
+              isAuthed={!!userId}
+              onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
+              showProNudge={showProNudge}
+              onKeepTraining={() => {
+                try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
+                setProNudgeDismissed(true);
+              }}
+            />
+          )}
+        </AnimatePresence>
       </div>
     </>
   );
