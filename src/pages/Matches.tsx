@@ -1289,6 +1289,60 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
 // ─────────────────────────────────────────────────────────────
 // Daily Limit Widget — moved from Pull or Pass results
 // ─────────────────────────────────────────────────────────────
+export function SwipeAgainOrLimit() {
+  const { isPremium, loading: premiumLoading } = useIsPremium();
+  const DAILY_BASE_LIMIT = 20;
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  };
+  const readQuota = () => {
+    try {
+      const raw = localStorage.getItem('pop_quota');
+      if (!raw) return { date: todayKey(), used: 0, bonus: 0 };
+      const q = JSON.parse(raw);
+      if (q.date !== todayKey()) return { date: todayKey(), used: 0, bonus: 0 };
+      return { date: q.date, used: q.used ?? 0, bonus: q.bonus ?? 0 };
+    } catch { return { date: todayKey(), used: 0, bonus: 0 }; }
+  };
+  const [quota, setQuota] = useState(() => readQuota());
+  useEffect(() => {
+    const refresh = () => setQuota(readQuota());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+  if (premiumLoading) return null;
+  const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
+  const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = !isPremium && remaining <= 0;
+  if (outOfSwipes) return <DailyLimitWidget />;
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex justify-center"
+    >
+      <Link to="/swipe" className="w-full sm:w-auto">
+        <motion.button
+          whileHover={{ y: -2, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          className="w-full sm:w-auto h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_24px_hsl(var(--primary)/0.45)]"
+        >
+          <Sparkles className="w-4 h-4" />
+          Swipe again
+          {!isPremium && (
+            <span className="text-xs font-medium opacity-80 ml-1">· {remaining} left today</span>
+          )}
+        </motion.button>
+      </Link>
+    </motion.section>
+  );
+}
+
 export function DailyLimitWidget() {
   const { isPremium, loading: premiumLoading } = useIsPremium();
   const DAILY_BASE_LIMIT = 20;
