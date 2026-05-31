@@ -1325,7 +1325,7 @@ export function SwipeAgainOrLimit() {
     <motion.section
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex justify-center"
+      className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center"
     >
       <Link to="/swipe" className="w-full sm:w-auto">
         <motion.button
@@ -1338,6 +1338,16 @@ export function SwipeAgainOrLimit() {
           {!isPremium && (
             <span className="text-xs font-medium opacity-80 ml-1">· {remaining} left today</span>
           )}
+        </motion.button>
+      </Link>
+      <Link to="/personality-types" className="w-full sm:w-auto">
+        <motion.button
+          whileHover={{ y: -2, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          className="w-full sm:w-auto h-12 px-7 rounded-xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-base inline-flex items-center justify-center gap-2 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_24px_-8px_hsl(var(--primary)/0.4)]"
+        >
+          <Sparkles className="w-4 h-4 text-primary" />
+          View Collector Profile
         </motion.button>
       </Link>
     </motion.section>
