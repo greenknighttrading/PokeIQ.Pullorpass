@@ -221,10 +221,10 @@ export default function Matches() {
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
-              <DailyLimitWidget />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
+              <SwipeAgainOrLimit />
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
@@ -332,7 +332,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     return (
       <div>
         {/* Personality — left aligned, portrait + content stacked */}
-        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
           <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
             {portrait ? (
               <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-[100px] mx-0 py-[99px]">
@@ -390,7 +390,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   return (
     <Link
       to="/test"
-      className="group block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-7 hover:border-primary/50 transition-colors"
+      className="group block rounded-2xl border border-primary/45 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-6 sm:p-7 hover:border-primary/60 transition-colors shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]"
     >
       <div className="flex items-start gap-4">
         <div className="w-11 h-11 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center shrink-0">
@@ -1289,6 +1289,60 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
 // ─────────────────────────────────────────────────────────────
 // Daily Limit Widget — moved from Pull or Pass results
 // ─────────────────────────────────────────────────────────────
+export function SwipeAgainOrLimit() {
+  const { isPremium, loading: premiumLoading } = useIsPremium();
+  const DAILY_BASE_LIMIT = 20;
+  const todayKey = () => {
+    const d = new Date();
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  };
+  const readQuota = () => {
+    try {
+      const raw = localStorage.getItem('pop_quota');
+      if (!raw) return { date: todayKey(), used: 0, bonus: 0 };
+      const q = JSON.parse(raw);
+      if (q.date !== todayKey()) return { date: todayKey(), used: 0, bonus: 0 };
+      return { date: q.date, used: q.used ?? 0, bonus: q.bonus ?? 0 };
+    } catch { return { date: todayKey(), used: 0, bonus: 0 }; }
+  };
+  const [quota, setQuota] = useState(() => readQuota());
+  useEffect(() => {
+    const refresh = () => setQuota(readQuota());
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+  if (premiumLoading) return null;
+  const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
+  const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
+  const outOfSwipes = !isPremium && remaining <= 0;
+  if (outOfSwipes) return <DailyLimitWidget />;
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex justify-center"
+    >
+      <Link to="/swipe" className="w-full sm:w-auto">
+        <motion.button
+          whileHover={{ y: -2, scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
+          className="w-full sm:w-auto h-12 px-8 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_24px_hsl(var(--primary)/0.45)]"
+        >
+          <Sparkles className="w-4 h-4" />
+          Swipe again
+          {!isPremium && (
+            <span className="text-xs font-medium opacity-80 ml-1">· {remaining} left today</span>
+          )}
+        </motion.button>
+      </Link>
+    </motion.section>
+  );
+}
+
 export function DailyLimitWidget() {
   const { isPremium, loading: premiumLoading } = useIsPremium();
   const DAILY_BASE_LIMIT = 20;
