@@ -228,6 +228,7 @@ export default function Matches() {
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
+              <DailyLimitWidget />
             </div>
           )}
         </main>
@@ -1319,7 +1320,7 @@ export function SwipeAgainOrLimit() {
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !isPremium && remaining <= 0;
-  if (outOfSwipes) return <DailyLimitWidget />;
+  if (outOfSwipes) return null;
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
