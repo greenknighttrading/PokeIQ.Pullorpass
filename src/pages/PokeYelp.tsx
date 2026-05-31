@@ -1037,7 +1037,7 @@ export default function PokeYelp() {
                     <p className="text-xs text-muted-foreground">
                       Pick what feels true. Your unique read helps train the AI. <span className="text-amber-400/90">Originality is rewarded — honest taste trains better AI.</span>
                     </p>
-                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] tabular-nums text-muted-foreground text-right ml-auto">
                       {selected.size} selected
                     </span>
                   </div>
