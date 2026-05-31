@@ -804,7 +804,7 @@ export default function PokeYelp() {
 
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8 flex flex-col select-none">
           {/* Cinematic hero */}
-          <header className="relative text-center mb-10 pt-4">
+          <header className="relative text-center mb-10 pt-4 mx-0 my-0 py-0">
             {/* Soft neon glow + animated particles */}
             <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[260px] rounded-full blur-3xl opacity-40 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.45),transparent_70%)]" />
@@ -858,7 +858,7 @@ export default function PokeYelp() {
               const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
               return (
                 <div className="mt-8 max-w-2xl mx-auto">
-                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-2 px-1 py-0 my-0 mx-0">
                     <span className="inline-flex items-center gap-1.5">
                       <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                       <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
