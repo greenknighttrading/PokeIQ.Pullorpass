@@ -118,7 +118,14 @@ export function QuizResults({ result }: QuizResultsProps) {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('personalityResult', JSON.stringify(result));
+    let cancelled = false;
+    (async () => {
+      const { writePersonalityForUser, getCurrentUserId } = await import('@/lib/personalityStorage');
+      const uid = await getCurrentUserId();
+      if (cancelled) return;
+      writePersonalityForUser(uid, result);
+    })();
+    return () => { cancelled = true; };
   }, [result]);
 
   return (
