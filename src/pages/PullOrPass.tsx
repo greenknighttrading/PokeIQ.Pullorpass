@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
 import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
+import { backfillGuestSwipes } from '@/lib/pullorpassBackfill';
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
 import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infinity as InfinityIcon, Zap, BarChart3, Library } from 'lucide-react';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
