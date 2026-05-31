@@ -151,7 +151,12 @@ export default function PullOrPass() {
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
   const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
-  const outOfSwipes = !premiumLoading && !premium && remaining <= 0;
+  // Compute out-of-swipes eagerly (without waiting for the async premium
+  // check) so the gating modal mounts on the same paint as the page. This
+  // avoids a brief flash of the results/intro view before the modal pops in
+  // when navigating in from /matches. Premium users will hide it the moment
+  // their cached premium flag resolves.
+  const outOfSwipes = !premium && remaining <= 0;
   const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
   const showProNudge =
     !premium &&
