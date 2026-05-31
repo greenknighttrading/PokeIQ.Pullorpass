@@ -196,15 +196,16 @@ export default function PullOrPass() {
           localStorage.setItem('pop_last_user_id', session.user.id);
         } catch {}
         // First time EVER for this user on this device → grant them their
-        // one-time post-signup 20 free swipes. After that, normal daily quota
-        // applies (so they must earn credits or upgrade to keep swiping).
+        // one-time post-signup free swipes bonus so brand-new accounts get
+        // 40 total free swipes (20 daily base + 20 bonus). After that, the
+        // normal daily quota applies (earn credits or upgrade to keep swiping).
         try {
           const bonusFlag = `pop_signup_bonus_granted_${session.user.id}`;
           const alreadyGranted = localStorage.getItem(bonusFlag) === '1';
           if (!alreadyGranted) {
             localStorage.setItem(bonusFlag, '1');
             localStorage.setItem('pop_last_user_id', session.user.id);
-            const fresh = { date: todayKey(), used: 0, bonus: 0, lifetime: readQuota().lifetime };
+            const fresh = { date: todayKey(), used: 0, bonus: 20, lifetime: readQuota().lifetime };
             writeQuota(fresh);
             setQuota(fresh);
           }
@@ -250,6 +251,15 @@ export default function PullOrPass() {
       window.removeEventListener('storage', refresh);
     };
   }, []);
+
+  // When the user runs out of swipes, skip any "out of swipes" popup and
+  // send them straight to /matches per product spec. Guard on stage so we
+  // don't yank users mid-intro or mid-loading.
+  useEffect(() => {
+    if (outOfSwipes && stage !== 'intro' && stage !== 'loading') {
+      navigate('/matches', { replace: true });
+    }
+  }, [outOfSwipes, stage, navigate]);
 
   // Fetch credits balance (signed-in users)
   const refreshCredits = useCallback(async (uid?: string | null) => {
@@ -701,14 +711,6 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
-          {/* When the user is out of swipes, replace ALL stage views with a
-              consistent, blurred Pull-or-Pass backdrop so the gating modal
-              always appears over the same swipe-game shell — never on top of
-              the results screen or a loading spinner. */}
-          {outOfSwipes ? (
-            <OutOfSwipesBackdrop />
-          ) : (
-          <>
           {stage === 'intro' && (
             <IntroScreen
               onStart={() => {
@@ -924,8 +926,6 @@ export default function PullOrPass() {
               remaining={remaining}
             />
           )}
-          </>
-          )}
         </main>
 
         {/* Mid-session signup nudge after first 20 lifetime swipes */}
@@ -939,25 +939,6 @@ export default function PullOrPass() {
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
-        {/* Persistent out-of-swipes overlay — stays up across stage transitions
-            (e.g. last swipe finalizing into results) until the user picks an action. */}
-        {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (
-          <div className="fixed inset-0 z-50">
-            <OutOfSwipesModal
-              credits={credits}
-              canRedeem={canRedeem}
-              onRedeem={redeemSwipes}
-              redeeming={redeeming}
-              isAuthed={!!userId}
-              onSignUp={() => navigate('/auth', { state: { from: '/swipe' } })}
-              showProNudge={showProNudge}
-              onKeepTraining={() => {
-                try { sessionStorage.setItem(PRO_NUDGE_DISMISSED_KEY, '1'); } catch {}
-                setProNudgeDismissed(true);
-              }}
-            />
-          </div>
-        )}
       </div>
     </>
   );
@@ -2443,7 +2424,7 @@ function OutOfSwipesModal({
             ) : (
               <div className="space-y-2 pt-1">
                 <Button size="lg" className="w-full gap-2" onClick={onSignUp}>
-                  <LogIn className="w-4 h-4" /> Sign up — get 20 free swipes
+                  <LogIn className="w-4 h-4" /> Sign up — get 50 free swipes
                 </Button>
                 <Link to="/matches" className="block text-center text-primary hover:underline pt-1 text-base font-sans font-medium">
                   See your matches →
