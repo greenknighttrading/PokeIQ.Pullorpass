@@ -415,9 +415,9 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
               Collector Personality
             </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
-              You are a{' '}
+              Discover your{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
-                Collector
+                Collector Archetype
               </span>
             </h2>
             <p className="mt-2 sm:mt-3 text-sm text-foreground/80 leading-relaxed mx-0 my-0 px-0 py-0 sm:text-lg">
