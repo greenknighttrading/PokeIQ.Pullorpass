@@ -992,7 +992,7 @@ export default function PokeYelp() {
               {/* Card image and info: left column on tablet/desktop */}
               <div className="space-y-2 w-full max-w-[190px] sm:max-w-none mx-auto sm:mx-0 sm:w-[200px] lg:w-[220px] sm:shrink-0">
                 <div className="relative">
-                  <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl" />
+                  <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl py-0 px-0 my-[16px] mx-[18px]" />
                   <button
                   type="button"
                   onClick={() => setDetailSeed({
@@ -1010,7 +1010,7 @@ export default function PokeYelp() {
                     <img
                       src={current.image_url}
                       alt={current.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover py-0 my-0"
                       onError={() => setImgErr(true)}
                     />
                   ) : (
