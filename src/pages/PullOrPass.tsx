@@ -1401,16 +1401,28 @@ export function ResultsView({
           transition={{ delay: 0.35, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
           className="pt-6"
         >
-          <motion.button
-            whileHover={{ y: -2, scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onPlayAgain}
-            disabled={outOfSwipes}
-            className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-          >
-            <RotateCw className="w-5 h-5" />
-            Swipe Again
-          </motion.button>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <motion.button
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={onPlayAgain}
+              disabled={outOfSwipes}
+              className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+            >
+              <RotateCw className="w-5 h-5" />
+              Swipe Again
+            </motion.button>
+            <Link to="/personality-types" className="inline-flex">
+              <motion.button
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                className="h-14 w-full sm:w-auto px-8 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-base tracking-wide inline-flex items-center justify-center gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)]"
+              >
+                <UserIcon className="w-5 h-5 text-primary" />
+                View Profile
+              </motion.button>
+            </Link>
+          </div>
           {outOfSwipes && (
             <p className="mt-2.5 text-xs text-muted-foreground">
               You're out of swipes — go to{' '}
