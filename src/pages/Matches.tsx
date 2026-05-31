@@ -1321,6 +1321,10 @@ export function DailyLimitWidget() {
   const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !premiumLoading && !isPremium && remaining <= 0;
 
+  // Only render this widget when the user has actually run out of swipes.
+  // Premium users or anyone with remaining swipes shouldn't see it at all.
+  if (premiumLoading || isPremium || !outOfSwipes) return null;
+
   // Countdown to midnight
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
