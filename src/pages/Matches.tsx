@@ -495,17 +495,21 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
   // Personality test result (localStorage). Read once on mount + when storage changes.
   const [personalityType, setPersonalityType] = useState<string | null>(null);
   useEffect(() => {
-    const read = () => {
+    let cancelled = false;
+    const read = async () => {
       try {
-        const raw = localStorage.getItem('personalityResult');
-        if (!raw) { setPersonalityType(null); return; }
-        const parsed = JSON.parse(raw);
+        const { readPersonalityForCurrentUser } = await import('@/lib/personalityStorage');
+        const parsed: any = await readPersonalityForCurrentUser();
+        if (cancelled) return;
         setPersonalityType(parsed?.type ?? null);
-      } catch { setPersonalityType(null); }
+      } catch {
+        if (!cancelled) setPersonalityType(null);
+      }
     };
     read();
-    window.addEventListener('storage', read);
-    return () => window.removeEventListener('storage', read);
+    const onStorage = () => { read(); };
+    window.addEventListener('storage', onStorage);
+    return () => { cancelled = true; window.removeEventListener('storage', onStorage); };
   }, []);
 
   const topEra = taste.topEras[0];
