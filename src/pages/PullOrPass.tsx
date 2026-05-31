@@ -252,6 +252,15 @@ export default function PullOrPass() {
     };
   }, []);
 
+  // When the user runs out of swipes, skip any "out of swipes" popup and
+  // send them straight to /matches per product spec. Guard on stage so we
+  // don't yank users mid-intro or mid-loading.
+  useEffect(() => {
+    if (outOfSwipes && stage !== 'intro' && stage !== 'loading') {
+      navigate('/matches', { replace: true });
+    }
+  }, [outOfSwipes, stage, navigate]);
+
   // Fetch credits balance (signed-in users)
   const refreshCredits = useCallback(async (uid?: string | null) => {
     const id = uid ?? userId;
