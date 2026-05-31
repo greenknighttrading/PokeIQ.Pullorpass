@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
+import { backfillGuestSwipes } from '@/lib/pullorpassBackfill';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { useIsPremium } from '@/hooks/useIsPremium';
 import { CarouselRow } from '@/components/CarouselRow';
