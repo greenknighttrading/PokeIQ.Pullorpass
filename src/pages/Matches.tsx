@@ -1320,7 +1320,7 @@ export function SwipeAgainOrLimit() {
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const remaining = isPremium ? Infinity : Math.max(0, dailyLimit - quota.used);
   const outOfSwipes = !isPremium && remaining <= 0;
-  if (outOfSwipes) return <DailyLimitWidget />;
+  if (outOfSwipes) return null;
   return (
     <motion.section
       initial={{ opacity: 0, y: 12 }}
