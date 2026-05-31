@@ -138,6 +138,7 @@ export default function PullOrPass() {
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
   const [redeeming, setRedeeming] = useState(false);
+  const [swipeBlocked, setSwipeBlocked] = useState(false);
   const [redemptionCount, setRedemptionCount] = useState<number>(() => {
     if (typeof window === 'undefined') return 0;
     return Number(sessionStorage.getItem(REDEMPTION_COUNT_KEY) ?? '0') || 0;
@@ -593,6 +594,7 @@ export default function PullOrPass() {
 
   const handlePull = () => {
     if (!current) return;
+    if (outOfSwipes) { setSwipeBlocked(true); return; }
     triggerAnim('pull');
     setExitDir('right');
     const matched = shouldTriggerMatch();
@@ -674,6 +676,7 @@ export default function PullOrPass() {
 
   const handlePass = () => {
     if (!current) return;
+    if (outOfSwipes) { setSwipeBlocked(true); return; }
     triggerAnim('pass');
     setExitDir('left');
     recordSwipe({ card: current, decision: 'pass', tags: [] });
@@ -681,6 +684,7 @@ export default function PullOrPass() {
 
   const handleLove = () => {
     if (!current) return;
+    if (outOfSwipes) { setSwipeBlocked(true); return; }
     triggerAnim('love');
     setExitDir('up');
     recordSwipe({ card: current, decision: 'pull', tags: ['Loved'] });
@@ -722,7 +726,7 @@ export default function PullOrPass() {
 
           {stage === 'swiping' && current && (
             <div className="relative flex-1 min-h-0 flex flex-col">
-              <div className={outOfSwipes ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
+              <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
               {/* Progress + quota */}
               <div className="flex items-center justify-between mb-3 gap-3">
                 <span className="text-sm font-medium text-muted-foreground tabular-nums">
@@ -932,7 +936,7 @@ export default function PullOrPass() {
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
         <AnimatePresence>
-          {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (
+          {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
               credits={credits}
               canRedeem={canRedeem}
