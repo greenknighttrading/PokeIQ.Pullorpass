@@ -196,15 +196,16 @@ export default function PullOrPass() {
           localStorage.setItem('pop_last_user_id', session.user.id);
         } catch {}
         // First time EVER for this user on this device → grant them their
-        // one-time post-signup 20 free swipes. After that, normal daily quota
-        // applies (so they must earn credits or upgrade to keep swiping).
+        // one-time post-signup free swipes bonus so brand-new accounts get
+        // 40 total free swipes (20 daily base + 20 bonus). After that, the
+        // normal daily quota applies (earn credits or upgrade to keep swiping).
         try {
           const bonusFlag = `pop_signup_bonus_granted_${session.user.id}`;
           const alreadyGranted = localStorage.getItem(bonusFlag) === '1';
           if (!alreadyGranted) {
             localStorage.setItem(bonusFlag, '1');
             localStorage.setItem('pop_last_user_id', session.user.id);
-            const fresh = { date: todayKey(), used: 0, bonus: 0, lifetime: readQuota().lifetime };
+            const fresh = { date: todayKey(), used: 0, bonus: 20, lifetime: readQuota().lifetime };
             writeQuota(fresh);
             setQuota(fresh);
           }
