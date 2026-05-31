@@ -181,6 +181,7 @@ export default function PokeYelp() {
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
   const [comment, setComment] = useState('');
+  const [commentOpen, setCommentOpen] = useState(false);
   const [reviewedCount, setReviewedCount] = useState<number>(() => {
     try { return Number(localStorage.getItem('earn_reviews_total') || '0'); } catch { return 0; }
   });
