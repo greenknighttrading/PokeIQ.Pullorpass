@@ -181,6 +181,7 @@ export default function PokeYelp() {
   const [custom, setCustom] = useState<string[]>([]);
   const [customInput, setCustomInput] = useState('');
   const [comment, setComment] = useState('');
+  const [commentOpen, setCommentOpen] = useState(false);
   const [reviewedCount, setReviewedCount] = useState<number>(() => {
     try { return Number(localStorage.getItem('earn_reviews_total') || '0'); } catch { return 0; }
   });
@@ -506,7 +507,7 @@ export default function PokeYelp() {
     setSuggestions([]);
     setCustom([]);
     setCustomInput('');
-    setComment('');
+    setComment(''); setCommentOpen(false);
     setImgErr(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
@@ -986,10 +987,10 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row gap-10 items-start justify-center"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start justify-center pb-28 sm:pb-0"
             >
               {/* Card image and info: left column on tablet/desktop */}
-              <div className="space-y-3 w-full max-w-[280px] mx-auto sm:mx-0 sm:max-w-none sm:w-[280px] lg:w-[300px] sm:shrink-0">
+              <div className="space-y-2 w-full max-w-[190px] sm:max-w-none mx-auto sm:mx-0 sm:w-[200px] lg:w-[220px] sm:shrink-0">
                 <div className="relative">
                   <div aria-hidden className="absolute -inset-6 rounded-[2rem] bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.25),transparent_70%)] blur-2xl" />
                   <button
@@ -1020,38 +1021,36 @@ export default function PokeYelp() {
                   )}
                 </button>
                 </div>
-                <div className="text-center sm:text-left pt-1">
-                  <p className="text-base font-semibold text-foreground truncate">{current.name}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {current.set_name ?? 'Unknown set'} · ${current.price.toFixed(2)}
-                    {current.rarity && ` · ${current.rarity}`}
+                <div className="text-center sm:text-left">
+                  <p className="text-sm font-semibold text-foreground truncate leading-tight">{current.name}</p>
+                  <p className="text-[11px] text-muted-foreground truncate leading-tight">
+                    {current.set_name ?? 'Unknown set'}
+                    {current.rarity && ` • ${current.rarity}`}
+                    {` • $${current.price.toFixed(2)}`}
                   </p>
                 </div>
               </div>
 
               {/* Tag picker — borderless, breathing */}
-              <div className="space-y-6 min-w-0 w-full sm:flex-1">
+              <div className="space-y-4 min-w-0 w-full sm:flex-1">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground mb-1">What does this card feel like?</h2>
-                  <div className="flex items-baseline justify-between mb-1">
-                    <p className="text-xs text-muted-foreground">
-                      Pick what feels true. Your unique read helps train the AI. <span className="text-amber-400/90">Originality is rewarded — honest taste trains better AI.</span>
-                    </p>
-                    <span className="text-[11px] tabular-nums text-muted-foreground text-right ml-auto">
+                  <div className="flex items-baseline justify-between gap-3 mb-2">
+                    <h2 className="text-base sm:text-lg font-semibold text-foreground leading-tight">What does this card feel like?</h2>
+                    <span className="text-[11px] tabular-nums text-muted-foreground shrink-0">
                       {selected.size} selected
                     </span>
                   </div>
 
-                  <div className="min-h-[140px]">
+                  <div className="min-h-[100px]">
                     {suggestLoading && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-8 justify-center">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground py-4 justify-center">
                         <Wand2 className="w-4 h-4 animate-pulse text-primary" />
                         AI is reading the card…
                       </div>
                     )}
 
                     {!suggestLoading && suggestions.length === 0 && (
-                      <div className="text-xs text-muted-foreground py-8 text-center">
+                      <div className="text-xs text-muted-foreground py-4 text-center">
                         No suggestions yet.
                         <Button
                           variant="link" size="sm" className="ml-1 h-auto p-0"
@@ -1062,7 +1061,7 @@ export default function PokeYelp() {
                       </div>
                     )}
 
-                    <div className="flex flex-wrap gap-2.5">
+                    <div className="flex flex-wrap gap-1.5">
                       <AnimatePresence initial={false}>
                         {suggestions.slice(0, 10).map((s) => {
                           const on = selected.has(s.tag);
@@ -1074,7 +1073,7 @@ export default function PokeYelp() {
                               exit={{ opacity: 0 }}
                               onClick={() => toggleTag(s.tag)}
                               whileTap={{ scale: 0.94 }}
-                              className={`px-4 py-2 text-sm rounded-full transition-all duration-200 ${
+                              className={`px-3 py-1.5 text-xs rounded-full transition-all duration-200 ${
                                 on
                                   ? 'bg-primary/15 text-primary border border-primary/60 font-semibold'
                                   : 'bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground'
@@ -1095,7 +1094,7 @@ export default function PokeYelp() {
                               onClick={hitDecoy}
                               disabled={used}
                               whileTap={{ scale: 0.94 }}
-                              className="px-4 py-2 text-sm rounded-full transition-all duration-200 bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed"
+                              className="px-3 py-1.5 text-xs rounded-full transition-all duration-200 bg-muted/40 text-foreground/80 border border-transparent hover:bg-muted/70 hover:text-foreground disabled:cursor-not-allowed"
                             >
                               {decoyTag}
                             </motion.button>
@@ -1106,19 +1105,16 @@ export default function PokeYelp() {
                   </div>
 
                   {/* Custom tags + comment — no boxed border, just whitespace */}
-                  <div className="mt-8 space-y-5">
+                  <div className="mt-4 space-y-3">
                     <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                          Create your own tag
+                      <div className="flex items-center justify-between mb-1.5">
+                        <p className="text-[11px] text-muted-foreground">
+                          Create your own tag. <span className="text-foreground/80">Earn bonus XP if others agree later.</span>
                         </p>
-                        <p className="text-[10px] uppercase tracking-wider text-amber-400/90">
-                          +{XP_PER_CUSTOM} XP · Originality bonus
+                        <p className="text-[10px] uppercase tracking-wider text-amber-400/90 shrink-0 ml-2">
+                          +{XP_PER_CUSTOM} XP
                         </p>
                       </div>
-                      <p className="text-[11px] text-muted-foreground mb-2">
-                        Invent collector language. If others agree later, you get discovery credit.
-                      </p>
                       <div className="flex gap-2">
                       <Input
                         value={customInput}
@@ -1126,18 +1122,18 @@ export default function PokeYelp() {
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustom())}
                         placeholder="e.g. Binder goblin energy"
                         maxLength={40}
-                        className="h-10 text-sm bg-muted/30 border-transparent focus-visible:border-primary/40"
+                        className="h-9 text-sm bg-muted/30 border-transparent focus-visible:border-primary/40"
                       />
                       <Button onClick={addCustom} size="sm" variant="outline" className="gap-1">
-                        <Plus className="w-3.5 h-3.5" /> Create Tag
+                        <Plus className="w-3.5 h-3.5" /> Add
                       </Button>
                       </div>
                     {custom.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="flex flex-wrap gap-1.5 mt-2">
                         {custom.map((t) => (
                           <span
                             key={t}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full bg-amber-400/10 text-amber-400 border border-amber-400/30"
                           >
                             <Sparkles className="w-3 h-3" />
                             {t}
@@ -1150,27 +1146,40 @@ export default function PokeYelp() {
                     )}
                     </div>
 
-                    {/* Optional comment */}
+                    {/* Optional comment — collapsed by default */}
                     <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1 mb-2">
-                        <MessageSquare className="w-3 h-3" /> Optional comment
-                      </p>
-                      <Textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value.slice(0, 500))}
-                        placeholder="Any extra thoughts?"
-                        className="text-sm min-h-[60px] bg-muted/30 border-transparent focus-visible:border-primary/40 resize-none"
-                      />
+                      {!commentOpen ? (
+                        <button
+                          type="button"
+                          onClick={() => setCommentOpen(true)}
+                          className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <MessageSquare className="w-3 h-3" /> Add comment (optional)
+                        </button>
+                      ) : (
+                        <>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground inline-flex items-center gap-1 mb-1.5">
+                            <MessageSquare className="w-3 h-3" /> Optional comment
+                          </p>
+                          <Textarea
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value.slice(0, 500))}
+                            placeholder="Any extra thoughts?"
+                            autoFocus
+                            className="text-sm min-h-[56px] bg-muted/30 border-transparent focus-visible:border-primary/40 resize-none"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
 
                 {/* Action area — primary hero CTA */}
-                <div className="pt-2 space-y-3">
+                <div className="pt-1 space-y-3 sm:static fixed bottom-0 left-0 right-0 z-40 px-4 pb-[max(env(safe-area-inset-bottom),12px)] sm:px-0 sm:pb-0 bg-gradient-to-t from-background via-background/95 to-background/0 sm:bg-none">
                   <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
                     <Button
                       onClick={submit}
-                      className="w-full h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
+                      className="w-full h-12 sm:h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
                        <Zap className="w-5 h-5" />
@@ -1185,7 +1194,7 @@ export default function PokeYelp() {
                           setSuggestions([]);
                           setCustom([]);
                           setCustomInput('');
-                          setComment('');
+                          setComment(''); setCommentOpen(false);
                           setImgErr(false);
                           setIndex(index - 1);
                         }
