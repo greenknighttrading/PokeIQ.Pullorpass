@@ -2122,6 +2122,79 @@ function OutOfSwipesView({
   isAuthed: boolean;
   onSignUp: () => void;
 }) {
+  return _OutOfSwipesViewImpl({ limit, hasBonus, isAuthed, onSignUp });
+}
+
+// Static, blurred Pull-or-Pass shell shown behind the OutOfSwipesModal so the
+// gating modal always sits on top of the swipe game UI — never the results
+// view, intro, or a loading spinner.
+function OutOfSwipesBackdrop() {
+  return (
+    <div className="relative flex-1 min-h-0 flex flex-col pointer-events-none select-none opacity-30 blur-[2px]">
+      <div className="flex items-center justify-between mb-3 gap-3">
+        <span className="text-sm font-medium text-muted-foreground tabular-nums">
+          Card <span className="text-foreground font-semibold">1</span>
+          <span className="text-muted-foreground/60"> / 20</span>
+        </span>
+        <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
+          <span className="text-foreground font-semibold">20</span>
+          <span className="text-muted-foreground">done today</span>
+          <span className="text-muted-foreground/50">·</span>
+          <span className="font-bold text-amber-400">0 left</span>
+        </span>
+      </div>
+      <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
+        <div className="h-full w-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400" />
+      </div>
+      <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2">
+        <div className="inline-flex items-center gap-2.5">
+          <Sparkles className="w-4 h-4 text-primary" />
+          <h1
+            className="font-black uppercase tracking-[0.18em] text-3xl sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
+            style={{
+              backgroundImage:
+                'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
+              backgroundSize: '250% 100%',
+              WebkitTextStroke: '1px hsl(var(--primary) / 0.25)',
+            }}
+          >
+            Pull or Pass
+          </h1>
+          <Sparkles className="w-4 h-4 text-primary" />
+        </div>
+        <p className="mt-1.5 text-[11px] sm:text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
+          A game by <span className="text-primary/90 font-semibold">PokeIQ</span>
+        </p>
+      </div>
+      <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-3 relative">
+        <div
+          className="relative aspect-[2.5/3.5] w-auto"
+          style={{ height: 'min(56vh, 420px)' }}
+        >
+          <div className="absolute -inset-8 rounded-[2.5rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/30 border border-border/60" />
+        </div>
+        <div className="flex items-end justify-center gap-7 sm:gap-10 pt-1">
+          <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/60" />
+          <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/60" />
+          <div className="w-14 h-14 rounded-full bg-muted/60 border border-border/60" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function _OutOfSwipesViewImpl({
+  limit,
+  hasBonus,
+  isAuthed,
+  onSignUp,
+}: {
+  limit: number;
+  hasBonus: boolean;
+  isAuthed: boolean;
+  onSignUp: () => void;
+}) {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center px-4 py-8">
       <div className="w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center">
