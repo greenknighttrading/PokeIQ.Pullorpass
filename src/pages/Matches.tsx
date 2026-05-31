@@ -87,6 +87,10 @@ export default function Matches() {
       const uid = session.user.id;
       setUserId(uid);
 
+      // Brand-new users may have swiped before signing up. Migrate those
+      // guest swipes into the account so Matches/Smart Profile reflect them.
+      try { await backfillGuestSwipes(uid); } catch (e) { console.warn('backfill failed', e); }
+
       // ── Stale-while-revalidate cache (sessionStorage) ──
       const cacheKey = `matches:v1:${uid}`;
       let cached: {
