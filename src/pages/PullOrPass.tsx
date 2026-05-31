@@ -211,6 +211,10 @@ export default function PullOrPass() {
             setQuota(fresh);
           }
         } catch {}
+        // Migrate any pre-signup guest swipes into this account (idempotent).
+        backfillGuestSwipes(session.user.id).catch((e) =>
+          console.warn('guest swipe backfill failed', e),
+        );
       }
     });
     // First-time visitors see the landing/instructions page
