@@ -507,7 +507,7 @@ export default function PokeYelp() {
     setSuggestions([]);
     setCustom([]);
     setCustomInput('');
-    setComment('');
+    setComment(''); setCommentOpen(false);
     setImgErr(false);
     if (index + 1 >= pool.length) loadPool();
     else setIndex(index + 1);
@@ -1194,7 +1194,7 @@ export default function PokeYelp() {
                           setSuggestions([]);
                           setCustom([]);
                           setCustomInput('');
-                          setComment('');
+                          setComment(''); setCommentOpen(false);
                           setImgErr(false);
                           setIndex(index - 1);
                         }
