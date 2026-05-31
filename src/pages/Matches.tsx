@@ -221,10 +221,10 @@ export default function Matches() {
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
               <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
-              <DailyLimitWidget />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
+              <SwipeAgainOrLimit />
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
