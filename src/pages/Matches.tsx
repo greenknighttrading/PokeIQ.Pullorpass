@@ -12,6 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
+import { backfillGuestSwipes } from '@/lib/pullorpassBackfill';
 import { recommendForUser, RecommendedCard } from '@/lib/recommendCards';
 import { useIsPremium } from '@/hooks/useIsPremium';
 import { CarouselRow } from '@/components/CarouselRow';
@@ -85,6 +86,10 @@ export default function Matches() {
       if (!session?.user || session.user.is_anonymous) { setLoading(false); return; }
       const uid = session.user.id;
       setUserId(uid);
+
+      // Brand-new users may have swiped before signing up. Migrate those
+      // guest swipes into the account so Matches/Smart Profile reflect them.
+      try { await backfillGuestSwipes(uid); } catch (e) { console.warn('backfill failed', e); }
 
       // ── Stale-while-revalidate cache (sessionStorage) ──
       const cacheKey = `matches:v1:${uid}`;
