@@ -388,33 +388,61 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     );
   }
 
+  // Placeholder shown BEFORE the user has taken the personality test.
+  // Mirrors the post-test layout (portrait + content) so the transition feels seamless.
   return (
-    <Link
-      to="/test"
-      className="group block rounded-2xl border border-primary/45 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-6 sm:p-7 hover:border-primary/60 transition-colors shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]"
-    >
-      <div className="flex items-start gap-4">
-        <div className="w-11 h-11 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center shrink-0">
-          <Sparkles className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-widest text-primary mb-1.5">
-            Next step
-          </p>
-          <h3 className="text-lg sm:text-xl font-bold text-foreground">
-            Take the Collector Personality Test
-          </h3>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-            Your Collector DNA shows <span className="text-foreground font-medium">what</span> you collect.
-            The personality test reveals <span className="text-foreground font-medium">how</span> you collect —
-            unlocking your archetype (Archivist, Historian, Investor, and more).
-          </p>
-          <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-primary">
-            Start the test <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-          </span>
+    <div>
+      <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
+        <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
+          <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-[100px] mx-0 py-[99px]">
+            <img
+              src={explorerPortrait}
+              alt="Unknown collector personality"
+              width={512}
+              height={512}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover object-top px-0 py-0 my-0 rounded-none grayscale"
+            />
+            <div className="absolute inset-0 bg-background/55" aria-hidden />
+            <div className="absolute inset-0 flex items-center justify-center" aria-hidden>
+              <HelpCircle className="w-16 h-16 sm:w-20 sm:h-20 text-primary drop-shadow-[0_4px_18px_hsl(var(--primary)/0.7)]" strokeWidth={2.25} />
+            </div>
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-primary font-bold mb-2">
+              Collector Personality
+            </p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
+              You are a{' '}
+              <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
+                Collector
+              </span>
+            </h2>
+            <p className="mt-2 sm:mt-3 text-sm text-foreground/80 leading-relaxed mx-0 my-0 px-0 py-0 sm:text-lg">
+              Every collector is different. Some chase rarity. Some chase art. Some chase the thrill of the hunt. The choices you make reveal a unique collecting personality that influences how you buy, sell, and build your collection.
+            </p>
+            <p className="mt-3 text-sm text-foreground/70 leading-relaxed sm:text-base">
+              Take the test to discover your collector archetype, understand your strengths and weaknesses, and learn what truly drives your decisions. You might be surprised by what your collection says about you.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
+              <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
+                <Link to="/test">
+                  Find your type <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                </Link>
+              </Button>
+              <Link
+                to="/test"
+                className="text-sm sm:text-base font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline"
+              >
+                Take the test
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
