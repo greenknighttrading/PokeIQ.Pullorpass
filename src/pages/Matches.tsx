@@ -332,7 +332,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
     return (
       <div>
         {/* Personality — left aligned, portrait + content stacked */}
-        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-primary/10 via-card to-card p-5 sm:p-6 md:p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
           <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
             {portrait ? (
               <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-[100px] mx-0 py-[99px]">
@@ -390,7 +390,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   return (
     <Link
       to="/test"
-      className="group block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-card to-card p-6 sm:p-7 hover:border-primary/50 transition-colors"
+      className="group block rounded-2xl border border-primary/45 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-6 sm:p-7 hover:border-primary/60 transition-colors shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]"
     >
       <div className="flex items-start gap-4">
         <div className="w-11 h-11 rounded-xl bg-primary/20 border border-primary/30 text-primary flex items-center justify-center shrink-0">
