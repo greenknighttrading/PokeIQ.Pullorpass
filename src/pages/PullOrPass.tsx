@@ -2593,6 +2593,22 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
             >
               ★ Super
             </motion.div>
+            {/* "Swipe Me" hint — sits centered on the card itself */}
+            <AnimatePresence>
+              {hint && (
+                <motion.div
+                  key="hint-on-card"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/20 border-2 border-primary/70 text-primary text-lg sm:text-xl font-black uppercase tracking-[0.22em] backdrop-blur-md pointer-events-none shadow-[0_0_28px_hsl(var(--primary)/0.65)] whitespace-nowrap"
+                >
+                  <span>←</span>
+                  <span>Swipe Me</span>
+                  <span>→</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
           {/* Gesture labels around the card */}
@@ -2615,20 +2631,6 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
             </div>
           </div>
 
-          {/* "Try me" nudge — disappears the moment user touches the card */}
-          <AnimatePresence>
-            {hint && (
-              <motion.div
-                key="hint"
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-primary/25 border-2 border-primary/60 text-primary text-base sm:text-lg font-black uppercase tracking-[0.22em] backdrop-blur-md pointer-events-none shadow-[0_0_24px_hsl(var(--primary)/0.55)] z-20"
-              >
-                ← Swipe Me →
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         <p className="w-full text-center text-sm sm:text-base md:text-lg text-foreground/90 font-medium -mt-1">
