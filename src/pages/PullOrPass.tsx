@@ -2593,22 +2593,24 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
             >
               ★ Super
             </motion.div>
-            {/* "Swipe Me" hint — sits centered on the card itself */}
-            <AnimatePresence>
-              {hint && (
-                <motion.div
-                  key="hint-on-card"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-primary/30 border-2 border-white/90 text-white text-lg sm:text-xl font-black uppercase tracking-[0.22em] backdrop-blur-md pointer-events-none shadow-[0_0_40px_hsl(var(--primary)/0.9),0_0_18px_rgba(255,255,255,0.45)] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
-                >
-                  <span>←</span>
-                  <span>Swipe Me</span>
-                  <span>→</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {/* "Swipe Me" hint — wrapper handles centering so Motion scale cannot override it */}
+            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+              <AnimatePresence>
+                {hint && (
+                  <motion.div
+                    key="hint-on-card"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-primary/70 border-2 border-white text-white text-lg sm:text-xl font-black uppercase tracking-[0.22em] backdrop-blur-md shadow-[0_0_46px_hsl(var(--primary)/0.95),0_0_20px_rgba(255,255,255,0.6)] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                  >
+                    <span>←</span>
+                    <span>Swipe Me</span>
+                    <span>→</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </motion.div>
 
           {/* Gesture labels around the card */}
