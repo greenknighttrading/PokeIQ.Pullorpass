@@ -22,9 +22,6 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Auth: open — function only performs data sync writes via service role
-  // and is rate-limited by upstream PPT credits.
-
   const PPT_API_KEY = Deno.env.get("POKEMON_PRICE_TRACKER_API_KEY");
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
   const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -32,6 +29,15 @@ serve(async (req) => {
   if (!PPT_API_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     return new Response(JSON.stringify({ error: "Missing env vars" }), {
       status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // Auth: service-role only (cron-triggered)
+  const authHeader = req.headers.get("authorization") || "";
+  if (!authHeader.includes(SUPABASE_SERVICE_ROLE_KEY)) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

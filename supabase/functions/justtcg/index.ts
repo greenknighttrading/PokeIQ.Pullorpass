@@ -47,6 +47,25 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
+  // ── Auth: require valid user JWT to prevent paid API abuse ──
+  const authHeader = req.headers.get("authorization") || "";
+  if (!authHeader.startsWith("Bearer ")) {
+    return json({ error: "Unauthorized" }, 401);
+  }
+  try {
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+    );
+    const token = authHeader.replace("Bearer ", "");
+    const { data, error } = await authClient.auth.getUser(token);
+    if (error || !data?.user) {
+      return json({ error: "Unauthorized" }, 401);
+    }
+  } catch {
+    return json({ error: "Unauthorized" }, 401);
+  }
+
   // ── Rate limiting ──
   const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (isRateLimited(clientIp)) {

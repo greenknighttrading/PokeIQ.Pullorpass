@@ -335,14 +335,31 @@ serve(async (req) => {
 
   // Extract user id from auth header
   let userId: string | null = null;
-  try {
-    const authHeader = req.headers.get("authorization");
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id ?? null;
+  {
+    const authHeader = req.headers.get("authorization") || "";
+    if (!authHeader.startsWith("Bearer ")) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
-  } catch { /* anonymous is fine */ }
+    try {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error } = await supabase.auth.getUser(token);
+      if (error || !user) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      userId = user.id;
+    } catch {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+  }
 
   try {
     const { items } = (await req.json()) as { items: MatchRequestItem[] };
