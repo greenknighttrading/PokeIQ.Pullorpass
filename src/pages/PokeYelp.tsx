@@ -1225,10 +1225,8 @@ export default function PokeYelp() {
                   <span className="text-foreground">1 per card</span> tagged, plus{' '}
                   <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.{' '}
                   <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits = {SWIPES_PER_REDEMPTION} swipes</span>.
-                </p>
-                <p className="mt-2 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed text-center">
-                  <span className="text-primary font-semibold">XP</span> also converts to bonus credits and other goodies —{' '}
-                  <span className="text-foreground/80">coming soon.</span>
+                  <span className="mx-1">⭐ ⭐</span>
+                  <span className="text-primary font-semibold">XP</span> is your progression score. Redeem for bonus swipes and other exclusive perks in future updates
                 </p>
               </div>
 
