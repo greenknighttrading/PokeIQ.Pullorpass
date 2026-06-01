@@ -1113,7 +1113,7 @@ export default function PokeYelp() {
                           Create your own tag. <span className="text-foreground/80">Earn bonus XP if others agree later.</span>
                         </p>
                         <p className="text-[10px] uppercase tracking-wider text-amber-400/90 shrink-0 ml-2">
-                          +{XP_PER_CUSTOM} XP
+                          +1 Swipe
                         </p>
                       </div>
                       <div className="flex gap-2">
