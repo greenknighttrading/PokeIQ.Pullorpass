@@ -2577,19 +2577,19 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
             {/* Live decision stamps that fade in as you drag */}
             <motion.div
               style={{ opacity: pullOpacity }}
-              className="absolute top-4 left-4 px-3 py-1.5 rounded-md border-[3px] border-emerald-400 text-emerald-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm -rotate-12"
+              className="absolute top-4 left-4 px-4 py-2 rounded-lg border-[5px] border-emerald-400 text-emerald-400 font-black uppercase tracking-widest text-4xl sm:text-5xl bg-background/40 backdrop-blur-sm -rotate-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
             >
               Pull
             </motion.div>
             <motion.div
               style={{ opacity: passOpacity }}
-              className="absolute top-4 right-4 px-3 py-1.5 rounded-md border-[3px] border-rose-400 text-rose-400 font-black uppercase tracking-widest text-lg bg-background/30 backdrop-blur-sm rotate-12"
+              className="absolute top-4 right-4 px-4 py-2 rounded-lg border-[5px] border-rose-400 text-rose-400 font-black uppercase tracking-widest text-4xl sm:text-5xl bg-background/40 backdrop-blur-sm rotate-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
             >
               Pass
             </motion.div>
             <motion.div
               style={{ opacity: superOpacity }}
-              className="absolute top-4 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-md border-[3px] border-amber-400 text-amber-400 font-black uppercase tracking-widest text-base bg-background/30 backdrop-blur-sm whitespace-nowrap"
+              className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-lg border-[5px] border-amber-400 text-amber-400 font-black uppercase tracking-widest text-3xl sm:text-4xl bg-background/40 backdrop-blur-sm whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.7)]"
             >
               ★ Super
             </motion.div>
