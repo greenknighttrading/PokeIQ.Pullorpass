@@ -143,7 +143,7 @@ export default function MatchesResults() {
     <>
       <Seo title="Your Matches | PokeIQ" description="Cards you pulled in your latest Pull or Pass round." />
       <div className="min-h-screen bg-background">
-        <main className="w-full mx-auto py-3 flex flex-col select-none">
+        <main className="w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start">
           <ResultsView
             records={records}
             onPlayAgain={() => navigate('/swipe')}

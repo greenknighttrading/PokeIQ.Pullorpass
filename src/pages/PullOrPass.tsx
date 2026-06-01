@@ -709,7 +709,7 @@ export default function PullOrPass() {
       />
       <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
 
-        <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex flex-col select-none ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
+        <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
           {stage === 'intro' && (
