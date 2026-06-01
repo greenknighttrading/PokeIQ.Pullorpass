@@ -2602,7 +2602,7 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
-                    className="flex items-center justify-center gap-3 px-6 py-3 rounded-full bg-primary/70 border-2 border-white text-white text-lg sm:text-xl font-black uppercase tracking-[0.22em] backdrop-blur-md shadow-[0_0_46px_hsl(var(--primary)/0.95),0_0_20px_rgba(255,255,255,0.6)] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
+                    className="w-[calc(100%-28px)] max-w-[190px] flex items-center justify-center gap-2 px-3 py-3 rounded-full bg-primary/75 border-2 border-white text-white text-base sm:text-lg font-black uppercase tracking-[0.12em] backdrop-blur-md shadow-[0_0_46px_hsl(var(--primary)/0.95),0_0_20px_rgba(255,255,255,0.6)] whitespace-nowrap drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]"
                   >
                     <span>←</span>
                     <span>Swipe Me</span>
