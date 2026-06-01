@@ -727,7 +727,7 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
   );
 }
 
-function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
+function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; tint: string; value: string; label: string; info?: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-4 xl:p-5 flex flex-col xl:flex-row items-start xl:items-center gap-2 xl:gap-3.5 min-w-0 min-h-[76px]">
       <div className={cn('w-10 h-10 xl:w-[52px] xl:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
@@ -740,7 +740,28 @@ function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: s
         >
           {value}
         </p>
-        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto">{label}</p>
+        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto flex items-center gap-1">
+          <span>{label}</span>
+          {info && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`What is ${label}?`}
+                    className="inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[240px] text-xs leading-snug">
+                  {info}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </p>
       </div>
     </div>
   );
