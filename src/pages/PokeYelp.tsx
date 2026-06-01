@@ -1437,17 +1437,17 @@ function ArcadeStat({
   const glow = accent ? 0.55 : 0.25;
   return (
     <div
-      className="relative rounded-lg px-3 py-2 bg-card/60 backdrop-blur font-mono"
+      className="relative rounded-lg px-3 sm:px-2 py-2 bg-card/60 backdrop-blur font-mono min-w-0"
       style={{
         border: `1.5px solid hsl(${palette.hsl} / ${accent ? 0.9 : 0.55})`,
         boxShadow: `0 0 ${accent ? 18 : 10}px hsl(${palette.hsl} / ${glow}), inset 0 0 12px hsl(${palette.hsl} / 0.08)`,
       }}
     >
       <div
-        className={`flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.25em] leading-tight text-center min-h-[1.75rem] ${palette.label}`}
+        className={`flex items-center justify-center gap-1 text-[9px] uppercase tracking-[0.25em] sm:tracking-[0.12em] leading-tight text-center min-h-[1.75rem] ${palette.label}`}
       >
         <span className={palette.text}>{icon}</span>
-        <span className="whitespace-nowrap">{label}</span>
+        <span className="whitespace-nowrap truncate">{label}</span>
       </div>
       <div
         className={`mt-1 text-xl font-black tabular-nums leading-none text-center ${palette.text}`}
