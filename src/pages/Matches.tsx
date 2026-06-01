@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { Seo } from '@/components/seo/Seo';
 import { buildTasteProfile, AttrCount, TasteProfile } from '@/lib/tasteProfile';
 import { fetchLikes, LikedCard, ERA_LABELS, PRICE_TIER_LABEL, backfillMissingTypes } from '@/lib/likesService';
@@ -128,7 +129,36 @@ export default function Matches() {
           .from('pullorpass_swipes')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', uid);
-        setCardsSwiped(count ?? 0);
+        // Fall back to local + DNA totals so guest-era swipes (or any race
+        // with the backfill) still show a non-zero count instead of "0".
+        let localTotal = 0;
+        try {
+          const ids = new Set<string>();
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || !k.startsWith('pop_today_swiped_')) continue;
+            const arr = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(arr)) arr.forEach((s: any) => s?.card_id && ids.add(s.card_id));
+          }
+          try {
+            const raw = localStorage.getItem('pop_results_v1');
+            if (raw) {
+              const v = JSON.parse(raw);
+              if (Array.isArray(v?.records)) v.records.forEach((r: any) => r?.card?.card_id && ids.add(r.card.card_id));
+            }
+          } catch {}
+          localTotal = ids.size;
+        } catch {}
+        let dnaTotal = 0;
+        try {
+          const { data: dna } = await supabase
+            .from('pullorpass_dna')
+            .select('pull_count, pass_count')
+            .eq('user_id', uid)
+            .maybeSingle();
+          if (dna) dnaTotal = (dna.pull_count ?? 0) + (dna.pass_count ?? 0);
+        } catch {}
+        setCardsSwiped(Math.max(count ?? 0, localTotal, dnaTotal));
       } catch (e) { console.warn('count swipes failed', e); }
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
@@ -644,6 +674,7 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 tint="bg-purple-400/15 border-purple-400/30"
                 value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
                 label="DNA Match Rate"
+                info="% of cards you swiped that you pulled into your collection. Higher = pickier taste; lower = broader taste."
               />
             </div>
 
@@ -696,7 +727,7 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
   );
 }
 
-function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: string; value: string; label: string }) {
+function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; tint: string; value: string; label: string; info?: string }) {
   return (
     <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-4 xl:p-5 flex flex-col xl:flex-row items-start xl:items-center gap-2 xl:gap-3.5 min-w-0 min-h-[76px]">
       <div className={cn('w-10 h-10 xl:w-[52px] xl:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
@@ -709,7 +740,28 @@ function HeroStat({ icon, tint, value, label }: { icon: React.ReactNode; tint: s
         >
           {value}
         </p>
-        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto">{label}</p>
+        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto flex items-center gap-1">
+          <span>{label}</span>
+          {info && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    aria-label={`What is ${label}?`}
+                    className="inline-flex items-center justify-center text-muted-foreground/70 hover:text-foreground transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[240px] text-xs leading-snug">
+                  {info}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </p>
       </div>
     </div>
   );
