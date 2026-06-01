@@ -1650,6 +1650,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tag_archetype_weights: {
+        Row: {
+          archetype_id: string
+          created_at: string
+          tag_id: string
+          weight: number
+        }
+        Insert: {
+          archetype_id: string
+          created_at?: string
+          tag_id: string
+          weight?: number
+        }
+        Update: {
+          archetype_id?: string
+          created_at?: string
+          tag_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tag_archetype_weights_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "archetypes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tag_archetype_weights_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tag_clusters: {
         Row: {
           centroid_embedding: string | null
