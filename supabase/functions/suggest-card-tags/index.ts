@@ -64,14 +64,37 @@ Deno.serve(async (req) => {
       .eq("status", "active")
       .eq("is_canonical", true);
     if (tagsErr) throw tagsErr;
-    const vocab = (tagRows ?? []).map((t) => t.slug);
     const tagBySlug = new Map((tagRows ?? []).map((t) => [t.slug, t]));
+
+    // Group vocab by Taste Profile v2 dimension so the model picks across all 5.
+    const DIMENSIONS: Array<{ key: string; label: string; categories: string[] }> = [
+      { key: "emotional",        label: "Emotional Response — how the card makes the collector feel", categories: ["emotional", "mood"] },
+      { key: "aesthetic",        label: "Aesthetic Style — what the artwork looks like",              categories: ["aesthetic", "character"] },
+      { key: "storytelling",     label: "Storytelling — the story the card is telling",               categories: ["storytelling"] },
+      { key: "collector_signal", label: "Collector Signal — collector appeal of the card",             categories: ["collector_signal", "meta", "era"] },
+      { key: "thematic",         label: "Thematic Elements — themes present in the artwork",           categories: ["thematic"] },
+    ];
+    const vocabByDim = DIMENSIONS.map((d) => ({
+      ...d,
+      slugs: (tagRows ?? []).filter((t) => d.categories.includes(t.category)).map((t) => t.slug),
+    }));
+    const vocabBlock = vocabByDim
+      .map((d) => `${d.label}\n  ${d.slugs.join(", ")}`)
+      .join("\n\n");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonResponse({ error: "AI not configured" }, 500);
 
-    const system = `You are an aesthetics critic for Pokémon TCG cards. Pick 6-8 tags from the provided vocabulary that best describe a card's mood, aesthetic, and character energy. Only return slugs that exist in the vocabulary. Return strict JSON.`;
-    const user = `Vocabulary: ${vocab.join(", ")}\n\nCard: ${cardName}\nSet: ${setName}\nArtist: ${artist}\nRarity: ${rarity}\nImage: ${imageUrl}\n\nReturn JSON: { "tags": [{"slug": "...", "confidence": 0..1}] }`;
+    const system = `You are a Pokémon TCG taste profiler. Every card is multi-dimensional — describe it across all 5 Taste Profile dimensions:
+
+1. Emotional Response — how the card makes the collector feel
+2. Aesthetic Style — what the artwork looks like
+3. Storytelling — the story the card is telling
+4. Collector Signal — collector appeal of the card
+5. Thematic Elements — themes present in the artwork
+
+Pick 1-3 tags from EACH dimension that genuinely apply (skip a dimension only if no tag fits). Aim for 7-12 tags total. Use ONLY slugs from the provided vocabulary — never invent slugs. Confidence 0..1 reflects how strongly the tag fits the card.`;
+    const user = `Vocabulary by dimension:\n\n${vocabBlock}\n\nCard: ${cardName}\nSet: ${setName}\nArtist: ${artist}\nRarity: ${rarity}\nImage: ${imageUrl}\n\nReturn JSON: { "tags": [{"slug": "...", "confidence": 0..1}] }`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -130,7 +153,7 @@ Deno.serve(async (req) => {
 
     const filtered = proposed
       .filter((t) => typeof t.slug === "string" && tagBySlug.has(t.slug))
-      .slice(0, 8)
+      .slice(0, 12)
       .map((t) => ({
         slug: t.slug,
         display_name: tagBySlug.get(t.slug)!.display_name,
