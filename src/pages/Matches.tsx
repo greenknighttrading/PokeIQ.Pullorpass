@@ -673,8 +673,8 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
                 icon={<Target className="w-6 h-6 text-purple-400" />}
                 tint="bg-purple-400/15 border-purple-400/30"
                 value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
-                label="DNA Match Rate"
-                info="% of cards you swiped that you pulled into your collection. Higher = pickier taste; lower = broader taste."
+                label="Pull Rate"
+                info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's simply Pulls ÷ total swipes. A low % means you're picky; a high % means you Pull broadly.`}
               />
             </div>
 
