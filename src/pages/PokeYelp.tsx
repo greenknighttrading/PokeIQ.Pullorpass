@@ -1180,7 +1180,7 @@ export default function PokeYelp() {
                   <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
                     <Button
                       onClick={submit}
-                      className="w-full h-12 sm:h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary"
+                      className="w-full h-12 sm:h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary my-[19px] py-[31px]"
                       style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
                     >
                        <Zap className="w-5 h-5" />
@@ -1220,13 +1220,13 @@ export default function PokeYelp() {
                   <ArcadeStat icon={<Trophy className="w-3 h-3" />} label={`Daily 🔥`} value={`${dailyStreak}d`} color="magenta" />
                   <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits Earned" value={`${credits} ◎`} color="amber" accent />
                 </div>
-                <p className="mt-3 text-[11px] text-muted-foreground max-w-xl mx-auto leading-relaxed text-center">
+                <p className="mt-3 text-[11px] text-muted-foreground max-w-xl leading-relaxed text-center py-[6px] my-px mx-0 px-px">
                   <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
                   <span className="text-foreground">1 per card</span> tagged, plus{' '}
                   <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.{' '}
                   <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits = {SWIPES_PER_REDEMPTION} swipes</span>.
-                  <span className="mx-1">⭐ ⭐</span>
-                  <span className="text-primary font-semibold">XP</span> is your progression score. Redeem for bonus swipes and other exclusive perks in future updates
+                  <span className="mx-0.5">⭐</span>
+                  <span className="text-primary font-semibold">XP</span> can be redeemed for bonus swipes and other perks in future updates.
                 </p>
               </div>
 
