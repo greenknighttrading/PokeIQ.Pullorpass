@@ -128,7 +128,36 @@ export default function Matches() {
           .from('pullorpass_swipes')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', uid);
-        setCardsSwiped(count ?? 0);
+        // Fall back to local + DNA totals so guest-era swipes (or any race
+        // with the backfill) still show a non-zero count instead of "0".
+        let localTotal = 0;
+        try {
+          const ids = new Set<string>();
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (!k || !k.startsWith('pop_today_swiped_')) continue;
+            const arr = JSON.parse(localStorage.getItem(k) || '[]');
+            if (Array.isArray(arr)) arr.forEach((s: any) => s?.card_id && ids.add(s.card_id));
+          }
+          try {
+            const raw = localStorage.getItem('pop_results_v1');
+            if (raw) {
+              const v = JSON.parse(raw);
+              if (Array.isArray(v?.records)) v.records.forEach((r: any) => r?.card?.card_id && ids.add(r.card.card_id));
+            }
+          } catch {}
+          localTotal = ids.size;
+        } catch {}
+        let dnaTotal = 0;
+        try {
+          const { data: dna } = await supabase
+            .from('pullorpass_dna')
+            .select('pull_count, pass_count')
+            .eq('user_id', uid)
+            .maybeSingle();
+          if (dna) dnaTotal = (dna.pull_count ?? 0) + (dna.pass_count ?? 0);
+        } catch {}
+        setCardsSwiped(Math.max(count ?? 0, localTotal, dnaTotal));
       } catch (e) { console.warn('count swipes failed', e); }
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
