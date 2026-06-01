@@ -2623,18 +2623,18 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="absolute bottom-1 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary text-[11px] font-bold uppercase tracking-[0.18em] backdrop-blur-sm pointer-events-none"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-primary/25 border-2 border-primary/60 text-primary text-base sm:text-lg font-black uppercase tracking-[0.22em] backdrop-blur-md pointer-events-none shadow-[0_0_24px_hsl(var(--primary)/0.55)] z-20"
               >
-                ← Swipe me →
+                ← Swipe Me →
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        <p className="w-full text-center text-xs text-muted-foreground -mt-1">
-          Swipe <span className="text-emerald-400 font-semibold">right to pull</span>,{' '}
-          <span className="text-rose-400 font-semibold">left to pass</span>,{' '}
-          <span className="text-amber-400 font-semibold">up to super like</span>.
+        <p className="w-full text-center text-sm sm:text-base md:text-lg text-foreground/90 font-medium -mt-1">
+          Swipe <span className="text-emerald-400 font-bold">right to pull</span>,{' '}
+          <span className="text-rose-400 font-bold">left to pass</span>,{' '}
+          <span className="text-amber-400 font-bold">up to super like</span>.
         </p>
 
         {/* SIMPLE FEATURE SUMMARY */}
