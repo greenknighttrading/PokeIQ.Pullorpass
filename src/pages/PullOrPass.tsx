@@ -167,7 +167,7 @@ export default function PullOrPass() {
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const handleSignedIn = (session: any) => {
       if (session?.user && !session.user.is_anonymous) {
         setUserId(session.user.id);
         // ── Per-account isolation ────────────────────────────
@@ -175,6 +175,13 @@ export default function PullOrPass() {
         // different account just signed in, wipe shared swipe state so one
         // user's history (quota, seen cards, in-progress round, results)
         // never bleeds into another's.
+        // IMPORTANT: we backfill guest swipes BEFORE wiping, so a brand new
+        // signup (prevUid === null) preserves its pre-account swipes, and
+        // even an account-switch still captures any guest swipes made on
+        // this device before this auth event fired.
+        backfillGuestSwipes(session.user.id).catch((e) =>
+          console.warn('guest swipe backfill failed', e),
+        );
         try {
           const prevUid = localStorage.getItem('pop_last_user_id');
           if (prevUid && prevUid !== session.user.id) {
@@ -212,10 +219,16 @@ export default function PullOrPass() {
             setQuota(fresh);
           }
         } catch {}
-        // Migrate any pre-signup guest swipes into this account (idempotent).
-        backfillGuestSwipes(session.user.id).catch((e) =>
-          console.warn('guest swipe backfill failed', e),
-        );
+      }
+    };
+    supabase.auth.getSession().then(({ data: { session } }) => handleSignedIn(session));
+    // Also listen for sign-in events that happen AFTER mount (e.g. user signs
+    // up via the auth modal while staying on this page). Without this listener
+    // a fresh signup never triggers the guest-swipe backfill, leaving the
+    // user's pre-account swipes orphaned in localStorage.
+    const { data: authSub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+        handleSignedIn(session);
       }
     });
     // First-time visitors see the landing/instructions page
@@ -255,6 +268,7 @@ export default function PullOrPass() {
     return () => {
       window.removeEventListener('focus', refresh);
       window.removeEventListener('storage', refresh);
+      try { authSub?.subscription?.unsubscribe(); } catch {}
     };
   }, []);
 
