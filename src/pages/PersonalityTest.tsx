@@ -48,6 +48,7 @@ export default function PersonalityTest() {
   const handleNextPage = useCallback(() => {
     if (currentPage < TOTAL_PAGES - 1) {
       setCurrentPage(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
       // Skip email capture for logged-in users
       setStage(isAuthed ? 'analyzing' : 'email');
