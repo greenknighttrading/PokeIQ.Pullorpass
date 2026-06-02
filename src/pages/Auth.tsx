@@ -33,9 +33,9 @@ export default function Auth() {
       const q = raw ? JSON.parse(raw) : { used: 0, bonus: 0 };
       const today = new Date().toISOString().slice(0, 10);
       const used = q?.date === today ? Number(q?.used ?? 0) : 0;
-      // New signups receive a +20 bonus on first auth; assume it here so a
+      // New signups receive a +40 bonus on first auth; assume it here so a
       // freshly-created account with 0 used swipes goes to /swipe.
-      const bonus = Math.max(Number(q?.bonus ?? 0), 20);
+      const bonus = Math.max(Number(q?.bonus ?? 0), 40);
       const remaining = Math.max(0, 20 + bonus - used);
       return remaining > 0 ? '/swipe' : '/profile';
     } catch {
