@@ -14,7 +14,7 @@ import { Sparkles, User, BarChart3, Heart, ChevronRight } from 'lucide-react';
 export default function Auth() {
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo =
+  const requestedRedirect =
     (location.state as { from?: string } | null)?.from ||
     new URLSearchParams(location.search).get('from') ||
     '/pokeiq-daily';
@@ -23,29 +23,49 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
 
+  // After signup/login, if the user came from Pull or Pass, send them
+  // straight back to swiping when they still have swipes left, otherwise
+  // surface their Smart Profile.
+  const resolveRedirect = React.useCallback((): string => {
+    if (requestedRedirect !== '/swipe') return requestedRedirect;
+    try {
+      const raw = localStorage.getItem('pop_quota');
+      const q = raw ? JSON.parse(raw) : { used: 0, bonus: 0 };
+      const today = new Date().toISOString().slice(0, 10);
+      const used = q?.date === today ? Number(q?.used ?? 0) : 0;
+      // New signups receive a +20 bonus on first auth; assume it here so a
+      // freshly-created account with 0 used swipes goes to /swipe.
+      const bonus = Math.max(Number(q?.bonus ?? 0), 20);
+      const remaining = Math.max(0, 20 + bonus - used);
+      return remaining > 0 ? '/swipe' : '/profile';
+    } catch {
+      return '/swipe';
+    }
+  }, [requestedRedirect]);
+
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
-        navigate(redirectTo, { replace: true });
+        navigate(resolveRedirect(), { replace: true });
       }
     };
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user && !session.user.is_anonymous) {
-        navigate(redirectTo, { replace: true });
+        navigate(resolveRedirect(), { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, redirectTo]);
+  }, [navigate, resolveRedirect]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}${redirectTo}`,
+        redirect_uri: `${window.location.origin}${resolveRedirect()}`,
       });
       if (error) {
         toast({ title: 'Error', description: String(error), variant: 'destructive' });
@@ -107,7 +127,7 @@ export default function Auth() {
       if (error) {
         toast({ title: 'Error', description: error.message, variant: 'destructive' });
       } else {
-        navigate(redirectTo, { replace: true });
+        navigate(resolveRedirect(), { replace: true });
       }
     } catch (err) {
       toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
