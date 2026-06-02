@@ -58,6 +58,7 @@ export default function PersonalityTest() {
   const handlePrevPage = useCallback(() => {
     if (currentPage > 0) {
       setCurrentPage(prev => prev - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentPage]);
 
