@@ -48,7 +48,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isPremium } = useIsPremium();
-  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
