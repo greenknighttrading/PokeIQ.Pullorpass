@@ -5,12 +5,11 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Sun, Moon, Menu, Check,
+  Menu, Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsPremium } from '@/hooks/useIsPremium';
-import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
@@ -49,7 +48,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isPremium } = useIsPremium();
-  const { theme, toggleTheme } = useTheme();
   const [email, setEmail] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -311,11 +309,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     <Crown className="w-4 h-4 mr-2" /> {isPremium ? 'Premium User' : 'Go Premium'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={toggleTheme}>
-                    {theme === 'light' ? <Moon className="w-4 h-4 mr-2" /> : <Sun className="w-4 h-4 mr-2" />}
-                    {theme === 'light' ? 'Dark mode' : 'Light mode'}
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={async () => { await supabase.auth.signOut(); navigate('/auth'); }}
                   >
@@ -324,10 +317,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                 </>
               ) : (
                 <>
-                  <DropdownMenuItem onClick={toggleTheme}>
-                    {theme === 'light' ? <Moon className="w-4 h-4 mr-2" /> : <Sun className="w-4 h-4 mr-2" />}
-                    {theme === 'light' ? 'Dark mode' : 'Light mode'}
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/auth')}>
                     <LogIn className="w-4 h-4 mr-2" /> Sign in
