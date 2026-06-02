@@ -234,20 +234,18 @@ export default function PullOrPass() {
     // Force a fresh round when navigated here with `state.fresh` (e.g.
     // "Swipe again" from the profile page). Skip resume/results entirely.
     const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true;
+    // First-time visitors see the landing/instructions page
+    let introSeen = false;
+    try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
+    // New users always see the intro/landing first, regardless of any
+    // stale resume or results that may be lingering in storage.
     if (wantsFresh) {
       try { window.history.replaceState({}, ''); } catch {}
       try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
       clearResume();
       clearResults();
       loadRound();
-      return;
-    }
-    // First-time visitors see the landing/instructions page
-    let introSeen = false;
-    try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
-    // New users always see the intro/landing first, regardless of any
-    // stale resume or results that may be lingering in storage.
-    if (!introSeen) {
+    } else if (!introSeen) {
       setStage('intro');
     } else {
       // Try to resume an in-progress round first, then fall back to last results
