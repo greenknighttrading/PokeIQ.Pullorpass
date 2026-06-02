@@ -114,7 +114,10 @@ export async function backfillGuestSwipes(userId: string): Promise<void> {
     return;
   }
 
-  const roundId = `guest-${Date.now()}`;
+  const roundId =
+    typeof crypto !== 'undefined' && 'randomUUID' in crypto
+      ? crypto.randomUUID()
+      : '00000000-0000-4000-8000-' + Date.now().toString().padStart(12, '0');
   const rows = Array.from(byCard.values()).map((s) => ({
     user_id: userId,
     round_id: roundId,
