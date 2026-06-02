@@ -118,8 +118,8 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
-      {/* Left side - Info */}
-      <div className="lg:w-1/2 p-8 lg:p-16 flex flex-col justify-center bg-secondary/30">
+      {/* Left side - Info (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 p-8 lg:p-16 flex-col justify-center bg-secondary/30">
         <div className="max-w-md mx-auto space-y-8">
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2 text-center">Welcome to PokeIQ</h1>
