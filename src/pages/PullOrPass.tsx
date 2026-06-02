@@ -231,6 +231,17 @@ export default function PullOrPass() {
         handleSignedIn(session);
       }
     });
+    // Force a fresh round when navigated here with `state.fresh` (e.g.
+    // "Swipe again" from the profile page). Skip resume/results entirely.
+    const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true;
+    if (wantsFresh) {
+      try { window.history.replaceState({}, ''); } catch {}
+      try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch {}
+      clearResume();
+      clearResults();
+      loadRound();
+      return;
+    }
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
