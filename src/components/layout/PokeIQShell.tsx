@@ -10,7 +10,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useIsPremium } from '@/hooks/useIsPremium';
-import { useTheme } from '@/hooks/useTheme';
 import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
