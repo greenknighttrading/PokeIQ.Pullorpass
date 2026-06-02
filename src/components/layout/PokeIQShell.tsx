@@ -311,7 +311,6 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     <Crown className="w-4 h-4 mr-2" /> {isPremium ? 'Premium User' : 'Go Premium'}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={async () => { await supabase.auth.signOut(); navigate('/auth'); }}
                   >
