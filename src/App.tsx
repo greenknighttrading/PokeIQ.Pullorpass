@@ -154,6 +154,8 @@ function AppRoutes() {
         <Route path="/card-intelligence" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
         <Route path="/checkout/return" element={<CheckoutReturn />} />
+        <Route path="/settings" element={<PokeIQShell><Settings /></PokeIQShell>} />
+        <Route path="/u/:username" element={<PublicProfile />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
