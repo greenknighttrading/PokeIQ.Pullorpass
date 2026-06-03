@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,14 @@ import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import {
+  FeedFiltersDrawer,
+  DEFAULT_FILTERS,
+  type FeedFilters,
+  matchesEras,
+  matchesLanguage,
+  formatsToProductTypes,
+} from '@/components/pullorpass/FeedFiltersDrawer';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -149,6 +157,8 @@ export default function PullOrPass() {
     return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
   });
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [feedFilters, setFeedFilters] = useState<FeedFilters>(DEFAULT_FILTERS);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
@@ -488,6 +498,104 @@ export default function PullOrPass() {
     setStage('swiping');
   }, []);
 
+  // Regenerate cards *after* the currently displayed card using new filters.
+  // Current card never changes. Swipe history & quota are untouched.
+  const applyFilters = useCallback(async (filters: FeedFilters) => {
+    setFeedFilters(filters);
+    setFiltersOpen(false);
+
+    // Cards still to be shown (after current). If none, just confirm filters
+    // for the next round and bail.
+    const needed = Math.max(0, cards.length - (index + 1));
+    if (needed === 0) {
+      toast.success('Feed Updated', {
+        description: 'Remaining cards have been refreshed.',
+        duration: 2000,
+      });
+      return;
+    }
+
+    // Build seen-set so we never re-show a card the user has swiped, and
+    // also exclude every card already queued (including current).
+    const seen = new Set<string>();
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user && !session.user.is_anonymous) {
+        let from = 0;
+        const PAGE = 1000;
+        while (true) {
+          const { data: prior } = await supabase
+            .from('pullorpass_swipes')
+            .select('card_id')
+            .eq('user_id', session.user.id)
+            .range(from, from + PAGE - 1);
+          if (!prior || prior.length === 0) break;
+          prior.forEach((r: any) => r.card_id && seen.add(r.card_id));
+          if (prior.length < PAGE) break;
+          from += PAGE;
+        }
+      }
+    } catch {}
+    try {
+      const local = JSON.parse(localStorage.getItem('pop_seen_card_ids') || '[]');
+      if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
+    } catch {}
+    cards.forEach((c) => seen.add(c.card_id));
+
+    const productTypes = formatsToProductTypes(filters.formats);
+    const { data: rows, error } = await supabase
+      .from('market_snapshots')
+      .select('card_id, tcgplayer_id, name, set_name, price, rarity')
+      .eq('game', 'Pokemon')
+      .in('product_type', productTypes)
+      .gte('price', filters.priceMin)
+      .lte('price', filters.priceMax)
+      .not('tcgplayer_id', 'is', null)
+      .limit(2000);
+
+    if (error || !rows || rows.length === 0) {
+      toast.error('No cards matched those filters — try a wider range.');
+      return;
+    }
+
+    const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
+    const byId = new Map<string, any>();
+    for (const c of rows) {
+      if (!c.tcgplayer_id || !c.price) continue;
+      if (EXCLUDE.test(c.name)) continue;
+      if (seen.has(c.card_id)) continue;
+      if (!matchesEras(c.set_name, filters.eras)) continue;
+      if (!matchesLanguage(c.name, filters.languages)) continue;
+      if (!byId.has(c.card_id)) byId.set(c.card_id, c);
+    }
+
+    const pool: SwipeCard[] = Array.from(byId.values()).map((c) => ({
+      card_id: c.card_id,
+      name: c.name,
+      set_name: c.set_name,
+      image_url: tcgImage(c.tcgplayer_id),
+      price: Number(c.price),
+      rarity: c.rarity,
+    }));
+
+    if (pool.length === 0) {
+      toast.error('No cards matched those filters — try a wider range.');
+      return;
+    }
+
+    // Light shuffle + take what we need.
+    const shuffled = [...pool].sort(() => Math.random() - 0.5).slice(0, needed);
+    setCards((prev) => [...prev.slice(0, index + 1), ...shuffled]);
+    toast.success('✨ Feed Updated', {
+      description: 'Remaining cards have been refreshed.',
+      duration: 2000,
+    });
+  }, [cards, index]);
+
+  const resetFilters = useCallback(() => {
+    setFeedFilters(DEFAULT_FILTERS);
+  }, []);
+
   const current = cards[index];
   const next = cards[index + 1];
   const after = cards[index + 2];
@@ -762,11 +870,19 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
+                   <button
+                     type="button"
+                     onClick={() => setFiltersOpen(true)}
+                     className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                   >
+                     <SlidersHorizontal className="w-3 h-3" /> Filter
+                   </button>
+                   <span className="text-muted-foreground/40">·</span>
                    <Link
                      to="/matches"
                      className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
                    >
-                     <Layers className="w-3 h-3" /> See matches
+                     <Layers className="w-3 h-3" /> Matches
                    </Link>
                   <span className="text-muted-foreground/40">·</span>
                   {premiumLoading ? null : premium ? (
@@ -963,6 +1079,14 @@ export default function PullOrPass() {
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+        <FeedFiltersDrawer
+          open={filtersOpen}
+          onOpenChange={setFiltersOpen}
+          initial={feedFilters}
+          remainingCount={Math.max(0, cards.length - (index + 1))}
+          onApply={applyFilters}
+          onReset={resetFilters}
+        />
         <AnimatePresence>
           {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
