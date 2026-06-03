@@ -2565,7 +2565,7 @@ function OutOfSwipesModal({
                 <p className="text-sm text-muted-foreground">Redeem your credits to keep swiping.</p>
               ) : isAuthed ? (
                 <p className="text-sm text-muted-foreground">
-                  You've used up your free 20 swipes a day limit — you can{' '}
+                 You've used up your free 50 swipes a day limit — you can{' '}
                   <Link to="/earn" className="text-primary font-semibold hover:underline">earn credits</Link>{' '}
                   or{' '}
                   <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Premium</Link>.
