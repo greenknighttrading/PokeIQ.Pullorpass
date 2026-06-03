@@ -1621,3 +1621,39 @@ export function DailyLimitWidget() {
     </motion.section>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// Public-profile helpers — read-only username + non-user CTA.
+// ─────────────────────────────────────────────────────────────
+function UsernameStatic({ name }: { name: string }) {
+  const initial = (name || 'C').charAt(0).toUpperCase();
+  return (
+    <div className="flex items-center gap-3">
+      <div className="w-11 h-11 rounded-full bg-primary/20 border border-primary/30 text-primary flex items-center justify-center text-base font-bold shrink-0">
+        {initial}
+      </div>
+      <div className="flex-1 min-w-0">
+        <span className="text-sm sm:text-base font-semibold text-foreground truncate">@{name}</span>
+        <p className="text-[11px] text-muted-foreground truncate">Public collector profile</p>
+      </div>
+    </div>
+  );
+}
+
+function BuildYourOwnProfileCTA() {
+  return (
+    <section className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/20 via-primary/10 to-card p-8 sm:p-12 text-center shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
+      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
+      <Sparkles className="w-9 h-9 text-primary mx-auto mb-4" />
+      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+        Build your own Collector DNA
+      </h2>
+      <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-md mx-auto">
+        Start swiping to discover your taste, unlock your personality, and build a profile like this one.
+      </p>
+      <Button asChild size="lg" className="mt-6 gap-2">
+        <Link to="/swipe">Start swiping <ArrowRight className="w-4 h-4" /></Link>
+      </Button>
+    </section>
+  );
+}
