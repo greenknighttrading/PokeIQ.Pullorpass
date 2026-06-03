@@ -75,9 +75,11 @@ const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
   { key: 'priceTier', label: 'Value',       icon: <Layers className="w-3.5 h-3.5" /> },
 ];
 
+type LocalSwipeRecord = Partial<SwipeRecord> & Partial<SwipeCard> & { client_ts?: string };
+
 function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes: LikedCard[]; total: number } {
-  const rawRecords: any[] = [];
-  const pushRecord = (r: any) => {
+  const rawRecords: LocalSwipeRecord[] = [];
+  const pushRecord = (r: LocalSwipeRecord) => {
     const card = r?.card ?? r;
     const id = card?.card_id ?? r?.card_id;
     const decision = r?.decision;
@@ -89,7 +91,7 @@ function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes:
     const raw = localStorage.getItem('pop_resume_v1') || localStorage.getItem('pop_results_v1');
     const parsed = raw ? JSON.parse(raw) : null;
     if (Array.isArray(parsed?.records)) parsed.records.forEach(pushRecord);
-  } catch {}
+  } catch { /* ignore malformed local swipe state */ }
 
   if (rawRecords.length === 0) {
     try {
@@ -99,11 +101,11 @@ function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes:
         const parsed = JSON.parse(localStorage.getItem(key) || '[]');
         if (Array.isArray(parsed)) parsed.forEach(pushRecord);
       }
-    } catch {}
+    } catch { /* ignore malformed local swipe history */ }
   }
 
   const seen = new Set<string>();
-  const toLike = (r: any): LikedCard | null => {
+  const toLike = (r: LocalSwipeRecord): LikedCard | null => {
     const card = r?.card ?? r;
     const cardId = card?.card_id ?? r?.card_id;
     if (!cardId) return null;
