@@ -21,10 +21,8 @@ type ProfileRow = {
 const PUBLIC_BASE = 'pokeiq.com/u/';
 
 function generateUsername(seed?: string | null) {
-  const base = (seed || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16);
-  const suffix = Math.random().toString(36).slice(2, 7);
-  const prefix = base && base.length >= 3 ? base : `trainer${Math.floor(Math.random() * 9000 + 1000)}`;
-  return `${prefix}_${suffix}`.slice(0, 30);
+  const digits = Math.floor(Math.random() * 900000 + 100000); // 6 digits
+  return `TRAINER${digits}`;
 }
 
 export default function Settings() {
@@ -67,8 +65,7 @@ export default function Settings() {
         if (row.username) {
           setUsername(row.username);
         } else {
-          const seed = (u.email || '').split('@')[0];
-          const generated = generateUsername(seed);
+          const generated = generateUsername();
           setUsername(generated);
           try {
             const { data: saved } = await supabase
@@ -80,8 +77,7 @@ export default function Settings() {
           } catch {}
         }
       } else {
-        const seed = (u.email || '').split('@')[0];
-        const generated = generateUsername(seed);
+        const generated = generateUsername();
         setUsername(generated);
         try {
           const { data: saved } = await supabase
