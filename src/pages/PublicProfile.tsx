@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Loader2 } from 'lucide-react';
 import { Seo } from '@/components/seo/Seo';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
+import Matches from '@/pages/Matches';
 
 type PublicProfile = {
+  user_id: string;
   username: string;
   display_name: string | null;
   avatar_url: string | null;
@@ -23,7 +24,7 @@ export default function PublicProfile() {
       setLoading(true);
       const { data } = await supabase
         .from('user_profiles' as any)
-        .select('username, display_name, avatar_url')
+        .select('user_id, username, display_name, avatar_url')
         .eq('username', username)
         .eq('public_profile_enabled', true)
         .maybeSingle() as any;
@@ -51,8 +52,6 @@ export default function PublicProfile() {
     );
   }
 
-  const initial = (profile.display_name || profile.username || '?').charAt(0).toUpperCase();
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Seo
@@ -66,27 +65,11 @@ export default function PublicProfile() {
         </Link>
       </header>
 
-      <main className="max-w-2xl mx-auto px-6 py-12">
-        <div className="flex flex-col items-center text-center gap-4">
-          <Avatar className="w-28 h-28 ring-2 ring-primary/30">
-            {profile.avatar_url ? <AvatarImage src={profile.avatar_url} alt={profile.username} /> : null}
-            <AvatarFallback className="bg-primary/15 text-primary text-3xl font-semibold">
-              {initial}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-3xl font-bold">{profile.display_name || `@${profile.username}`}</h1>
-            <div className="text-primary mt-1">@{profile.username}</div>
-          </div>
-        </div>
-
-        <div className="mt-12 rounded-2xl border border-border/60 bg-card/40 p-8 text-center">
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Collector personality, favorite cards, taste profile, and portfolio showcase
-            are coming soon to public profiles.
-          </p>
-        </div>
-      </main>
+      <Matches
+        viewedUserId={profile.user_id}
+        viewedDisplayName={profile.display_name || profile.username}
+        isPublicView
+      />
     </div>
   );
 }
