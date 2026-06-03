@@ -294,7 +294,7 @@ export default function Matches({
 
   return (
     <>
-      <Seo title="Your Collector DNA | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
+      <Seo title={isPublicView ? `${viewedDisplayName || 'Collector'}'s Collector DNA | PokeIQ` : 'Your Collector DNA | PokeIQ'} description={isPublicView ? `${viewedDisplayName || 'Collector'}'s public Pokémon collector identity.` : 'Your personal Pokémon collector identity — built from every card you\'ve liked.'} />
       <div className="min-h-screen bg-background flex flex-col gap-0">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
           {!isPublicView && (
