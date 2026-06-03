@@ -702,6 +702,7 @@ export default function PullOrPass() {
       writeQuota(next);
       return next;
     });
+    bumpSwipeStreak();
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
