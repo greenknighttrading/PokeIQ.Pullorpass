@@ -707,6 +707,7 @@ export type Database = {
           hp: string | null
           id: string
           image_url: string | null
+          language: string | null
           listings: number | null
           max_price_30d: number | null
           max_price_7d: number | null
@@ -755,6 +756,7 @@ export type Database = {
           hp?: string | null
           id?: string
           image_url?: string | null
+          language?: string | null
           listings?: number | null
           max_price_30d?: number | null
           max_price_7d?: number | null
@@ -803,6 +805,7 @@ export type Database = {
           hp?: string | null
           id?: string
           image_url?: string | null
+          language?: string | null
           listings?: number | null
           max_price_30d?: number | null
           max_price_7d?: number | null
@@ -1927,6 +1930,7 @@ export type Database = {
     }
     Functions: {
       change_pokeiq_credits: { Args: { p_delta: number }; Returns: number }
+      classify_card_language: { Args: { card_name: string }; Returns: string }
       classify_set_era: { Args: { s: string }; Returns: string }
       get_set_stats: {
         Args: never

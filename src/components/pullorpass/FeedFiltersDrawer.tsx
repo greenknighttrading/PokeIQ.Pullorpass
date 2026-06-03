@@ -5,8 +5,8 @@ import { Slider } from '@/components/ui/slider';
 import { Sparkles, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type CardFormat = 'singles' | 'sealed' | 'raw' | 'graded';
-export type Language = 'english' | 'japanese' | 'korean' | 'chinese';
+export type CardFormat = 'singles' | 'sealed';
+export type Language = 'english' | 'japanese';
 export type EraKey =
   | 'wotc' | 'ex' | 'dp' | 'bw' | 'xy' | 'sm' | 'swsh' | 'sv';
 
@@ -43,15 +43,11 @@ const ERA_OPTIONS: { key: EraKey; label: string }[] = [
 const FORMAT_OPTIONS: { key: CardFormat; label: string }[] = [
   { key: 'singles', label: 'Singles' },
   { key: 'sealed', label: 'Sealed' },
-  { key: 'raw', label: 'Raw' },
-  { key: 'graded', label: 'Graded' },
 ];
 
 const LANGUAGE_OPTIONS: { key: Language; label: string }[] = [
   { key: 'english', label: 'English' },
   { key: 'japanese', label: 'Japanese' },
-  { key: 'korean', label: 'Korean' },
-  { key: 'chinese', label: 'Chinese' },
 ];
 
 function Chip({
@@ -233,26 +229,11 @@ export function matchesEras(setName: string | null, eras: EraKey[]): boolean {
   return eras.some((e) => ERA_PATTERNS[e].test(setName));
 }
 
-export function matchesLanguage(name: string, langs: Language[]): boolean {
-  if (langs.length === 0) return true;
-  const lower = name.toLowerCase();
-  const isJp = /\(jp\)|japanese/.test(lower);
-  const isKr = /\(kr\)|korean/.test(lower);
-  const isCn = /\(cn\)|chinese/.test(lower);
-  const isEn = !isJp && !isKr && !isCn;
-  return (
-    (langs.includes('english') && isEn) ||
-    (langs.includes('japanese') && isJp) ||
-    (langs.includes('korean') && isKr) ||
-    (langs.includes('chinese') && isCn)
-  );
-}
-
-// Resolve which product_type values to query. Singles/Raw both map to 'card'.
+// Resolve product_type values. Anything that isn't sealed is treated as a single.
 export function formatsToProductTypes(formats: CardFormat[]): string[] {
   if (formats.length === 0) return ['card', 'sealed'];
   const out = new Set<string>();
-  if (formats.includes('singles') || formats.includes('raw') || formats.includes('graded')) out.add('card');
+  if (formats.includes('singles')) out.add('card');
   if (formats.includes('sealed')) out.add('sealed');
   return Array.from(out);
 }

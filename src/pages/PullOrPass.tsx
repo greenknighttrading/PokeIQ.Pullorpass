@@ -27,7 +27,6 @@ import {
   DEFAULT_FILTERS,
   type FeedFilters,
   matchesEras,
-  matchesLanguage,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
 
@@ -554,6 +553,9 @@ export default function PullOrPass() {
     if (filters.eras.length > 0) {
       query = query.in('era', filters.eras);
     }
+    if (filters.languages.length > 0) {
+      query = query.in('language', filters.languages);
+    }
     const { data: rows, error } = await query.limit(2000);
 
     if (error || !rows || rows.length === 0) {
@@ -567,9 +569,7 @@ export default function PullOrPass() {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (seen.has(c.card_id)) continue;
-      // Era already filtered server-side via the `era` column; keep
-      // language filter client-side since we don't store language yet.
-      if (!matchesLanguage(c.name, filters.languages)) continue;
+      // Era + language filtered server-side via dedicated columns.
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
 
