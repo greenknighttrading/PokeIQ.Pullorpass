@@ -53,6 +53,10 @@ const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
 // Grammar helper — "a" vs "an" based on first letter sound.
 const articleFor = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
 
+function possessive(name: string) {
+  return name.endsWith('s') ? `${name}'` : `${name}'s`;
+}
+
 // Take first N sentences from a paragraph.
 const firstSentences = (text: string, n = 2) => {
   const parts = text.match(/[^.!?]+[.!?]+/g);
