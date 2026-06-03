@@ -1,0 +1,9 @@
+{
+  "appId": "app.lovable.0408e84fb82d4e4fb6f0ca118fcbf058",
+  "appName": "mintdbrief",
+  "webDir": "dist",
+  "server": {
+    "url": "https://0408e84f-b82d-4e4f-b6f0-ca118fcbf058.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}
