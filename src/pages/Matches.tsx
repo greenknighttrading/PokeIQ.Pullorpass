@@ -466,7 +466,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
                 Collector Personality
               </p>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
-                You are {article}{' '}
+                {name || 'You'} {name ? 'is' : 'are'} {article}{' '}
                 <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                   {personalityType}
                 </span>
