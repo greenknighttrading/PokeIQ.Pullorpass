@@ -157,6 +157,8 @@ export default function PullOrPass() {
     return sessionStorage.getItem(PRO_NUDGE_DISMISSED_KEY) === '1';
   });
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [feedFilters, setFeedFilters] = useState<FeedFilters>(DEFAULT_FILTERS);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
