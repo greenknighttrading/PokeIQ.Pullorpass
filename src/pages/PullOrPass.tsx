@@ -264,7 +264,8 @@ export default function PullOrPass() {
     });
     // Force a fresh round when navigated here with `state.fresh` (e.g.
     // "Swipe again" from the profile page). Skip resume/results entirely.
-    const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true;
+    const storedResume = readResume();
+    const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true && !storedResume;
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
@@ -280,7 +281,7 @@ export default function PullOrPass() {
       setStage('intro');
     } else {
       // Try to resume an in-progress round first, then fall back to last results
-      const resume = readResume();
+      const resume = storedResume;
       if (resume) {
       setCards(resume.cards);
       setIndex(resume.index);
