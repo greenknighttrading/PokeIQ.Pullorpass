@@ -1046,12 +1046,12 @@ function BinderView({ likes, taste, onOpen, userId, isPublicView, viewedDisplayN
       <div className="mb-5">
         <div className="flex items-center gap-2 flex-wrap">
           <BookOpen className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Your binder</h2>
+          <h2 className="text-2xl font-bold text-foreground">{isPublicView ? `${possessive(viewedDisplayName || 'Collector')} binder` : 'Your binder'}</h2>
           <span className="text-sm text-muted-foreground tabular-nums">
             · {filtered.length}{value ? ` of ${likes.length}` : ''}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">A curated digital binder of every card you've liked.</p>
+        <p className="text-sm text-muted-foreground mt-1">A curated digital binder of every card {isPublicView ? `${viewedDisplayName || 'Collector'} has` : "you've"} liked.</p>
       </div>
 
       {likes.length > 0 && (
