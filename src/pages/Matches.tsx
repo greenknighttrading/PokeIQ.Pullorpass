@@ -354,12 +354,15 @@ export default function Matches({
           source: 'pass',
           liked_at: r.created_at,
         }));
+        const merged = mergeLocal(liked, mapped);
+        mapped = merged.passes;
+        setLikes(merged.likes);
         setPasses(mapped);
       } catch (e) { console.warn('fetch passes failed', e); }
       let recs: RecommendedCard[] = cached?.recommendations ?? [];
-      if (liked.length > 0 && !unchanged) {
+      if (effectiveLikes.length > 0 && !unchanged) {
         try {
-          recs = await recommendForUser(liked, 12);
+          recs = await recommendForUser(effectiveLikes, 12);
           setRecommendations(recs);
         } catch (e) { console.warn('recommend failed', e); }
       }
@@ -367,20 +370,20 @@ export default function Matches({
 
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify({
-          likes: liked,
+          likes: effectiveLikes,
           passes: mapped,
           recommendations: recs,
-          likedCount: liked.length,
+          likedCount: effectiveLikes.length,
           latestLikedAt,
         }));
       } catch {}
 
       // Background backfill — populate pokemon_type/artist for older likes
       // that were saved before cards_ppt had data. Refreshes the UI when done.
-      if (liked.length > 0) {
-        backfillMissingTypes(uid, liked, { max: 60 })
+      if (effectiveLikes.length > 0) {
+        backfillMissingTypes(uid, effectiveLikes.filter((l) => !l.id.startsWith('local-')), { max: 60 })
           .then(updated => {
-            if (updated !== liked) setLikes(updated);
+            if (updated.length) setLikes(mergeLocal(updated, mapped).likes);
           })
           .catch(e => console.warn('backfillMissingTypes failed', e));
       }
