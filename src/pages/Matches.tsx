@@ -433,7 +433,7 @@ function UsernameInline() {
 // Personality test CTA — sits at the bottom of the Smart Profile.
 // Collector DNA = WHAT they collect; Personality Test = HOW they collect.
 // ─────────────────────────────────────────────────────────────
-function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
+function PersonalityTestCTA({ personalityType, name }: { personalityType: string | null; name?: string }) {
   if (personalityType) {
     const info = PERSONALITY_INFO[personalityType as PersonalityType];
     const article = articleFor(personalityType);
