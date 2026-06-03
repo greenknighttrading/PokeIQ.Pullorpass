@@ -584,7 +584,14 @@ function buildSignals(t: TasteProfile): { label: string; sub?: string }[] {
   return out.slice(0, 5);
 }
 
-function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: number }) {
+function TasteHero({
+  taste, cardsSwiped, isPublicView = false, viewedDisplayName,
+}: {
+  taste: TasteProfile;
+  cardsSwiped: number;
+  isPublicView?: boolean;
+  viewedDisplayName?: string;
+}) {
   const sentence = buildIdentitySentence(taste);
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
@@ -676,7 +683,9 @@ function TasteHero({ taste, cardsSwiped }: { taste: TasteProfile; cardsSwiped: n
         <div className="relative z-10 p-6 sm:p-8 md:p-10 space-y-6 min-h-[360px] md:min-h-[400px] flex flex-col gap-0 px-[40px] py-[10px]">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
-            <UsernameInline />
+            {isPublicView
+              ? <UsernameStatic name={viewedDisplayName || 'Collector'} />
+              : <UsernameInline />}
           </div>
 
           <div className="md:max-w-[62%]">
