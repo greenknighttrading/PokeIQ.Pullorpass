@@ -245,7 +245,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               </div>
               <div className="font-semibold text-sm">Go PRO</div>
               <p className="text-[11px] text-muted-foreground leading-snug">
-                Unlock unlimited swipes, deeper collector insights, and custom recommendations tailored to your taste.
+                Unlimited swipes, deeper collector insights, and advanced analytics catered to your taste.
               </p>
               <Button size="sm" variant="outline" className="w-full mt-1 h-8 text-xs border-primary/40 hover:border-primary hover:bg-primary/10">
                 Upgrade Now
