@@ -770,6 +770,7 @@ export default function PullOrPass() {
       const newRecords = [...records, rec];
       setRecords(newRecords);
       bumpQuota();
+      persistSwipeProgress(rec, newRecords);
       if (userId) {
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
@@ -918,16 +919,7 @@ export default function PullOrPass() {
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  ) : (
-                    <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-                      <span className="text-foreground font-semibold">{quota.used}</span>
-                      <span className="text-muted-foreground">done today</span>
-                      <span className="text-muted-foreground/50">·</span>
-                      <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
-                        {remaining} left
-                      </span>
-                    </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
@@ -2332,12 +2324,7 @@ function OutOfSwipesBackdrop() {
           Card <span className="text-foreground font-semibold">1</span>
           <span className="text-muted-foreground/60"> / 20</span>
         </span>
-        <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-          <span className="text-foreground font-semibold">20</span>
-          <span className="text-muted-foreground">done today</span>
-          <span className="text-muted-foreground/50">·</span>
-          <span className="font-bold text-amber-400">0 left</span>
-        </span>
+        <span className="text-[10px] uppercase tracking-wide tabular-nums font-bold text-amber-400">0 left</span>
       </div>
       <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
         <div className="h-full w-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400" />
