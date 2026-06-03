@@ -350,14 +350,13 @@ const STAGE_LABEL: Record<string, string> = {
 // Editable username card — stores in auth user_metadata.display_name
 // ─────────────────────────────────────────────────────────────
 function UsernameInline() {
-  // declared below for public-view rendering
-  // (kept as separate component for clarity)
-
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+
+  // (UsernameStatic + BuildYourOwnProfileCTA defined at bottom of file)
 
   useEffect(() => {
     (async () => {
