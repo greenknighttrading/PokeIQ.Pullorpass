@@ -71,7 +71,15 @@ const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
   { key: 'priceTier', label: 'Value',       icon: <Layers className="w-3.5 h-3.5" /> },
 ];
 
-export default function Matches() {
+export default function Matches({
+  viewedUserId,
+  viewedDisplayName,
+  isPublicView = false,
+}: {
+  viewedUserId?: string;
+  viewedDisplayName?: string;
+  isPublicView?: boolean;
+} = {}) {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,13 +88,64 @@ export default function Matches() {
   const [cardsSwiped, setCardsSwiped] = useState<number>(0);
   const [recommendations, setRecommendations] = useState<RecommendedCard[]>([]);
   const [openSeed, setOpenSeed] = useState<CardDetailSeed | null>(null);
+  const [viewerIsOwner, setViewerIsOwner] = useState(false);
 
   useEffect(() => {
     (async () => {
+      // ── PUBLIC PROFILE VIEW ──
+      // When rendering someone's public profile, skip the auth/backfill flow
+      // and pull taste data through the public RPCs (gated server-side on
+      // user_profiles.public_profile_enabled).
+      if (isPublicView && viewedUserId) {
+        const uid = viewedUserId;
+        setUserId(uid);
+        try {
+          const { data: sess } = await supabase.auth.getSession();
+          setViewerIsOwner(sess.session?.user?.id === uid);
+        } catch { setViewerIsOwner(false); }
+
+        try {
+          const { data: likesData } = await supabase.rpc('get_public_likes' as any, { p_user_id: uid });
+          const liked = (likesData ?? []) as LikedCard[];
+          setLikes(liked);
+
+          const { data: countData } = await supabase.rpc('get_public_swipe_count' as any, { p_user_id: uid });
+          setCardsSwiped(Number(countData) || 0);
+
+          const { data: passRows } = await supabase.rpc('get_public_recent_passes' as any, { p_user_id: uid });
+          const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
+            id: `pass-${r.card_id}-${r.created_at}`,
+            user_id: uid,
+            card_id: r.card_id, card_name: r.card_name,
+            pokemon_name: null, artist: null,
+            set_name: r.card_set ?? null, set_id: null,
+            era: null, release_year: null, card_type: null, pokemon_type: null,
+            rarity: r.card_rarity ?? null, language: null, card_number: null,
+            variant: null, product_category: null,
+            price: Number(r.card_price) || null,
+            price_tier: null, image_url: r.card_image ?? null,
+            source: 'pass', liked_at: r.created_at,
+          }));
+          setPasses(mapped);
+
+          if (liked.length > 0) {
+            try {
+              const recs = await recommendForUser(liked, 12);
+              setRecommendations(recs);
+            } catch (e) { console.warn('recommend failed', e); }
+          }
+        } catch (e) {
+          console.warn('public profile fetch failed', e);
+        }
+        setLoading(false);
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user || session.user.is_anonymous) { setLoading(false); return; }
       const uid = session.user.id;
       setUserId(uid);
+      setViewerIsOwner(true);
 
       // Brand-new users may have swiped before signing up. Migrate those
       // guest swipes into the account so Matches/Smart Profile reflect them.
@@ -225,7 +284,7 @@ export default function Matches() {
           .catch(e => console.warn('backfillMissingTypes failed', e));
       }
     })();
-  }, []);
+  }, [isPublicView, viewedUserId]);
 
   const taste = useMemo(() => buildTasteProfile(likes), [likes]);
 
@@ -255,15 +314,21 @@ export default function Matches() {
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              <TasteHero taste={taste} cardsSwiped={cardsSwiped} />
+              <TasteHero
+                taste={taste}
+                cardsSwiped={cardsSwiped}
+                isPublicView={isPublicView}
+                viewedDisplayName={viewedDisplayName}
+              />
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
               )}
-              <SwipeAgainOrLimit />
+              {!isPublicView && <SwipeAgainOrLimit />}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
               <DeepTasteInsights taste={taste} />
-              <DailyLimitWidget />
+              {!isPublicView && <DailyLimitWidget />}
+              {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
             </div>
           )}
         </main>
