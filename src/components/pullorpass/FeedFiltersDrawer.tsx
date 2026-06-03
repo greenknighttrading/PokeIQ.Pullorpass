@@ -19,14 +19,14 @@ export interface FeedFilters {
 }
 
 export const DEFAULT_FILTERS: FeedFilters = {
-  priceMin: 5,
+  priceMin: 0.01,
   priceMax: 1000,
   eras: [],
   formats: [],
   languages: [],
 };
 
-export const PRICE_FLOOR = 1;
+export const PRICE_FLOOR = 0.01;
 export const PRICE_CEIL = 5000;
 
 const ERA_OPTIONS: { key: EraKey; label: string }[] = [
@@ -135,7 +135,7 @@ export function FeedFiltersDrawer({
             <Slider
               min={PRICE_FLOOR}
               max={PRICE_CEIL}
-              step={5}
+              step={1}
               value={[draft.priceMin, draft.priceMax]}
               onValueChange={(v) =>
                 setDraft((d) => ({ ...d, priceMin: v[0], priceMax: v[1] }))
