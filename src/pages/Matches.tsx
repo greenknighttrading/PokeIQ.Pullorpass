@@ -859,7 +859,7 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void }) {
+function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string }) {
   // Pulls only — super likes first, then regular pulls, newest first within each group.
   const sorted = [...likes].sort((a, b) => {
     const aSuper = a.source === 'super_like' ? 1 : 0;
@@ -868,6 +868,7 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
     return (b.liked_at || '').localeCompare(a.liked_at || '');
   });
   const recent = sorted.slice(0, 24);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   return (
     <section>
       <div className="mb-5">
@@ -876,7 +877,7 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
           <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Every card you pulled — super likes first.
+          Every card {subject} pulled — super likes first.
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
