@@ -53,6 +53,10 @@ const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
 // Grammar helper — "a" vs "an" based on first letter sound.
 const articleFor = (word: string) => (/^[aeiou]/i.test(word) ? 'an' : 'a');
 
+function possessive(name: string) {
+  return name.endsWith('s') ? `${name}'` : `${name}'s`;
+}
+
 // Take first N sentences from a paragraph.
 const firstSentences = (text: string, n = 2) => {
   const parts = text.match(/[^.!?]+[.!?]+/g);
@@ -290,7 +294,7 @@ export default function Matches({
 
   return (
     <>
-      <Seo title="Your Collector DNA | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
+      <Seo title={isPublicView ? `${viewedDisplayName || 'Collector'}'s Collector DNA | PokeIQ` : 'Your Collector DNA | PokeIQ'} description={isPublicView ? `${viewedDisplayName || 'Collector'}'s public Pokémon collector identity.` : 'Your personal Pokémon collector identity — built from every card you\'ve liked.'} />
       <div className="min-h-screen bg-background flex flex-col gap-0">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
           {!isPublicView && (
@@ -323,12 +327,12 @@ export default function Matches({
                 viewedDisplayName={viewedDisplayName}
               />
               {(likes.length > 0 || passes.length > 0) && (
-                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} />
+                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
               )}
               {!isPublicView && <SwipeAgainOrLimit />}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
-              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} />
-              <DeepTasteInsights taste={taste} />
+              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+              <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
               {!isPublicView && <DailyLimitWidget />}
               {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
             </div>
@@ -429,7 +433,7 @@ function UsernameInline() {
 // Personality test CTA — sits at the bottom of the Smart Profile.
 // Collector DNA = WHAT they collect; Personality Test = HOW they collect.
 // ─────────────────────────────────────────────────────────────
-function PersonalityTestCTA({ personalityType }: { personalityType: string | null }) {
+function PersonalityTestCTA({ personalityType, name }: { personalityType: string | null; name?: string }) {
   if (personalityType) {
     const info = PERSONALITY_INFO[personalityType as PersonalityType];
     const article = articleFor(personalityType);
@@ -462,7 +466,7 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
                 Collector Personality
               </p>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
-                You are {article}{' '}
+                {name || 'You'} {name ? 'is' : 'are'} {article}{' '}
                 <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                   {personalityType}
                 </span>
@@ -547,9 +551,12 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   );
 }
 
-function buildIdentitySentence(t: TasteProfile): string {
-  if (t.totalLikes === 0) return 'Start swiping to reveal your collector identity.';
-  if (t.totalLikes < 8) return 'Your DNA is forming — keep swiping to sharpen your collector identity.';
+function buildIdentitySentence(t: TasteProfile, subject = 'You'): string {
+  const isYou = subject === 'You';
+  const poss = isYou ? 'Your' : possessive(subject);
+  const verb = isYou ? 'gravitate' : 'gravitates';
+  if (t.totalLikes === 0) return `${isYou ? 'Start swiping to reveal your' : `${poss} collector identity is waiting. Start swiping to reveal their`} collector identity.`;
+  if (t.totalLikes < 8) return `${poss} DNA is forming — keep swiping to sharpen ${isYou ? 'your' : 'their'} collector identity.`;
   const era = t.topEras[0];
   const rarity = t.topRarities[0];
   const artist = t.topArtists[0];
@@ -561,11 +568,11 @@ function buildIdentitySentence(t: TasteProfile): string {
   if (pokemon && pokemon.count >= 3) bits.push(`${pokemon.label}-heavy picks`);
   if (artist && artist.count >= 3) bits.push(`art by ${artist.label}`);
   if (tier && tier.pct >= 30 && tier.key !== 'budget') bits.push(tier.label.toLowerCase());
-  if (bits.length === 0) return 'Your DNA is eclectic — drawn to a wide range of cards and eras.';
+  if (bits.length === 0) return `${poss} DNA is eclectic — drawn to a wide range of cards and eras.`;
   const head = bits.slice(0, -1).join(', ');
   const tail = bits[bits.length - 1];
   const phrase = bits.length === 1 ? tail : `${head}, and ${tail}`;
-  return `You gravitate toward ${phrase}.`;
+  return `${subject} ${verb} toward ${phrase}.`;
 }
 
 function buildSignals(t: TasteProfile): { label: string; sub?: string }[] {
@@ -596,7 +603,8 @@ function TasteHero({
   isPublicView?: boolean;
   viewedDisplayName?: string;
 }) {
-  const sentence = buildIdentitySentence(taste);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'You';
+  const sentence = buildIdentitySentence(taste, subject);
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
 
@@ -633,7 +641,9 @@ function TasteHero({
     : 0;
 
   // Split headline so the last word can render in the brand gradient
-  const headlineParts = ['Your', 'Collector', 'DNA'];
+  const headlineParts = isPublicView
+    ? [possessive(viewedDisplayName || 'Collector'), 'Collector', 'DNA']
+    : ['Your', 'Collector', 'DNA'];
   const headlineHead = headlineParts.slice(0, -1).join(' ');
   const headlineTail = headlineParts[headlineParts.length - 1];
 
@@ -771,7 +781,7 @@ function TasteHero({
       </div>
 
       {/* Personality result — sits directly under the Collector DNA widget */}
-      <PersonalityTestCTA personalityType={personalityType} />
+      <PersonalityTestCTA personalityType={personalityType} name={isPublicView ? (viewedDisplayName || 'Collector') : undefined} />
     </section>
   );
 }
@@ -849,7 +859,7 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void }) {
+function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string }) {
   // Pulls only — super likes first, then regular pulls, newest first within each group.
   const sorted = [...likes].sort((a, b) => {
     const aSuper = a.source === 'super_like' ? 1 : 0;
@@ -858,6 +868,7 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
     return (b.liked_at || '').localeCompare(a.liked_at || '');
   });
   const recent = sorted.slice(0, 24);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   return (
     <section>
       <div className="mb-5">
@@ -866,7 +877,7 @@ function RecentlyLiked({ likes, passes, onOpen }: { likes: LikedCard[]; passes: 
           <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Every card you pulled — super likes first.
+          Every card {subject} pulled — super likes first.
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
@@ -939,7 +950,7 @@ function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; deci
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ likes, taste, onOpen, userId }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void; userId: string }) {
+function BinderView({ likes, taste, onOpen, userId, isPublicView, viewedDisplayName }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void; userId: string; isPublicView?: boolean; viewedDisplayName?: string }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [facet, setFacet] = useState<FacetKey>('all');
@@ -1035,12 +1046,12 @@ function BinderView({ likes, taste, onOpen, userId }: { likes: LikedCard[]; tast
       <div className="mb-5">
         <div className="flex items-center gap-2 flex-wrap">
           <BookOpen className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Your binder</h2>
+          <h2 className="text-2xl font-bold text-foreground">{isPublicView ? `${possessive(viewedDisplayName || 'Collector')} binder` : 'Your binder'}</h2>
           <span className="text-sm text-muted-foreground tabular-nums">
             · {filtered.length}{value ? ` of ${likes.length}` : ''}
           </span>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">A curated digital binder of every card you've liked.</p>
+        <p className="text-sm text-muted-foreground mt-1">A curated digital binder of every card {isPublicView ? `${viewedDisplayName || 'Collector'} has` : "you've"} liked.</p>
       </div>
 
       {likes.length > 0 && (
@@ -1088,9 +1099,9 @@ function BinderView({ likes, taste, onOpen, userId }: { likes: LikedCard[]; tast
       {likes.length === 0 ? (
         <Card className="p-12 text-center border-dashed">
           <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-base text-foreground font-medium mb-1">Your binder is empty.</p>
-          <p className="text-sm text-muted-foreground mb-5">Like a card on swipe to add it to your binder.</p>
-          <Button asChild><Link to="/swipe">Start swiping</Link></Button>
+          <p className="text-base text-foreground font-medium mb-1">{isPublicView ? `${possessive(viewedDisplayName || 'Collector')} binder is empty.` : 'Your binder is empty.'}</p>
+          <p className="text-sm text-muted-foreground mb-5">{isPublicView ? 'This collector has not liked any cards yet.' : 'Like a card on swipe to add it to your binder.'}</p>
+          {!isPublicView && <Button asChild><Link to="/swipe">Start swiping</Link></Button>}
         </Card>
       ) : filtered.length === 0 ? (
         <Card className="p-10 text-center text-sm text-muted-foreground border-dashed">
@@ -1374,7 +1385,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
 // SECTION 4 — Deep Taste Insights (tabbed)
 // ─────────────────────────────────────────────────────────────
 
-function DeepTasteInsights({ taste }: { taste: TasteProfile }) {
+function DeepTasteInsights({ taste, isPublicView, viewedDisplayName }: { taste: TasteProfile; isPublicView?: boolean; viewedDisplayName?: string }) {
   const tabs: { key: string; label: string; items: AttrCount[]; icon: React.ReactNode }[] = [
     { key: 'artists',  label: 'Artists',  items: taste.topArtists,        icon: <Palette className="w-3.5 h-3.5" /> },
     { key: 'sets',     label: 'Sets',     items: taste.topSets,           icon: <Layers className="w-3.5 h-3.5" /> },
@@ -1384,12 +1395,13 @@ function DeepTasteInsights({ taste }: { taste: TasteProfile }) {
     { key: 'value',    label: 'Value',    items: taste.priceDistribution, icon: <Layers className="w-3.5 h-3.5" /> },
   ];
   const hasAnyData = tabs.some((t) => t.items.length > 0);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'your';
 
   return (
     <section id="deep-insights">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Taste insights</h2>
-        <p className="text-sm text-muted-foreground mt-1">The hard patterns behind your likes.</p>
+        <p className="text-sm text-muted-foreground mt-1">The hard patterns behind {isPublicView ? `${possessive(subject)} likes` : 'your likes'}.</p>
       </div>
 
       {!hasAnyData ? (
