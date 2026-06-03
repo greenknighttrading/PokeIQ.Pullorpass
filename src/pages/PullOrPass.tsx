@@ -362,17 +362,6 @@ export default function PullOrPass() {
     }
   }, [userId, credits, redeeming, navigate]);
 
-  // Clicking "Pull or Pass" in the nav while already on /swipe → start a new round
-  const initialKeyRef = React.useRef(location.key);
-  useEffect(() => {
-    if (location.key === initialKeyRef.current) return;
-    initialKeyRef.current = location.key;
-    clearResume();
-    clearResults();
-    loadRound();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
-
   // Persist in-progress round so users can leave and come back
   useEffect(() => {
     if (stage !== 'swiping') return;
@@ -626,11 +615,9 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 320) => {
-    const newRecords = [...records, rec];
-    setRecords(newRecords);
-    bumpQuota();
-    // Track today's swiped cards so the Earn page can prioritize them
+  const persistSwipeProgress = (rec: SwipeRecord, newRecords: SwipeRecord[]) => {
+    // Track today's swiped cards so Matches/Earn/Profile can reflect the
+    // latest swipe immediately, even if the DB write is still in flight.
     try {
       const key = 'pop_today_swiped_' + todayKey();
       const prev = JSON.parse(localStorage.getItem(key) || '[]');
@@ -642,6 +629,7 @@ export default function PullOrPass() {
         price: rec.card.price,
         rarity: rec.card.rarity,
         decision: rec.decision,
+        tags: rec.tags,
       });
       localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
     } catch {}
@@ -653,10 +641,24 @@ export default function PullOrPass() {
       const seenPrev: string[] = JSON.parse(localStorage.getItem(seenKey) || '[]');
       if (!seenPrev.includes(rec.card.card_id)) {
         seenPrev.push(rec.card.card_id);
-        // Cap to avoid unbounded growth
         localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
       }
     } catch {}
+
+    const nextIndex = index + 1;
+    if (nextIndex >= cards.length) {
+      clearResume();
+      writeResults({ records: newRecords, roundId, cards });
+    } else {
+      writeResume({ cards, index: nextIndex, records: newRecords, roundId });
+    }
+  };
+
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 320) => {
+    const newRecords = [...records, rec];
+    setRecords(newRecords);
+    bumpQuota();
+    persistSwipeProgress(rec, newRecords);
 
     if (userId) {
       supabase.from('pullorpass_swipes').insert({
