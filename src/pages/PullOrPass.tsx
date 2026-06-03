@@ -38,7 +38,7 @@ type SwipeDir = 'left' | 'right' | 'up';
 const SWIPE_THRESHOLD = 110;
 
 // ─── Daily swipe quota (free tier) ───────────────────────
-const DAILY_BASE_LIMIT = 20;
+const DAILY_BASE_LIMIT = 50;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 10 Earn reviews
 const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes (1 credit = 1 swipe)
 const SWIPES_PER_REDEMPTION = 10;
@@ -49,6 +49,28 @@ const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+function yesterdayKey() {
+  const d = new Date(Date.now() - 86400000);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+// ─── Daily swipe streak ─────────────────────────────────
+const STREAK_KEY = 'pop_streak_v1';
+export function readSwipeStreak(): { lastDate: string | null; streak: number } {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (!raw) return { lastDate: null, streak: 0 };
+    const v = JSON.parse(raw);
+    return { lastDate: v.lastDate ?? null, streak: v.streak ?? 0 };
+  } catch { return { lastDate: null, streak: 0 }; }
+}
+export function bumpSwipeStreak(): number {
+  const cur = readSwipeStreak();
+  const today = todayKey();
+  if (cur.lastDate === today) return cur.streak;
+  const next = cur.lastDate === yesterdayKey() ? cur.streak + 1 : 1;
+  try { localStorage.setItem(STREAK_KEY, JSON.stringify({ lastDate: today, streak: next })); } catch {}
+  return next;
 }
 function readQuota() {
   try {
