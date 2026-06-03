@@ -146,7 +146,7 @@ export function QuizResults({ result }: QuizResultsProps) {
         </div>
         <div className="space-y-2">
           <p className="text-sm uppercase tracking-wider text-primary font-medium">
-            Your Collector Personality
+            UNLIMITED{"\n"}Matches
           </p>
           <h1 className="text-4xl font-bold text-foreground">
             {info.emoji} The {safeType}
