@@ -121,6 +121,9 @@ export function FeedFiltersDrawer({
           <DrawerTitle className="text-xl font-bold flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
             Customize Your Feed
+            <span className="ml-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold tracking-wider uppercase bg-primary/15 text-primary border border-primary/30">
+              Beta
+            </span>
           </DrawerTitle>
           <DrawerDescription className="text-sm">
             Filters prioritize your preferences while still introducing new cards to improve future matches.
