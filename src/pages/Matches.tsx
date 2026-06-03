@@ -551,9 +551,12 @@ function PersonalityTestCTA({ personalityType }: { personalityType: string | nul
   );
 }
 
-function buildIdentitySentence(t: TasteProfile): string {
-  if (t.totalLikes === 0) return 'Start swiping to reveal your collector identity.';
-  if (t.totalLikes < 8) return 'Your DNA is forming — keep swiping to sharpen your collector identity.';
+function buildIdentitySentence(t: TasteProfile, subject = 'You'): string {
+  const isYou = subject === 'You';
+  const poss = isYou ? 'Your' : possessive(subject);
+  const verb = isYou ? 'gravitate' : 'gravitates';
+  if (t.totalLikes === 0) return `${isYou ? 'Start swiping to reveal your' : `${poss} collector identity is waiting. Start swiping to reveal their`} collector identity.`;
+  if (t.totalLikes < 8) return `${poss} DNA is forming — keep swiping to sharpen ${isYou ? 'your' : 'their'} collector identity.`;
   const era = t.topEras[0];
   const rarity = t.topRarities[0];
   const artist = t.topArtists[0];
@@ -565,11 +568,11 @@ function buildIdentitySentence(t: TasteProfile): string {
   if (pokemon && pokemon.count >= 3) bits.push(`${pokemon.label}-heavy picks`);
   if (artist && artist.count >= 3) bits.push(`art by ${artist.label}`);
   if (tier && tier.pct >= 30 && tier.key !== 'budget') bits.push(tier.label.toLowerCase());
-  if (bits.length === 0) return 'Your DNA is eclectic — drawn to a wide range of cards and eras.';
+  if (bits.length === 0) return `${poss} DNA is eclectic — drawn to a wide range of cards and eras.`;
   const head = bits.slice(0, -1).join(', ');
   const tail = bits[bits.length - 1];
   const phrase = bits.length === 1 ? tail : `${head}, and ${tail}`;
-  return `You gravitate toward ${phrase}.`;
+  return `${subject} ${verb} toward ${phrase}.`;
 }
 
 function buildSignals(t: TasteProfile): { label: string; sub?: string }[] {
