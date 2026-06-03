@@ -929,7 +929,11 @@ export default function PullOrPass() {
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 tabular-nums">
+                      {remaining} left
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
