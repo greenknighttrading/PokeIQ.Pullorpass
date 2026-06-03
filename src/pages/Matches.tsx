@@ -641,7 +641,9 @@ function TasteHero({
     : 0;
 
   // Split headline so the last word can render in the brand gradient
-  const headlineParts = ['Your', 'Collector', 'DNA'];
+  const headlineParts = isPublicView
+    ? [possessive(viewedDisplayName || 'Collector'), 'Collector', 'DNA']
+    : ['Your', 'Collector', 'DNA'];
   const headlineHead = headlineParts.slice(0, -1).join(' ');
   const headlineTail = headlineParts[headlineParts.length - 1];
 
