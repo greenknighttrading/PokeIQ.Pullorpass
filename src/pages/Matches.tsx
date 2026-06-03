@@ -950,7 +950,7 @@ function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; deci
 const CARDS_PER_PAGE = 9;
 const CARDS_PER_SPREAD = CARDS_PER_PAGE * 2;
 
-function BinderView({ likes, taste, onOpen, userId }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void; userId: string }) {
+function BinderView({ likes, taste, onOpen, userId, isPublicView, viewedDisplayName }: { likes: LikedCard[]; taste: TasteProfile; onOpen: (s: CardDetailSeed) => void; userId: string; isPublicView?: boolean; viewedDisplayName?: string }) {
   const [spread, setSpread] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const [facet, setFacet] = useState<FacetKey>('all');
