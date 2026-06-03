@@ -1996,16 +1996,18 @@ function StatGlowCard({
   icon, value, label, sub, tint,
 }: {
   icon: React.ReactNode; value: string; label: string; sub: string;
-  tint: 'primary' | 'purple' | 'amber';
+  tint: 'primary' | 'purple' | 'amber' | 'flame';
 }) {
   const ring =
     tint === 'primary' ? 'border-primary/25 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--primary)/0.25)]'
     : tint === 'purple' ? 'border-purple-500/25 hover:border-purple-400/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)]'
-    : 'border-amber-400/25 hover:border-amber-300/50 hover:shadow-[0_0_30px_rgba(251,191,36,0.22)]';
+    : tint === 'amber' ? 'border-amber-400/25 hover:border-amber-300/50 hover:shadow-[0_0_30px_rgba(251,191,36,0.22)]'
+    : 'border-orange-500/30 hover:border-orange-400/60 hover:shadow-[0_0_30px_rgba(249,115,22,0.28)]';
   const iconBg =
     tint === 'primary' ? 'bg-primary/10'
     : tint === 'purple' ? 'bg-purple-500/10'
-    : 'bg-amber-400/10';
+    : tint === 'amber' ? 'bg-amber-400/10'
+    : 'bg-orange-500/10';
   return (
     <motion.div
       whileHover={{ y: -4 }}
