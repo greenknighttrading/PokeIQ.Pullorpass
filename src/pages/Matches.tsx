@@ -75,6 +75,77 @@ const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
   { key: 'priceTier', label: 'Value',       icon: <Layers className="w-3.5 h-3.5" /> },
 ];
 
+function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes: LikedCard[]; total: number } {
+  const rawRecords: any[] = [];
+  const pushRecord = (r: any) => {
+    const card = r?.card ?? r;
+    const id = card?.card_id ?? r?.card_id;
+    const decision = r?.decision;
+    if (!id || (decision !== 'pull' && decision !== 'pass')) return;
+    rawRecords.push(r);
+  };
+
+  try {
+    const raw = localStorage.getItem('pop_resume_v1') || localStorage.getItem('pop_results_v1');
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed?.records)) parsed.records.forEach(pushRecord);
+  } catch {}
+
+  if (rawRecords.length === 0) {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('pop_today_swiped_')) continue;
+        const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(parsed)) parsed.forEach(pushRecord);
+      }
+    } catch {}
+  }
+
+  const seen = new Set<string>();
+  const toLike = (r: any): LikedCard | null => {
+    const card = r?.card ?? r;
+    const cardId = card?.card_id ?? r?.card_id;
+    if (!cardId) return null;
+    const decision = r?.decision;
+    const key = `${decision}:${cardId}`;
+    if (seen.has(key)) return null;
+    seen.add(key);
+    const tags = Array.isArray(r?.tags) ? r.tags : [];
+    return {
+      id: `local-${decision}-${cardId}`,
+      user_id: uid,
+      card_id: cardId,
+      card_name: card?.name ?? r?.name ?? '',
+      pokemon_name: null,
+      artist: null,
+      set_name: card?.set_name ?? r?.set_name ?? null,
+      set_id: null,
+      era: null,
+      release_year: null,
+      card_type: null,
+      pokemon_type: null,
+      rarity: card?.rarity ?? r?.rarity ?? null,
+      language: null,
+      card_number: null,
+      variant: null,
+      product_category: null,
+      price: Number(card?.price ?? r?.price) || null,
+      price_tier: null,
+      image_url: card?.image_url ?? r?.image_url ?? null,
+      source: tags.includes('Loved') ? 'super_like' : decision,
+      liked_at: r?.client_ts ?? new Date().toISOString(),
+    };
+  };
+
+  const mapped = rawRecords.map(toLike).filter(Boolean) as LikedCard[];
+  return {
+    likes: mapped.filter((r) => r.source !== 'pass'),
+    passes: mapped.filter((r) => r.source === 'pass'),
+    total: mapped.length,
+  };
+}
+
 export default function Matches({
   viewedUserId,
   viewedDisplayName,
