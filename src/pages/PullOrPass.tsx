@@ -291,11 +291,19 @@ export default function PullOrPass() {
       } else {
       const last = readResults();
       if (last) {
-        setCards(last.cards);
-        setRecords(last.records);
-        setRoundId(last.roundId);
-        setIndex(last.cards.length);
-        setStage('results');
+        // If the user still has swipes left, skip the results recap and
+        // drop them straight back into a new round.
+        const q = readQuota();
+        const remainingNow = Math.max(0, (DAILY_BASE_LIMIT + (q.bonus ?? 0)) - (q.used ?? 0));
+        if (remainingNow > 0) {
+          loadRound();
+        } else {
+          setCards(last.cards);
+          setRecords(last.records);
+          setRoundId(last.roundId);
+          setIndex(last.cards.length);
+          setStage('results');
+        }
       } else {
         loadRound();
       }
@@ -921,7 +929,11 @@ export default function PullOrPass() {
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  ) : null}
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 tabular-nums">
+                      {remaining} left
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
