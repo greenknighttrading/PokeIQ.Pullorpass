@@ -291,11 +291,19 @@ export default function PullOrPass() {
       } else {
       const last = readResults();
       if (last) {
-        setCards(last.cards);
-        setRecords(last.records);
-        setRoundId(last.roundId);
-        setIndex(last.cards.length);
-        setStage('results');
+        // If the user still has swipes left, skip the results recap and
+        // drop them straight back into a new round.
+        const q = readQuota();
+        const remainingNow = Math.max(0, (DAILY_BASE_LIMIT + (q.bonus ?? 0)) - (q.used ?? 0));
+        if (remainingNow > 0) {
+          loadRound();
+        } else {
+          setCards(last.cards);
+          setRecords(last.records);
+          setRoundId(last.roundId);
+          setIndex(last.cards.length);
+          setStage('results');
+        }
       } else {
         loadRound();
       }
