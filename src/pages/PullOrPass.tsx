@@ -1895,7 +1895,7 @@ export function ResultsView({
                   'Save your collector profile',
                   'Build your custom binder',
                   'Get smarter recommendations',
-                  '20 free swipes a day',
+                  '50 free swipes a day',
                   'Learn more about you as a collector',
                   'Organize your dream collection',
                 ].map((s) => (
