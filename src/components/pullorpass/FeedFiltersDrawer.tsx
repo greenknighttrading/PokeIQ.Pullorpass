@@ -1,7 +1,6 @@
 import React from 'react';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
 import { Sparkles, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -28,6 +27,16 @@ export const DEFAULT_FILTERS: FeedFilters = {
 
 export const PRICE_FLOOR = 0.01;
 export const PRICE_CEIL = 5000;
+
+const PRICE_RANGES: { label: string; min: number; max: number }[] = [
+  { label: 'Up to $1',  min: 0.01, max: 1 },
+  { label: '$1–$10',    min: 1,    max: 10 },
+  { label: '$10–$50',   min: 10,   max: 50 },
+  { label: '$50–$100',  min: 50,   max: 100 },
+  { label: '$100–$300', min: 100,  max: 300 },
+  { label: '$300–$1K',  min: 300,  max: 1000 },
+  { label: '$1K+',      min: 1000, max: PRICE_CEIL },
+];
 
 const ERA_OPTIONS: { key: EraKey; label: string }[] = [
   { key: 'wotc', label: 'WOTC' },
@@ -132,19 +141,53 @@ export function FeedFiltersDrawer({
                 ${draft.priceMin} — ${draft.priceMax >= PRICE_CEIL ? `${PRICE_CEIL}+` : draft.priceMax}
               </span>
             </div>
-            <Slider
-              min={PRICE_FLOOR}
-              max={PRICE_CEIL}
-              step={1}
-              value={[draft.priceMin, draft.priceMax]}
-              onValueChange={(v) =>
-                setDraft((d) => ({ ...d, priceMin: v[0], priceMax: v[1] }))
-              }
-              className="py-2"
-            />
-            <div className="flex justify-between text-[11px] uppercase tracking-wider text-muted-foreground">
-              <span>Min ${PRICE_FLOOR}</span>
-              <span>Max ${PRICE_CEIL}+</span>
+            <div className="flex flex-wrap gap-2">
+              {PRICE_RANGES.map((r) => {
+                const active = draft.priceMin === r.min && draft.priceMax === r.max;
+                return (
+                  <Chip
+                    key={r.label}
+                    active={active}
+                    onClick={() => setDraft((d) => ({ ...d, priceMin: r.min, priceMax: r.max }))}
+                  >
+                    {r.label}
+                  </Chip>
+                );
+              })}
+            </div>
+            <div className="flex items-center gap-2 pt-1">
+              <span className="text-[11px] uppercase tracking-wider text-muted-foreground">Custom</span>
+              <div className="flex items-center gap-1.5 text-sm">
+                <span className="text-muted-foreground">$</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={PRICE_FLOOR}
+                  max={PRICE_CEIL}
+                  step="0.01"
+                  value={draft.priceMin}
+                  onChange={(e) => {
+                    const v = Math.max(PRICE_FLOOR, Math.min(PRICE_CEIL, parseFloat(e.target.value) || PRICE_FLOOR));
+                    setDraft((d) => ({ ...d, priceMin: v, priceMax: Math.max(v, d.priceMax) }));
+                  }}
+                  className="w-20 bg-card/60 border border-border rounded-md px-2 py-1 text-foreground tabular-nums focus:border-primary focus:outline-none"
+                />
+                <span className="text-muted-foreground">–</span>
+                <span className="text-muted-foreground">$</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  min={PRICE_FLOOR}
+                  max={PRICE_CEIL}
+                  step="1"
+                  value={draft.priceMax}
+                  onChange={(e) => {
+                    const v = Math.max(PRICE_FLOOR, Math.min(PRICE_CEIL, parseFloat(e.target.value) || PRICE_CEIL));
+                    setDraft((d) => ({ ...d, priceMax: v, priceMin: Math.min(v, d.priceMin) }));
+                  }}
+                  className="w-24 bg-card/60 border border-border rounded-md px-2 py-1 text-foreground tabular-nums focus:border-primary focus:outline-none"
+                />
+              </div>
             </div>
           </section>
 
