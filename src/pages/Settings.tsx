@@ -49,10 +49,10 @@ export default function Settings() {
       setEmail(u.email ?? null);
 
       const { data: row } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .select('user_id, username, display_name, avatar_url, public_profile_enabled')
         .eq('user_id', u.id)
-        .maybeSingle();
+        .maybeSingle() as any;
 
       if (row) {
         setProfile(row as ProfileRow);
@@ -77,10 +77,10 @@ export default function Settings() {
         patch.public_profile_enabled !== undefined ? patch.public_profile_enabled : publicEnabled,
     };
     const { data, error } = await supabase
-      .from('user_profiles')
+      .from('user_profiles' as any)
       .upsert(next, { onConflict: 'user_id' })
       .select()
-      .maybeSingle();
+      .maybeSingle() as any;
     if (error) throw error;
     if (data) setProfile(data as ProfileRow);
     return data as ProfileRow | null;
