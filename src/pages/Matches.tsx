@@ -293,9 +293,11 @@ export default function Matches({
       <Seo title="Your Collector DNA | PokeIQ" description="Your personal Pokémon collector identity — built from every card you've liked." />
       <div className="min-h-screen bg-background flex flex-col gap-0">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
-          <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
-          </Link>
+          {!isPublicView && (
+            <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
+            </Link>
+          )}
 
           {loading && <Card className="p-10 text-center text-muted-foreground text-sm">Loading your collection…</Card>}
 
