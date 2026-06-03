@@ -111,10 +111,10 @@ export function FeedFiltersDrawer({
         <DrawerHeader className="text-left px-5 pt-2 pb-3 shrink-0">
           <DrawerTitle className="text-xl font-bold flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            Train Your Feed
+            Customize Your Feed
           </DrawerTitle>
           <DrawerDescription className="text-sm">
-            Adjust what appears in the rest of this swipe session.
+            Filters prioritize your preferences while still introducing new cards to improve future matches.
           </DrawerDescription>
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground/70 mt-1">
             Current card will remain unchanged
