@@ -605,7 +605,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
     <div>
       <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
         <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
-          <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-[100px] mx-0 py-[99px]">
+          <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-0 mx-0 py-0">
             <img
               src={explorerPortrait}
               alt="Unknown collector personality"
@@ -625,14 +625,14 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
             <p className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-primary font-bold mb-2">
               Collector Personality
             </p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-[1.1]">
+            <h2 className="text-center text-4xl font-bold tracking-tight leading-[1.05] mb-8 md:text-3xl px-[32px] mx-0">
               Discover your{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                 Collector Archetype
               </span>
             </h2>
             <p className="mt-2 sm:mt-3 text-sm text-foreground/80 leading-relaxed mx-0 my-0 px-0 py-0 sm:text-lg">
-              Every collector is different. Some chase rarity. Some chase art. Some chase the thrill of the hunt. The choices you make reveal a unique collecting personality that influences how you buy, sell, and build your collection. Take the collector archetype test to understand your strengths and weaknesses, and learn what truly drives your decisions. 
+              Built for Collectors chasing JOY, not Roi
             </p>
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
               <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
@@ -797,7 +797,7 @@ function TasteHero({
           <div className="absolute top-[6%] right-[10%] z-[2] w-[26%] h-[34%] rounded-full bg-warning/10 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 p-6 sm:p-8 md:p-10 space-y-6 min-h-[360px] md:min-h-[400px] flex flex-col gap-0 px-[40px] py-[10px]">
+        <div className="relative z-10 p-6 sm:p-8 md:p-10 space-y-6 min-h-[360px] md:min-h-[400px] flex flex-col gap-0 px-[32px] py-[10px] mx-0">
           {/* Username sits inside the widget now */}
           <div className="md:max-w-[62%]">
             {isPublicView
@@ -821,7 +821,7 @@ function TasteHero({
               </span>
             </h1>
             <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-xl font-semibold">
-              {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}{sentence}
+              {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}Which helps you collect  SMARTER not Harder.
             </p>
 
             {totalLikes === 0 && (
@@ -1762,8 +1762,8 @@ function BuildYourOwnProfileCTA() {
     <section className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/20 via-primary/10 to-card p-8 sm:p-12 text-center shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
       <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
       <Sparkles className="w-9 h-9 text-primary mx-auto mb-4" />
-      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-        Build your own Collector DNA
+      <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground whitespace-pre-line">
+        UNLIMITED{"\n"}Matches
       </h2>
       <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-md mx-auto">
         Start swiping to discover your taste, unlock your personality, and build a profile like this one.

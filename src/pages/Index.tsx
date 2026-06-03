@@ -174,7 +174,7 @@ export default function Index() {
           ) : (
             <div className="space-y-5 pt-1">
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xs mx-auto">
-                Portfolio analytics for serious Pokémon collectors. Track risk. Measure performance. Rebalance with conviction.
+                Connect your Collectr portfolio to unlock health scores, era allocation, value-over-time analysis, and risk insights tailored to your collection.
               </p>
 
               {/* Feature pills */}
