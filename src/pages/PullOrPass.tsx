@@ -543,15 +543,18 @@ export default function PullOrPass() {
     cards.forEach((c) => seen.add(c.card_id));
 
     const productTypes = formatsToProductTypes(filters.formats);
-    const { data: rows, error } = await supabase
+    let query = supabase
       .from('market_snapshots')
       .select('card_id, tcgplayer_id, name, set_name, price, rarity')
       .eq('game', 'Pokemon')
       .in('product_type', productTypes)
       .gte('price', filters.priceMin)
       .lte('price', filters.priceMax)
-      .not('tcgplayer_id', 'is', null)
-      .limit(2000);
+      .not('tcgplayer_id', 'is', null);
+    if (filters.eras.length > 0) {
+      query = query.in('era', filters.eras);
+    }
+    const { data: rows, error } = await query.limit(2000);
 
     if (error || !rows || rows.length === 0) {
       toast.error('No cards matched those filters — try a wider range.');
@@ -564,7 +567,8 @@ export default function PullOrPass() {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (seen.has(c.card_id)) continue;
-      if (!matchesEras(c.set_name, filters.eras)) continue;
+      // Era already filtered server-side via the `era` column; keep
+      // language filter client-side since we don't store language yet.
       if (!matchesLanguage(c.name, filters.languages)) continue;
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
