@@ -772,11 +772,19 @@ export default function PullOrPass() {
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
                 <div className="flex items-center gap-2">
+                   <button
+                     type="button"
+                     onClick={() => setFiltersOpen(true)}
+                     className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                   >
+                     <SlidersHorizontal className="w-3 h-3" /> Filter
+                   </button>
+                   <span className="text-muted-foreground/40">·</span>
                    <Link
                      to="/matches"
                      className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
                    >
-                     <Layers className="w-3 h-3" /> See matches
+                     <Layers className="w-3 h-3" /> Matches
                    </Link>
                   <span className="text-muted-foreground/40">·</span>
                   {premiumLoading ? null : premium ? (
