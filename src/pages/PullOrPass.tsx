@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal, Flame } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,7 @@ type SwipeDir = 'left' | 'right' | 'up';
 const SWIPE_THRESHOLD = 110;
 
 // ─── Daily swipe quota (free tier) ───────────────────────
-const DAILY_BASE_LIMIT = 20;
+const DAILY_BASE_LIMIT = 50;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 10 Earn reviews
 const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes (1 credit = 1 swipe)
 const SWIPES_PER_REDEMPTION = 10;
@@ -49,6 +49,28 @@ const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+function yesterdayKey() {
+  const d = new Date(Date.now() - 86400000);
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+// ─── Daily swipe streak ─────────────────────────────────
+const STREAK_KEY = 'pop_streak_v1';
+export function readSwipeStreak(): { lastDate: string | null; streak: number } {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (!raw) return { lastDate: null, streak: 0 };
+    const v = JSON.parse(raw);
+    return { lastDate: v.lastDate ?? null, streak: v.streak ?? 0 };
+  } catch { return { lastDate: null, streak: 0 }; }
+}
+export function bumpSwipeStreak(): number {
+  const cur = readSwipeStreak();
+  const today = todayKey();
+  if (cur.lastDate === today) return cur.streak;
+  const next = cur.lastDate === yesterdayKey() ? cur.streak + 1 : 1;
+  try { localStorage.setItem(STREAK_KEY, JSON.stringify({ lastDate: today, streak: next })); } catch {}
+  return next;
 }
 function readQuota() {
   try {
@@ -680,6 +702,7 @@ export default function PullOrPass() {
       writeQuota(next);
       return next;
     });
+    bumpSwipeStreak();
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
@@ -1525,7 +1548,7 @@ export function ResultsView({
           </>
         )}
 
-        <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-5 pt-4 max-w-5xl mx-auto">
           <StatGlowCard
             icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
             tint="primary"
@@ -1546,6 +1569,13 @@ export function ResultsView({
             value={`$${a.avgPullPrice.toFixed(0)}`}
             label="Avg Value Preference"
             sub="Your sweet spot"
+          />
+          <StatGlowCard
+            icon={<Flame className="w-5 h-5 text-orange-400" />}
+            tint="flame"
+            value={`${readSwipeStreak().streak}d`}
+            label="Daily Streak"
+            sub="Swipe every day to grow it"
           />
         </div>
 
@@ -1872,7 +1902,7 @@ export function ResultsView({
                   'Save your collector profile',
                   'Build your custom binder',
                   'Get smarter recommendations',
-                  '20 free swipes a day',
+                  '50 free swipes a day',
                   'Learn more about you as a collector',
                   'Organize your dream collection',
                 ].map((s) => (
@@ -1966,16 +1996,18 @@ function StatGlowCard({
   icon, value, label, sub, tint,
 }: {
   icon: React.ReactNode; value: string; label: string; sub: string;
-  tint: 'primary' | 'purple' | 'amber';
+  tint: 'primary' | 'purple' | 'amber' | 'flame';
 }) {
   const ring =
     tint === 'primary' ? 'border-primary/25 hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--primary)/0.25)]'
     : tint === 'purple' ? 'border-purple-500/25 hover:border-purple-400/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.25)]'
-    : 'border-amber-400/25 hover:border-amber-300/50 hover:shadow-[0_0_30px_rgba(251,191,36,0.22)]';
+    : tint === 'amber' ? 'border-amber-400/25 hover:border-amber-300/50 hover:shadow-[0_0_30px_rgba(251,191,36,0.22)]'
+    : 'border-orange-500/30 hover:border-orange-400/60 hover:shadow-[0_0_30px_rgba(249,115,22,0.28)]';
   const iconBg =
     tint === 'primary' ? 'bg-primary/10'
     : tint === 'purple' ? 'bg-purple-500/10'
-    : 'bg-amber-400/10';
+    : tint === 'amber' ? 'bg-amber-400/10'
+    : 'bg-orange-500/10';
   return (
     <motion.div
       whileHover={{ y: -4 }}
@@ -2542,7 +2574,7 @@ function OutOfSwipesModal({
                 <p className="text-sm text-muted-foreground">Redeem your credits to keep swiping.</p>
               ) : isAuthed ? (
                 <p className="text-sm text-muted-foreground">
-                  You've used up your free 20 swipes a day limit — you can{' '}
+                 You've used up your free 50 swipes a day limit — you can{' '}
                   <Link to="/earn" className="text-primary font-semibold hover:underline">earn credits</Link>{' '}
                   or{' '}
                   <Link to="/premium" className="text-amber-400 font-semibold hover:underline">upgrade to Premium</Link>.
