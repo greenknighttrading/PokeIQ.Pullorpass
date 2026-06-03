@@ -1099,9 +1099,9 @@ function BinderView({ likes, taste, onOpen, userId, isPublicView, viewedDisplayN
       {likes.length === 0 ? (
         <Card className="p-12 text-center border-dashed">
           <BookOpen className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
-          <p className="text-base text-foreground font-medium mb-1">Your binder is empty.</p>
-          <p className="text-sm text-muted-foreground mb-5">Like a card on swipe to add it to your binder.</p>
-          <Button asChild><Link to="/swipe">Start swiping</Link></Button>
+          <p className="text-base text-foreground font-medium mb-1">{isPublicView ? `${possessive(viewedDisplayName || 'Collector')} binder is empty.` : 'Your binder is empty.'}</p>
+          <p className="text-sm text-muted-foreground mb-5">{isPublicView ? 'This collector has not liked any cards yet.' : 'Like a card on swipe to add it to your binder.'}</p>
+          {!isPublicView && <Button asChild><Link to="/swipe">Start swiping</Link></Button>}
         </Card>
       ) : filtered.length === 0 ? (
         <Card className="p-10 text-center text-sm text-muted-foreground border-dashed">
