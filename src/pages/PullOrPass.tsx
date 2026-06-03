@@ -1079,6 +1079,14 @@ export default function PullOrPass() {
           )}
         </AnimatePresence>
         <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+        <FeedFiltersDrawer
+          open={filtersOpen}
+          onOpenChange={setFiltersOpen}
+          initial={feedFilters}
+          remainingCount={Math.max(0, cards.length - (index + 1))}
+          onApply={applyFilters}
+          onReset={resetFilters}
+        />
         <AnimatePresence>
           {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
