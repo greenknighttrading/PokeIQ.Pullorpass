@@ -214,23 +214,23 @@ export function FeedFiltersDrawer({
   );
 }
 
-// Era keyword matcher used to filter set_name strings against selected eras.
-const ERA_KEYWORDS: Record<EraKey, string[]> = {
-  wotc: ['base set', 'jungle', 'fossil', 'team rocket', 'gym heroes', 'gym challenge', 'neo ', 'expedition', 'aquapolis', 'skyridge', 'legendary collection'],
-  ex: ['ex ruby', 'ex sandstorm', 'ex dragon', 'ex team magma', 'ex team aqua', 'ex hidden legends', 'ex firered', 'ex leafgreen', 'ex deoxys', 'ex emerald', 'ex unseen forces', 'ex delta species', 'ex legend maker', 'ex holon', 'ex crystal guardians', 'ex dragon frontiers', 'ex power keepers'],
-  dp: ['diamond', 'pearl', 'platinum', 'mysterious treasures', 'secret wonders', 'great encounters', 'majestic dawn', 'legends awakened', 'stormfront', 'rising rivals', 'supreme victors', 'arceus', 'heartgold', 'soulsilver', 'hgss', 'unleashed', 'undaunted', 'triumphant', 'call of legends'],
-  bw: ['black & white', 'black and white', 'emerging powers', 'noble victories', 'next destinies', 'dark explorers', 'dragons exalted', 'boundaries crossed', 'plasma storm', 'plasma freeze', 'plasma blast', 'legendary treasures'],
-  xy: ['xy', 'flashfire', 'furious fists', 'phantom forces', 'primal clash', 'roaring skies', 'ancient origins', 'breakthrough', 'breakpoint', 'fates collide', 'steam siege', 'evolutions', 'generations', 'double crisis', 'kalos starter'],
-  sm: ['sun & moon', 'sun and moon', 'guardians rising', 'burning shadows', 'crimson invasion', 'ultra prism', 'forbidden light', 'celestial storm', 'lost thunder', 'team up', 'unbroken bonds', 'unified minds', 'cosmic eclipse', 'hidden fates', 'shining legends', 'detective pikachu', 'dragon majesty'],
-  swsh: ['sword & shield', 'sword and shield', 'rebel clash', 'darkness ablaze', 'vivid voltage', 'battle styles', 'chilling reign', 'evolving skies', 'fusion strike', 'brilliant stars', 'astral radiance', 'lost origin', 'silver tempest', 'crown zenith', 'pokemon go', 'celebrations', 'shining fates'],
-  sv: ['scarlet & violet', 'scarlet and violet', 'paldea evolved', 'obsidian flames', '151', 'paradox rift', 'paldean fates', 'temporal forces', 'twilight masquerade', 'shrouded fable', 'stellar crown', 'surging sparks', 'prismatic evolutions', 'journey together', 'destined rivals'],
+// Era matcher — handles real DB set_names which include prefixes like
+// "SV: Prismatic Evolutions", "SWSH08: Fusion Strike", "SM - Cosmic Eclipse".
+const ERA_PATTERNS: Record<EraKey, RegExp> = {
+  wotc: /\b(base set|jungle|fossil|team rocket|gym heroes|gym challenge|neo |expedition|aquapolis|skyridge|legendary collection)/i,
+  ex:   /^(ex[: ]|ex\d)|\b(ex (ruby|sandstorm|dragon|team magma|team aqua|hidden legends|firered|leafgreen|deoxys|emerald|unseen forces|delta species|legend maker|holon|crystal guardians|dragon frontiers|power keepers))/i,
+  dp:   /^(dp[: \d]|hgss[: \d])|\b(diamond|pearl|platinum|mysterious treasures|secret wonders|great encounters|majestic dawn|legends awakened|stormfront|rising rivals|supreme victors|arceus|heartgold|soulsilver|unleashed|undaunted|triumphant|call of legends)/i,
+  bw:   /^(bw[: \d])|\b(black ?& ?white|black and white|emerging powers|noble victories|next destinies|dark explorers|dragons exalted|boundaries crossed|plasma|legendary treasures)/i,
+  xy:   /^(xy[: \d]|xy )|\b(flashfire|furious fists|phantom forces|primal clash|roaring skies|ancient origins|breakthrough|breakpoint|fates collide|steam siege|evolutions|generations|double crisis|kalos)/i,
+  sm:   /^(sm[: \d]|sm[ -])|\b(sun ?& ?moon|sun and moon|guardians rising|burning shadows|crimson invasion|ultra prism|forbidden light|celestial storm|lost thunder|team up|unbroken bonds|unified minds|cosmic eclipse|hidden fates|shining legends|detective pikachu|dragon majesty)/i,
+  swsh: /^(swsh[: \d])|\b(sword ?& ?shield|sword and shield|rebel clash|darkness ablaze|vivid voltage|battle styles|chilling reign|evolving skies|fusion strike|brilliant stars|astral radiance|lost origin|silver tempest|crown zenith|pokemon go|celebrations|shining fates)/i,
+  sv:   /^(sv[: \d])|\b(scarlet ?& ?violet|scarlet and violet|paldea|obsidian flames|\b151\b|paradox rift|paldean fates|temporal forces|twilight masquerade|shrouded fable|stellar crown|surging sparks|prismatic evolutions|journey together|destined rivals|black bolt|white flare)/i,
 };
 
 export function matchesEras(setName: string | null, eras: EraKey[]): boolean {
   if (eras.length === 0) return true;
   if (!setName) return false;
-  const lower = setName.toLowerCase();
-  return eras.some((e) => ERA_KEYWORDS[e].some((kw) => lower.includes(kw)));
+  return eras.some((e) => ERA_PATTERNS[e].test(setName));
 }
 
 export function matchesLanguage(name: string, langs: Language[]): boolean {

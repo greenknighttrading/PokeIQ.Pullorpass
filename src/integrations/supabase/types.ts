@@ -702,6 +702,7 @@ export type Database = {
           cov_price_30d: number | null
           cov_price_7d: number | null
           energy_type: string[] | null
+          era: string | null
           game: string
           hp: string | null
           id: string
@@ -749,6 +750,7 @@ export type Database = {
           cov_price_30d?: number | null
           cov_price_7d?: number | null
           energy_type?: string[] | null
+          era?: string | null
           game?: string
           hp?: string | null
           id?: string
@@ -796,6 +798,7 @@ export type Database = {
           cov_price_30d?: number | null
           cov_price_7d?: number | null
           energy_type?: string[] | null
+          era?: string | null
           game?: string
           hp?: string | null
           id?: string
@@ -1924,6 +1927,7 @@ export type Database = {
     }
     Functions: {
       change_pokeiq_credits: { Args: { p_delta: number }; Returns: number }
+      classify_set_era: { Args: { s: string }; Returns: string }
       get_set_stats: {
         Args: never
         Returns: {
