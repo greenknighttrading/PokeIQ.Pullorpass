@@ -1385,7 +1385,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
 // SECTION 4 — Deep Taste Insights (tabbed)
 // ─────────────────────────────────────────────────────────────
 
-function DeepTasteInsights({ taste }: { taste: TasteProfile }) {
+function DeepTasteInsights({ taste, isPublicView, viewedDisplayName }: { taste: TasteProfile; isPublicView?: boolean; viewedDisplayName?: string }) {
   const tabs: { key: string; label: string; items: AttrCount[]; icon: React.ReactNode }[] = [
     { key: 'artists',  label: 'Artists',  items: taste.topArtists,        icon: <Palette className="w-3.5 h-3.5" /> },
     { key: 'sets',     label: 'Sets',     items: taste.topSets,           icon: <Layers className="w-3.5 h-3.5" /> },
@@ -1395,12 +1395,13 @@ function DeepTasteInsights({ taste }: { taste: TasteProfile }) {
     { key: 'value',    label: 'Value',    items: taste.priceDistribution, icon: <Layers className="w-3.5 h-3.5" /> },
   ];
   const hasAnyData = tabs.some((t) => t.items.length > 0);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'your';
 
   return (
     <section id="deep-insights">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground">Taste insights</h2>
-        <p className="text-sm text-muted-foreground mt-1">The hard patterns behind your likes.</p>
+        <p className="text-sm text-muted-foreground mt-1">The hard patterns behind {isPublicView ? `${possessive(subject)} likes` : 'your likes'}.</p>
       </div>
 
       {!hasAnyData ? (
