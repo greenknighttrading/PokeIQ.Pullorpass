@@ -73,6 +73,8 @@ const PokeIQPremium = lazy(() => import("./pages/pokeiq/Premium"));
 const PokeIQCardIntelligence = lazy(() => import("./pages/pokeiq/CardIntelligence"));
 const PokeIQLastRound = lazy(() => import("./pages/pokeiq/LastRound"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
+const Settings = lazy(() => import("./pages/Settings"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
