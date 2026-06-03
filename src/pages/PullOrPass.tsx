@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
-import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers } from 'lucide-react';
+import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,14 @@ import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import {
+  FeedFiltersDrawer,
+  DEFAULT_FILTERS,
+  type FeedFilters,
+  matchesEras,
+  matchesLanguage,
+  formatsToProductTypes,
+} from '@/components/pullorpass/FeedFiltersDrawer';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
