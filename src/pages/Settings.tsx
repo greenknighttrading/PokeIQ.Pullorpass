@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Copy, ExternalLink, Loader2, Pencil, Upload, Check, Crown } from 'lucide-react';
+import { Copy, ExternalLink, Loader2, Pencil, Upload, Check, Crown, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
@@ -21,6 +20,13 @@ type ProfileRow = {
 
 const PUBLIC_BASE = 'pokeiq.com/u/';
 
+function generateUsername(seed?: string | null) {
+  const base = (seed || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16);
+  const suffix = Math.random().toString(36).slice(2, 7);
+  const prefix = base && base.length >= 3 ? base : `trainer${Math.floor(Math.random() * 9000 + 1000)}`;
+  return `${prefix}_${suffix}`.slice(0, 30);
+}
+
 export default function Settings() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -33,8 +39,9 @@ export default function Settings() {
   const [email, setEmail] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
 
-  const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
+  const [editing, setEditing] = useState(false);
+  const [draftUsername, setDraftUsername] = useState('');
   const [publicEnabled, setPublicEnabled] = useState(false);
 
   useEffect(() => {
@@ -56,22 +63,47 @@ export default function Settings() {
 
       if (row) {
         setProfile(row as ProfileRow);
-        setDisplayName(row.display_name ?? '');
-        setUsername(row.username ?? '');
         setPublicEnabled(!!row.public_profile_enabled);
+        if (row.username) {
+          setUsername(row.username);
+        } else {
+          const seed = (u.email || '').split('@')[0];
+          const generated = generateUsername(seed);
+          setUsername(generated);
+          try {
+            const { data: saved } = await supabase
+              .from('user_profiles' as any)
+              .upsert({ user_id: u.id, username: generated }, { onConflict: 'user_id' })
+              .select()
+              .maybeSingle() as any;
+            if (saved) setProfile(saved as ProfileRow);
+          } catch {}
+        }
+      } else {
+        const seed = (u.email || '').split('@')[0];
+        const generated = generateUsername(seed);
+        setUsername(generated);
+        try {
+          const { data: saved } = await supabase
+            .from('user_profiles' as any)
+            .upsert({ user_id: u.id, username: generated }, { onConflict: 'user_id' })
+            .select()
+            .maybeSingle() as any;
+          if (saved) setProfile(saved as ProfileRow);
+        } catch {}
       }
       setLoading(false);
     })();
   }, [navigate]);
 
-  const usernameValid = !username || /^[a-zA-Z0-9_]{3,30}$/.test(username);
+  const draftValid = /^[a-zA-Z0-9_]{3,30}$/.test(draftUsername);
 
   async function persist(patch: Partial<ProfileRow>) {
     if (!userId) return;
     const next = {
       user_id: userId,
       username: patch.username !== undefined ? patch.username : username || null,
-      display_name: patch.display_name !== undefined ? patch.display_name : displayName || null,
+      display_name: patch.display_name !== undefined ? patch.display_name : profile?.display_name ?? null,
       avatar_url: patch.avatar_url !== undefined ? patch.avatar_url : profile?.avatar_url ?? null,
       public_profile_enabled:
         patch.public_profile_enabled !== undefined ? patch.public_profile_enabled : publicEnabled,
@@ -86,15 +118,22 @@ export default function Settings() {
     return data as ProfileRow | null;
   }
 
-  async function handleSaveIdentity() {
-    if (!usernameValid) {
+  function startEdit() {
+    setDraftUsername(username);
+    setEditing(true);
+  }
+
+  async function handleSaveUsername() {
+    if (!/^[a-zA-Z0-9_]{3,30}$/.test(draftUsername)) {
       toast({ title: 'Invalid username', description: '3–30 chars, letters/numbers/underscore.', variant: 'destructive' });
       return;
     }
     setSaving(true);
     try {
-      await persist({ display_name: displayName || null, username: username || null });
-      toast({ title: 'Profile updated' });
+      await persist({ username: draftUsername });
+      setUsername(draftUsername);
+      setEditing(false);
+      toast({ title: 'Username updated' });
     } catch (e: any) {
       const msg = e?.message?.includes('user_profiles_username') || e?.code === '23505'
         ? 'That username is already taken.'
@@ -160,7 +199,7 @@ export default function Settings() {
     );
   }
 
-  const initial = (displayName || email || '?').charAt(0).toUpperCase();
+  const initial = (username || email || '?').charAt(0).toUpperCase();
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
@@ -201,59 +240,57 @@ export default function Settings() {
           </div>
 
           <div className="flex-1 min-w-0 w-full space-y-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-xl font-bold">{displayName || 'Your name'}</h2>
-              {isPremium && (
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                  <Crown className="w-3 h-3" /> Premium
-                </span>
-              )}
-            </div>
-            {username && (
-              <div className="text-sm text-primary">@{username}</div>
-            )}
-            <div className="text-sm text-muted-foreground truncate">{email}</div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="space-y-1.5">
-                <Label htmlFor="displayName" className="text-xs uppercase tracking-wide text-muted-foreground">Display Name</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your name"
-                  maxLength={60}
-                />
+            {!editing ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-xl font-bold">@{username}</h2>
+                <button
+                  onClick={startEdit}
+                  className="w-8 h-8 rounded-md hover:bg-muted/60 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Edit username"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                {isPremium && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                    <Crown className="w-3 h-3" /> Premium
+                  </span>
+                )}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="username" className="text-xs uppercase tracking-wide text-muted-foreground">Username</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
-                  <Input
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
-                    placeholder="username"
-                    className="pl-7"
-                    maxLength={30}
-                  />
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="relative flex-1 min-w-[200px] max-w-sm">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
+                    <Input
+                      autoFocus
+                      value={draftUsername}
+                      onChange={(e) => setDraftUsername(e.target.value.replace(/[^a-zA-Z0-9_]/g, ''))}
+                      placeholder="username"
+                      className="pl-7"
+                      maxLength={30}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && draftValid) handleSaveUsername();
+                        if (e.key === 'Escape') setEditing(false);
+                      }}
+                    />
+                  </div>
+                  <Button size="sm" onClick={handleSaveUsername} disabled={saving || !draftValid}>
+                    {saving ? <Loader2 className="w-4 h-4" /> : <Check className="w-4 h-4" />}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditing(false)} disabled={saving}>
+                    <X className="w-4 h-4" />
+                  </Button>
                 </div>
-                {!usernameValid && (
+                {!draftValid && draftUsername.length > 0 && (
                   <p className="text-xs text-destructive">3–30 chars; letters, numbers, underscores.</p>
                 )}
               </div>
-            </div>
+            )}
+            <div className="text-sm text-muted-foreground truncate">{email}</div>
 
             <div className="text-xs text-muted-foreground">
               Public profile preview:{' '}
               <span className="text-foreground/80">{publicUrl}</span>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={handleSaveIdentity} disabled={saving || !usernameValid}>
-                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Check className="w-4 h-4 mr-2" />}
-                Save changes
-              </Button>
             </div>
           </div>
         </div>
