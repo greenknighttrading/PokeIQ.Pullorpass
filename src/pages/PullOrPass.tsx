@@ -1548,7 +1548,7 @@ export function ResultsView({
           </>
         )}
 
-        <div className="grid grid-cols-3 gap-3 sm:gap-5 pt-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-5 pt-4 max-w-5xl mx-auto">
           <StatGlowCard
             icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
             tint="primary"
@@ -1569,6 +1569,13 @@ export function ResultsView({
             value={`$${a.avgPullPrice.toFixed(0)}`}
             label="Avg Value Preference"
             sub="Your sweet spot"
+          />
+          <StatGlowCard
+            icon={<Flame className="w-5 h-5 text-orange-400" />}
+            tint="flame"
+            value={`${readSwipeStreak().streak}d`}
+            label="Daily Streak"
+            sub="Swipe every day to grow it"
           />
         </div>
 
