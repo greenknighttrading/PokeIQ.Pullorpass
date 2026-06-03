@@ -630,6 +630,7 @@ export default function PullOrPass() {
         rarity: rec.card.rarity,
         decision: rec.decision,
         tags: rec.tags,
+        client_ts: new Date().toISOString(),
       });
       localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
     } catch {}
