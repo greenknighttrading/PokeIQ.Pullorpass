@@ -33,6 +33,7 @@ import showmanPortrait from '@/assets/personalities/showman.jpg';
 import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
@@ -74,6 +75,79 @@ const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
   { key: 'rarity',    label: 'Rarity',      icon: <Sparkles className="w-3.5 h-3.5" /> },
   { key: 'priceTier', label: 'Value',       icon: <Layers className="w-3.5 h-3.5" /> },
 ];
+
+type LocalSwipeRecord = Partial<SwipeRecord> & Partial<SwipeCard> & { client_ts?: string };
+
+function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes: LikedCard[]; total: number } {
+  const rawRecords: LocalSwipeRecord[] = [];
+  const pushRecord = (r: LocalSwipeRecord) => {
+    const card = r?.card ?? r;
+    const id = card?.card_id ?? r?.card_id;
+    const decision = r?.decision;
+    if (!id || (decision !== 'pull' && decision !== 'pass')) return;
+    rawRecords.push(r);
+  };
+
+  try {
+    const raw = localStorage.getItem('pop_resume_v1') || localStorage.getItem('pop_results_v1');
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (Array.isArray(parsed?.records)) parsed.records.forEach(pushRecord);
+  } catch { /* ignore malformed local swipe state */ }
+
+  if (rawRecords.length === 0) {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key || !key.startsWith('pop_today_swiped_')) continue;
+        const parsed = JSON.parse(localStorage.getItem(key) || '[]');
+        if (Array.isArray(parsed)) parsed.forEach(pushRecord);
+      }
+    } catch { /* ignore malformed local swipe history */ }
+  }
+
+  const seen = new Set<string>();
+  const toLike = (r: LocalSwipeRecord): LikedCard | null => {
+    const card = r?.card ?? r;
+    const cardId = card?.card_id ?? r?.card_id;
+    if (!cardId) return null;
+    const decision = r?.decision;
+    const key = `${decision}:${cardId}`;
+    if (seen.has(key)) return null;
+    seen.add(key);
+    const tags = Array.isArray(r?.tags) ? r.tags : [];
+    return {
+      id: `local-${decision}-${cardId}`,
+      user_id: uid,
+      card_id: cardId,
+      card_name: card?.name ?? r?.name ?? '',
+      pokemon_name: null,
+      artist: null,
+      set_name: card?.set_name ?? r?.set_name ?? null,
+      set_id: null,
+      era: null,
+      release_year: null,
+      card_type: null,
+      pokemon_type: null,
+      rarity: card?.rarity ?? r?.rarity ?? null,
+      language: null,
+      card_number: null,
+      variant: null,
+      product_category: null,
+      price: Number(card?.price ?? r?.price) || null,
+      price_tier: null,
+      image_url: card?.image_url ?? r?.image_url ?? null,
+      source: tags.includes('Loved') ? 'super_like' : decision,
+      liked_at: r?.client_ts ?? new Date().toISOString(),
+    };
+  };
+
+  const mapped = rawRecords.map(toLike).filter(Boolean) as LikedCard[];
+  return {
+    likes: mapped.filter((r) => r.source !== 'pass'),
+    passes: mapped.filter((r) => r.source === 'pass'),
+    total: mapped.length,
+  };
+}
 
 export default function Matches({
   viewedUserId,
@@ -155,6 +229,22 @@ export default function Matches({
       // guest swipes into the account so Matches/Smart Profile reflect them.
       try { await backfillGuestSwipes(uid); } catch (e) { console.warn('backfill failed', e); }
 
+      const localProfile = localSwipeRecordsForProfile(uid);
+      const mergeLocal = (serverLikes: LikedCard[], serverPasses: LikedCard[] = []) => {
+        const likeIds = new Set(localProfile.likes.map((l) => l.card_id));
+        const passIds = new Set(localProfile.passes.map((l) => l.card_id));
+        return {
+          likes: [...localProfile.likes, ...serverLikes.filter((l) => !likeIds.has(l.card_id))],
+          passes: [...localProfile.passes, ...serverPasses.filter((l) => !passIds.has(l.card_id))],
+        };
+      };
+      if (localProfile.total > 0) {
+        setLikes(localProfile.likes);
+        setPasses(localProfile.passes);
+        setCardsSwiped(localProfile.total);
+        setLoading(false);
+      }
+
       // ── Stale-while-revalidate cache (sessionStorage) ──
       const cacheKey = `matches:v1:${uid}`;
       let cached: {
@@ -169,23 +259,26 @@ export default function Matches({
         if (raw) cached = JSON.parse(raw);
       } catch {}
       if (cached) {
-        setLikes(cached.likes);
-        setPasses(cached.passes);
+        const merged = mergeLocal(cached.likes, cached.passes);
+        setLikes(merged.likes);
+        setPasses(merged.passes);
         setRecommendations(cached.recommendations);
         setLoading(false);
       }
 
       const liked = await fetchLikes(uid);
-      const latestLikedAt = liked.reduce<string | null>(
+      const mergedInitial = mergeLocal(liked, cached?.passes ?? []);
+      const effectiveLikes = mergedInitial.likes;
+      const latestLikedAt = effectiveLikes.reduce<string | null>(
         (m, l) => (l.liked_at && (!m || l.liked_at > m) ? l.liked_at : m),
         null,
       );
       const unchanged =
         cached &&
-        cached.likedCount === liked.length &&
+        cached.likedCount === effectiveLikes.length &&
         cached.latestLikedAt === latestLikedAt;
 
-      setLikes(liked);
+      setLikes(effectiveLikes);
       // Total swipes for this user (likes + passes + supers across all time)
       try {
         const { count } = await supabase
@@ -210,6 +303,13 @@ export default function Matches({
               if (Array.isArray(v?.records)) v.records.forEach((r: any) => r?.card?.card_id && ids.add(r.card.card_id));
             }
           } catch {}
+          try {
+            const raw = localStorage.getItem('pop_resume_v1');
+            if (raw) {
+              const v = JSON.parse(raw);
+              if (Array.isArray(v?.records)) v.records.forEach((r: any) => r?.card?.card_id && ids.add(r.card.card_id));
+            }
+          } catch {}
           localTotal = ids.size;
         } catch {}
         let dnaTotal = 0;
@@ -221,7 +321,7 @@ export default function Matches({
             .maybeSingle();
           if (dna) dnaTotal = (dna.pull_count ?? 0) + (dna.pass_count ?? 0);
         } catch {}
-        setCardsSwiped(Math.max(count ?? 0, localTotal, dnaTotal));
+        setCardsSwiped(Math.max(count ?? 0, localTotal, localProfile.total, dnaTotal));
       } catch (e) { console.warn('count swipes failed', e); }
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
@@ -257,12 +357,15 @@ export default function Matches({
           source: 'pass',
           liked_at: r.created_at,
         }));
+        const merged = mergeLocal(liked, mapped);
+        mapped = merged.passes;
+        setLikes(merged.likes);
         setPasses(mapped);
       } catch (e) { console.warn('fetch passes failed', e); }
       let recs: RecommendedCard[] = cached?.recommendations ?? [];
-      if (liked.length > 0 && !unchanged) {
+      if (effectiveLikes.length > 0 && !unchanged) {
         try {
-          recs = await recommendForUser(liked, 12);
+          recs = await recommendForUser(effectiveLikes, 12);
           setRecommendations(recs);
         } catch (e) { console.warn('recommend failed', e); }
       }
@@ -270,20 +373,20 @@ export default function Matches({
 
       try {
         sessionStorage.setItem(cacheKey, JSON.stringify({
-          likes: liked,
+          likes: effectiveLikes,
           passes: mapped,
           recommendations: recs,
-          likedCount: liked.length,
+          likedCount: effectiveLikes.length,
           latestLikedAt,
         }));
       } catch {}
 
       // Background backfill — populate pokemon_type/artist for older likes
       // that were saved before cards_ppt had data. Refreshes the UI when done.
-      if (liked.length > 0) {
-        backfillMissingTypes(uid, liked, { max: 60 })
+      if (effectiveLikes.length > 0) {
+        backfillMissingTypes(uid, effectiveLikes.filter((l) => !l.id.startsWith('local-')), { max: 60 })
           .then(updated => {
-            if (updated !== liked) setLikes(updated);
+            if (updated.length) setLikes(mergeLocal(updated, mapped).likes);
           })
           .catch(e => console.warn('backfillMissingTypes failed', e));
       }

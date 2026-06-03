@@ -264,7 +264,8 @@ export default function PullOrPass() {
     });
     // Force a fresh round when navigated here with `state.fresh` (e.g.
     // "Swipe again" from the profile page). Skip resume/results entirely.
-    const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true;
+    const storedResume = readResume();
+    const wantsFresh = (location.state as { fresh?: boolean } | null)?.fresh === true && !storedResume;
     // First-time visitors see the landing/instructions page
     let introSeen = false;
     try { introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1'; } catch {}
@@ -280,7 +281,7 @@ export default function PullOrPass() {
       setStage('intro');
     } else {
       // Try to resume an in-progress round first, then fall back to last results
-      const resume = readResume();
+      const resume = storedResume;
       if (resume) {
       setCards(resume.cards);
       setIndex(resume.index);
@@ -361,17 +362,6 @@ export default function PullOrPass() {
       setRedeeming(false);
     }
   }, [userId, credits, redeeming, navigate]);
-
-  // Clicking "Pull or Pass" in the nav while already on /swipe → start a new round
-  const initialKeyRef = React.useRef(location.key);
-  useEffect(() => {
-    if (location.key === initialKeyRef.current) return;
-    initialKeyRef.current = location.key;
-    clearResume();
-    clearResults();
-    loadRound();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.key]);
 
   // Persist in-progress round so users can leave and come back
   useEffect(() => {
@@ -626,11 +616,9 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 320) => {
-    const newRecords = [...records, rec];
-    setRecords(newRecords);
-    bumpQuota();
-    // Track today's swiped cards so the Earn page can prioritize them
+  const persistSwipeProgress = (rec: SwipeRecord, newRecords: SwipeRecord[]) => {
+    // Track today's swiped cards so Matches/Earn/Profile can reflect the
+    // latest swipe immediately, even if the DB write is still in flight.
     try {
       const key = 'pop_today_swiped_' + todayKey();
       const prev = JSON.parse(localStorage.getItem(key) || '[]');
@@ -642,6 +630,8 @@ export default function PullOrPass() {
         price: rec.card.price,
         rarity: rec.card.rarity,
         decision: rec.decision,
+        tags: rec.tags,
+        client_ts: new Date().toISOString(),
       });
       localStorage.setItem(key, JSON.stringify(prev.slice(-200)));
     } catch {}
@@ -653,10 +643,24 @@ export default function PullOrPass() {
       const seenPrev: string[] = JSON.parse(localStorage.getItem(seenKey) || '[]');
       if (!seenPrev.includes(rec.card.card_id)) {
         seenPrev.push(rec.card.card_id);
-        // Cap to avoid unbounded growth
         localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
       }
     } catch {}
+
+    const nextIndex = index + 1;
+    if (nextIndex >= cards.length) {
+      clearResume();
+      writeResults({ records: newRecords, roundId, cards });
+    } else {
+      writeResume({ cards, index: nextIndex, records: newRecords, roundId });
+    }
+  };
+
+  const recordSwipe = async (rec: SwipeRecord, advanceDelay = 320) => {
+    const newRecords = [...records, rec];
+    setRecords(newRecords);
+    bumpQuota();
+    persistSwipeProgress(rec, newRecords);
 
     if (userId) {
       supabase.from('pullorpass_swipes').insert({
@@ -768,6 +772,7 @@ export default function PullOrPass() {
       const newRecords = [...records, rec];
       setRecords(newRecords);
       bumpQuota();
+      persistSwipeProgress(rec, newRecords);
       if (userId) {
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
@@ -916,16 +921,7 @@ export default function PullOrPass() {
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
                     </span>
-                  ) : (
-                    <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-                      <span className="text-foreground font-semibold">{quota.used}</span>
-                      <span className="text-muted-foreground">done today</span>
-                      <span className="text-muted-foreground/50">·</span>
-                      <span className={`font-bold ${remaining <= 5 ? 'text-amber-400' : 'text-primary'}`}>
-                        {remaining} left
-                      </span>
-                    </span>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
@@ -2330,12 +2326,7 @@ function OutOfSwipesBackdrop() {
           Card <span className="text-foreground font-semibold">1</span>
           <span className="text-muted-foreground/60"> / 20</span>
         </span>
-        <span className="text-[10px] uppercase tracking-wide tabular-nums flex items-center gap-1.5">
-          <span className="text-foreground font-semibold">20</span>
-          <span className="text-muted-foreground">done today</span>
-          <span className="text-muted-foreground/50">·</span>
-          <span className="font-bold text-amber-400">0 left</span>
-        </span>
+        <span className="text-[10px] uppercase tracking-wide tabular-nums font-bold text-amber-400">0 left</span>
       </div>
       <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
         <div className="h-full w-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400" />

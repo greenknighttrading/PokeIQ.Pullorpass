@@ -8,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ResultsView } from './PullOrPass';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 
-type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
+type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[]; index?: number };
 
 function todayKey() {
   const d = new Date();
@@ -68,6 +68,27 @@ export default function MatchesResults() {
 
   useEffect(() => {
     (async () => {
+      // Prefer the local active/completed round so "Matches" updates the
+      // moment a user leaves swiping, before async DB writes finish.
+      const active = readResume();
+      if (active?.records?.length) {
+        setRecords(active.records);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          setIsAuthed(!!session?.user && !session.user.is_anonymous);
+        } catch {}
+        return;
+      }
+      const latestLocal = readResults();
+      if (latestLocal?.records?.length) {
+        setRecords(latestLocal.records);
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          setIsAuthed(!!session?.user && !session.user.is_anonymous);
+        } catch {}
+        return;
+      }
+
       // 1) For authed users, prefer their server-side swipe history so it
       //    survives across devices/sessions.
       let serverRecords: SwipeRecord[] | null = null;
@@ -76,12 +97,20 @@ export default function MatchesResults() {
         const authed = !!session?.user && !session.user.is_anonymous;
         setIsAuthed(authed);
         if (authed) {
-          const { data } = await supabase
+          const { data: latest } = await supabase
+            .from('pullorpass_swipes')
+            .select('round_id, created_at')
+            .eq('user_id', session!.user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+          const roundId = latest?.[0]?.round_id;
+          const { data } = roundId ? await supabase
             .from('pullorpass_swipes')
             .select('card_id, card_name, card_set, card_image, card_price, card_rarity, decision, tags, created_at')
             .eq('user_id', session!.user.id)
+            .eq('round_id', roundId)
             .order('created_at', { ascending: false })
-            .limit(500);
+            .limit(500) : { data: null } as any;
           if (data && data.length) {
             serverRecords = data.map((x: any): SwipeRecord => ({
               card: {
