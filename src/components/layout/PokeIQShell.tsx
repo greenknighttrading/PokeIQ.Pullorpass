@@ -33,7 +33,7 @@ const primaryNav: NavItem[] = [
   { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, badge: 'NEW' },
   { label: 'Personality Test', href: '/personality-types', icon: Users },
   { label: 'Market Report', href: '/pokeiq-daily', icon: Activity },
-  { label: 'Card Scanner', href: '/buylist/scanner', icon: ScanLine },
+  { label: 'Card Search', href: '/buylist/scanner', icon: ScanLine },
 ];
 
 const premiumCollect: NavItem[] = [
