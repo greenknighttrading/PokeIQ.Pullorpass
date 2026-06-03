@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Menu, Check,
+  Menu, Check, Settings as SettingsIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -304,6 +304,9 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
                     <User className="w-4 h-4 mr-2" /> Smart Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/settings')}>
+                    <SettingsIcon className="w-4 h-4 mr-2" /> Settings
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/premium')}>
                     <Crown className="w-4 h-4 mr-2" /> {isPremium ? 'Premium User' : 'Go Premium'}

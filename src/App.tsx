@@ -73,6 +73,8 @@ const PokeIQPremium = lazy(() => import("./pages/pokeiq/Premium"));
 const PokeIQCardIntelligence = lazy(() => import("./pages/pokeiq/CardIntelligence"));
 const PokeIQLastRound = lazy(() => import("./pages/pokeiq/LastRound"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
+const Settings = lazy(() => import("./pages/Settings"));
+const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -152,6 +154,8 @@ function AppRoutes() {
         <Route path="/card-intelligence" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
         <Route path="/checkout/return" element={<CheckoutReturn />} />
+        <Route path="/settings" element={<PokeIQShell><Settings /></PokeIQShell>} />
+        <Route path="/u/:username" element={<PublicProfile />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
