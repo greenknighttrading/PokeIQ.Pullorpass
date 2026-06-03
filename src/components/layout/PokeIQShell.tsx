@@ -243,9 +243,9 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
               <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                 <Crown className="w-5 h-5 text-primary" />
               </div>
-              <div className="font-semibold text-sm">Go Premium</div>
+              <div className="font-semibold text-sm">Go PRO</div>
               <p className="text-[11px] text-muted-foreground leading-snug">
-                Unlock unlimited swipes, advanced insights, and exclusive rewards.
+                Unlock unlimited swipes, deeper collector insights, and custom recommendations tailored to your taste.
               </p>
               <Button size="sm" variant="outline" className="w-full mt-1 h-8 text-xs border-primary/40 hover:border-primary hover:bg-primary/10">
                 Upgrade Now
