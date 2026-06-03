@@ -603,7 +603,8 @@ function TasteHero({
   isPublicView?: boolean;
   viewedDisplayName?: string;
 }) {
-  const sentence = buildIdentitySentence(taste);
+  const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'You';
+  const sentence = buildIdentitySentence(taste, subject);
   const signals = buildSignals(taste);
   const { totalLikes, stage, nextThreshold, avgPrice } = taste;
 
