@@ -205,9 +205,54 @@ function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: 
             </div>
             <div className="grid grid-cols-3 gap-4">
               <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Swipes</div><div className="text-2xl font-semibold">{data.swipeCount ?? 0}</div></CardContent></Card>
-              <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Likes</div><div className="text-2xl font-semibold">{data.likeCount ?? 0}</div></CardContent></Card>
+              <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Likes (from swipes)</div><div className="text-2xl font-semibold">{data.likeCount ?? 0}</div></CardContent></Card>
               <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Subscriptions</div><div className="text-2xl font-semibold">{data.subscriptions?.length ?? 0}</div></CardContent></Card>
             </div>
+            {data.smartProfile && (
+              <div>
+                <h3 className="font-medium mb-2">Smart Profile</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-3">
+                  {[
+                    ["Archetype", data.smartProfile.archetype_id ?? "—"],
+                    ["Confidence", data.smartProfile.archetype_confidence != null ? `${Math.round(Number(data.smartProfile.archetype_confidence) * 100)}%` : "—"],
+                    ["Stage", data.smartProfile.stage ?? "—"],
+                    ["Signals", data.smartProfile.signal_count ?? 0],
+                    ["Nostalgia", data.smartProfile.nostalgia_score ?? "—"],
+                    ["Chaos", data.smartProfile.chaos_score ?? "—"],
+                    ["Art focus", data.smartProfile.art_focus_score ?? "—"],
+                    ["Grail appetite", data.smartProfile.grail_appetite ?? "—"],
+                    ["JP lean", data.smartProfile.jp_lean ?? "—"],
+                    ["Sealed lean", data.smartProfile.sealed_lean ?? "—"],
+                    ["Rarity lean", data.smartProfile.rarity_lean ?? "—"],
+                    ["Value lean", data.smartProfile.value_lean ?? "—"],
+                  ].map(([k, v]) => (
+                    <div key={k as string} className="bg-muted/30 rounded p-2">
+                      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{k}</div>
+                      <div className="text-sm font-medium truncate">{String(v)}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {[
+                    ["Top artists", data.smartProfile.top_artists],
+                    ["Top sets", data.smartProfile.top_sets],
+                    ["Top eras", data.smartProfile.top_eras],
+                    ["Top types", data.smartProfile.top_types],
+                    ["Top Pokémon", data.smartProfile.top_pokemon],
+                    ["Top rarities", data.smartProfile.top_rarities],
+                    ["Price distribution", data.smartProfile.price_distribution],
+                  ].map(([k, v]) => (
+                    <div key={k as string}>
+                      <div className="text-xs text-muted-foreground mb-1">{k}</div>
+                      <pre className="text-xs bg-muted/30 p-2 rounded overflow-auto max-h-32">{v ? JSON.stringify(v, null, 2) : "—"}</pre>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-2">
+                  Last computed: {data.smartProfile.last_computed_at ? new Date(data.smartProfile.last_computed_at).toLocaleString() : "—"} · model {data.smartProfile.model_version ?? "—"}
+                </div>
+              </div>
+            )}
             {data.dna && (
               <div>
                 <h3 className="font-medium mb-2">Collector DNA</h3>

@@ -45,7 +45,7 @@ Deno.serve(async (req) => {
         const [{ count: userCount }, { count: swipeCount }, { count: likeCount }, { data: subs }] = await Promise.all([
           supabase.auth.admin.listUsers({ page: 1, perPage: 1 }).then((r) => ({ count: (r.data as any)?.total ?? r.data.users.length })),
           supabase.from("pullorpass_swipes").select("*", { count: "exact", head: true }),
-          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }),
+          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).in("source", ["swipe", "super_like"]),
           supabase
             .from("subscriptions")
             .select("status,environment,current_period_end")
@@ -103,10 +103,11 @@ Deno.serve(async (req) => {
           supabase.from("subscriptions").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("pullorpass_swipes").select("*", { count: "exact", head: true }).eq("user_id", userId),
           supabase.from("pullorpass_swipes").select("card_name,card_set,card_price,decision,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
-          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("user_id", userId),
+          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("user_id", userId).in("source", ["swipe", "super_like"]),
           supabase.from("pokeiq_likes").select("card_name,card_set,liked_at").eq("user_id", userId).order("liked_at", { ascending: false }).limit(20),
           supabase.from("pullorpass_dna").select("*").eq("user_id", userId).maybeSingle(),
         ]);
+        const { data: smartProfile } = await supabase.from("pokeiq_profiles").select("*").eq("user_id", userId).maybeSingle();
         return json({
           user: u.user,
           profile,
@@ -116,6 +117,7 @@ Deno.serve(async (req) => {
           likeCount,
           recentLikes,
           dna,
+          smartProfile,
         });
       }
 
