@@ -75,6 +75,7 @@ const PokeIQLastRound = lazy(() => import("./pages/pokeiq/LastRound"));
 const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const Settings = lazy(() => import("./pages/Settings"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
+const Admin = lazy(() => import("./pages/Admin"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -156,6 +157,9 @@ function AppRoutes() {
         <Route path="/checkout/return" element={<CheckoutReturn />} />
         <Route path="/settings" element={<PokeIQShell><Settings /></PokeIQShell>} />
         <Route path="/u/:username" element={<PublicProfile />} />
+
+        {/* Admin (gated by email server-side + client-side) */}
+        <Route path="/admin" element={<Admin />} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
