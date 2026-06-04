@@ -301,6 +301,7 @@ export default function Admin() {
   const [me, setMe] = useState<Me | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [viewUser, setViewUser] = useState<string | null>(null);
+  const [viewProfileUser, setViewProfileUser] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -343,11 +344,12 @@ export default function Admin() {
             <TabsTrigger value="grant">Grant Pro</TabsTrigger>
           </TabsList>
           <TabsContent value="stats" className="mt-6"><StatsTab /></TabsContent>
-          <TabsContent value="users" className="mt-6"><UsersTab onView={setViewUser} /></TabsContent>
+          <TabsContent value="users" className="mt-6"><UsersTab onView={setViewUser} onViewProfile={setViewProfileUser} /></TabsContent>
           <TabsContent value="grant" className="mt-6"><GrantTab /></TabsContent>
         </Tabs>
       </div>
       <UserDetailModal userId={viewUser} onClose={() => setViewUser(null)} />
+      <UserDetailModal userId={viewProfileUser} onClose={() => setViewProfileUser(null)} profileOnly />
     </div>
   );
 }
