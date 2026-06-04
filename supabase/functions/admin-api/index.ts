@@ -81,11 +81,12 @@ Deno.serve(async (req) => {
         if (search) users = users.filter((u) => (u.email ?? "").toLowerCase().includes(search));
         const ids = users.map((u) => u.id);
         const userFilter = ids.length ? ids : [EMPTY_USER_ID];
-        const [{ data: subs }, { data: dnaRows }, { data: swipes }, { data: superLikes }] = await Promise.all([
+        const [{ data: subs }, { data: dnaRows }, { data: swipes }, { data: superLikes }, { data: likes }] = await Promise.all([
           supabase.from("subscriptions").select("user_id,status,current_period_end,price_id").eq("environment", "live").in("user_id", userFilter),
           supabase.from("pullorpass_dna").select("user_id,pull_count,pass_count").in("user_id", userFilter).range(0, 199999),
           supabase.from("pullorpass_swipes").select("user_id").in("user_id", userFilter).range(0, 199999),
           supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", userFilter).range(0, 199999),
+          supabase.from("pokeiq_likes").select("user_id").in("source", ["swipe", "super_like"]).in("user_id", userFilter).range(0, 199999),
         ]);
         const swipeMap = new Map<string, number>();
         const dnaUserIds = new Set((dnaRows ?? []).map((d: any) => d.user_id));
@@ -94,6 +95,8 @@ Deno.serve(async (req) => {
           if (!dnaUserIds.has(s.user_id)) swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1);
         });
         (superLikes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
+        const likeMap = new Map<string, number>();
+        (likes ?? []).forEach((s: any) => likeMap.set(s.user_id, (likeMap.get(s.user_id) ?? 0) + 1));
         const now = Date.now();
         const subMap = new Map<string, any>();
         (subs ?? []).forEach((s: any) => {
@@ -108,6 +111,7 @@ Deno.serve(async (req) => {
           created_at: u.created_at,
           last_sign_in_at: u.last_sign_in_at,
           swipe_count: swipeMap.get(u.id) ?? 0,
+          like_count: likeMap.get(u.id) ?? 0,
           is_pro: !!subMap.get(u.id)?.active,
           price_id: subMap.get(u.id)?.price_id ?? null,
         }));
