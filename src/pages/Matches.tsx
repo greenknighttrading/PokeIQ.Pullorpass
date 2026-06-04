@@ -153,10 +153,12 @@ export default function Matches({
   viewedUserId,
   viewedDisplayName,
   isPublicView = false,
+  isAdminView = false,
 }: {
   viewedUserId?: string;
   viewedDisplayName?: string;
   isPublicView?: boolean;
+  isAdminView?: boolean;
 } = {}) {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
@@ -174,7 +176,7 @@ export default function Matches({
       // When rendering someone's public profile, skip the auth/backfill flow
       // and pull taste data through the public RPCs (gated server-side on
       // user_profiles.public_profile_enabled).
-      if (isPublicView && viewedUserId) {
+      if ((isPublicView || isAdminView) && viewedUserId) {
         const uid = viewedUserId;
         setUserId(uid);
         try {
@@ -183,14 +185,17 @@ export default function Matches({
         } catch { setViewerIsOwner(false); }
 
         try {
-          const { data: likesData } = await supabase.rpc('get_public_likes' as any, { p_user_id: uid });
+          const likesRpc = isAdminView ? 'get_admin_likes' : 'get_public_likes';
+          const countRpc = isAdminView ? 'get_admin_swipe_count' : 'get_public_swipe_count';
+          const passesRpc = isAdminView ? 'get_admin_recent_passes' : 'get_public_recent_passes';
+          const { data: likesData } = await supabase.rpc(likesRpc as any, { p_user_id: uid });
           const liked = (likesData ?? []) as LikedCard[];
           setLikes(liked);
 
-          const { data: countData } = await supabase.rpc('get_public_swipe_count' as any, { p_user_id: uid });
+          const { data: countData } = await supabase.rpc(countRpc as any, { p_user_id: uid });
           setCardsSwiped(Number(countData) || 0);
 
-          const { data: passRows } = await supabase.rpc('get_public_recent_passes' as any, { p_user_id: uid });
+          const { data: passRows } = await supabase.rpc(passesRpc as any, { p_user_id: uid });
           const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
             id: `pass-${r.card_id}-${r.created_at}`,
             user_id: uid,
