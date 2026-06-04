@@ -76,6 +76,7 @@ const CheckoutReturn = lazy(() => import("./pages/CheckoutReturn"));
 const Settings = lazy(() => import("./pages/Settings"));
 const PublicProfile = lazy(() => import("./pages/PublicProfile"));
 const Admin = lazy(() => import("./pages/Admin"));
+const AdminProfileView = lazy(() => import("./pages/AdminProfileView"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
