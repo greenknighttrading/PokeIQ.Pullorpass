@@ -21,7 +21,7 @@ export const DEFAULT_FILTERS: FeedFilters = {
   priceMin: 0.01,
   priceMax: 1000,
   eras: [],
-  formats: [],
+  formats: ['singles'],
   languages: [],
 };
 
