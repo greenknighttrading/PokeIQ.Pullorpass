@@ -630,14 +630,14 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
             <p className="text-[10px] sm:text-xs uppercase tracking-[0.22em] text-primary font-bold mb-2">
               Collector Personality
             </p>
-            <h2 className="text-center text-4xl font-bold tracking-tight leading-[1.05] mb-8 md:text-3xl px-[32px] mx-0">
+            <h2 className="text-left text-3xl sm:text-4xl font-bold tracking-tight leading-[1.05] mb-3">
               Discover your{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                 Collector Archetype
               </span>
             </h2>
-            <p className="mt-2 sm:mt-3 text-sm text-foreground/80 leading-relaxed mx-0 my-0 px-0 py-0 sm:text-lg">
-              Built for Collectors chasing JOY, not Roi
+            <p className="text-left mt-2 sm:mt-3 text-sm sm:text-base text-foreground/80 leading-relaxed">
+              Every collector is different. Some chase rarity. Some chase art. Some chase the thrill of the hunt. The choices you make reveal a unique collecting personality that influences how you buy, sell, and build your collection. Take the collector archetype test to understand your strengths and weaknesses, and learn what truly drives your decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
               <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
