@@ -20,6 +20,7 @@ import { BookOpen, Wand2, TrendingUp as TrendingUpIcon, ArrowRight, Crown, Infin
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
 import pikachuMascot from '@/assets/pikachu-mascot.png';
 import binderMockup from '@/assets/binder-mockup.jpg';
+import dittoDancing from '@/assets/ditto-dancing.gif.asset.json';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
 import {
@@ -894,9 +895,14 @@ export default function PullOrPass() {
             />
           )}
           {stage === 'loading' && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              <p className="text-sm">Loading 20 wildly different cards to learn about your taste…</p>
+            <div className="flex-1 flex flex-col items-center justify-center gap-4 text-muted-foreground text-center px-6">
+              <img
+                src={dittoDancing.url}
+                alt="Dancing Ditto"
+                className="w-32 h-32 object-contain"
+                style={{ imageRendering: 'pixelated' }}
+              />
+              <p className="text-sm">Loading cards to start mapping your collector DNA…</p>
             </div>
           )}
 
