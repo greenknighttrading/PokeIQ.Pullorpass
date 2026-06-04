@@ -13,6 +13,12 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
+const EMPTY_USER_ID = "00000000-0000-0000-0000-000000000000";
+
+function dnaSwipeCount(dna: any) {
+  return Number(dna?.pull_count ?? 0) + Number(dna?.pass_count ?? 0);
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -42,9 +48,10 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case "stats": {
-        const [{ count: userCount }, { count: pullPassCount }, { count: superLikeSwipes }, { count: likeCount }, { data: subs }] = await Promise.all([
+        const [{ count: userCount }, { data: dnaRows }, { data: pullPassRows }, { count: superLikeSwipes }, { count: likeCount }, { data: subs }] = await Promise.all([
           supabase.auth.admin.listUsers({ page: 1, perPage: 1 }).then((r) => ({ count: (r.data as any)?.total ?? r.data.users.length })),
-          supabase.from("pullorpass_swipes").select("*", { count: "exact", head: true }),
+          supabase.from("pullorpass_dna").select("user_id,pull_count,pass_count").range(0, 199999),
+          supabase.from("pullorpass_swipes").select("user_id").range(0, 199999),
           supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("source", "super_like"),
           supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).in("source", ["swipe", "super_like"]),
           supabase
@@ -52,7 +59,10 @@ Deno.serve(async (req) => {
             .select("status,environment,current_period_end")
             .eq("environment", "live"),
         ]);
-        const swipeCount = (pullPassCount ?? 0) + (superLikeSwipes ?? 0);
+        const dnaUserIds = new Set((dnaRows ?? []).map((d: any) => d.user_id));
+        const dnaPullPassCount = (dnaRows ?? []).reduce((sum: number, d: any) => sum + dnaSwipeCount(d), 0);
+        const nonDnaPullPassCount = (pullPassRows ?? []).filter((s: any) => !dnaUserIds.has(s.user_id)).length;
+        const swipeCount = dnaPullPassCount + nonDnaPullPassCount + (superLikeSwipes ?? 0);
         const now = Date.now();
         const activePro = (subs ?? []).filter((s: any) => {
           const end = s.current_period_end ? new Date(s.current_period_end).getTime() : null;
@@ -70,13 +80,19 @@ Deno.serve(async (req) => {
         let users = data.users;
         if (search) users = users.filter((u) => (u.email ?? "").toLowerCase().includes(search));
         const ids = users.map((u) => u.id);
-        const [{ data: subs }, { data: swipes }, { data: superLikes }] = await Promise.all([
-          supabase.from("subscriptions").select("user_id,status,current_period_end,price_id").eq("environment", "live").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
-          supabase.from("pullorpass_swipes").select("user_id").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]).range(0, 199999),
-          supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]).range(0, 199999),
+        const userFilter = ids.length ? ids : [EMPTY_USER_ID];
+        const [{ data: subs }, { data: dnaRows }, { data: swipes }, { data: superLikes }] = await Promise.all([
+          supabase.from("subscriptions").select("user_id,status,current_period_end,price_id").eq("environment", "live").in("user_id", userFilter),
+          supabase.from("pullorpass_dna").select("user_id,pull_count,pass_count").in("user_id", userFilter).range(0, 199999),
+          supabase.from("pullorpass_swipes").select("user_id").in("user_id", userFilter).range(0, 199999),
+          supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", userFilter).range(0, 199999),
         ]);
         const swipeMap = new Map<string, number>();
-        (swipes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
+        const dnaUserIds = new Set((dnaRows ?? []).map((d: any) => d.user_id));
+        (dnaRows ?? []).forEach((d: any) => swipeMap.set(d.user_id, dnaSwipeCount(d)));
+        (swipes ?? []).forEach((s: any) => {
+          if (!dnaUserIds.has(s.user_id)) swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1);
+        });
         (superLikes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
         const now = Date.now();
         const subMap = new Map<string, any>();
@@ -112,7 +128,7 @@ Deno.serve(async (req) => {
           supabase.from("pokeiq_likes").select("card_name,card_set,liked_at").eq("user_id", userId).order("liked_at", { ascending: false }).limit(20),
           supabase.from("pullorpass_dna").select("*").eq("user_id", userId).maybeSingle(),
         ]);
-        const swipeCount = (pullPassCount ?? 0) + (superLikeCount ?? 0);
+        const swipeCount = (dna ? dnaSwipeCount(dna) : (pullPassCount ?? 0)) + (superLikeCount ?? 0);
         const { data: smartProfile } = await supabase.from("pokeiq_profiles").select("*").eq("user_id", userId).maybeSingle();
         return json({
           user: u.user,
