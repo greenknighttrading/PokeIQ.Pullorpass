@@ -46,7 +46,7 @@ function StatsTab() {
   );
 }
 
-function UsersTab({ onView }: { onView: (id: string) => void }) {
+function UsersTab({ onView, onViewProfile }: { onView: (id: string) => void; onViewProfile: (id: string) => void }) {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState<any[]>([]);
   const [page, setPage] = useState(1);
@@ -104,32 +104,38 @@ function UsersTab({ onView }: { onView: (id: string) => void }) {
               <TableHead>Signed up</TableHead>
               <TableHead>Last seen</TableHead>
               <TableHead className="text-right">Swipes</TableHead>
+              <TableHead className="text-right">Like %</TableHead>
               <TableHead>Pro</TableHead>
               <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin inline" /></TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8"><Loader2 className="w-5 h-5 animate-spin inline" /></TableCell></TableRow>
             )}
             {!loading && users.length === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No users</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No users</TableCell></TableRow>
             )}
-            {!loading && users.map((u) => (
+            {!loading && users.map((u) => {
+              const likePct = u.swipe_count > 0 ? Math.round((u.like_count / u.swipe_count) * 100) : null;
+              return (
               <TableRow key={u.id}>
                 <TableCell className="font-medium">{u.email ?? "—"}</TableCell>
                 <TableCell className="text-muted-foreground">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}</TableCell>
                 <TableCell className="text-muted-foreground">{u.last_sign_in_at ? new Date(u.last_sign_in_at).toLocaleDateString() : "—"}</TableCell>
                 <TableCell className="text-right tabular-nums">{u.swipe_count}</TableCell>
+                <TableCell className="text-right tabular-nums">{likePct === null ? "—" : `${likePct}%`}</TableCell>
                 <TableCell>{u.is_pro ? <Badge>Pro</Badge> : <Badge variant="outline">Free</Badge>}</TableCell>
                 <TableCell className="text-right space-x-2 whitespace-nowrap">
-                  <Button size="sm" variant="ghost" onClick={() => onView(u.id)}>View</Button>
+                  <Button size="sm" variant="ghost" onClick={() => onView(u.id)}>User Details</Button>
+                  <Button size="sm" variant="ghost" onClick={() => onViewProfile(u.id)}>View Profile</Button>
                   <Button size="sm" variant={u.is_pro ? "outline" : "default"} disabled={busy === u.id} onClick={() => togglePro(u)}>
                     {busy === u.id ? <Loader2 className="w-3 h-3 animate-spin" /> : u.is_pro ? (<><ShieldOff className="w-3 h-3" /> Revoke</>) : (<><ShieldCheck className="w-3 h-3" /> Grant Pro</>)}
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </Card>
