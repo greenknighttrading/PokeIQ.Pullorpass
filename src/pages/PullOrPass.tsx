@@ -480,6 +480,8 @@ export default function PullOrPass() {
       const error = lastError;
       console.error('pullorpass load error', error);
       toast.error('Could not load cards for this round');
+      const elapsed = Date.now() - loadStart;
+      if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
       setStage('swiping');
       return;
     }
@@ -516,6 +518,8 @@ export default function PullOrPass() {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
     setCards(picked);
+    const elapsed = Date.now() - loadStart;
+    if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
     setStage('swiping');
   }, []);
 
