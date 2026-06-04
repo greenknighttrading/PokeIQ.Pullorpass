@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -301,7 +302,7 @@ export default function Admin() {
   const [me, setMe] = useState<Me | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
   const [viewUser, setViewUser] = useState<string | null>(null);
-  const [viewProfileUser, setViewProfileUser] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -344,12 +345,11 @@ export default function Admin() {
             <TabsTrigger value="grant">Grant Pro</TabsTrigger>
           </TabsList>
           <TabsContent value="stats" className="mt-6"><StatsTab /></TabsContent>
-          <TabsContent value="users" className="mt-6"><UsersTab onView={setViewUser} onViewProfile={setViewProfileUser} /></TabsContent>
+          <TabsContent value="users" className="mt-6"><UsersTab onView={setViewUser} onViewProfile={(id) => navigate(`/admin/profile/${id}`)} /></TabsContent>
           <TabsContent value="grant" className="mt-6"><GrantTab /></TabsContent>
         </Tabs>
       </div>
       <UserDetailModal userId={viewUser} onClose={() => setViewUser(null)} />
-      <UserDetailModal userId={viewProfileUser} onClose={() => setViewProfileUser(null)} profileOnly />
     </div>
   );
 }
