@@ -382,6 +382,7 @@ export default function PullOrPass() {
 
   const loadRound = useCallback(async () => {
     setStage('loading');
+    const loadStart = Date.now();
     clearResults();
     setIndex(0);
     setRecords([]);
@@ -479,6 +480,8 @@ export default function PullOrPass() {
       const error = lastError;
       console.error('pullorpass load error', error);
       toast.error('Could not load cards for this round');
+      const elapsed = Date.now() - loadStart;
+      if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
       setStage('swiping');
       return;
     }
@@ -515,6 +518,8 @@ export default function PullOrPass() {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
     setCards(picked);
+    const elapsed = Date.now() - loadStart;
+    if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
     setStage('swiping');
   }, []);
 
@@ -902,7 +907,7 @@ export default function PullOrPass() {
                 className="w-32 h-32 object-contain"
                 style={{ imageRendering: 'pixelated' }}
               />
-              <p className="text-sm">Loading cards to start mapping your collector DNA…</p>
+              <p className="text-sm">Loading 20 randomized cards to start mapping your collector DNA</p>
             </div>
           )}
 
