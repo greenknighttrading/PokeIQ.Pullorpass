@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
           supabase.from("pokeiq_likes").select("card_name,card_set,liked_at").eq("user_id", userId).order("liked_at", { ascending: false }).limit(20),
           supabase.from("pullorpass_dna").select("*").eq("user_id", userId).maybeSingle(),
         ]);
-        const swipeCount = (pullPassCount ?? 0) + (superLikeCount ?? 0);
+        const swipeCount = (dna ? dnaSwipeCount(dna) : (pullPassCount ?? 0)) + (superLikeCount ?? 0);
         const { data: smartProfile } = await supabase.from("pokeiq_profiles").select("*").eq("user_id", userId).maybeSingle();
         return json({
           user: u.user,
