@@ -160,6 +160,7 @@ function AppRoutes() {
 
         {/* Admin (gated by email server-side + client-side) */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/profile/:userId" element={<PokeIQShell><AdminProfileView /></PokeIQShell>} />
 
         {/* Standalone report pages - no layout */}
         <Route path="/report/generated" element={<GeneratedReport />} />
