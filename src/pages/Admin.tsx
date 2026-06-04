@@ -184,7 +184,7 @@ function GrantTab() {
   );
 }
 
-function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: () => void }) {
+function UserDetailModal({ userId, onClose, profileOnly }: { userId: string | null; onClose: () => void; profileOnly?: boolean }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
@@ -197,23 +197,23 @@ function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: 
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
       <div className="max-w-3xl mx-auto my-10 p-6 bg-card border rounded-lg" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">User detail</h2>
+          <h2 className="text-xl font-semibold">{profileOnly ? "Smart Profile" : "User Details"}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>Close</Button>
         </div>
         {loading && <Loader2 className="w-5 h-5 animate-spin" />}
         {data && (
           <div className="space-y-6 text-sm">
-            <div>
+            {!profileOnly && (<div>
               <div className="text-muted-foreground">Email</div>
               <div className="font-medium">{data.user?.email}</div>
               <div className="text-xs text-muted-foreground mt-1">ID: {data.user?.id}</div>
               <div className="text-xs text-muted-foreground">Joined: {data.user?.created_at && new Date(data.user.created_at).toLocaleString()}</div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
+            </div>)}
+            {!profileOnly && (<div className="grid grid-cols-3 gap-4">
               <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Swipes</div><div className="text-2xl font-semibold">{data.swipeCount ?? 0}</div></CardContent></Card>
               <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Likes (from swipes)</div><div className="text-2xl font-semibold">{data.likeCount ?? 0}</div></CardContent></Card>
               <Card><CardContent className="pt-6"><div className="text-muted-foreground text-xs">Subscriptions</div><div className="text-2xl font-semibold">{data.subscriptions?.length ?? 0}</div></CardContent></Card>
-            </div>
+            </div>)}
             {data.smartProfile && (
               <div>
                 <h3 className="font-medium mb-2">Smart Profile</h3>
@@ -259,13 +259,13 @@ function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: 
                 </div>
               </div>
             )}
-            {data.dna && (
+            {!profileOnly && data.dna && (
               <div>
                 <h3 className="font-medium mb-2">Collector DNA</h3>
                 <pre className="text-xs bg-muted/30 p-3 rounded overflow-auto max-h-48">{JSON.stringify(data.dna, null, 2)}</pre>
               </div>
             )}
-            <div>
+            {!profileOnly && (<div>
               <h3 className="font-medium mb-2">Recent swipes</h3>
               <div className="space-y-1">
                 {(data.recentSwipes ?? []).map((s: any, i: number) => (
@@ -275,8 +275,8 @@ function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: 
                   </div>
                 ))}
               </div>
-            </div>
-            <div>
+            </div>)}
+            {!profileOnly && (<div>
               <h3 className="font-medium mb-2">Recent likes</h3>
               <div className="space-y-1">
                 {(data.recentLikes ?? []).map((s: any, i: number) => (
@@ -286,7 +286,10 @@ function UserDetailModal({ userId, onClose }: { userId: string | null; onClose: 
                   </div>
                 ))}
               </div>
-            </div>
+            </div>)}
+            {profileOnly && !data.smartProfile && (
+              <div className="text-muted-foreground text-sm">No smart profile yet for this user.</div>
+            )}
           </div>
         )}
       </div>
