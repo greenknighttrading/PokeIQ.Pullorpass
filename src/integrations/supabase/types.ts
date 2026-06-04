@@ -1965,6 +1965,54 @@ export type Database = {
       change_pokeiq_credits: { Args: { p_delta: number }; Returns: number }
       classify_card_language: { Args: { card_name: string }; Returns: string }
       classify_set_era: { Args: { s: string }; Returns: string }
+      get_admin_likes: {
+        Args: { p_user_id: string }
+        Returns: {
+          artist: string | null
+          card_id: string
+          card_name: string
+          card_number: string | null
+          card_type: string | null
+          created_at: string
+          era: string | null
+          id: string
+          image_url: string | null
+          language: string | null
+          liked_at: string
+          pokemon_name: string | null
+          pokemon_type: string | null
+          price: number | null
+          price_tier: string | null
+          product_category: string | null
+          rarity: string | null
+          release_year: number | null
+          set_id: string | null
+          set_name: string | null
+          source: string
+          updated_at: string
+          user_id: string
+          variant: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pokeiq_likes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_admin_recent_passes: {
+        Args: { p_user_id: string }
+        Returns: {
+          card_id: string
+          card_image: string
+          card_name: string
+          card_price: number
+          card_rarity: string
+          card_set: string
+          created_at: string
+        }[]
+      }
+      get_admin_swipe_count: { Args: { p_user_id: string }; Returns: number }
       get_public_likes: {
         Args: { p_user_id: string }
         Returns: {
@@ -2029,6 +2077,7 @@ export type Database = {
         Returns: boolean
       }
       has_buylist_access: { Args: { _user_id: string }; Returns: boolean }
+      is_admin_email: { Args: never; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
