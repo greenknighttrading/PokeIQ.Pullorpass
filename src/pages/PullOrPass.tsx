@@ -382,6 +382,7 @@ export default function PullOrPass() {
 
   const loadRound = useCallback(async () => {
     setStage('loading');
+    const loadStart = Date.now();
     clearResults();
     setIndex(0);
     setRecords([]);
@@ -902,7 +903,7 @@ export default function PullOrPass() {
                 className="w-32 h-32 object-contain"
                 style={{ imageRendering: 'pixelated' }}
               />
-              <p className="text-sm">Loading cards to start mapping your collector DNA…</p>
+              <p className="text-sm">Loading 20 randomized cards to start mapping your collector DNA</p>
             </div>
           )}
 
