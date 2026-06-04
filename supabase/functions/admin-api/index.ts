@@ -42,15 +42,17 @@ Deno.serve(async (req) => {
 
     switch (action) {
       case "stats": {
-        const [{ count: userCount }, { count: swipeCount }, { count: likeCount }, { data: subs }] = await Promise.all([
+        const [{ count: userCount }, { count: pullPassCount }, { count: superLikeSwipes }, { count: likeCount }, { data: subs }] = await Promise.all([
           supabase.auth.admin.listUsers({ page: 1, perPage: 1 }).then((r) => ({ count: (r.data as any)?.total ?? r.data.users.length })),
           supabase.from("pullorpass_swipes").select("*", { count: "exact", head: true }),
+          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("source", "super_like"),
           supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).in("source", ["swipe", "super_like"]),
           supabase
             .from("subscriptions")
             .select("status,environment,current_period_end")
             .eq("environment", "live"),
         ]);
+        const swipeCount = (pullPassCount ?? 0) + (superLikeSwipes ?? 0);
         const now = Date.now();
         const activePro = (subs ?? []).filter((s: any) => {
           const end = s.current_period_end ? new Date(s.current_period_end).getTime() : null;
@@ -68,12 +70,14 @@ Deno.serve(async (req) => {
         let users = data.users;
         if (search) users = users.filter((u) => (u.email ?? "").toLowerCase().includes(search));
         const ids = users.map((u) => u.id);
-        const [{ data: subs }, { data: swipes }] = await Promise.all([
+        const [{ data: subs }, { data: swipes }, { data: superLikes }] = await Promise.all([
           supabase.from("subscriptions").select("user_id,status,current_period_end,price_id").eq("environment", "live").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
           supabase.from("pullorpass_swipes").select("user_id").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
+          supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
         ]);
         const swipeMap = new Map<string, number>();
         (swipes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
+        (superLikes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
         const now = Date.now();
         const subMap = new Map<string, any>();
         (subs ?? []).forEach((s: any) => {
@@ -98,15 +102,17 @@ Deno.serve(async (req) => {
         const userId = payload?.userId as string;
         if (!userId) return json({ error: "Missing userId" }, 400);
         const { data: u } = await supabase.auth.admin.getUserById(userId);
-        const [{ data: profile }, { data: subs }, { count: swipeCount }, { data: recentSwipes }, { count: likeCount }, { data: recentLikes }, { data: dna }] = await Promise.all([
+        const [{ data: profile }, { data: subs }, { count: pullPassCount }, { count: superLikeCount }, { data: recentSwipes }, { count: likeCount }, { data: recentLikes }, { data: dna }] = await Promise.all([
           supabase.from("user_profiles").select("*").eq("user_id", userId).maybeSingle(),
           supabase.from("subscriptions").select("*").eq("user_id", userId).order("created_at", { ascending: false }),
           supabase.from("pullorpass_swipes").select("*", { count: "exact", head: true }).eq("user_id", userId),
+          supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("user_id", userId).eq("source", "super_like"),
           supabase.from("pullorpass_swipes").select("card_name,card_set,card_price,decision,created_at").eq("user_id", userId).order("created_at", { ascending: false }).limit(20),
           supabase.from("pokeiq_likes").select("*", { count: "exact", head: true }).eq("user_id", userId).in("source", ["swipe", "super_like"]),
           supabase.from("pokeiq_likes").select("card_name,card_set,liked_at").eq("user_id", userId).order("liked_at", { ascending: false }).limit(20),
           supabase.from("pullorpass_dna").select("*").eq("user_id", userId).maybeSingle(),
         ]);
+        const swipeCount = (pullPassCount ?? 0) + (superLikeCount ?? 0);
         const { data: smartProfile } = await supabase.from("pokeiq_profiles").select("*").eq("user_id", userId).maybeSingle();
         return json({
           user: u.user,
