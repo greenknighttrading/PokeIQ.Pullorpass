@@ -72,8 +72,8 @@ Deno.serve(async (req) => {
         const ids = users.map((u) => u.id);
         const [{ data: subs }, { data: swipes }, { data: superLikes }] = await Promise.all([
           supabase.from("subscriptions").select("user_id,status,current_period_end,price_id").eq("environment", "live").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
-          supabase.from("pullorpass_swipes").select("user_id").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
-          supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]),
+          supabase.from("pullorpass_swipes").select("user_id").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]).range(0, 199999),
+          supabase.from("pokeiq_likes").select("user_id").eq("source", "super_like").in("user_id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]).range(0, 199999),
         ]);
         const swipeMap = new Map<string, number>();
         (swipes ?? []).forEach((s: any) => swipeMap.set(s.user_id, (swipeMap.get(s.user_id) ?? 0) + 1));
