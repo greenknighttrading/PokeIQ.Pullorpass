@@ -642,7 +642,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
               <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
                 <Link to="/test">
-                  Find your type <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Take the Test <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </Button>
               <Link
