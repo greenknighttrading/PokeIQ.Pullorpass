@@ -2688,23 +2688,23 @@ function IntroScreen({ onStart, onAuth, isAuthed }: { onStart: () => void; onAut
   const handleDragEnd = (_: any, info: PanInfo) => {
     setHint(false);
     const { offset } = info;
+    let swiped: 'pull' | 'pass' | 'super' | null = null;
     if (offset.y < -110 && Math.abs(offset.y) > Math.abs(offset.x)) {
-      setDecision('super');
+      swiped = 'super';
     } else if (offset.x > 110) {
-      setDecision('pull');
+      swiped = 'pull';
     } else if (offset.x < -110) {
-      setDecision('pass');
+      swiped = 'pass';
     } else {
       // Snap back
       x.set(0); y.set(0);
       return;
     }
-    // Reset after a beat so the user can try again
+    setDecision(swiped);
+    // Any swipe on the demo card counts as a "like" — jump straight into the game.
     window.setTimeout(() => {
-      setDecision(null);
-      x.set(0); y.set(0);
-      setResetKey((k) => k + 1);
-    }, 900);
+      onStart();
+    }, 350);
   };
 
   return (
