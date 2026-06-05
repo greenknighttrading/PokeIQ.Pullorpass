@@ -621,7 +621,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
               className="absolute inset-0 w-full h-full object-cover object-top px-0 py-0 my-0 rounded-none grayscale"
             />
             <div className="absolute inset-0 bg-background/55" aria-hidden />
-            <div className="absolute inset-0 flex items-center justify-center" aria-hidden>
+            <div className="absolute inset-0 mx-0 py-0 px-0 flex-row flex items-center justify-center my-0" aria-hidden>
               <HelpCircle className="w-16 h-16 sm:w-20 sm:h-20 text-primary drop-shadow-[0_4px_18px_hsl(var(--primary)/0.7)]" strokeWidth={2.25} />
             </div>
           </div>
