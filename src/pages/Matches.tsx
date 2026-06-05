@@ -610,7 +610,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
     <div>
       <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
         <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
-          <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 mx-[3px] my-[50px] py-0 px-[5px]">
+          <div className="relative w-56 h-56 sm:w-80 sm:h-80 sm:self-stretch rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 mx-[3px] my-[50px] py-0 px-[5px]">
             <img
               src={explorerPortrait}
               alt="Unknown collector personality"
@@ -642,7 +642,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
               <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
                 <Link to="/test">
-                  Find your type <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  Take the Test <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
               </Button>
               <Link
