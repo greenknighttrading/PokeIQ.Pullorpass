@@ -1,18 +1,33 @@
-# MintdBrief — Project Documentation
+# PokeIQ — Project Documentation
 
-## What Is MintdBrief?
+## What Is PokeIQ?
 
-MintdBrief is a Pokémon TCG portfolio management and market intelligence platform. It helps collectors and investors track their card collections, understand their market value, discover new cards that match their taste, and make smarter buying and selling decisions.
+PokeIQ is a Pokémon TCG portfolio management and market intelligence platform. It helps collectors and investors track their card collections, understand their market value, discover new cards that match their taste, and make smarter buying and selling decisions.
 
 The app combines four core pillars:
+- **Community discovery** — swipe on cards, vote on tags, and explore what the community loves
 - **Portfolio management** — upload and track your collection with live pricing
 - **Personality profiling** — understand your collector identity and get personalized recommendations
 - **Market intelligence** — access buy/sell picks, price movers, and market trends
-- **Community discovery** — swipe on cards, vote on tags, and explore what the community loves
 
 ---
 
 ## Features
+
+### Swipe / Card Discovery (`/`, `/swipe`, `/matches`)
+
+A Tinder-style card discovery interface where users swipe on cards to express interest:
+
+- **Pull** — I'd buy this
+- **Pass** — not for me
+- **Love** — strong yes
+- **Super** — must have
+
+Each swipe is recorded and contributes to the **community stats** for that card (pull %, popularity score, hover time). The swipe engine uses these stats plus the user's taste profile to surface relevant cards.
+
+Free users get 50 swipes per day. Additional swipes can be earned by leaving reviews.
+
+Match history is accessible via `/matches`, organised by category in `/matches/:category`.
 
 ### Dashboard & Portfolio (`/home`, `/collection`, `/report`)
 
@@ -50,21 +65,6 @@ Each archetype comes with recommended portfolio asset allocations (e.g. what % v
 Public collector profiles can be shared via `/collector/:slug`.
 
 ---
-
-### Swipe / Card Discovery (`/`, `/swipe`, `/matches`)
-
-A Tinder-style card discovery interface where users swipe on cards to express interest:
-
-- **Pull** — I'd buy this
-- **Pass** — not for me
-- **Love** — strong yes
-- **Super** — must have
-
-Each swipe is recorded and contributes to the **community stats** for that card (pull %, popularity score, hover time). The swipe engine uses these stats plus the user's taste profile to surface relevant cards.
-
-Free users get 50 swipes per day. Additional swipes can be earned by leaving reviews.
-
-Match history is accessible via `/matches`, organised by category in `/matches/:category`.
 
 ---
 
