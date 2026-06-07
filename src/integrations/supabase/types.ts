@@ -1335,6 +1335,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pullorpass_referrals: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          referred_email: string | null
+          referred_user_id: string | null
+          referrer_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          referred_email?: string | null
+          referred_user_id?: string | null
+          referrer_id?: string
+        }
+        Relationships: []
+      }
       pullorpass_swipes: {
         Row: {
           card_id: string

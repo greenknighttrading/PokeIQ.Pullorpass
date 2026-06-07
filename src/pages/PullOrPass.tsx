@@ -23,6 +23,8 @@ import binderMockup from '@/assets/binder-mockup.jpg';
 import dittoDancing from '@/assets/ditto-dancing.gif.asset.json';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import { useHasFilterAccess } from '@/hooks/useHasFilterAccess';
+import { InviteFriendModal } from '@/components/pullorpass/InviteFriendModal';
 import {
   FeedFiltersDrawer,
   DEFAULT_FILTERS,
@@ -181,6 +183,20 @@ export default function PullOrPass() {
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [feedFilters, setFeedFilters] = useState<FeedFilters>(DEFAULT_FILTERS);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const { hasAccess: hasFilterAccess, completedReferrals, refresh: refreshFilterAccess } =
+    useHasFilterAccess();
+
+  // Capture ?ref=<uuid> in the URL and persist for the auth flow.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const ref = params.get('ref');
+      if (ref && /^[0-9a-f-]{32,40}$/i.test(ref)) {
+        sessionStorage.setItem('pop_referrer_id', ref);
+      }
+    } catch {}
+  }, [location.search]);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
@@ -923,13 +939,24 @@ export default function PullOrPass() {
                 <div className="flex items-center gap-2">
                    {userId && (
                      <>
-                       <button
-                         type="button"
-                         onClick={() => setFiltersOpen(true)}
-                         className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
-                       >
-                         <SlidersHorizontal className="w-3 h-3" /> Filter
-                       </button>
+                       {hasFilterAccess ? (
+                         <button
+                           type="button"
+                           onClick={() => setFiltersOpen(true)}
+                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                         >
+                           <SlidersHorizontal className="w-3 h-3" /> Filter
+                         </button>
+                       ) : (
+                         <button
+                           type="button"
+                           onClick={() => setInviteOpen(true)}
+                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                           title="Invite a friend to unlock filters"
+                         >
+                           <Lock className="w-3 h-3" /> Filter
+                         </button>
+                       )}
                        <span className="text-muted-foreground/40">·</span>
                      </>
                    )}
@@ -1137,6 +1164,14 @@ export default function PullOrPass() {
           onApply={applyFilters}
           onReset={resetFilters}
         />
+        {userId && (
+          <InviteFriendModal
+            open={inviteOpen}
+            onOpenChange={(v) => { setInviteOpen(v); if (!v) refreshFilterAccess(); }}
+            userId={userId}
+            completedReferrals={completedReferrals}
+          />
+        )}
         <AnimatePresence>
           {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
