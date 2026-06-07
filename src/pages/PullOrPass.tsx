@@ -1164,6 +1164,14 @@ export default function PullOrPass() {
           onApply={applyFilters}
           onReset={resetFilters}
         />
+        {userId && (
+          <InviteFriendModal
+            open={inviteOpen}
+            onOpenChange={(v) => { setInviteOpen(v); if (!v) refreshFilterAccess(); }}
+            userId={userId}
+            completedReferrals={completedReferrals}
+          />
+        )}
         <AnimatePresence>
           {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
