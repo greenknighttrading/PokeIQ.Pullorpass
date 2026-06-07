@@ -77,19 +77,21 @@ export default function Auth() {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user && !session.user.is_anonymous) {
+        await recordReferralIfPending();
         navigate(resolveRedirect(), { replace: true });
       }
     };
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user && !session.user.is_anonymous) {
+        await recordReferralIfPending();
         navigate(resolveRedirect(), { replace: true });
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, resolveRedirect]);
+  }, [navigate, resolveRedirect, recordReferralIfPending]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
