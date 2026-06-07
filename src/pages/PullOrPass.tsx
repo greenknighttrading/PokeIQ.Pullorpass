@@ -939,13 +939,24 @@ export default function PullOrPass() {
                 <div className="flex items-center gap-2">
                    {userId && (
                      <>
-                       <button
-                         type="button"
-                         onClick={() => setFiltersOpen(true)}
-                         className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
-                       >
-                         <SlidersHorizontal className="w-3 h-3" /> Filter
-                       </button>
+                       {hasFilterAccess ? (
+                         <button
+                           type="button"
+                           onClick={() => setFiltersOpen(true)}
+                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                         >
+                           <SlidersHorizontal className="w-3 h-3" /> Filter
+                         </button>
+                       ) : (
+                         <button
+                           type="button"
+                           onClick={() => setInviteOpen(true)}
+                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                           title="Invite a friend to unlock filters"
+                         >
+                           <Lock className="w-3 h-3" /> Filter
+                         </button>
+                       )}
                        <span className="text-muted-foreground/40">·</span>
                      </>
                    )}
