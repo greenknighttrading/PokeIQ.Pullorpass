@@ -23,6 +23,36 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('signup');
 
+  // Persist ?ref=<uuid> across the OAuth round-trip.
+  useEffect(() => {
+    try {
+      const ref = new URLSearchParams(location.search).get('ref');
+      if (ref && /^[0-9a-f-]{32,40}$/i.test(ref)) {
+        sessionStorage.setItem('pop_referrer_id', ref);
+      }
+    } catch {}
+  }, [location.search]);
+
+  // If we have a pending referrer for the current signed-in user, record it.
+  const recordReferralIfPending = React.useCallback(async () => {
+    try {
+      const ref = sessionStorage.getItem('pop_referrer_id');
+      if (!ref) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user || session.user.is_anonymous) return;
+      if (ref === session.user.id) {
+        sessionStorage.removeItem('pop_referrer_id');
+        return;
+      }
+      await supabase.functions.invoke('record-referral', {
+        body: { referrer_id: ref },
+      });
+      sessionStorage.removeItem('pop_referrer_id');
+    } catch (e) {
+      console.warn('record-referral failed', e);
+    }
+  }, []);
+
   // After signup/login, if the user came from Pull or Pass, send them
   // straight back to swiping when they still have swipes left, otherwise
   // surface their Smart Profile.
