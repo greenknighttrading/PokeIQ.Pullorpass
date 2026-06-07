@@ -96,8 +96,13 @@ export default function Auth() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     try {
+      const ref = (() => { try { return sessionStorage.getItem('pop_referrer_id'); } catch { return null; } })();
+      const redirectPath = resolveRedirect();
+      const redirectUrl = ref
+        ? `${window.location.origin}${redirectPath}${redirectPath.includes('?') ? '&' : '?'}ref=${encodeURIComponent(ref)}`
+        : `${window.location.origin}${redirectPath}`;
       const { error } = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: `${window.location.origin}${resolveRedirect()}`,
+        redirect_uri: redirectUrl,
       });
       if (error) {
         toast({ title: 'Error', description: String(error), variant: 'destructive' });
