@@ -23,6 +23,8 @@ import binderMockup from '@/assets/binder-mockup.jpg';
 import dittoDancing from '@/assets/ditto-dancing.gif.asset.json';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
+import { useHasFilterAccess } from '@/hooks/useHasFilterAccess';
+import { InviteFriendModal } from '@/components/pullorpass/InviteFriendModal';
 import {
   FeedFiltersDrawer,
   DEFAULT_FILTERS,
