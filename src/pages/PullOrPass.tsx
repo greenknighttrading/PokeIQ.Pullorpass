@@ -183,6 +183,20 @@ export default function PullOrPass() {
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [feedFilters, setFeedFilters] = useState<FeedFilters>(DEFAULT_FILTERS);
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const { hasAccess: hasFilterAccess, completedReferrals, refresh: refreshFilterAccess } =
+    useHasFilterAccess();
+
+  // Capture ?ref=<uuid> in the URL and persist for the auth flow.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(location.search);
+      const ref = params.get('ref');
+      if (ref && /^[0-9a-f-]{32,40}$/i.test(ref)) {
+        sessionStorage.setItem('pop_referrer_id', ref);
+      }
+    } catch {}
+  }, [location.search]);
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
