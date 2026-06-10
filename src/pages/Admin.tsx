@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, ShieldCheck, ShieldOff, Search } from "lucide-react";
+import { Loader2, ShieldCheck, ShieldOff, Search, Download } from "lucide-react";
 
 type Me = { email: string | null; id: string | null };
 
@@ -53,6 +53,7 @@ function UsersTab({ onView, onViewProfile }: { onView: (id: string) => void; onV
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const load = useCallback(async (p = page, q = search) => {
     setLoading(true);
@@ -65,6 +66,43 @@ function UsersTab({ onView, onViewProfile }: { onView: (id: string) => void; onV
   }, [page, search]);
 
   useEffect(() => { load(1, ""); /* eslint-disable-next-line */ }, []);
+
+  async function exportCsv() {
+    setExporting(true);
+    try {
+      const all: any[] = [];
+      let p = 1;
+      // Paginate through list_users until an empty page is returned.
+      // Safety cap at 200 pages (10k users at 50/page).
+      while (p <= 200) {
+        const res = await invoke<{ users: any[] }>("list_users", { page: p, search: "" });
+        if (!res.users?.length) break;
+        all.push(...res.users);
+        if (res.users.length < 50) break;
+        p += 1;
+      }
+      const headers = ["email","id","created_at","last_sign_in_at","swipe_count","like_count","is_pro","price_id"];
+      const esc = (v: any) => {
+        const s = v === null || v === undefined ? "" : String(v);
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const csv = [headers.join(","), ...all.map((u) => headers.map((h) => esc(u[h])).join(","))].join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `users-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      toast({ title: "Exported", description: `${all.length} users` });
+    } catch (e: any) {
+      toast({ title: "Export failed", description: e.message });
+    } finally {
+      setExporting(false);
+    }
+  }
 
   async function togglePro(u: any) {
     setBusy(u.id);
@@ -91,6 +129,10 @@ function UsersTab({ onView, onViewProfile }: { onView: (id: string) => void; onV
           />
         </div>
         <Button variant="outline" onClick={() => load(1, search)}>Search</Button>
+        <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+          Export CSV
+        </Button>
         <div className="ml-auto flex gap-2">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); load(p, search); }}>Prev</Button>
           <span className="text-sm text-muted-foreground self-center">Page {page}</span>
