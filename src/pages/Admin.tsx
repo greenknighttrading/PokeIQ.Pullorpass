@@ -117,23 +117,25 @@ function UsersTab({ onView, onViewProfile }: { onView: (id: string) => void; onV
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 items-center">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search email…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && load(1, search)}
-            className="pl-9"
-          />
+      <div className="flex flex-wrap gap-2 items-center justify-between">
+        <div className="flex flex-wrap gap-2 items-center flex-1">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search email…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && load(1, search)}
+              className="pl-9"
+            />
+          </div>
+          <Button variant="outline" onClick={() => load(1, search)}>Search</Button>
+          <Button variant="default" onClick={exportCsv} disabled={exporting} className="gap-2">
+            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            Export CSV
+          </Button>
         </div>
-        <Button variant="outline" onClick={() => load(1, search)}>Search</Button>
-        <Button variant="outline" onClick={exportCsv} disabled={exporting}>
-          {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-          Export CSV
-        </Button>
-        <div className="ml-auto flex gap-2">
+        <div className="flex gap-2">
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => { const p = page - 1; setPage(p); load(p, search); }}>Prev</Button>
           <span className="text-sm text-muted-foreground self-center">Page {page}</span>
           <Button variant="outline" size="sm" onClick={() => { const p = page + 1; setPage(p); load(p, search); }}>Next</Button>
