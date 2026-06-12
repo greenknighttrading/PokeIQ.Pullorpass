@@ -80,7 +80,7 @@ function CardFace({
       <button
         type="button"
         onClick={state === 'idle' ? onPick : undefined}
-        className="relative w-full max-w-[320px] aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
+        className="relative h-[38vh] max-h-[360px] w-auto aspect-[2.5/3.5] md:h-auto md:w-full md:max-w-[320px] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
         style={{
           boxShadow:
             state === 'winner'
@@ -105,12 +105,22 @@ function CardFace({
         <AnimatePresence>
           {state === 'winner' && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.6 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-2 shadow-lg"
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <Check className="w-5 h-5" strokeWidth={3} />
+              <div
+                className="rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl"
+                style={{
+                  width: '24%',
+                  aspectRatio: '1 / 1',
+                  boxShadow: '0 0 30px hsl(var(--primary) / 0.8), 0 0 0 4px hsl(var(--background) / 0.6)',
+                }}
+              >
+                <Check className="w-1/2 h-1/2" strokeWidth={3.5} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -122,7 +132,7 @@ function CardFace({
           e.stopPropagation();
           setShowDetails((v) => !v);
         }}
-        className="mt-2 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        className="mt-1.5 text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
       >
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
@@ -436,7 +446,7 @@ export default function ThisOrThat() {
           </div>
 
           {/* Progress */}
-          <div className="mb-6 max-w-2xl mx-auto w-full">
+          <div className="mb-3 sm:mb-5 max-w-2xl mx-auto w-full">
             <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5">
               <span>Matchup <span className="text-foreground font-semibold tabular-nums">{matchupIndex + 1}</span> / {ROUND_SIZE}</span>
               <span className="tabular-nums">{totalCompleted} total</span>
@@ -458,7 +468,7 @@ export default function ThisOrThat() {
             </div>
           ) : (
             <div className="flex-1 flex items-center justify-center">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 w-full">
+              <div className="relative flex flex-col md:flex-row items-center justify-center gap-1 md:gap-12 w-full">
                 <CardFace
                   card={pair[0]}
                   state={
@@ -471,8 +481,40 @@ export default function ThisOrThat() {
                   onPick={() => onPick(pair[0], pair[1])}
                 />
 
-                <div className="text-xs font-bold tracking-[0.3em] text-muted-foreground select-none">
-                  VS
+                {/* Stylish VS — overlaps both cards, centered */}
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 select-none"
+                >
+                  <motion.div
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+                    className="relative"
+                  >
+                    {/* Glow ring */}
+                    <div
+                      className="absolute inset-0 rounded-full blur-2xl"
+                      style={{ background: 'radial-gradient(circle, hsl(var(--primary)/0.55), transparent 70%)' }}
+                    />
+                    <div
+                      className="relative flex items-center justify-center rounded-full px-5 py-2 sm:px-7 sm:py-3 border-2 border-primary/70 bg-background/85 backdrop-blur-md"
+                      style={{
+                        boxShadow:
+                          '0 0 0 4px hsl(var(--background) / 0.5), 0 10px 40px hsl(var(--primary) / 0.45)',
+                      }}
+                    >
+                      <span
+                        className="font-black italic tracking-tighter text-4xl sm:text-5xl md:text-6xl bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent"
+                        style={{
+                          textShadow: '0 2px 20px hsl(var(--primary) / 0.4)',
+                          WebkitTextStroke: '1px hsl(var(--primary) / 0.3)',
+                        }}
+                      >
+                        VS
+                      </span>
+                    </div>
+                  </motion.div>
                 </div>
 
                 <CardFace
