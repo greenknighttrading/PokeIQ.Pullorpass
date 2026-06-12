@@ -66,6 +66,7 @@ const Matches = lazy(() => import("./pages/Matches"));
 const MatchesResults = lazy(() => import("./pages/MatchesResults"));
 const MatchesCollection = lazy(() => import("./pages/MatchesCollection"));
 const PokeYelp = lazy(() => import("./pages/PokeYelp"));
+const ThisOrThat = lazy(() => import("./pages/ThisOrThat"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const PokeIQLeaderboard = lazy(() => import("./pages/pokeiq/Leaderboard"));
@@ -152,6 +153,7 @@ function AppRoutes() {
         <Route path="/profile" element={<PokeIQShell><Matches /></PokeIQShell>} />
         <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
         <Route path="/earn" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
+        <Route path="/this-or-that" element={<PokeIQShell><ThisOrThat /></PokeIQShell>} />
         <Route path="/leaderboard" element={<PokeIQShell><PokeIQLeaderboard /></PokeIQShell>} />
         <Route path="/card-intelligence" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
