@@ -1838,6 +1838,60 @@ export type Database = {
           },
         ]
       }
+      this_or_that_matchups: {
+        Row: {
+          card_a_id: string
+          card_b_id: string
+          created_at: string
+          id: string
+          loser_card_id: string
+          user_id: string
+          winner_artist: string | null
+          winner_card_id: string
+          winner_era: string | null
+          winner_name: string | null
+          winner_price: number | null
+          winner_rarity: string | null
+          winner_set: string | null
+          winner_tags: string[] | null
+          winner_type: string | null
+        }
+        Insert: {
+          card_a_id: string
+          card_b_id: string
+          created_at?: string
+          id?: string
+          loser_card_id: string
+          user_id: string
+          winner_artist?: string | null
+          winner_card_id: string
+          winner_era?: string | null
+          winner_name?: string | null
+          winner_price?: number | null
+          winner_rarity?: string | null
+          winner_set?: string | null
+          winner_tags?: string[] | null
+          winner_type?: string | null
+        }
+        Update: {
+          card_a_id?: string
+          card_b_id?: string
+          created_at?: string
+          id?: string
+          loser_card_id?: string
+          user_id?: string
+          winner_artist?: string | null
+          winner_card_id?: string
+          winner_era?: string | null
+          winner_name?: string | null
+          winner_price?: number | null
+          winner_rarity?: string | null
+          winner_set?: string | null
+          winner_tags?: string[] | null
+          winner_type?: string | null
+        }
+        Relationships: []
+      }
       user_asset_mappings: {
         Row: {
           confidence: number
