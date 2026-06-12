@@ -80,7 +80,7 @@ function CardFace({
       <button
         type="button"
         onClick={state === 'idle' ? onPick : undefined}
-        className="relative w-full max-w-[320px] aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
+        className="relative w-full max-w-[300px] md:max-w-[320px] aspect-[2.5/3.5] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
         style={{
           boxShadow:
             state === 'winner'
@@ -105,12 +105,22 @@ function CardFace({
         <AnimatePresence>
           {state === 'winner' && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.6 }}
+              initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute top-3 right-3 bg-primary text-primary-foreground rounded-full p-2 shadow-lg"
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none"
             >
-              <Check className="w-5 h-5" strokeWidth={3} />
+              <div
+                className="rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-2xl"
+                style={{
+                  width: '24%',
+                  aspectRatio: '1 / 1',
+                  boxShadow: '0 0 30px hsl(var(--primary) / 0.8), 0 0 0 4px hsl(var(--background) / 0.6)',
+                }}
+              >
+                <Check className="w-1/2 h-1/2" strokeWidth={3.5} />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -122,7 +132,7 @@ function CardFace({
           e.stopPropagation();
           setShowDetails((v) => !v);
         }}
-        className="mt-2 text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
+        className="mt-1.5 text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground hover:text-foreground transition-colors"
       >
         {showDetails ? 'Hide details' : 'Show details'}
       </button>
