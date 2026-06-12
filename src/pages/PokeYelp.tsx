@@ -894,6 +894,22 @@ export default function PokeYelp() {
             })()}
           </header>
 
+          {/* This or That CTA */}
+          <Card className="mb-4 p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
+            <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
+              <Gamepad2 className="w-6 h-6 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-base sm:text-lg font-semibold tracking-tight">This or That</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">
+                Choose between two cards and help PokeIQ learn your collecting taste.
+              </div>
+            </div>
+            <Button onClick={() => navigate('/this-or-that')} className="shrink-0">
+              Play Now
+            </Button>
+          </Card>
+
           {/* Filters panel */}
           <AnimatePresence initial={false}>
             {showFilters && (
