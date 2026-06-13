@@ -440,7 +440,7 @@ export default function ThisOrThat() {
             <div className="flex-1">
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight">This or That</h1>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                Choose the card you'd rather own.
+                Don't think too hard, just choose the card you like more!
               </p>
             </div>
           </div>
