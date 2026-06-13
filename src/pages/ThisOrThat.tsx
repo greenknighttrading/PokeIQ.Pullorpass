@@ -80,7 +80,7 @@ function CardFace({
       <button
         type="button"
         onClick={state === 'idle' ? onPick : undefined}
-        className="relative h-[38vh] max-h-[360px] w-auto aspect-[2.5/3.5] md:h-auto md:w-full md:max-w-[320px] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
+        className="relative h-[38vh] max-h-[360px] w-auto aspect-[2.5/3.5] md:h-auto md:max-h-[520px] md:w-full md:max-w-[320px] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
         style={{
           boxShadow:
             state === 'winner'
