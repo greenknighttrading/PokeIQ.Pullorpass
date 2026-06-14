@@ -435,10 +435,11 @@ export default function Matches({
                 viewedDisplayName={viewedDisplayName}
               />
               {(likes.length > 0 || passes.length > 0) && (
-                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
               )}
               {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
               {!isPublicView && <SwipeAgainOrLimit />}
+              {!isPublicView && <ThisOrThatCTA />}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
               <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
@@ -962,9 +963,63 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string }) {
+function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName, userId }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string; userId?: string | null }) {
+  // For the authed personal view, lock the carousel to the user's most recent
+  // completed round so it stays persistent across navigations. Cached locally
+  // and only refreshed when a newer round_id appears in the DB.
+  const [roundLikes, setRoundLikes] = useState<LikedCard[] | null>(null);
+  useEffect(() => {
+    if (isPublicView || !userId) { setRoundLikes(null); return; }
+    const cacheKey = `matches:last_round:${userId}`;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v?.likes)) setRoundLikes(v.likes as LikedCard[]);
+      }
+    } catch {}
+    let cancelled = false;
+    (async () => {
+      const { data: latest } = await supabase
+        .from('pullorpass_swipes')
+        .select('round_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const roundId = latest?.[0]?.round_id;
+      if (!roundId || cancelled) return;
+      const { data: rows } = await supabase
+        .from('pullorpass_swipes')
+        .select('card_id, card_name, card_set, card_image, card_price, card_rarity, tags, decision, created_at')
+        .eq('user_id', userId)
+        .eq('round_id', roundId)
+        .eq('decision', 'pull')
+        .order('created_at', { ascending: false });
+      if (cancelled) return;
+      const mapped: LikedCard[] = (rows ?? []).map((r: any) => ({
+        id: `round-${roundId}-${r.card_id}`,
+        user_id: userId,
+        card_id: r.card_id,
+        card_name: r.card_name ?? '',
+        pokemon_name: null, artist: null,
+        set_name: r.card_set ?? null, set_id: null,
+        era: null, release_year: null, card_type: null, pokemon_type: null,
+        rarity: r.card_rarity ?? null, language: null, card_number: null,
+        variant: null, product_category: null,
+        price: r.card_price != null ? Number(r.card_price) : null,
+        price_tier: null, image_url: r.card_image ?? null,
+        source: Array.isArray(r.tags) && r.tags.includes('Loved') ? 'super_like' : 'pull',
+        liked_at: r.created_at,
+      }));
+      setRoundLikes(mapped);
+      try { localStorage.setItem(cacheKey, JSON.stringify({ roundId, likes: mapped })); } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [userId, isPublicView]);
+
+  const source = (!isPublicView && roundLikes && roundLikes.length > 0) ? roundLikes : likes;
   // Pulls only — super likes first, then regular pulls, newest first within each group.
-  const sorted = [...likes].sort((a, b) => {
+  const sorted = [...source].sort((a, b) => {
     const aSuper = a.source === 'super_like' ? 1 : 0;
     const bSuper = b.source === 'super_like' ? 1 : 0;
     if (aSuper !== bSuper) return bSuper - aSuper;
@@ -977,10 +1032,12 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName 
       <div className="mb-5">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
+          <h2 className="text-2xl font-bold text-foreground">{isPublicView ? 'Latest matches' : 'Your latest round'}</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Every card {subject} pulled — super likes first.
+          {isPublicView
+            ? `Every card ${subject} pulled — super likes first.`
+            : 'Cards you pulled in your most recent round — super likes first.'}
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
@@ -1942,5 +1999,47 @@ function RankedThumb({ card, rank, onOpen }: { card: RankedTotCard; rank: number
         {card.set_name ?? '—'}{card.price ? ` · $${Number(card.price).toFixed(0)}` : ''}
       </p>
     </button>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// This or That — cross-promo widget below "Swipe again"
+// ─────────────────────────────────────────────────────────────
+function ThisOrThatCTA() {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card/60 to-card/40 p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
+    >
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+      <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
+        <div className="flex-1 min-w-0">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
+            <Sparkles className="w-3 h-3" /> New training lab
+          </div>
+          <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-2">
+            🔥 Try <span className="text-primary">This or That</span> — now live on PokeIQ
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
+            See 20 head-to-head Pokémon card matchups, choose your favorite each time, and help PokeIQ rank
+            your preferences and learn more about what makes you unique as a collector.
+          </p>
+        </div>
+        <Link to="/this-or-that" className="w-full sm:w-auto shrink-0">
+          <motion.button
+            whileHover={{ y: -2, scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full sm:w-auto h-12 px-7 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)]"
+          >
+            <Zap className="w-4 h-4" />
+            Battle now
+            <ArrowRight className="w-4 h-4" />
+          </motion.button>
+        </Link>
+      </div>
+    </motion.section>
   );
 }
