@@ -963,9 +963,63 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string }) {
+function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName, userId }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string; userId?: string | null }) {
+  // For the authed personal view, lock the carousel to the user's most recent
+  // completed round so it stays persistent across navigations. Cached locally
+  // and only refreshed when a newer round_id appears in the DB.
+  const [roundLikes, setRoundLikes] = useState<LikedCard[] | null>(null);
+  useEffect(() => {
+    if (isPublicView || !userId) { setRoundLikes(null); return; }
+    const cacheKey = `matches:last_round:${userId}`;
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      if (raw) {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v?.likes)) setRoundLikes(v.likes as LikedCard[]);
+      }
+    } catch {}
+    let cancelled = false;
+    (async () => {
+      const { data: latest } = await supabase
+        .from('pullorpass_swipes')
+        .select('round_id, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const roundId = latest?.[0]?.round_id;
+      if (!roundId || cancelled) return;
+      const { data: rows } = await supabase
+        .from('pullorpass_swipes')
+        .select('card_id, card_name, card_set, card_image, card_price, card_rarity, tags, decision, created_at')
+        .eq('user_id', userId)
+        .eq('round_id', roundId)
+        .eq('decision', 'pull')
+        .order('created_at', { ascending: false });
+      if (cancelled) return;
+      const mapped: LikedCard[] = (rows ?? []).map((r: any) => ({
+        id: `round-${roundId}-${r.card_id}`,
+        user_id: userId,
+        card_id: r.card_id,
+        card_name: r.card_name ?? '',
+        pokemon_name: null, artist: null,
+        set_name: r.card_set ?? null, set_id: null,
+        era: null, release_year: null, card_type: null, pokemon_type: null,
+        rarity: r.card_rarity ?? null, language: null, card_number: null,
+        variant: null, product_category: null,
+        price: r.card_price != null ? Number(r.card_price) : null,
+        price_tier: null, image_url: r.card_image ?? null,
+        source: Array.isArray(r.tags) && r.tags.includes('Loved') ? 'super_like' : 'pull',
+        liked_at: r.created_at,
+      }));
+      setRoundLikes(mapped);
+      try { localStorage.setItem(cacheKey, JSON.stringify({ roundId, likes: mapped })); } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [userId, isPublicView]);
+
+  const source = (!isPublicView && roundLikes && roundLikes.length > 0) ? roundLikes : likes;
   // Pulls only — super likes first, then regular pulls, newest first within each group.
-  const sorted = [...likes].sort((a, b) => {
+  const sorted = [...source].sort((a, b) => {
     const aSuper = a.source === 'super_like' ? 1 : 0;
     const bSuper = b.source === 'super_like' ? 1 : 0;
     if (aSuper !== bSuper) return bSuper - aSuper;
@@ -978,10 +1032,12 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName 
       <div className="mb-5">
         <div className="flex items-center gap-2">
           <Clock className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Latest matches</h2>
+          <h2 className="text-2xl font-bold text-foreground">{isPublicView ? 'Latest matches' : 'Your latest round'}</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Every card {subject} pulled — super likes first.
+          {isPublicView
+            ? `Every card ${subject} pulled — super likes first.`
+            : 'Cards you pulled in your most recent round — super likes first.'}
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
