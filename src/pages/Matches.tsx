@@ -2001,3 +2001,45 @@ function RankedThumb({ card, rank, onOpen }: { card: RankedTotCard; rank: number
     </button>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// This or That — cross-promo widget below "Swipe again"
+// ─────────────────────────────────────────────────────────────
+function ThisOrThatCTA() {
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.4 }}
+      className="relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card/60 to-card/40 p-6 sm:p-8 shadow-[0_20px_60px_-30px_hsl(var(--primary)/0.6)]"
+    >
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+      <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
+        <div className="flex-1 min-w-0">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
+            <Sparkles className="w-3 h-3" /> New training lab
+          </div>
+          <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-2">
+            🔥 Try <span className="text-primary">This or That</span> — now live on PokeIQ
+          </h3>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
+            See 20 head-to-head Pokémon card matchups, choose your favorite each time, and help PokeIQ rank
+            your preferences and learn more about what makes you unique as a collector.
+          </p>
+        </div>
+        <Link to="/this-or-that" className="w-full sm:w-auto shrink-0">
+          <motion.button
+            whileHover={{ y: -2, scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            className="w-full sm:w-auto h-12 px-7 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)]"
+          >
+            <Zap className="w-4 h-4" />
+            Battle now
+            <ArrowRight className="w-4 h-4" />
+          </motion.button>
+        </Link>
+      </div>
+    </motion.section>
+  );
+}
