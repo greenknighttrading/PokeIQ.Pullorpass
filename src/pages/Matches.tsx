@@ -437,6 +437,7 @@ export default function Matches({
               {(likes.length > 0 || passes.length > 0) && (
                 <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
               )}
+              {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
               {!isPublicView && <SwipeAgainOrLimit />}
               {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
               <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
