@@ -1774,3 +1774,173 @@ function BuildYourOwnProfileCTA() {
     </section>
   );
 }
+
+// ─────────────────────────────────────────────────────────────
+// SECTION — This or That Rankings (top winners from Training Lab)
+// ─────────────────────────────────────────────────────────────
+
+type RankedTotCard = {
+  card_id: string;
+  name: string;
+  set_name: string | null;
+  image_url: string | null;
+  price: number | null;
+  wins: number;
+  losses: number;
+};
+
+function totTcgImage(id: string | null): string | null {
+  if (!id) return null;
+  return `https://tcgplayer-cdn.tcgplayer.com/product/${id}_in_1000x1000.jpg`;
+}
+
+function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: CardDetailSeed) => void }) {
+  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<RankedTotCard[]>([]);
+  const [totalMatchups, setTotalMatchups] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('this_or_that_matchups')
+        .select('winner_card_id, loser_card_id, winner_name, winner_set, winner_price')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1000);
+
+      if (cancelled) return;
+      if (error || !data || data.length === 0) {
+        setItems([]); setTotalMatchups(0); setLoading(false); return;
+      }
+
+      const tally = new Map<string, RankedTotCard>();
+      for (const r of data as any[]) {
+        const wId = r.winner_card_id as string;
+        const lId = r.loser_card_id as string;
+        if (wId) {
+          const cur = tally.get(wId) ?? { card_id: wId, name: r.winner_name ?? '', set_name: r.winner_set ?? null, image_url: null, price: r.winner_price != null ? Number(r.winner_price) : null, wins: 0, losses: 0 };
+          cur.wins += 1;
+          if (!cur.name && r.winner_name) cur.name = r.winner_name;
+          if (!cur.set_name && r.winner_set) cur.set_name = r.winner_set;
+          if (cur.price == null && r.winner_price != null) cur.price = Number(r.winner_price);
+          tally.set(wId, cur);
+        }
+        if (lId) {
+          const cur = tally.get(lId) ?? { card_id: lId, name: '', set_name: null, image_url: null, price: null, wins: 0, losses: 0 };
+          cur.losses += 1;
+          tally.set(lId, cur);
+        }
+      }
+
+      const ranked = Array.from(tally.values())
+        .filter((c) => c.wins > 0)
+        .sort((a, b) => b.wins - a.wins || (b.wins / Math.max(1, b.wins + b.losses)) - (a.wins / Math.max(1, a.wins + a.losses)))
+        .slice(0, 10);
+
+      // Enrich with images + missing meta from market_snapshots
+      const ids = ranked.map((r) => r.card_id);
+      if (ids.length) {
+        const { data: meta } = await supabase
+          .from('market_snapshots')
+          .select('card_id, tcgplayer_id, name, set_name, price, image_url')
+          .in('card_id', ids);
+        const byId = new Map<string, any>();
+        (meta ?? []).forEach((m: any) => byId.set(m.card_id, m));
+        for (const r of ranked) {
+          const m = byId.get(r.card_id);
+          if (m) {
+            r.image_url = m.image_url || totTcgImage(m.tcgplayer_id);
+            if (!r.name) r.name = m.name ?? r.name;
+            if (!r.set_name) r.set_name = m.set_name ?? r.set_name;
+            if (r.price == null && m.price != null) r.price = Number(m.price);
+          }
+        }
+      }
+
+      if (cancelled) return;
+      setItems(ranked);
+      setTotalMatchups(data.length);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
+  if (loading) return null;
+  if (items.length === 0) {
+    return (
+      <section>
+        <div className="flex items-end justify-between mb-3">
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight">Rankings</h2>
+            <p className="text-xs text-muted-foreground">Your top 10 cards from This or That.</p>
+          </div>
+          <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+            Play This or That <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+        <Card className="p-6 text-center text-sm text-muted-foreground">
+          No This or That picks yet. Play a round to see your rankings.
+        </Card>
+      </section>
+    );
+  }
+
+  return (
+    <section>
+      <div className="flex items-end justify-between mb-3 gap-3">
+        <div>
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight">Rankings</h2>
+          <p className="text-xs text-muted-foreground">
+            Your top {items.length} cards from This or That · {totalMatchups} matchup{totalMatchups === 1 ? '' : 's'}
+          </p>
+        </div>
+        <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1 whitespace-nowrap">
+          Play more <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
+        {items.map((c, i) => (
+          <RankedThumb key={c.card_id} card={c} rank={i + 1} onOpen={onOpen} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RankedThumb({ card, rank, onOpen }: { card: RankedTotCard; rank: number; onOpen: (s: CardDetailSeed) => void }) {
+  const [err, setErr] = useState(false);
+  const total = card.wins + card.losses;
+  const winPct = total > 0 ? Math.round((card.wins / total) * 100) : 0;
+  const rankBg =
+    rank === 1 ? 'bg-amber-400 text-black' :
+    rank === 2 ? 'bg-slate-300 text-black' :
+    rank === 3 ? 'bg-orange-400 text-black' :
+    'bg-background/85 text-foreground';
+  return (
+    <button
+      type="button"
+      onClick={() => onOpen({ card_id: card.card_id, name: card.name, set_name: card.set_name, image_url: card.image_url, price: card.price ?? undefined } as any)}
+      className="group text-left space-y-1.5"
+    >
+      <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/40 group-hover:ring-primary/40 transition-shadow shadow-md group-hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.45)]">
+        {card.image_url && !err ? (
+          <img src={card.image_url} alt={card.name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
+        )}
+        <div className={`absolute top-1.5 left-1.5 ${rankBg} rounded-full w-7 h-7 flex items-center justify-center text-xs font-bold shadow-md backdrop-blur-sm`}>
+          #{rank}
+        </div>
+        <div className="absolute bottom-1.5 right-1.5 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums shadow-md">
+          {card.wins}W · {winPct}%
+        </div>
+      </div>
+      <p className="text-xs text-foreground truncate font-medium">{card.name || '—'}</p>
+      <p className="text-[10px] text-muted-foreground truncate">
+        {card.set_name ?? '—'}{card.price ? ` · $${Number(card.price).toFixed(0)}` : ''}
+      </p>
+    </button>
+  );
+}
