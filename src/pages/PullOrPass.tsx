@@ -1698,6 +1698,33 @@ export function ResultsView({
         />
       </motion.section>
 
+      {/* ── This or That CTA — shown to signed-in users with previous matches ─── */}
+      {isAuthed && (
+        <motion.section {...fadeUp}>
+          <div className="relative rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-purple-500/10 p-6 sm:p-8 overflow-hidden shadow-xl">
+            <div className="absolute -top-24 -right-24 w-[320px] h-[320px] bg-primary/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="relative flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+              <div className="flex-1 min-w-0">
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[11px] font-semibold uppercase tracking-wider text-primary mb-3">
+                  <Flame className="w-3.5 h-3.5" /> New
+                </div>
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">
+                  Play This or That
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-xl">
+                  See 20 head-to-head Pokémon card matchups. Pick your favorite each time and help PokeIQ rank your preferences and learn what makes you unique as a collector.
+                </p>
+              </div>
+              <Link to="/this-or-that" className="shrink-0">
+                <Button size="lg" className="gap-2 w-full sm:w-auto">
+                  <Zap className="w-4 h-4" /> Play now <ArrowRight className="w-4 h-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </motion.section>
+      )}
+
       {/* ── SECTION 4: Your Collection Awaits (authed → /profile, guest → /auth) + binder hero for guests ─── */}
       <motion.section {...fadeUp}>
         {!isAuthed && (
