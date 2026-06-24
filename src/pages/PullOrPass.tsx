@@ -929,6 +929,15 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          <AnimatePresence>
+            {totPair && (
+              <ThisOrThatInterstitial
+                pair={totPair}
+                userId={userId}
+                onComplete={() => setTotPair(null)}
+              />
+            )}
+          </AnimatePresence>
           {stage === 'intro' && (
             <IntroScreen
               onStart={() => {
