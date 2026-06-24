@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal, Flame } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
+import { ThisOrThatInterstitial } from '@/components/pullorpass/ThisOrThatInterstitial';
 import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
 import { backfillGuestSwipes } from '@/lib/pullorpassBackfill';
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
@@ -167,6 +168,8 @@ export default function PullOrPass() {
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
+  const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
+  const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
@@ -737,6 +740,27 @@ export default function PullOrPass() {
       return next;
     });
     bumpSwipeStreak();
+    maybeTriggerInterstitial();
+  };
+
+  const maybeTriggerInterstitial = () => {
+    if (totPair) return;
+    totCounterRef.current -= 1;
+    if (totCounterRef.current > 0) return;
+    // Reset for next time first, so an early return doesn't stick at 0.
+    totCounterRef.current = 8 + Math.floor(Math.random() * 5);
+    const pool = cards.filter((c, i) => i !== index && i !== index + 1);
+    if (pool.length < 2) return;
+    const a = pool[Math.floor(Math.random() * pool.length)];
+    let b = pool[Math.floor(Math.random() * pool.length)];
+    let t = 0;
+    while (b.card_id === a.card_id && t < 20) {
+      b = pool[Math.floor(Math.random() * pool.length)];
+      t++;
+    }
+    if (b.card_id === a.card_id) return;
+    // Slight delay so it appears after the swipe exit animation settles.
+    window.setTimeout(() => setTotPair([a, b]), 380);
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
@@ -905,6 +929,15 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          <AnimatePresence>
+            {totPair && (
+              <ThisOrThatInterstitial
+                pair={totPair}
+                userId={userId}
+                onComplete={() => setTotPair(null)}
+              />
+            )}
+          </AnimatePresence>
           {stage === 'intro' && (
             <IntroScreen
               onStart={() => {
