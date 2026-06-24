@@ -90,7 +90,7 @@ export function ThisOrThatInterstitial({ pair, userId, onComplete }: Props) {
     setWinnerId(winner.card_id);
 
     if (userId) {
-      const era = classifyEra(winner.set_name);
+      const era = classifyEra(winner.set_name)?.id ?? null;
       supabase
         .from('this_or_that_matchups')
         .insert([{
