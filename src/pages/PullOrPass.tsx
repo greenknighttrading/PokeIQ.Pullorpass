@@ -749,7 +749,11 @@ export default function PullOrPass() {
     if (totCounterRef.current > 0) return;
     // Reset for next time first, so an early return doesn't stick at 0.
     totCounterRef.current = 8 + Math.floor(Math.random() * 5);
-    const pool = cards.filter((c, i) => i !== index && i !== index + 1);
+    // Only single cards in This or That — never sealed/graded/etc.
+    const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
+    const pool = cards.filter((c, i) =>
+      i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
+    );
     if (pool.length < 2) return;
     const a = pool[Math.floor(Math.random() * pool.length)];
     let b = pool[Math.floor(Math.random() * pool.length)];
