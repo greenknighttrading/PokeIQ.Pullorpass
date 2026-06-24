@@ -168,6 +168,8 @@ export default function PullOrPass() {
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
+  const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
+  const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
