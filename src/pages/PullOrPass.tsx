@@ -361,6 +361,40 @@ export default function PullOrPass() {
     return () => window.removeEventListener('focus', onFocus);
   }, [refreshCredits]);
 
+  // Load previously-liked cards into a pool used by the This-or-That
+  // interstitial so 99% of matchups pit a user's existing favorites
+  // against each other (passively ranks their dream binder).
+  useEffect(() => {
+    if (!userId) { likedPoolRef.current = []; return; }
+    let cancelled = false;
+    const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
+    (async () => {
+      const { data } = await supabase
+        .from('pokeiq_likes')
+        .select('card_id, card_name, set_name, rarity, price, image_url, product_category')
+        .eq('user_id', userId)
+        .order('liked_at', { ascending: false })
+        .limit(400);
+      if (cancelled) return;
+      const pool: SwipeCard[] = (data ?? [])
+        .filter((r: any) =>
+          r.product_category !== 'sealed' &&
+          !SEALED_RE.test(r.card_name || '') &&
+          !!r.image_url
+        )
+        .map((r: any) => ({
+          card_id: r.card_id,
+          name: r.card_name,
+          set_name: r.set_name ?? '',
+          rarity: r.rarity ?? '',
+          price: Number(r.price) || 0,
+          image_url: r.image_url ?? null,
+        } as SwipeCard));
+      likedPoolRef.current = pool;
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
+
   // Redeem 10 credits → +10 swipes (bonus added to today's quota)
   const redeemSwipes = useCallback(async () => {
     if (!userId) {
