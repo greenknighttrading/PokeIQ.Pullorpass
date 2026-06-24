@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, Layers, SlidersHorizontal, Flame } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import { MatchOverlay } from '@/components/pullorpass/MatchOverlay';
 import { MatchPulse, type MatchPulseEvent } from '@/components/pullorpass/MatchPulse';
+import { ThisOrThatInterstitial } from '@/components/pullorpass/ThisOrThatInterstitial';
 import { saveLike, classifyEra, priceTier, extractPokemonName, type LikedCard } from '@/lib/likesService';
 import { backfillGuestSwipes } from '@/lib/pullorpassBackfill';
 import { recommendForUser, type RecommendedCard } from '@/lib/recommendCards';
