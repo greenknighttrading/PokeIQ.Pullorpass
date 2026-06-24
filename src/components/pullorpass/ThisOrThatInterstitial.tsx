@@ -93,7 +93,7 @@ export function ThisOrThatInterstitial({ pair, userId, onComplete }: Props) {
       const era = classifyEra(winner.set_name);
       supabase
         .from('this_or_that_matchups')
-        .insert({
+        .insert([{
           user_id: userId,
           card_a_id: pair[0].card_id,
           card_b_id: pair[1].card_id,
@@ -104,7 +104,7 @@ export function ThisOrThatInterstitial({ pair, userId, onComplete }: Props) {
           winner_rarity: winner.rarity,
           winner_price: winner.price,
           winner_era: era,
-        })
+        }])
         .then(({ error }) => {
           if (error) console.warn('matchup insert failed', error);
         });
