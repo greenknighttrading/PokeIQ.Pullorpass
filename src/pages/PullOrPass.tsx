@@ -740,6 +740,27 @@ export default function PullOrPass() {
       return next;
     });
     bumpSwipeStreak();
+    maybeTriggerInterstitial();
+  };
+
+  const maybeTriggerInterstitial = () => {
+    if (totPair) return;
+    totCounterRef.current -= 1;
+    if (totCounterRef.current > 0) return;
+    // Reset for next time first, so an early return doesn't stick at 0.
+    totCounterRef.current = 8 + Math.floor(Math.random() * 5);
+    const pool = cards.filter((c, i) => i !== index && i !== index + 1);
+    if (pool.length < 2) return;
+    const a = pool[Math.floor(Math.random() * pool.length)];
+    let b = pool[Math.floor(Math.random() * pool.length)];
+    let t = 0;
+    while (b.card_id === a.card_id && t < 20) {
+      b = pool[Math.floor(Math.random() * pool.length)];
+      t++;
+    }
+    if (b.card_id === a.card_id) return;
+    // Slight delay so it appears after the swipe exit animation settles.
+    window.setTimeout(() => setTotPair([a, b]), 380);
   };
 
   const finalizeRound = async (allRecords: SwipeRecord[]) => {
