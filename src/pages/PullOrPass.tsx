@@ -788,9 +788,16 @@ export default function PullOrPass() {
     totCounterRef.current = 8 + Math.floor(Math.random() * 5);
     // Only single cards in This or That — never sealed/graded/etc.
     const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
-    const pool = cards.filter((c, i) =>
-      i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
-    );
+    // 99% of the time, pair two cards the user has already liked so
+    // This-or-That passively ranks their dream binder. Only fall back
+    // to the current swipe pool when they don't have enough likes yet.
+    const liked = likedPoolRef.current;
+    const useLiked = liked.length >= 2 && Math.random() < 0.99;
+    const pool: SwipeCard[] = useLiked
+      ? liked
+      : cards.filter((c, i) =>
+          i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
+        );
     if (pool.length < 2) return;
     const a = pool[Math.floor(Math.random() * pool.length)];
     let b = pool[Math.floor(Math.random() * pool.length)];
