@@ -110,10 +110,7 @@ export function ThisOrThatInterstitial({ pair, userId, onComplete }: Props) {
         });
     }
 
-    toast.success('Preference learned', {
-      icon: <Sparkles className="w-4 h-4" />,
-      duration: 1400,
-    });
+    toast.success('✨ Preference learned', { duration: 1400 });
 
     window.setTimeout(() => {
       onComplete();
