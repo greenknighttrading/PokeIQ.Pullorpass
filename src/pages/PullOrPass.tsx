@@ -170,6 +170,9 @@ export default function PullOrPass() {
   const [quota, setQuota] = useState(() => readQuota());
   const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
   const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
+  // Pool of previously-liked cards used to power This-or-That matchups.
+  // We pair from this 99% of the time so users rank their own binder.
+  const likedPoolRef = useRef<SwipeCard[]>([]);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
@@ -357,6 +360,40 @@ export default function PullOrPass() {
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, [refreshCredits]);
+
+  // Load previously-liked cards into a pool used by the This-or-That
+  // interstitial so 99% of matchups pit a user's existing favorites
+  // against each other (passively ranks their dream binder).
+  useEffect(() => {
+    if (!userId) { likedPoolRef.current = []; return; }
+    let cancelled = false;
+    const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
+    (async () => {
+      const { data } = await supabase
+        .from('pokeiq_likes')
+        .select('card_id, card_name, set_name, rarity, price, image_url, product_category')
+        .eq('user_id', userId)
+        .order('liked_at', { ascending: false })
+        .limit(400);
+      if (cancelled) return;
+      const pool: SwipeCard[] = (data ?? [])
+        .filter((r: any) =>
+          r.product_category !== 'sealed' &&
+          !SEALED_RE.test(r.card_name || '') &&
+          !!r.image_url
+        )
+        .map((r: any) => ({
+          card_id: r.card_id,
+          name: r.card_name,
+          set_name: r.set_name ?? '',
+          rarity: r.rarity ?? '',
+          price: Number(r.price) || 0,
+          image_url: r.image_url ?? null,
+        } as SwipeCard));
+      likedPoolRef.current = pool;
+    })();
+    return () => { cancelled = true; };
+  }, [userId]);
 
   // Redeem 10 credits → +10 swipes (bonus added to today's quota)
   const redeemSwipes = useCallback(async () => {
@@ -751,9 +788,16 @@ export default function PullOrPass() {
     totCounterRef.current = 8 + Math.floor(Math.random() * 5);
     // Only single cards in This or That — never sealed/graded/etc.
     const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
-    const pool = cards.filter((c, i) =>
-      i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
-    );
+    // 99% of the time, pair two cards the user has already liked so
+    // This-or-That passively ranks their dream binder. Only fall back
+    // to the current swipe pool when they don't have enough likes yet.
+    const liked = likedPoolRef.current;
+    const useLiked = liked.length >= 2 && Math.random() < 0.99;
+    const pool: SwipeCard[] = useLiked
+      ? liked
+      : cards.filter((c, i) =>
+          i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
+        );
     if (pool.length < 2) return;
     const a = pool[Math.floor(Math.random() * pool.length)];
     let b = pool[Math.floor(Math.random() * pool.length)];
