@@ -170,6 +170,9 @@ export default function PullOrPass() {
   const [quota, setQuota] = useState(() => readQuota());
   const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
   const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
+  // Pool of previously-liked cards used to power This-or-That matchups.
+  // We pair from this 99% of the time so users rank their own binder.
+  const likedPoolRef = useRef<SwipeCard[]>([]);
   const [showSignupPrompt, setShowSignupPrompt] = useState(false);
   const [detailSeed, setDetailSeed] = useState<CardDetailSeed | null>(null);
   const [credits, setCredits] = useState<number>(0);
