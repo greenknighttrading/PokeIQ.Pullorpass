@@ -16,6 +16,7 @@ export interface RecommendedCard {
   era: string | null;
   score: number;
   reason: string;
+  tcgplayer_id: string | null;
 }
 
 interface TopSet<T> {
@@ -101,6 +102,7 @@ export async function recommendForUser(
         era: classifyEra(c.set_name)?.id ?? null,
         score: 0,
         reason: '',
+        tcgplayer_id: c.tcgplayer_id ?? null,
       });
     }
   }
@@ -136,6 +138,7 @@ export async function recommendForUser(
           era: classifyEra(c.set_name)?.id ?? null,
           score: 0,
           reason: '',
+          tcgplayer_id: c.tcgplayer_id ?? null,
         });
       }
     }
