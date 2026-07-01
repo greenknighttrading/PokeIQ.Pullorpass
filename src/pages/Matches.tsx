@@ -34,6 +34,8 @@ import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
+import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
+import { tcgPlayerUrl } from '@/lib/packEV';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
@@ -64,6 +66,29 @@ const firstSentences = (text: string, n = 2) => {
   if (!parts) return text;
   return parts.slice(0, n).join(' ').trim();
 };
+
+// Build the affiliate-wrapped TCGplayer URL for a card.
+function tcgHref(tcgplayerId?: string | null, name?: string | null): string {
+  return tcgPlayerUrl(tcgplayerId, name || '');
+}
+
+function TcgLinkIcon({ tcgplayerId, name, className }: { tcgplayerId?: string | null; name?: string | null; className?: string }) {
+  return (
+    <a
+      href={tcgHref(tcgplayerId, name)}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      className={cn(
+        "absolute bottom-1.5 left-1.5 z-10 flex items-center justify-center rounded-md bg-white shadow-md hover:scale-105 transition-transform",
+        className
+      )}
+      title="View on TCGplayer"
+    >
+      <img src={tcgplayerLogo} alt="TCGplayer" className="h-4 w-auto" />
+    </a>
+  );
+}
 
 type FacetKey = 'all' | 'artist' | 'set' | 'era' | 'type' | 'rarity' | 'priceTier';
 const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
@@ -1017,14 +1042,39 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
     return () => { cancelled = true; };
   }, [userId, isPublicView]);
 
-  const source = (!isPublicView && roundLikes && roundLikes.length > 0) ? roundLikes : likes;
+  const source = useMemo(() => (!isPublicView && roundLikes && roundLikes.length > 0) ? roundLikes : likes, [isPublicView, roundLikes, likes]);
+
+  // Fetch TCGplayer IDs for the cards shown so we can link out with affiliate tracking.
+  const [tcgMeta, setTcgMeta] = useState<Map<string, string>>(new Map());
+  useEffect(() => {
+    const ids = source.map((c) => c.card_id).filter(Boolean) as string[];
+    if (ids.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('market_snapshots')
+        .select('card_id, tcgplayer_id')
+        .in('card_id', ids)
+        .limit(ids.length);
+      if (cancelled) return;
+      const map = new Map<string, string>();
+      (data ?? []).forEach((m: any) => {
+        if (m.card_id && m.tcgplayer_id) map.set(m.card_id, m.tcgplayer_id as string);
+      });
+      setTcgMeta(map);
+    })();
+    return () => { cancelled = true; };
+  }, [source]);
+
   // Pulls only — super likes first, then regular pulls, newest first within each group.
-  const sorted = [...source].sort((a, b) => {
-    const aSuper = a.source === 'super_like' ? 1 : 0;
-    const bSuper = b.source === 'super_like' ? 1 : 0;
-    if (aSuper !== bSuper) return bSuper - aSuper;
-    return (b.liked_at || '').localeCompare(a.liked_at || '');
-  });
+  const sorted = useMemo(() => {
+    return [...source].sort((a, b) => {
+      const aSuper = a.source === 'super_like' ? 1 : 0;
+      const bSuper = b.source === 'super_like' ? 1 : 0;
+      if (aSuper !== bSuper) return bSuper - aSuper;
+      return (b.liked_at || '').localeCompare(a.liked_at || '');
+    });
+  }, [source]);
   const recent = sorted.slice(0, 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   return (
@@ -1048,6 +1098,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
             decision="pull"
             isSuper={c.source === 'super_like'}
             onOpen={onOpen}
+            tcgplayerId={tcgMeta.get(c.card_id)}
           />
         ))}
       </CarouselRow>
@@ -1055,11 +1106,11 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   );
 }
 
-function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; decision: 'pull' | 'pass'; isSuper?: boolean; onOpen: (s: CardDetailSeed) => void }) {
+function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: LikedCard; decision: 'pull' | 'pass'; isSuper?: boolean; onOpen: (s: CardDetailSeed) => void; tcgplayerId?: string }) {
   const [err, setErr] = useState(false);
   const isPass = decision === 'pass';
   return (
-    <motion.button
+    <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 280, damping: 22 }}
       onClick={() => onOpen({
@@ -1067,7 +1118,7 @@ function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; deci
         image_url: like.image_url, price: like.price, rarity: like.rarity,
         artist: like.artist, pokemon_type: like.pokemon_type, card_number: like.card_number,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left"
+      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className={cn(
         "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
@@ -1094,12 +1145,13 @@ function RecentCard({ like, decision, isSuper, onOpen }: { like: LikedCard; deci
               ? <><Sparkles className="w-2.5 h-2.5" /> Super</>
               : <><HeartIcon className="w-2.5 h-2.5" /> Pull</>}
         </div>
+        <TcgLinkIcon tcgplayerId={tcgplayerId} name={like.card_name} />
       </div>
       <p className="mt-2.5 text-sm text-foreground font-medium truncate">{like.card_name}</p>
       <p className="text-xs text-muted-foreground truncate">
         {like.set_name ?? '—'}{like.price ? ` · $${Number(like.price).toFixed(0)}` : ''}
       </p>
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -1515,7 +1567,7 @@ function RecommendedRow({ items, onOpen }: { items: RecommendedCard[]; onOpen: (
 function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailSeed) => void }) {
   const [err, setErr] = useState(false);
   return (
-    <motion.button
+    <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 280, damping: 22 }}
       onClick={() => onOpen({
@@ -1523,7 +1575,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
         image_url: r.image_url, price: r.price, rarity: r.rarity,
         artist: r.artist, pokemon_type: r.pokemon_type,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left"
+      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
         {r.image_url && !err ? (
@@ -1531,13 +1583,14 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
+        <TcgLinkIcon tcgplayerId={r.tcgplayer_id} name={r.card_name} />
       </div>
       <p className="mt-2.5 text-sm text-foreground font-medium truncate">{r.card_name}</p>
       <p className="text-xs text-muted-foreground truncate">
         {r.set_name ?? '—'}{r.price ? ` · $${Number(r.price).toFixed(0)}` : ''}
       </p>
       <p className="text-[11px] text-primary/80 truncate italic mt-0.5">{r.reason}</p>
-    </motion.button>
+    </motion.div>
   );
 }
 
@@ -1844,6 +1897,7 @@ type RankedTotCard = {
   price: number | null;
   wins: number;
   losses: number;
+  tcgplayer_id: string | null;
 };
 
 function totTcgImage(id: string | null): string | null {
@@ -1877,7 +1931,7 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
         const wId = r.winner_card_id as string;
         const lId = r.loser_card_id as string;
         if (wId) {
-          const cur = tally.get(wId) ?? { card_id: wId, name: r.winner_name ?? '', set_name: r.winner_set ?? null, image_url: null, price: r.winner_price != null ? Number(r.winner_price) : null, wins: 0, losses: 0 };
+          const cur = tally.get(wId) ?? { card_id: wId, name: r.winner_name ?? '', set_name: r.winner_set ?? null, image_url: null, price: r.winner_price != null ? Number(r.winner_price) : null, wins: 0, losses: 0, tcgplayer_id: null };
           cur.wins += 1;
           if (!cur.name && r.winner_name) cur.name = r.winner_name;
           if (!cur.set_name && r.winner_set) cur.set_name = r.winner_set;
@@ -1885,7 +1939,7 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
           tally.set(wId, cur);
         }
         if (lId) {
-          const cur = tally.get(lId) ?? { card_id: lId, name: '', set_name: null, image_url: null, price: null, wins: 0, losses: 0 };
+          const cur = tally.get(lId) ?? { card_id: lId, name: '', set_name: null, image_url: null, price: null, wins: 0, losses: 0, tcgplayer_id: null };
           cur.losses += 1;
           tally.set(lId, cur);
         }
@@ -1912,6 +1966,7 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
             if (!r.name) r.name = m.name ?? r.name;
             if (!r.set_name) r.set_name = m.set_name ?? r.set_name;
             if (r.price == null && m.price != null) r.price = Number(m.price);
+            if (!r.tcgplayer_id) r.tcgplayer_id = m.tcgplayer_id ?? null;
           }
         }
       }
@@ -1976,10 +2031,12 @@ function RankedThumb({ card, rank, onOpen }: { card: RankedTotCard; rank: number
     rank === 3 ? 'bg-orange-400 text-black' :
     'bg-background/85 text-foreground';
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpen({ card_id: card.card_id, name: card.name, set_name: card.set_name, image_url: card.image_url, price: card.price ?? undefined } as any)}
-      className="group text-left space-y-1.5"
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onOpen({ card_id: card.card_id, name: card.name, set_name: card.set_name, image_url: card.image_url, price: card.price ?? undefined } as any); }}
+      className="group text-left space-y-1.5 cursor-pointer"
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/40 group-hover:ring-primary/40 transition-shadow shadow-md group-hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.45)]">
         {card.image_url && !err ? (
@@ -1993,12 +2050,13 @@ function RankedThumb({ card, rank, onOpen }: { card: RankedTotCard; rank: number
         <div className="absolute bottom-1.5 right-1.5 bg-background/80 backdrop-blur-sm rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums shadow-md">
           {card.wins}W · {winPct}%
         </div>
+        <TcgLinkIcon tcgplayerId={card.tcgplayer_id} name={card.name} />
       </div>
       <p className="text-xs text-foreground truncate font-medium">{card.name || '—'}</p>
       <p className="text-[10px] text-muted-foreground truncate">
         {card.set_name ?? '—'}{card.price ? ` · $${Number(card.price).toFixed(0)}` : ''}
       </p>
-    </button>
+    </div>
   );
 }
 
