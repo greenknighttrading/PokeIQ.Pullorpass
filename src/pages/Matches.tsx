@@ -34,7 +34,7 @@ import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
-import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
+import tcgplayerIcon from '@/assets/tcgplayer-icon.png';
 import { tcgPlayerUrl } from '@/lib/packEV';
 
 // Map of personality type → portrait illustration (matches /personality-types).
