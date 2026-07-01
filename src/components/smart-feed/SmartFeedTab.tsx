@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getAffiliateUrl } from '@/lib/affiliate';
 import { MoverCard, getImageUrl, getChangeForTime } from '@/components/buylist/shared/signalHelpers';
 import { useWatchlist } from '@/hooks/useWatchlist';
 import { matchPokemonCharacter } from '@/lib/pokemonNames';
