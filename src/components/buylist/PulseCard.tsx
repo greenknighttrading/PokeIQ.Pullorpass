@@ -4,6 +4,7 @@ import { ImageOff } from 'lucide-react';
 import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
 import ebayLogo from '@/assets/ebay-logo.svg';
 import { MoverCard, getImageUrl } from './shared/signalHelpers';
+import { getAffiliateUrl } from '@/lib/affiliate';
 
 interface PulseCardProps {
   card: MoverCard;
@@ -25,9 +26,10 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
   const dotColor = getTrendDot(card);
   const showPlaceholder = !imgUrl || imgFailed;
 
-  const tcgplayerUrl = card.tcgplayer_id
+  const tcgplayerRaw = card.tcgplayer_id
     ? `https://www.tcgplayer.com/product/${card.tcgplayer_id}`
     : `https://www.tcgplayer.com/search/pokemon/product?q=${encodeURIComponent(card.name)}`;
+  const tcgplayerUrl = getAffiliateUrl(tcgplayerRaw);
   const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(card.name + (card.set_name ? ' ' + card.set_name : ''))}`;
 
   return (
