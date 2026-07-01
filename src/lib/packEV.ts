@@ -79,9 +79,11 @@ export function classifyPackEra(setName: string): 'modern' | 'legacy' | 'vintage
   return 'legacy';
 }
 
+import { getAffiliateUrl } from '@/lib/affiliate';
+
 export function tcgPlayerUrl(tcgplayerId: string | null | undefined, name: string): string {
-  if (tcgplayerId) {
-    return `https://www.tcgplayer.com/product/${tcgplayerId}?utm_campaign=affiliate&utm_medium=PokeIQ&utm_source=PokeIQ`;
-  }
-  return `https://www.tcgplayer.com/search/all/product?q=${encodeURIComponent(name)}`;
+  const raw = tcgplayerId
+    ? `https://www.tcgplayer.com/product/${tcgplayerId}`
+    : `https://www.tcgplayer.com/search/all/product?q=${encodeURIComponent(name)}`;
+  return getAffiliateUrl(raw);
 }
