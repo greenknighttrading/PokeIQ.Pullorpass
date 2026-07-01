@@ -13,7 +13,7 @@ import { classifyEra } from '@/lib/likesService';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getAffiliateUrl } from '@/lib/affiliate';
-import { ShoppingCart } from 'lucide-react';
+import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
 
 const PriceHistoryChart = lazy(() => import('@/components/buylist/PriceHistoryChart'));
 
@@ -529,16 +529,11 @@ export function CardDetailModal({
                     href={getAffiliateUrl(tcgUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-3 w-full inline-flex flex-col items-center rounded-xl bg-primary text-primary-foreground px-4 py-2.5 font-semibold text-sm shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:bg-primary/90"
+                    className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 border border-border px-4 py-2.5 font-semibold text-sm shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:bg-gray-50"
                   >
-                    <span className="inline-flex items-center gap-2">
-                      <ShoppingCart className="w-4 h-4" />
-                      Buy on TCGplayer
-                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
-                    </span>
-                    <span className="text-[10px] font-normal opacity-80 mt-0.5">
-                      View live listings & current market prices
-                    </span>
+                    <img src={tcgplayerLogo} alt="TCGplayer" className="h-5 w-auto" />
+                    <span>Buy on TCGplayer</span>
+                    <ExternalLink className="w-3.5 h-3.5 opacity-70" />
                   </a>
                 );
               })()}
