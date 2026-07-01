@@ -12,6 +12,8 @@ import { saveLike } from '@/lib/likesService';
 import { classifyEra } from '@/lib/likesService';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getAffiliateUrl } from '@/lib/affiliate';
+import { ShoppingCart } from 'lucide-react';
 
 const PriceHistoryChart = lazy(() => import('@/components/buylist/PriceHistoryChart'));
 
@@ -518,6 +520,28 @@ export function CardDetailModal({
                   </div>
                 ) : null}
               </div>
+              {(() => {
+                const tcgUrl = details?.tcgplayer_id
+                  ? `https://www.tcgplayer.com/product/${details.tcgplayer_id}`
+                  : `https://www.tcgplayer.com/search/pokemon/product?q=${encodeURIComponent(seed.card_name)}`;
+                return (
+                  <a
+                    href={getAffiliateUrl(tcgUrl)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 w-full inline-flex flex-col items-center rounded-xl bg-primary text-primary-foreground px-4 py-2.5 font-semibold text-sm shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:bg-primary/90"
+                  >
+                    <span className="inline-flex items-center gap-2">
+                      <ShoppingCart className="w-4 h-4" />
+                      Buy on TCGplayer
+                      <ExternalLink className="w-3.5 h-3.5 opacity-80" />
+                    </span>
+                    <span className="text-[10px] font-normal opacity-80 mt-0.5">
+                      View live listings & current market prices
+                    </span>
+                  </a>
+                );
+              })()}
             </div>
 
             {/* DETAILS */}
@@ -622,26 +646,6 @@ export function CardDetailModal({
             <Bookmark className={`w-4 h-4 ${inWatch ? 'fill-current' : ''}`} />
             {inWatch ? 'Watching' : 'Watchlist'}
           </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => { onClose(); navigate('/matches'); }}
-            className="hidden sm:inline-flex gap-1.5"
-          >
-            <Sparkles className="w-4 h-4" /> Similar
-          </Button>
-          {details?.tcgplayer_id && (
-            <a
-              href={`https://www.tcgplayer.com/product/${details.tcgplayer_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex"
-            >
-              <Button variant="ghost" size="sm" className="gap-1.5">
-                <ExternalLink className="w-4 h-4" /> TCGplayer
-              </Button>
-            </a>
-          )}
         </div>
       </motion.div>
     </motion.div>
