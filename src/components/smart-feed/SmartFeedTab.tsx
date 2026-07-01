@@ -323,9 +323,10 @@ function SpotlightCard({ card, navigate }: { card: MoverCard; navigate: (path: s
   const [imgFailed, setImgFailed] = useState(false);
   const change7d = card.price_change_7d ?? 0;
   const dotColor = getTrendDotColor(card);
-  const tcgplayerUrl = card.tcgplayer_id
+  const tcgplayerRaw = card.tcgplayer_id
     ? `https://www.tcgplayer.com/product/${card.tcgplayer_id}`
     : `https://www.tcgplayer.com/search/pokemon/product?q=${encodeURIComponent(card.name)}`;
+  const tcgplayerUrl = getAffiliateUrl(tcgplayerRaw);
   const ebayUrl = `https://www.ebay.com/sch/i.html?_nkw=${encodeURIComponent(card.name + (card.set_name ? ' ' + card.set_name : ''))}`;
 
   return (
