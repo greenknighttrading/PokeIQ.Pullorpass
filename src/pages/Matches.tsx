@@ -85,7 +85,7 @@ function TcgLinkIcon({ tcgplayerId, name, className }: { tcgplayerId?: string | 
       )}
       title="View on TCGplayer"
     >
-      <img src={tcgplayerIcon} alt="TCGplayer" className="h-10 w-auto" />
+      <img src={tcgplayerIcon} alt="TCGplayer" className="h-12 w-auto" />
     </a>
   );
 }
