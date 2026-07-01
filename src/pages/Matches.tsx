@@ -34,7 +34,7 @@ import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
-import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
+import tcgplayerIcon from '@/assets/tcgplayer-icon.png';
 import { tcgPlayerUrl } from '@/lib/packEV';
 
 // Map of personality type → portrait illustration (matches /personality-types).
@@ -85,7 +85,7 @@ function TcgLinkIcon({ tcgplayerId, name, className }: { tcgplayerId?: string | 
       )}
       title="View on TCGplayer"
     >
-      <img src={tcgplayerLogo} alt="TCGplayer" className="h-8 w-auto" />
+      <img src={tcgplayerIcon} alt="TCGplayer" className="h-12 w-auto" />
     </a>
   );
 }
