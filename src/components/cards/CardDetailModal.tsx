@@ -531,7 +531,7 @@ export function CardDetailModal({
                     rel="noopener noreferrer"
                     className="mt-3 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-white text-gray-900 border border-border px-4 py-2.5 font-semibold text-sm shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:bg-gray-50"
                   >
-                    <img src={tcgplayerLogo} alt="TCGplayer" className="h-8 w-auto" />
+                    <img src={tcgplayerLogo} alt="TCGplayer" className="h-10 w-auto" />
                     <span>Buy on TCGplayer</span>
                     <ExternalLink className="w-3.5 h-3.5 opacity-70" />
                   </a>
