@@ -80,12 +80,12 @@ function TcgLinkIcon({ tcgplayerId, name, className }: { tcgplayerId?: string | 
       rel="noopener noreferrer"
       onClick={(e) => e.stopPropagation()}
       className={cn(
-        "absolute bottom-1.5 left-1.5 z-10 flex items-center justify-center rounded-md bg-white p-1.5 shadow-md hover:scale-105 transition-transform",
+        "absolute bottom-1.5 left-1.5 z-10 flex items-center justify-center hover:scale-105 transition-transform drop-shadow-lg",
         className
       )}
       title="View on TCGplayer"
     >
-      <img src={tcgplayerLogo} alt="TCGplayer" className="h-5 w-auto" />
+      <img src={tcgplayerLogo} alt="TCGplayer" className="h-8 w-auto" />
     </a>
   );
 }
