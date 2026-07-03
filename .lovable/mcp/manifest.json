@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "pokeiq-mcp",
+      "version": "0.1.0",
+      "title": "PokeIQ MCP"
+    },
+    "tools": [
+      {
+        "name": "search_cards",
+        "title": "Search Pokemon cards",
+        "description": "Search the PokeIQ card catalog by name. Returns up to `limit` matching Pokemon cards with set, number, and rarity.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Card name or partial name to search for."
+            },
+            "limit": {
+              "default": 10,
+              "description": "Max cards to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            },
+            "include_sealed": {
+              "default": false,
+              "description": "Include sealed products in results.",
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "query"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_card_prices",
+        "title": "Get card prices",
+        "description": "Get current market prices for all variants (condition/printing/language) of a specific card by its PokeIQ card id. Use search_cards first to find the id.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "card_id": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The card id returned by search_cards."
+            }
+          },
+          "required": [
+            "card_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_trending_pokemon",
+        "title": "List trending Pokemon",
+        "description": "Return the top trending Pokemon over the last 7 days, ranked by average price change across their cards (PokeIQ Greatest Hits index).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "default": 15,
+              "description": "Max Pokemon to return.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
