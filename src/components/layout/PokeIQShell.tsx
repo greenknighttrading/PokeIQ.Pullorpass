@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  Heart, User, Trophy, ScanLine, Crown, Zap, Users, Lock, Activity,
+  User, Crown, Zap, Users, Lock, Activity,
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
@@ -27,13 +27,10 @@ interface NavItem {
 
 const primaryNav: NavItem[] = [
   { label: 'Pull or Pass', href: '/swipe', icon: Layers },
-  { label: 'Matches', href: '/matches', icon: Heart },
-  { label: 'Smart Profile', href: '/profile', icon: User },
-  { label: 'Training Lab', href: '/pokeyelp', icon: Zap },
-  { label: 'Leaderboard', href: '/leaderboard', icon: Trophy, badge: 'NEW' },
-  { label: 'Personality Test', href: '/personality-types', icon: Users },
-  { label: 'Market Report', href: '/pokeiq-daily', icon: Activity },
-  { label: 'Card Search', href: '/buylist/scanner', icon: ScanLine },
+  { label: 'Profile', href: '/profile', icon: User },
+  { label: 'Identity', href: '/personality-types', icon: Users },
+  { label: 'Earn', href: '/pokeyelp', icon: Zap },
+  { label: 'Market', href: '/pokeiq-daily', icon: Activity },
 ];
 
 const premiumCollect: NavItem[] = [
@@ -303,7 +300,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <DropdownMenuLabel className="truncate">{email}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate('/profile')}>
-                    <User className="w-4 h-4 mr-2" /> Smart Profile
+                    <User className="w-4 h-4 mr-2" /> Profile
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate('/settings')}>
                     <SettingsIcon className="w-4 h-4 mr-2" /> Settings
