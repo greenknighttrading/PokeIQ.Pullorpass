@@ -87,14 +87,13 @@ export function GlobalNavBar({
   ];
 
   const personalityItems = [
-    { label: 'Personality Test', href: '/personality-types', icon: Sparkles },
+    { label: 'Identity', href: '/personality-types', icon: Sparkles },
     { label: 'Collector Types', href: '/personality-types', icon: Users },
   ];
 
   const discoverItems = [
     { label: 'Pull or Pass', href: '/swipe', icon: Heart },
-    { label: 'Matches', href: '/matches', icon: Heart },
-    { label: 'Training Lab', href: '/pokeyelp', icon: MessageSquare },
+    { label: 'Earn', href: '/pokeyelp', icon: MessageSquare },
   ];
 
   const toolsItems = [
