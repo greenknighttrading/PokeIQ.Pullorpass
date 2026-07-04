@@ -714,8 +714,8 @@ export default function PullOrPass() {
   const next = cards[index + 1];
   const after = cards[index + 2];
 
-  const persistSwipeProgress = (rec: SwipeRecord, newRecords: SwipeRecord[]) => {
-    const safeRoundId = validRoundId(roundId);
+  const persistSwipeProgress = (rec: SwipeRecord, newRecords: SwipeRecord[], forcedRoundId?: string) => {
+    const safeRoundId = forcedRoundId ?? validRoundId(roundId);
     if (safeRoundId !== roundId) setRoundId(safeRoundId);
 
     // Track today's swiped cards so Matches/Earn/Profile can reflect the
@@ -761,10 +761,10 @@ export default function PullOrPass() {
     const newRecords = [...records, rec];
     setRecords(newRecords);
     bumpQuota();
-    persistSwipeProgress(rec, newRecords);
+    const persistedRoundId = validRoundId(roundId);
+    persistSwipeProgress(rec, newRecords, persistedRoundId);
 
     if (userId) {
-      const persistedRoundId = validRoundId(roundId);
       supabase.from('pullorpass_swipes').insert({
         user_id: userId,
         round_id: persistedRoundId,
@@ -906,9 +906,9 @@ export default function PullOrPass() {
       const newRecords = [...records, rec];
       setRecords(newRecords);
       bumpQuota();
-      persistSwipeProgress(rec, newRecords);
+      const persistedRoundId = validRoundId(roundId);
+      persistSwipeProgress(rec, newRecords, persistedRoundId);
       if (userId) {
-        const persistedRoundId = validRoundId(roundId);
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
           round_id: persistedRoundId,
