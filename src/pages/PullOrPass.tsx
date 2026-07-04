@@ -182,7 +182,7 @@ export default function PullOrPass() {
   const [cards, setCards] = useState<SwipeCard[]>([]);
   const [index, setIndex] = useState(0);
   const [records, setRecords] = useState<SwipeRecord[]>([]);
-  const [roundId, setRoundId] = useState<string>('');
+  const [roundId, setRoundId] = useState<string>(() => newRoundId());
   const [imgError, setImgError] = useState(false);
   const [flyAnim, setFlyAnim] = useState<{ type: 'pull' | 'love' | 'pass'; key: number } | null>(null);
   const [exitDir, setExitDir] = useState<SwipeDir | null>(null);
