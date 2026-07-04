@@ -332,10 +332,10 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
 
         {/* Mobile floating pill tab bar */}
         <nav
-          className="md:hidden fixed bottom-4 left-4 right-4 z-40 rounded-[32px] border border-border/60 bg-background/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]"
+          className="md:hidden fixed bottom-2 left-4 right-4 z-40 rounded-[32px] border border-border/60 bg-background/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]"
           aria-label="Primary"
         >
-          <ul className="flex items-center justify-around px-1 py-0">
+          <ul className="flex items-center justify-around px-1 pt-0 pb-2">
             {mobileNav.map((item) => {
               const Icon = item.icon;
               const isActive =
