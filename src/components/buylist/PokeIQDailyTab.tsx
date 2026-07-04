@@ -1252,9 +1252,10 @@ function InvestingIdeas() {
 
       const MAX_PICK_CARDS = 9;
 
-      // Recent snapshots can be incomplete (sync still running), so look back 14 days
+      // Recent snapshots can be incomplete (sync still running), so look back 120 days
       // and keep the most recent row per card_id rather than locking to one date.
-      const sinceDate = new Date(Date.now() - 14 * 86400_000).toISOString().slice(0, 10);
+      // A wide window protects against gaps between sync runs.
+      const sinceDate = new Date(Date.now() - 120 * 86400_000).toISOString().slice(0, 10);
       const dedupeLatest = <T extends { card_id: string; snapshot_date?: string }>(rows: T[]): T[] => {
         const map = new Map<string, T>();
         for (const r of rows) {
