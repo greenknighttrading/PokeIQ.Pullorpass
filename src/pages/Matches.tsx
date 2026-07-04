@@ -34,6 +34,7 @@ import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
+import { readSwipeStreak } from '@/pages/PullOrPass';
 import tcgplayerIcon from '@/assets/tcgplayer-icon-transparent.png.asset.json';
 import { tcgPlayerUrl } from '@/lib/packEV';
 
@@ -529,9 +530,11 @@ export default function Matches({
               )}
               {view === 'binder' && (
                 <>
-                  {(likes.length > 0 || passes.length > 0) && (
-                    <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
+                  {!isPublicView && (
+                    <SwipeStats likes={likes} cardsSwiped={cardsSwiped} />
                   )}
+                  <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
+                  <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
@@ -1061,7 +1064,43 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName, userId }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string; userId?: string | null }) {
+function SwipeStats({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: number }) {
+  const totalLikes = likes.length;
+  const priced = likes.filter((l) => typeof l.price === 'number' && (l.price ?? 0) > 0);
+  const avgValue = priced.length ? priced.reduce((s, l) => s + (l.price ?? 0), 0) / priced.length : 0;
+  const streak = readSwipeStreak().streak;
+  const tiles: { label: string; value: string; icon: React.ReactNode }[] = [
+    { label: 'Total likes', value: totalLikes.toLocaleString(), icon: <HeartIcon className="w-4 h-4 text-primary" /> },
+    { label: 'Avg. card value', value: avgValue > 0 ? `$${avgValue.toFixed(avgValue >= 100 ? 0 : 2)}` : '—', icon: <Sparkles className="w-4 h-4 text-primary" /> },
+    { label: 'Daily streak', value: `${streak}d`, icon: <Flame className="w-4 h-4 text-primary" /> },
+  ];
+  return (
+    <section>
+      <div className="mb-4">
+        <div className="flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-primary" />
+          <h2 className="text-2xl font-bold text-foreground">Swipe stats</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mt-1">
+          A quick snapshot of your swiping so far{cardsSwiped ? ` — ${cardsSwiped.toLocaleString()} cards swiped total` : ''}.
+        </p>
+      </div>
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        {tiles.map((t) => (
+          <Card key={t.label} className="p-4 sm:p-5 bg-card/60 border-border/60">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+              {t.icon}
+              <span className="truncate">{t.label}</span>
+            </div>
+            <div className="mt-2 text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{t.value}</div>
+          </Card>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName, userId, kind = 'liked' }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string; userId?: string | null; kind?: 'liked' | 'disliked' }) {
   const [roundCards, setRoundCards] = useState<RoundDisplayCard[] | null>(null);
   useEffect(() => {
     if (isPublicView || !userId) { setRoundCards(null); return; }
@@ -1100,9 +1139,15 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   }, [userId, isPublicView]);
 
   const source = useMemo<RoundDisplayCard[]>(() => {
-    if (!isPublicView && roundCards && roundCards.length > 0) return roundCards;
-    return likes.map((like) => ({ ...like, decision: like.source === 'pass' ? 'pass' : 'pull' }));
-  }, [isPublicView, roundCards, likes]);
+    const base: RoundDisplayCard[] = (() => {
+      if (!isPublicView && roundCards && roundCards.length > 0) return roundCards;
+      const pool = kind === 'disliked' ? passes : likes;
+      return pool.map((like) => ({ ...like, decision: like.source === 'pass' ? 'pass' : 'pull' }));
+    })();
+    return kind === 'disliked'
+      ? base.filter((c) => c.decision === 'pass' || c.source === 'pass')
+      : base.filter((c) => !(c.decision === 'pass' || c.source === 'pass'));
+  }, [isPublicView, roundCards, likes, passes, kind]);
 
   // Fetch TCGplayer IDs for the cards shown so we can link out with affiliate tracking.
   const [tcgMeta, setTcgMeta] = useState<Map<string, string>>(new Map());
@@ -1137,31 +1182,43 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   }, [source, isPublicView, roundCards]);
   const recent = sorted.slice(0, !isPublicView && roundCards?.length ? 20 : 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
+  const isDisliked = kind === 'disliked';
+  const heading = isPublicView
+    ? (isDisliked ? 'Recently passed' : 'Latest matches')
+    : (isDisliked ? 'Disliked' : 'Liked');
+  const description = isPublicView
+    ? (isDisliked ? `Cards ${subject} recently passed on.` : `Every card ${subject} pulled — super likes first.`)
+    : 'Complete a round of 20 in Swipe to see cards here.';
+  const Icon = isDisliked ? XIcon : HeartIcon;
   return (
     <section>
       <div className="mb-5">
         <div className="flex items-center gap-2">
-          <Clock className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">{isPublicView ? 'Latest matches' : 'Your latest round'}</h2>
+          <Icon className={cn('w-5 h-5', isDisliked ? 'text-destructive' : 'text-primary')} />
+          <h2 className="text-2xl font-bold text-foreground">{heading}</h2>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          {isPublicView
-            ? `Every card ${subject} pulled — super likes first.`
-            : 'The latest 20 cards you swiped in your most recent round.'}
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">{description}</p>
       </div>
-      <CarouselRow ariaLabel="latest matches">
-        {recent.map((c) => (
-          <RecentCard
-            key={`round-${c.id}`}
-            like={c}
-            decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
-            isSuper={c.source === 'super_like'}
-            onOpen={onOpen}
-            tcgplayerId={tcgMeta.get(c.card_id)}
-          />
-        ))}
-      </CarouselRow>
+      {recent.length === 0 ? (
+        <Card className="p-6 text-sm text-muted-foreground bg-card/40 border-dashed border-border/60">
+          {isDisliked
+            ? 'No passes yet — swipe left on a card to see it here.'
+            : 'No likes yet — swipe right on a card to see it here.'}
+        </Card>
+      ) : (
+        <CarouselRow ariaLabel={isDisliked ? 'recently disliked' : 'liked cards'}>
+          {recent.map((c) => (
+            <RecentCard
+              key={`${kind}-${c.id}`}
+              like={c}
+              decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
+              isSuper={c.source === 'super_like'}
+              onOpen={onOpen}
+              tcgplayerId={tcgMeta.get(c.card_id)}
+            />
+          ))}
+        </CarouselRow>
+      )}
     </section>
   );
 }
