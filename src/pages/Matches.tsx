@@ -1268,11 +1268,11 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
       <div className={cn(
         "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
         isPass
-          ? "ring-border/40 group-hover:ring-destructive/40"
+          ? "ring-border/40 group-hover:ring-destructive/40 saturate-[0.92]"
           : "ring-border/60 group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50"
       )}>
         {like.image_url && !err ? (
-          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-60 grayscale")} onError={() => setErr(true)} />
+          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-90")} onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
