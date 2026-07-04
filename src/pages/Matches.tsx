@@ -512,7 +512,7 @@ export default function Matches({
           )}
 
           {!loading && userId && (
-            <div className="space-y-8 sm:space-y-10">
+            <div className="space-y-6 sm:space-y-8">
               {view === 'profile' && (
                 <>
                   <TasteHero
