@@ -531,7 +531,7 @@ export default function Matches({
               {view === 'binder' && (
                 <>
                   {!isPublicView && (
-                    <SwipeStats likes={likes} cardsSwiped={cardsSwiped} />
+                    <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
