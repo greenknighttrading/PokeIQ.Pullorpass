@@ -179,11 +179,13 @@ export default function Matches({
   viewedDisplayName,
   isPublicView = false,
   isAdminView = false,
+  view = 'profile',
 }: {
   viewedUserId?: string;
   viewedDisplayName?: string;
   isPublicView?: boolean;
   isAdminView?: boolean;
+  view?: 'profile' | 'binder';
 } = {}) {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
@@ -453,7 +455,7 @@ export default function Matches({
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              {!isPublicView && (
+              {view === 'profile' && !isPublicView && (
                 <Link
                   to="/leaderboard"
                   className="group flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 sm:p-5 hover:border-primary/60 hover:from-primary/15 transition-all"
@@ -473,23 +475,31 @@ export default function Matches({
                   <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
                 </Link>
               )}
-              <TasteHero
-                taste={taste}
-                cardsSwiped={cardsSwiped}
-                isPublicView={isPublicView}
-                viewedDisplayName={viewedDisplayName}
-              />
-              {(likes.length > 0 || passes.length > 0) && (
-                <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
+              {view === 'profile' && (
+                <>
+                  <TasteHero
+                    taste={taste}
+                    cardsSwiped={cardsSwiped}
+                    isPublicView={isPublicView}
+                    viewedDisplayName={viewedDisplayName}
+                  />
+                  {(likes.length > 0 || passes.length > 0) && (
+                    <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
+                  )}
+                  {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
+                  {!isPublicView && <SwipeAgainOrLimit />}
+                  {!isPublicView && <ThisOrThatCTA />}
+                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
+                  {!isPublicView && <DailyLimitWidget />}
+                  {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
+                </>
               )}
-              {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
-              {!isPublicView && <SwipeAgainOrLimit />}
-              {!isPublicView && <ThisOrThatCTA />}
-              {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
-              <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-              <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-              {!isPublicView && <DailyLimitWidget />}
-              {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
+              {view === 'binder' && (
+                <>
+                  <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                  <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                </>
+              )}
             </div>
           )}
         </main>
@@ -687,6 +697,12 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
               Every collector is different. Some chase rarity. Some chase art. Some chase the thrill of the hunt. The choices you make reveal a unique collecting personality that influences how you buy, sell, and build your collection. Take the collector archetype test to understand your strengths and weaknesses, and learn what truly drives your decisions.
             </p>
             <div className="flex flex-col sm:flex-row items-center sm:items-center gap-3 sm:gap-5 mt-4 sm:mt-5">
+              <Link
+                to="/personality-types"
+                className="text-sm sm:text-base font-medium text-muted-foreground hover:text-primary underline-offset-4 hover:underline order-first sm:order-none"
+              >
+                Learn more
+              </Link>
               <Button asChild size="lg" className="gap-2 w-full sm:w-auto sm:h-12 sm:px-7 sm:text-base font-semibold">
                 <Link to="/test">
                   Take the Test <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
