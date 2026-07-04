@@ -34,6 +34,7 @@ import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
 import { cn } from '@/lib/utils';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
+import { readSwipeStreak } from '@/pages/PullOrPass';
 import tcgplayerIcon from '@/assets/tcgplayer-icon-transparent.png.asset.json';
 import { tcgPlayerUrl } from '@/lib/packEV';
 
