@@ -1049,7 +1049,7 @@ export default function PokeYelp() {
               </div>
 
               {/* Tag picker — borderless, breathing */}
-              <div className="space-y-4 min-w-0 w-full sm:flex-1">
+              <div className="flex flex-col gap-4 min-w-0 w-full sm:flex-1">
                 <div>
                   <div className="flex items-baseline justify-between gap-3 mb-2">
                     <h2 className="text-base sm:text-lg font-semibold text-foreground leading-tight">What does this card feel like?</h2>
