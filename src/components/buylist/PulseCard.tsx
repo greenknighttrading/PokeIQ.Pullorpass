@@ -55,18 +55,18 @@ export default function PulseCard({ card, type, navigate, getTrendDot }: PulseCa
         )}
         {/* Gradient overlay at bottom of image */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 via-background/70 to-transparent pt-8 pb-2 px-2.5">
-          <p className="text-xs font-bold truncate group-hover:text-primary transition-colors leading-tight">{card.name}</p>
-          <p className="text-[10px] text-muted-foreground truncate mt-0.5">{card.set_name}</p>
+          <p className="text-sm sm:text-xs font-bold truncate group-hover:text-primary transition-colors leading-tight">{card.name}</p>
+          <p className="text-[11px] sm:text-[10px] text-muted-foreground truncate mt-0.5">{card.set_name}</p>
         </div>
         {/* Trend dot top-left */}
         <span className={cn('absolute top-2 left-2 w-2.5 h-2.5 rounded-full ring-2 ring-background', dotColor)} />
       </div>
       {/* Price + change row */}
       <div className="px-2.5 py-2 flex items-center justify-between mt-auto">
-        <span className="text-sm font-black tabular-nums">${(card.price ?? 0).toFixed(2)}</span>
-        <span className={cn('text-xs font-bold tabular-nums flex items-baseline gap-1', changeValue >= 0 ? 'text-success' : 'text-destructive')}>
+        <span className="text-base sm:text-sm font-black tabular-nums">${(card.price ?? 0).toFixed(2)}</span>
+        <span className={cn('text-sm sm:text-xs font-bold tabular-nums flex items-baseline gap-1', changeValue >= 0 ? 'text-success' : 'text-destructive')}>
           {changeValue >= 0 ? '+' : ''}{changeValue.toFixed(1)}%
-          <span className="text-[9px] font-semibold text-muted-foreground">{changeLabel}</span>
+          <span className="text-[10px] sm:text-[9px] font-semibold text-muted-foreground">{changeLabel}</span>
         </span>
       </div>
       {/* TCGPlayer & eBay logos */}
