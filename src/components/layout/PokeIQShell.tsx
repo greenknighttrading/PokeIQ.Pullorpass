@@ -360,7 +360,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     >
                       <Icon className="w-5 h-5" />
                     </span>
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate leading-none">{item.label}</span>
                   </Link>
                 </li>
               );
