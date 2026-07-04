@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Menu, Check, Settings as SettingsIcon,
+  Menu, Check, Settings as SettingsIcon, BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ interface NavItem {
 const primaryNav: NavItem[] = [
   { label: 'Pull or Pass', href: '/swipe', icon: Layers },
   { label: 'Profile', href: '/profile', icon: User },
-  { label: 'Identity', href: '/personality-types', icon: Users },
+  { label: 'Binder', href: '/binder', icon: BookOpen },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Market', href: '/pokeiq-daily', icon: Activity },
 ];
