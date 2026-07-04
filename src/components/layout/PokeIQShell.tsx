@@ -335,7 +335,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
           className="md:hidden fixed bottom-4 left-4 right-4 z-40 rounded-[32px] border border-border/60 bg-background/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]"
           aria-label="Primary"
         >
-          <ul className="flex items-center justify-around px-1.5 py-1.5">
+          <ul className="flex items-center justify-around px-1 py-0">
             {mobileNav.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -346,13 +346,13 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <Link
                     to={item.href}
                     className={cn(
-                      'flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[10px] font-medium transition-all duration-200',
+                      'flex flex-col items-center justify-center gap-0 py-0 px-1 rounded-xl text-[10px] font-medium transition-all duration-200',
                       isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     <span
                       className={cn(
-                        'flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200',
+                        'flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
                         isActive
                           ? 'bg-primary/20 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
                           : 'text-muted-foreground'
@@ -360,7 +360,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                     >
                       <Icon className="w-5 h-5" />
                     </span>
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate leading-none">{item.label}</span>
                   </Link>
                 </li>
               );
