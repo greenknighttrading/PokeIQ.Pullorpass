@@ -1111,15 +1111,13 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
       </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {tiles.map((t) => (
-          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col justify-between", t.bg, t.border)}>
-            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2 sm:mb-3", t.bg, t.border, t.ring)}>
+          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col items-center text-center", t.bg, t.border)}>
+            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2", t.bg, t.border, t.ring)}>
               {t.icon}
             </div>
-            <div className="mt-auto">
-              <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
-              <div className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mt-1 leading-tight">
-                {t.label}
-              </div>
+            <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
+            <div className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mt-1 leading-tight">
+              {t.label}
             </div>
           </Card>
         ))}
