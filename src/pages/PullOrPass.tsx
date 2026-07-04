@@ -1074,14 +1074,7 @@ export default function PullOrPass() {
                        <span className="text-muted-foreground/40">·</span>
                      </>
                    )}
-                   <Link
-                     to="/matches"
-                     className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
-                   >
-                      <Layers className="w-3 h-3" /> Results
-                   </Link>
-                  <span className="text-muted-foreground/40">·</span>
-                  {premiumLoading ? null : premium ? (
+                    {premiumLoading ? null : premium ? (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
                       <Crown className="w-3 h-3" /> Unlimited
                     </span>
