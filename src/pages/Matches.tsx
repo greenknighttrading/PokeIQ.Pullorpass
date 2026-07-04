@@ -463,9 +463,6 @@ export default function Matches({
                     isPublicView={isPublicView}
                     viewedDisplayName={viewedDisplayName}
                   />
-                  {(likes.length > 0 || passes.length > 0) && (
-                    <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
-                  )}
                   {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
                   {!isPublicView && <SwipeAgainOrLimit />}
                   {!isPublicView && <ThisOrThatCTA />}
@@ -476,6 +473,9 @@ export default function Matches({
               )}
               {view === 'binder' && (
                 <>
+                  {(likes.length > 0 || passes.length > 0) && (
+                    <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
+                  )}
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                 </>
