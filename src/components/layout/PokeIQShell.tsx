@@ -271,7 +271,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
         {sidebarInner}
       </aside>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 pb-16 md:pb-0">
         {/* Top bar with profile in upper right */}
         <div
           className={cn(
