@@ -2151,9 +2151,6 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
             Your top {items.length} cards from This or That · {totalMatchups} matchup{totalMatchups === 1 ? '' : 's'}
           </p>
         </div>
-        <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1 whitespace-nowrap">
-          Play more <ArrowRight className="w-3 h-3" />
-        </Link>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
         {items.map((c, i) => (
