@@ -103,6 +103,63 @@ const FACETS: { key: FacetKey; label: string; icon: React.ReactNode }[] = [
 
 type LocalSwipeRecord = Partial<SwipeRecord> & Partial<SwipeCard> & { client_ts?: string };
 
+type RoundDisplayCard = LikedCard & {
+  decision?: 'pull' | 'pass';
+  client_ts?: string;
+  created_at?: string;
+};
+
+function todayKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function localLatestTwenty(userId: string): RoundDisplayCard[] {
+  try {
+    const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+    const arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .filter((x: any) => x?.card_id && (x.decision === 'pull' || x.decision === 'pass'))
+      .map((x: any, i: number): RoundDisplayCard => ({
+        id: `local-round-${x.decision}-${x.card_id}-${x.client_ts ?? i}`,
+        user_id: userId,
+        card_id: x.card_id,
+        card_name: x.name ?? '',
+        pokemon_name: null,
+        artist: null,
+        set_name: x.set_name ?? null,
+        set_id: null,
+        era: null,
+        release_year: null,
+        card_type: null,
+        pokemon_type: null,
+        rarity: x.rarity ?? null,
+        language: null,
+        card_number: null,
+        variant: null,
+        product_category: null,
+        price: x.price != null ? Number(x.price) : null,
+        price_tier: null,
+        image_url: x.image_url ?? null,
+        source: x.decision === 'pass' ? 'pass' : (Array.isArray(x.tags) && x.tags.includes('Loved') ? 'super_like' : 'pull'),
+        liked_at: x.client_ts ?? '',
+        decision: x.decision,
+        client_ts: x.client_ts ?? String(i).padStart(4, '0'),
+      }))
+      .sort((a, b) => (b.client_ts || '').localeCompare(a.client_ts || ''))
+      .slice(0, 20)
+      .reverse();
+  } catch { return []; }
+}
+
+function newestRoundCardTime(cards: RoundDisplayCard[]): string | null {
+  return cards.reduce<string | null>((max, c) => {
+    const t = c.created_at ?? c.client_ts ?? c.liked_at ?? null;
+    return t && (!max || t > max) ? t : max;
+  }, null);
+}
+
 function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes: LikedCard[]; total: number } {
   const rawRecords: LocalSwipeRecord[] = [];
   const pushRecord = (r: LocalSwipeRecord) => {
@@ -1005,32 +1062,21 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // ─────────────────────────────────────────────────────────────
 
 function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName, userId }: { likes: LikedCard[]; passes: LikedCard[]; onOpen: (s: CardDetailSeed) => void; isPublicView?: boolean; viewedDisplayName?: string; userId?: string | null }) {
-  // For the authed personal view, lock the carousel to the user's most recent
-  // completed round so it stays persistent across navigations. Cached locally
-  // and only refreshed when a newer round_id appears in the DB.
-  const [roundLikes, setRoundLikes] = useState<LikedCard[] | null>(null);
+  const [roundCards, setRoundCards] = useState<RoundDisplayCard[] | null>(null);
   useEffect(() => {
-    if (isPublicView || !userId) { setRoundLikes(null); return; }
+    if (isPublicView || !userId) { setRoundCards(null); return; }
     let cancelled = false;
     (async () => {
-      const { data: latest } = await supabase
-        .from('pullorpass_swipes')
-        .select('round_id, created_at')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      const roundId = latest?.[0]?.round_id;
-      if (!roundId || cancelled) return;
+      const localRound = localLatestTwenty(userId);
       const { data: rows } = await supabase
         .from('pullorpass_swipes')
         .select('card_id, card_name, card_set, card_image, card_price, card_rarity, tags, decision, created_at')
         .eq('user_id', userId)
-        .eq('round_id', roundId)
-        .eq('decision', 'pull')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(20);
       if (cancelled) return;
-      const mapped: LikedCard[] = (rows ?? []).map((r: any) => ({
-        id: `round-${roundId}-${r.card_id}`,
+      const mapped: RoundDisplayCard[] = (rows ?? []).map((r: any) => ({
+        id: `round-${r.created_at}-${r.card_id}`,
         user_id: userId,
         card_id: r.card_id,
         card_name: r.card_name ?? '',
@@ -1041,15 +1087,22 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
         variant: null, product_category: null,
         price: r.card_price != null ? Number(r.card_price) : null,
         price_tier: null, image_url: r.card_image ?? null,
-        source: Array.isArray(r.tags) && r.tags.includes('Loved') ? 'super_like' : 'pull',
+        source: r.decision === 'pass' ? 'pass' : (Array.isArray(r.tags) && r.tags.includes('Loved') ? 'super_like' : 'pull'),
         liked_at: r.created_at,
-      }));
-      setRoundLikes(mapped);
+        decision: r.decision,
+        created_at: r.created_at,
+      })).reverse();
+      const localNewest = newestRoundCardTime(localRound);
+      const serverNewest = newestRoundCardTime(mapped);
+      setRoundCards(localRound.length && (!mapped.length || !serverNewest || (localNewest && localNewest > serverNewest)) ? localRound : mapped);
     })();
     return () => { cancelled = true; };
   }, [userId, isPublicView]);
 
-  const source = useMemo(() => (!isPublicView && roundLikes && roundLikes.length > 0) ? roundLikes : likes, [isPublicView, roundLikes, likes]);
+  const source = useMemo<RoundDisplayCard[]>(() => {
+    if (!isPublicView && roundCards && roundCards.length > 0) return roundCards;
+    return likes.map((like) => ({ ...like, decision: like.source === 'pass' ? 'pass' : 'pull' }));
+  }, [isPublicView, roundCards, likes]);
 
   // Fetch TCGplayer IDs for the cards shown so we can link out with affiliate tracking.
   const [tcgMeta, setTcgMeta] = useState<Map<string, string>>(new Map());
@@ -1073,16 +1126,16 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
     return () => { cancelled = true; };
   }, [source]);
 
-  // Pulls only — super likes first, then regular pulls, newest first within each group.
   const sorted = useMemo(() => {
+    if (!isPublicView && roundCards && roundCards.length > 0) return source;
     return [...source].sort((a, b) => {
       const aSuper = a.source === 'super_like' ? 1 : 0;
       const bSuper = b.source === 'super_like' ? 1 : 0;
       if (aSuper !== bSuper) return bSuper - aSuper;
       return (b.liked_at || '').localeCompare(a.liked_at || '');
     });
-  }, [source]);
-  const recent = sorted.slice(0, 24);
+  }, [source, isPublicView, roundCards]);
+  const recent = sorted.slice(0, !isPublicView && roundCards?.length ? 20 : 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   return (
     <section>
@@ -1094,15 +1147,15 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
         <p className="text-sm text-muted-foreground mt-1">
           {isPublicView
             ? `Every card ${subject} pulled — super likes first.`
-            : 'Cards you pulled in your most recent round — super likes first.'}
+            : 'The latest 20 cards you swiped in your most recent round.'}
         </p>
       </div>
       <CarouselRow ariaLabel="latest matches">
         {recent.map((c) => (
           <RecentCard
-            key={`pull-${c.id}`}
+            key={`round-${c.id}`}
             like={c}
-            decision="pull"
+            decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
             isSuper={c.source === 'super_like'}
             onOpen={onOpen}
             tcgplayerId={tcgMeta.get(c.card_id)}
