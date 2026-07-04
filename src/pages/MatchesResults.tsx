@@ -9,6 +9,7 @@ import { ResultsView } from './PullOrPass';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 
 type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[]; index?: number };
+type TimedSwipeRecord = SwipeRecord & { client_ts?: string; created_at?: string };
 
 function todayKey() {
   const d = new Date();
@@ -37,8 +38,24 @@ function readTodayRecords(): SwipeRecord[] {
         },
         decision: x.decision,
         tags: Array.isArray(x.tags) ? x.tags : [],
+        client_ts: x.client_ts,
       }));
   } catch { return []; }
+}
+
+function latestLocalTwenty(): TimedSwipeRecord[] {
+  return readTodayRecords()
+    .map((r, i) => ({ ...r, client_ts: (r as TimedSwipeRecord).client_ts ?? String(i).padStart(4, '0') }))
+    .sort((a, b) => (b.client_ts || '').localeCompare(a.client_ts || ''))
+    .slice(0, 20)
+    .reverse();
+}
+
+function newestRecordTime(records: TimedSwipeRecord[]): string | null {
+  return records.reduce<string | null>((max, r) => {
+    const t = r.created_at ?? r.client_ts ?? null;
+    return t && (!max || t > max) ? t : max;
+  }, null);
 }
 
 function readResults(): Stored | null {
@@ -71,28 +88,20 @@ export default function MatchesResults() {
       // 1) For authed users, always prefer their server-side latest round so
       //    reloads reflect the true most recent round (local caches can be
     //    stale from earlier rounds or other tabs).
-      let serverRecords: SwipeRecord[] | null = null;
+      let serverRecords: TimedSwipeRecord[] | null = null;
       try {
         const { data: { session } } = await supabase.auth.getSession();
         const authed = !!session?.user && !session.user.is_anonymous;
         setIsAuthed(authed);
         if (authed) {
-          const { data: latest } = await supabase
-            .from('pullorpass_swipes')
-            .select('round_id, created_at')
-            .eq('user_id', session!.user.id)
-            .order('created_at', { ascending: false })
-            .limit(1);
-          const roundId = latest?.[0]?.round_id;
-          const { data } = roundId ? await supabase
+          const { data } = await supabase
             .from('pullorpass_swipes')
             .select('card_id, card_name, card_set, card_image, card_price, card_rarity, decision, tags, created_at')
             .eq('user_id', session!.user.id)
-            .eq('round_id', roundId)
             .order('created_at', { ascending: false })
-            .limit(500) : { data: null } as any;
+            .limit(20);
           if (data && data.length) {
-            serverRecords = data.map((x: any): SwipeRecord => ({
+            serverRecords = data.map((x: any): TimedSwipeRecord => ({
               card: {
                 card_id: x.card_id,
                 name: x.card_name ?? '',
@@ -103,11 +112,20 @@ export default function MatchesResults() {
               },
               decision: x.decision,
               tags: Array.isArray(x.tags) ? x.tags : [],
-            }));
+              created_at: x.created_at,
+            })).reverse();
           }
         }
       } catch (e) {
         console.warn('matches: server fetch failed', e);
+      }
+
+      const localTwenty = latestLocalTwenty();
+      const localNewest = newestRecordTime(localTwenty);
+      const serverNewest = newestRecordTime(serverRecords ?? []);
+      if (localTwenty.length && (!serverRecords?.length || !serverNewest || (localNewest && localNewest > serverNewest))) {
+        setRecords(localTwenty);
+        return;
       }
 
       if (serverRecords && serverRecords.length) {
