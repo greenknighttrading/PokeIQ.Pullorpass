@@ -923,7 +923,7 @@ function TasteHero({
               </span>
             </h1>
             <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-xl font-semibold">
-              {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}Which helps you collect  SMARTER not Harder.
+              {buildIdentitySentence(taste, isPublicView ? (viewedDisplayName || 'They') : 'You')}
             </p>
 
             {totalLikes === 0 && (
@@ -2151,9 +2151,6 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
             Your top {items.length} cards from This or That · {totalMatchups} matchup{totalMatchups === 1 ? '' : 's'}
           </p>
         </div>
-        <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1 whitespace-nowrap">
-          Play more <ArrowRight className="w-3 h-3" />
-        </Link>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4">
         {items.map((c, i) => (

@@ -26,7 +26,14 @@ export async function readPersonalityForCurrentUser<T = any>(): Promise<T | null
   if (!userId) return null;
   try {
     const raw = localStorage.getItem(keyFor(userId));
-    return raw ? (JSON.parse(raw) as T) : null;
+    if (raw) return JSON.parse(raw) as T;
+    // Fallback: adopt legacy unscoped result (from before per-user scoping).
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      try { localStorage.setItem(keyFor(userId), legacy); } catch {}
+      return JSON.parse(legacy) as T;
+    }
+    return null;
   } catch {
     return null;
   }

@@ -124,6 +124,8 @@ export function QuizResults({ result }: QuizResultsProps) {
       const uid = await getCurrentUserId();
       if (cancelled) return;
       writePersonalityForUser(uid, result);
+      // Always mirror to legacy unscoped key so results survive sign-in/out.
+      try { localStorage.setItem('personalityResult', JSON.stringify(result)); } catch {}
     })();
     return () => { cancelled = true; };
   }, [result]);
