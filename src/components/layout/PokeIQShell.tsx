@@ -34,6 +34,15 @@ const primaryNav: NavItem[] = [
   { label: 'Social', href: '/leaderboard', icon: Trophy },
 ];
 
+// Mobile bottom bar order (Profile lives in the top-right avatar)
+const mobileNav: NavItem[] = [
+  { label: 'Swipe', href: '/swipe', icon: Layers },
+  { label: 'Binder', href: '/binder', icon: BookOpen },
+  { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
+  { label: 'Earn', href: '/pokeyelp', icon: Zap },
+  { label: 'Social', href: '/leaderboard', icon: Trophy },
+];
+
 const premiumCollect: NavItem[] = [
   { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard, badge: 'BETA' },
   { label: 'Collector Report Card', href: '/report', icon: FileText },
