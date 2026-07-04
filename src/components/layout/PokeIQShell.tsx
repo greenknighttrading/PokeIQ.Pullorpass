@@ -41,6 +41,7 @@ const mobileNav: NavItem[] = [
   { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Social', href: '/leaderboard', icon: Trophy },
+  { label: 'Profile', href: '/profile', icon: User },
 ];
 
 const premiumCollect: NavItem[] = [
