@@ -352,7 +352,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   >
                     <span
                       className={cn(
-                        'flex items-center justify-center w-9 h-9 rounded-full transition-colors duration-200',
+                        'flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
                         isActive
                           ? 'bg-primary/20 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
                           : 'text-muted-foreground'
