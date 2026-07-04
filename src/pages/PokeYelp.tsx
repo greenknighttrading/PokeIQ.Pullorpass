@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, CheckCircle2, MessageSquare, Wand2, Filter, ArrowLeft, Zap, Flame, Trophy, Gamepad2 } from 'lucide-react';
+import { Loader2, ImageOff, Plus, X, Sparkles, Coins, RotateCw, LogIn, Check, CheckCircle2, MessageSquare, Wand2, Filter, ArrowLeft, Zap, Flame, Trophy, Gamepad2, Gift, Share2, Users, Brain } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PACK_ODDS_REGISTRY } from '@/lib/packOdds';
 import { CardDetailModal, CardDetailSeed } from '@/components/cards/CardDetailModal';
+import { InviteFriendsModal } from '@/components/earn/InviteFriendsModal';
+import { readPersonalityForUserSync } from '@/lib/personalityStorage';
 
 // ── Reward constants ────────────────────────────────────
 // Every 20 reviews → +10 PullOrPass swipes
@@ -62,6 +64,9 @@ const ANON_REVIEWED_KEY = 'pokeyelp_reviewed_pg';
 const SESSION_SHOWN_KEY = 'pokeyelp_session_shown';
 const CREDITS_PER_REDEMPTION = 10;
 const SWIPES_PER_REDEMPTION = 10;
+const REFERRAL_REWARD_CREDITS = 10;
+const TEST_SHARE_REWARD_CREDITS = 1;
+const TEST_SHARE_REWARD_KEY = 'pokeiq_test_share_reward_date';
 
 // ── Arcade XP rules ─────────────────────────────────────
 const ROUND_SIZE = 10;
@@ -173,6 +178,12 @@ export default function PokeYelp() {
   const [userId, setUserId] = useState<string | null>(null);
   const [credits, setCredits] = useState<number>(0);
 
+  // ── Ways to Earn ──
+  const [completedReferrals, setCompletedReferrals] = useState<number>(0);
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [personalityResult, setPersonalityResult] = useState<{ type?: string } | null>(null);
+  const [testShareBusy, setTestShareBusy] = useState(false);
+
   // AI suggestions — single-select (tap = applicable)
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -261,6 +272,15 @@ export default function PokeYelp() {
     const { data } = await supabase
       .from('pokeiq_credits').select('credits').eq('user_id', uid).maybeSingle();
     setCredits(data?.credits ?? 0);
+  }, []);
+
+  const fetchCompletedReferrals = useCallback(async (uid: string) => {
+    const { count } = await supabase
+      .from('pullorpass_referrals')
+      .select('id', { count: 'exact', head: true })
+      .eq('referrer_id', uid)
+      .not('completed_at', 'is', null);
+    setCompletedReferrals(count ?? 0);
   }, []);
 
   const loadPool = useCallback(async () => {
@@ -441,6 +461,8 @@ export default function PokeYelp() {
       if (session?.user && !session.user.is_anonymous) {
         setUserId(session.user.id);
         fetchCredits(session.user.id);
+        fetchCompletedReferrals(session.user.id);
+        setPersonalityResult(readPersonalityForUserSync(session.user.id));
       }
       loadPool();
     });
@@ -722,6 +744,52 @@ export default function PokeYelp() {
     }
   }, [userId, credits, redeeming, navigate]);
 
+  const handleInviteClick = useCallback(() => {
+    if (!userId) { navigate('/auth?next=/earn'); return; }
+    setInviteModalOpen(true);
+  }, [userId, navigate]);
+
+  const handleShareTest = useCallback(async () => {
+    if (!userId) { navigate('/auth?next=/earn'); return; }
+    if (!personalityResult?.type) { navigate('/test'); return; }
+    if (testShareBusy) return;
+
+    const shareUrl = `${window.location.origin}/collector/${String(personalityResult.type).toLowerCase()}`;
+    const shareData = {
+      title: `I'm The ${personalityResult.type} — PokeIQ Collector Type`,
+      text: 'I took the PokeIQ Collector Personality Test — see your type too!',
+      url: shareUrl,
+    };
+    try {
+      if (navigator.share && /Mobi|Android/i.test(navigator.userAgent)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied!', { description: 'Share your collector type with friends.' });
+      }
+    } catch {
+      return; // share sheet dismissed or clipboard denied — no reward
+    }
+
+    const today = todayKey();
+    if (localStorage.getItem(TEST_SHARE_REWARD_KEY) === today) {
+      toast.message('Already earned today\'s share bonus — thanks for spreading the word!');
+      return;
+    }
+    setTestShareBusy(true);
+    try {
+      const { data: updated, error } = await supabase.rpc('change_pokeiq_credits', { p_delta: TEST_SHARE_REWARD_CREDITS });
+      if (error) throw error;
+      setCredits(typeof updated === 'number' ? updated : credits + TEST_SHARE_REWARD_CREDITS);
+      localStorage.setItem(TEST_SHARE_REWARD_KEY, today);
+      toast.success(`+${TEST_SHARE_REWARD_CREDITS} credit earned for sharing!`, { position: 'top-center' });
+    } catch {
+      toast.error('Could not grant reward, but thanks for sharing!');
+    } finally {
+      setTestShareBusy(false);
+    }
+  }, [userId, personalityResult, testShareBusy, credits, navigate]);
+
   const activeFiltersCount = useMemo(() => {
     let n = 0;
     if (Number(minPrice) > 5) n++;
@@ -894,21 +962,71 @@ export default function PokeYelp() {
             })()}
           </header>
 
-          {/* This or That CTA */}
-          <Card className="mb-4 p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
-            <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
-              <Gamepad2 className="w-6 h-6 text-primary" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-base sm:text-lg font-semibold tracking-tight">This or That</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                Choose between two cards and help PokeIQ learn your collecting taste.
+          {/* Ways to Earn */}
+          <div className="mb-2 flex items-center justify-between px-1">
+            <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Ways to Earn</span>
+          </div>
+          <div className="mb-4 space-y-2.5">
+            {/* Invite friends */}
+            <Card className="p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
+              <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
+                <Gift className="w-6 h-6 text-primary" />
               </div>
-            </div>
-            <Button onClick={() => navigate('/this-or-that')} className="shrink-0">
-              Play Now
-            </Button>
-          </Card>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-base sm:text-lg font-semibold tracking-tight">
+                  Invite Friends
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-medium normal-case tracking-normal">
+                    +{REFERRAL_REWARD_CREDITS} swipes/friend
+                  </span>
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  Share PokeIQ — when a friend signs up, you both win.
+                </div>
+              </div>
+              <Button onClick={handleInviteClick} className="shrink-0 gap-1.5">
+                <Users className="w-4 h-4" /> Invite
+              </Button>
+            </Card>
+
+            {/* This or That */}
+            <Card className="p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
+              <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
+                <Gamepad2 className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-base sm:text-lg font-semibold tracking-tight">This or That</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  Choose between two cards and help PokeIQ learn your collecting taste.
+                </div>
+              </div>
+              <Button onClick={() => navigate('/this-or-that')} className="shrink-0">
+                Play Now
+              </Button>
+            </Card>
+
+            {/* Share personality test */}
+            <Card className="p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
+              <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
+                <Brain className="w-6 h-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 text-base sm:text-lg font-semibold tracking-tight">
+                  Collector Personality Test
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-medium normal-case tracking-normal">
+                    +{TEST_SHARE_REWARD_CREDITS} swipe
+                  </span>
+                </div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
+                  {personalityResult?.type
+                    ? 'Share your Collector Type with friends for a free swipe.'
+                    : 'Take the 2-minute quiz, then share your Collector Type for a free swipe.'}
+                </div>
+              </div>
+              <Button onClick={handleShareTest} disabled={testShareBusy} variant={personalityResult?.type ? 'default' : 'outline'} className="shrink-0 gap-1.5">
+                {personalityResult?.type ? (<><Share2 className="w-4 h-4" /> Share & Earn</>) : 'Take the Test'}
+              </Button>
+            </Card>
+          </div>
 
           {/* Filters panel */}
           <AnimatePresence initial={false}>
@@ -1262,6 +1380,15 @@ export default function PokeYelp() {
         </main>
       </div>
       <CardDetailModal open={!!detailSeed} seed={detailSeed} onClose={() => setDetailSeed(null)} />
+      {userId && (
+        <InviteFriendsModal
+          open={inviteModalOpen}
+          onOpenChange={setInviteModalOpen}
+          userId={userId}
+          completedReferrals={completedReferrals}
+          rewardCredits={REFERRAL_REWARD_CREDITS}
+        />
+      )}
 
       {/* CRT scanline overlay */}
       <div

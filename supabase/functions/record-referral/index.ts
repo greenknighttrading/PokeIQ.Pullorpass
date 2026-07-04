@@ -9,6 +9,30 @@ const corsHeaders = {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+// Reward the referrer with credits (redeemable for swipes in the Training
+// Lab) the first time a friend they invited completes signup.
+const REFERRAL_REWARD_CREDITS = 10;
+
+async function grantReferralReward(admin: ReturnType<typeof createClient>, referrerId: string) {
+  const { data: existing } = await admin
+    .from("pokeiq_credits")
+    .select("credits")
+    .eq("user_id", referrerId)
+    .maybeSingle();
+
+  const newCredits = (existing?.credits ?? 0) + REFERRAL_REWARD_CREDITS;
+  if (existing) {
+    await admin
+      .from("pokeiq_credits")
+      .update({ credits: newCredits, updated_at: new Date().toISOString() })
+      .eq("user_id", referrerId);
+  } else {
+    await admin
+      .from("pokeiq_credits")
+      .insert({ user_id: referrerId, credits: newCredits, updated_at: new Date().toISOString() });
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -71,6 +95,13 @@ serve(async (req) => {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Best-effort — a failure here shouldn't fail the referral record itself.
+    try {
+      await grantReferralReward(admin, referrer_id);
+    } catch (e) {
+      console.warn("referral reward grant failed", e);
     }
 
     return new Response(JSON.stringify({ ok: true }), {

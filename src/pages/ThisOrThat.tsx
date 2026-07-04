@@ -9,6 +9,7 @@ import { Seo } from '@/components/seo/Seo';
 import { toast } from 'sonner';
 
 const ROUND_SIZE = 20;
+const ROUND_REWARD_CREDITS = 5;
 
 interface TotCard {
   card_id: string;
@@ -158,6 +159,7 @@ export default function ThisOrThat() {
   const [pickState, setPickState] = useState<{ winnerId: string | null }>({ winnerId: null });
   const [roundDone, setRoundDone] = useState(false);
   const [preferences, setPreferences] = useState<Record<string, number>>({});
+  const [roundReward, setRoundReward] = useState<number | null>(null);
 
   // Auth + total count
   useEffect(() => {
@@ -302,6 +304,12 @@ export default function ThisOrThat() {
           setRoundDone(true);
           setPair(null);
           setPickState({ winnerId: null });
+          setRoundReward(null);
+          if (userId) {
+            supabase.rpc('change_pokeiq_credits', { p_delta: ROUND_REWARD_CREDITS }).then(({ error }) => {
+              if (!error) setRoundReward(ROUND_REWARD_CREDITS);
+            });
+          }
           return;
         }
         const exclude = new Set([pair![0].card_id, pair![1].card_id]);
@@ -407,6 +415,12 @@ export default function ThisOrThat() {
                   Keep playing to unlock deeper taste insights.
                 </p>
               </>
+            )}
+
+            {roundReward != null && (
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                +{roundReward} credits earned — redeem for swipes in the Training Lab
+              </div>
             )}
 
             <div className="flex flex-col sm:flex-row gap-2 pt-2">
