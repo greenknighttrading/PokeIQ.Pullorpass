@@ -113,7 +113,7 @@ export function CarouselRow({ children, ariaLabel = 'cards', className }: Carous
     <div className={cn('relative group/carousel', className)}>
       <div
         ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto overscroll-x-contain pb-4 [overflow-anchor:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex gap-3 sm:gap-4 overflow-x-auto overscroll-x-contain pb-4 [overflow-anchor:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {children}
       </div>

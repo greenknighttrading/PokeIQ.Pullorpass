@@ -1111,15 +1111,13 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
       </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {tiles.map((t) => (
-          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col justify-between", t.bg, t.border)}>
-            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2 sm:mb-3", t.bg, t.border, t.ring)}>
+          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col items-center text-center", t.bg, t.border)}>
+            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2", t.bg, t.border, t.ring)}>
               {t.icon}
             </div>
-            <div className="mt-auto">
-              <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
-              <div className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mt-1 leading-tight">
-                {t.label}
-              </div>
+            <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
+            <div className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mt-1 leading-tight">
+              {t.label}
             </div>
           </Card>
         ))}
@@ -1263,7 +1261,7 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
         image_url: like.image_url, price: like.price, rarity: like.rarity,
         artist: like.artist, pokemon_type: like.pokemon_type, card_number: like.card_number,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
+      className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className={cn(
         "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
@@ -1720,7 +1718,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
         image_url: r.image_url, price: r.price, rarity: r.rarity,
         artist: r.artist, pokemon_type: r.pokemon_type,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
+      className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
         {r.image_url && !err ? (
