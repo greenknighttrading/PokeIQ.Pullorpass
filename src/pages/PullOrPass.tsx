@@ -761,9 +761,11 @@ export default function PullOrPass() {
     persistSwipeProgress(rec, newRecords);
 
     if (userId) {
+      const persistedRoundId = validRoundId(roundId);
+      if (persistedRoundId !== roundId) setRoundId(persistedRoundId);
       supabase.from('pullorpass_swipes').insert({
         user_id: userId,
-        round_id: roundId,
+        round_id: persistedRoundId,
         card_id: rec.card.card_id,
         card_name: rec.card.name,
         card_set: rec.card.set_name,
@@ -904,9 +906,11 @@ export default function PullOrPass() {
       bumpQuota();
       persistSwipeProgress(rec, newRecords);
       if (userId) {
+        const persistedRoundId = validRoundId(roundId);
+        if (persistedRoundId !== roundId) setRoundId(persistedRoundId);
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
-          round_id: roundId,
+          round_id: persistedRoundId,
           card_id: rec.card.card_id,
           card_name: rec.card.name,
           card_set: rec.card.set_name,
