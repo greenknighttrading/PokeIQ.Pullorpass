@@ -1003,7 +1003,7 @@ export default function PokeYelp() {
               key={current.card_id}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start justify-center pb-28 sm:pb-0"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-start justify-center pb-4 sm:pb-0"
             >
               {/* Card image and info: left column on tablet/desktop */}
               <div className="space-y-2 w-full max-w-[190px] sm:max-w-none mx-auto sm:mx-0 sm:w-[200px] lg:w-[220px] sm:shrink-0">
