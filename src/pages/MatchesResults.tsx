@@ -68,29 +68,9 @@ export default function MatchesResults() {
 
   useEffect(() => {
     (async () => {
-      // Prefer the local active/completed round so "Matches" updates the
-      // moment a user leaves swiping, before async DB writes finish.
-      const active = readResume();
-      if (active?.records?.length) {
-        setRecords(active.records);
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          setIsAuthed(!!session?.user && !session.user.is_anonymous);
-        } catch {}
-        return;
-      }
-      const latestLocal = readResults();
-      if (latestLocal?.records?.length) {
-        setRecords(latestLocal.records);
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          setIsAuthed(!!session?.user && !session.user.is_anonymous);
-        } catch {}
-        return;
-      }
-
-      // 1) For authed users, prefer their server-side swipe history so it
-      //    survives across devices/sessions.
+      // 1) For authed users, always prefer their server-side latest round so
+      //    reloads reflect the true most recent round (local caches can be
+    //    stale from earlier rounds or other tabs).
       let serverRecords: SwipeRecord[] | null = null;
       try {
         const { data: { session } } = await supabase.auth.getSession();
@@ -135,14 +115,18 @@ export default function MatchesResults() {
         return;
       }
 
-      // 2) Otherwise use today's local swipe history, then last round / resume.
+      // 2) Guests / no server data — fall back to local state (in-progress
+      //    round first, then last completed round, then today's history).
+      const active = readResume();
+      if (active?.records?.length) { setRecords(active.records); return; }
+      const latestLocal = readResults();
+      if (latestLocal?.records?.length) { setRecords(latestLocal.records); return; }
       const today = readTodayRecords();
       if (today.length) {
         setRecords(today);
         return;
       }
-      const stored = readResults() ?? readResume();
-      setRecords(stored?.records ?? []);
+      setRecords([]);
     })();
   }, []);
 
