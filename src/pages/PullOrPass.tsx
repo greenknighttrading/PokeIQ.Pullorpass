@@ -1665,7 +1665,7 @@ export function ResultsView({
             <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
             <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Your Matches</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
         </motion.div>
         {!isAuthed ? (
           <>
@@ -1679,10 +1679,19 @@ export function ResultsView({
         ) : (
           <>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Your Matches <span className="inline-block">✨</span>
+              Round Results <span className="inline-block">✨</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.
+              {(() => {
+                const roundSize = records.length > 10 ? 20 : 10;
+                const remainingSwipes = Math.max(0, roundSize - records.length);
+                return remainingSwipes > 0 ? (
+                  <>
+                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more time{remainingSwipes === 1 ? '' : 's'} to complete the round and add the cards permanently into your binder in Matches.
+                  </>
+                ) : null;
+              })()}
             </p>
           </>
         )}
