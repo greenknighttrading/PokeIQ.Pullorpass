@@ -2122,9 +2122,6 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
             <h2 className="text-lg sm:text-xl font-bold tracking-tight">Your Top 10</h2>
             <p className="text-xs text-muted-foreground">Your top 10 cards from This or That.</p>
           </div>
-          <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
-            Play This or That <ArrowRight className="w-3 h-3" />
-          </Link>
         </div>
         <Card className="p-6 text-center text-sm text-muted-foreground">
           No This or That picks yet. Play a round to see your rankings.
