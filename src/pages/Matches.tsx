@@ -512,7 +512,7 @@ export default function Matches({
           )}
 
           {!loading && userId && (
-            <div className="space-y-8 sm:space-y-10">
+            <div className="space-y-6 sm:space-y-8">
               {view === 'profile' && (
                 <>
                   <TasteHero
@@ -1069,33 +1069,33 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
   const priced = likes.filter((l) => typeof l.price === 'number' && (l.price ?? 0) > 0);
   const avgValue = priced.length ? priced.reduce((s, l) => s + (l.price ?? 0), 0) / priced.length : 0;
   const streak = readSwipeStreak().streak;
-  const tiles: { label: string; value: string; icon: React.ReactNode; color: string; bg: string; border: string; ring: string }[] = [
+  const tiles: { label: string; value: string; icon: React.ReactNode; accentBg: string; accentBorder: string; accentRing: string; accentText: string }[] = [
     {
       label: 'Total cards liked',
       value: totalLikes.toLocaleString(),
       icon: <HeartIcon className="w-5 h-5 text-teal-300" />,
-      color: 'text-teal-300',
-      bg: 'bg-teal-500/10',
-      border: 'border-teal-400/20',
-      ring: 'ring-teal-400/20',
+      accentBg: 'bg-teal-500/10',
+      accentBorder: 'border-teal-400/20',
+      accentRing: 'ring-teal-400/20',
+      accentText: 'text-teal-300',
     },
     {
       label: 'Avg. card value',
       value: avgValue > 0 ? `$${avgValue.toFixed(avgValue >= 100 ? 0 : 2)}` : '—',
       icon: <Sparkles className="w-5 h-5 text-amber-300" />,
-      color: 'text-amber-300',
-      bg: 'bg-amber-500/10',
-      border: 'border-amber-400/20',
-      ring: 'ring-amber-400/20',
+      accentBg: 'bg-amber-500/10',
+      accentBorder: 'border-amber-400/20',
+      accentRing: 'ring-amber-400/20',
+      accentText: 'text-amber-300',
     },
     {
       label: 'Daily streak',
       value: `${streak}d`,
       icon: <Flame className="w-5 h-5 text-rose-300" />,
-      color: 'text-rose-300',
-      bg: 'bg-rose-500/10',
-      border: 'border-rose-400/20',
-      ring: 'ring-rose-400/20',
+      accentBg: 'bg-rose-500/10',
+      accentBorder: 'border-rose-400/20',
+      accentRing: 'ring-rose-400/20',
+      accentText: 'text-rose-300',
     },
   ];
   return (
@@ -1111,8 +1111,8 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
       </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {tiles.map((t) => (
-          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col items-center text-center", t.bg, t.border)}>
-            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2", t.bg, t.border, t.ring)}>
+          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col items-center text-center bg-card border-white/10")}>
+            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2", t.accentBg, t.accentBorder, t.accentRing)}>
               {t.icon}
             </div>
             <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
