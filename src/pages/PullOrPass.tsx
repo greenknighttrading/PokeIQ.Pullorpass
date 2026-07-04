@@ -1045,7 +1045,7 @@ export default function PullOrPass() {
                      to="/matches"
                      className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
                    >
-                     <Layers className="w-3 h-3" /> Matches
+                      <Layers className="w-3 h-3" /> Results
                    </Link>
                   <span className="text-muted-foreground/40">·</span>
                   {premiumLoading ? null : premium ? (
@@ -1665,7 +1665,7 @@ export function ResultsView({
             <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
             <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Your Matches</p>
+          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
         </motion.div>
         {!isAuthed ? (
           <>
@@ -1679,10 +1679,19 @@ export function ResultsView({
         ) : (
           <>
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-              Your Matches <span className="inline-block">✨</span>
+              Round Results <span className="inline-block">✨</span>
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.
+              {(() => {
+                const roundSize = records.length > 10 ? 20 : 10;
+                const remainingSwipes = Math.max(0, roundSize - records.length);
+                return remainingSwipes > 0 ? (
+                  <>
+                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more time{remainingSwipes === 1 ? '' : 's'} to complete the round and add the cards permanently into your binder in Matches.
+                  </>
+                ) : null;
+              })()}
             </p>
           </>
         )}
@@ -1727,14 +1736,14 @@ export function ResultsView({
           className="pt-6 px-0 mx-0 py-[19px]"
         >
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-6 sm:gap-8">
-            <Link to="/profile" className="inline-flex">
+            <Link to="/binder" className="inline-flex">
               <motion.button
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
                 className="h-14 w-full sm:w-auto px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow"
               >
                 <UserIcon className="w-5 h-5" />
-                View Profile
+                View Matches
               </motion.button>
             </Link>
             <motion.button
@@ -1745,7 +1754,7 @@ export function ResultsView({
               className="h-14 px-10 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-base tracking-wide inline-flex items-center justify-center gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <RotateCw className="w-5 h-5 text-primary" />
-              Swipe Again
+              Continue Swiping
             </motion.button>
           </div>
           {outOfSwipes && (
