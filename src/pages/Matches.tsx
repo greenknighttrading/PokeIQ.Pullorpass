@@ -971,15 +971,6 @@ function TasteHero({
               />
             </div>
 
-            {/* View Full DNA — plain text link inside the hero widget, below the signal cards */}
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => document.getElementById('deep-insights')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline underline-offset-4 text-lg px-0 py-[11px] mx-px"
-              >
-                View taste insights <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
           </div>
         </div>
 
@@ -2128,7 +2119,7 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
       <section>
         <div className="flex items-end justify-between mb-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-bold tracking-tight">Rankings</h2>
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight">Your Top 10</h2>
             <p className="text-xs text-muted-foreground">Your top 10 cards from This or That.</p>
           </div>
           <Link to="/this-or-that" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
@@ -2146,7 +2137,7 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
     <section>
       <div className="flex items-end justify-between mb-3 gap-3">
         <div>
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight">Rankings</h2>
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight">Your Top 10</h2>
           <p className="text-xs text-muted-foreground">
             Your top {items.length} cards from This or That · {totalMatchups} matchup{totalMatchups === 1 ? '' : 's'}
           </p>
