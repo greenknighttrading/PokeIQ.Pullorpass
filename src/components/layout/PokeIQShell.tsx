@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Menu, Check, Settings as SettingsIcon, BookOpen,
+  Menu, Check, Settings as SettingsIcon, BookOpen, Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,8 @@ const primaryNav: NavItem[] = [
   { label: 'Profile', href: '/profile', icon: User },
   { label: 'Binder', href: '/binder', icon: BookOpen },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
-  { label: 'Market', href: '/pokeiq-daily', icon: Activity },
+  { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
+  { label: 'Social', href: '/leaderboard', icon: Trophy },
 ];
 
 const premiumCollect: NavItem[] = [
