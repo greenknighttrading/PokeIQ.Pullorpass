@@ -34,6 +34,15 @@ const primaryNav: NavItem[] = [
   { label: 'Social', href: '/leaderboard', icon: Trophy },
 ];
 
+// Mobile bottom bar order (Profile lives in the top-right avatar)
+const mobileNav: NavItem[] = [
+  { label: 'Swipe', href: '/swipe', icon: Layers },
+  { label: 'Binder', href: '/binder', icon: BookOpen },
+  { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
+  { label: 'Earn', href: '/pokeyelp', icon: Zap },
+  { label: 'Social', href: '/leaderboard', icon: Trophy },
+];
+
 const premiumCollect: NavItem[] = [
   { label: 'Advanced Analytics', href: '/home', icon: LayoutDashboard, badge: 'BETA' },
   { label: 'Collector Report Card', href: '/report', icon: FileText },
@@ -262,27 +271,18 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
         {sidebarInner}
       </aside>
 
-      <main className="flex-1 min-w-0">
+      <main className="flex-1 min-w-0 pb-16 md:pb-0">
         {/* Top bar with profile in upper right */}
         <div
           className={cn(
             'sticky top-0 z-30 flex items-center gap-2 px-5 py-3 bg-background/70 backdrop-blur-md border-b border-border/40'
           )}
         >
-          {/* Mobile sidebar trigger */}
-          <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
-            <SheetTrigger asChild>
-              <button
-                className="md:hidden w-9 h-9 rounded-lg border border-border/60 bg-card/50 flex items-center justify-center text-foreground hover:bg-muted/50 transition-colors"
-                aria-label="Open navigation"
-              >
-                <Menu className="w-5 h-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-72 flex flex-col bg-card/95 backdrop-blur-md border-r border-border/60">
-              {sidebarInner}
-            </SheetContent>
-          </Sheet>
+          {/* Mobile brand */}
+          <Link to="/" className="md:hidden flex items-center gap-2">
+            <img src={pokeiqLogo} alt="PokeIQ" className="h-7 w-auto" />
+            <span className="font-bold text-base tracking-tight">PokeIQ</span>
+          </Link>
 
           <div className="flex-1" />
 
@@ -328,6 +328,35 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </div>
         {children}
+
+        {/* Mobile bottom tab bar */}
+        <nav
+          className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/60 bg-background/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
+          aria-label="Primary"
+        >
+          <ul className="flex items-stretch justify-around">
+            {mobileNav.map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                location.pathname === item.href ||
+                (item.href !== '/' && location.pathname.startsWith(item.href));
+              return (
+                <li key={item.href} className="flex-1">
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      'flex flex-col items-center justify-center gap-0.5 py-2 text-[10px] font-medium transition-colors',
+                      isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    <Icon className={cn('w-5 h-5', isActive && 'drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]')} />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
       </main>
     </div>
   );

@@ -455,26 +455,6 @@ export default function Matches({
 
           {!loading && userId && (
             <div className="space-y-8 sm:space-y-10">
-              {view === 'profile' && !isPublicView && (
-                <Link
-                  to="/leaderboard"
-                  className="group flex items-center justify-between gap-4 rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 sm:p-5 hover:border-primary/60 hover:from-primary/15 transition-all"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-foreground">Leaderboard</span>
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/20 text-primary">NEW</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">See how you stack up against top collectors</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
-                </Link>
-              )}
               {view === 'profile' && (
                 <>
                   <TasteHero
