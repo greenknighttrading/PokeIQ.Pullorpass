@@ -19,7 +19,7 @@ function todayKey() {
 }
 
 // Every swipe of the day (across rounds) is appended here by PullOrPass.
-function readTodayRecords(): SwipeRecord[] {
+function readTodayRecords(): TimedSwipeRecord[] {
   try {
     const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
     if (!raw) return [];
@@ -27,7 +27,7 @@ function readTodayRecords(): SwipeRecord[] {
     if (!Array.isArray(arr)) return [];
     return arr
       .filter((x: any) => x && x.card_id && (x.decision === 'pull' || x.decision === 'pass'))
-      .map((x: any): SwipeRecord => ({
+      .map((x: any): TimedSwipeRecord => ({
         card: {
           card_id: x.card_id,
           name: x.name ?? '',
