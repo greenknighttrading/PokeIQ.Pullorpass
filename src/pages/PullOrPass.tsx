@@ -715,6 +715,9 @@ export default function PullOrPass() {
   const after = cards[index + 2];
 
   const persistSwipeProgress = (rec: SwipeRecord, newRecords: SwipeRecord[]) => {
+    const safeRoundId = validRoundId(roundId);
+    if (safeRoundId !== roundId) setRoundId(safeRoundId);
+
     // Track today's swiped cards so Matches/Earn/Profile can reflect the
     // latest swipe immediately, even if the DB write is still in flight.
     try {
@@ -748,9 +751,9 @@ export default function PullOrPass() {
     const nextIndex = index + 1;
     if (nextIndex >= cards.length) {
       clearResume();
-      writeResults({ records: newRecords, roundId, cards });
+      writeResults({ records: newRecords, roundId: safeRoundId, cards });
     } else {
-      writeResume({ cards, index: nextIndex, records: newRecords, roundId });
+      writeResume({ cards, index: nextIndex, records: newRecords, roundId: safeRoundId });
     }
   };
 
@@ -762,7 +765,6 @@ export default function PullOrPass() {
 
     if (userId) {
       const persistedRoundId = validRoundId(roundId);
-      if (persistedRoundId !== roundId) setRoundId(persistedRoundId);
       supabase.from('pullorpass_swipes').insert({
         user_id: userId,
         round_id: persistedRoundId,
@@ -907,7 +909,6 @@ export default function PullOrPass() {
       persistSwipeProgress(rec, newRecords);
       if (userId) {
         const persistedRoundId = validRoundId(roundId);
-        if (persistedRoundId !== roundId) setRoundId(persistedRoundId);
         supabase.from('pullorpass_swipes').insert({
           user_id: userId,
           round_id: persistedRoundId,
