@@ -1245,21 +1245,6 @@ export default function PokeYelp() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                  <ArcadeStat icon={<Zap className="w-3 h-3" />} label="Score" value={`${roundXp.toLocaleString()} XP`} color="primary" accent />
-                  <ArcadeStat icon={<Flame className="w-3 h-3" />} label="Cards Reviewed" value={`${reviewedCount}`} color="amber" />
-                  <ArcadeStat icon={<Trophy className="w-3 h-3" />} label={`Daily 🔥`} value={`${dailyStreak}d`} color="magenta" />
-                  <ArcadeStat icon={<Coins className="w-3 h-3" />} label="Credits Earned" value={`${credits} ◎`} color="amber" accent />
-                </div>
-                <p className="mt-3 text-[11px] text-muted-foreground max-w-xl leading-relaxed text-center py-[6px] my-px mx-0 px-px">
-                  <span className="text-amber-400 font-semibold">Credits</span> are real currency: earn{' '}
-                  <span className="text-foreground">1 per card</span> tagged, plus{' '}
-                  <span className="text-foreground">+1 bonus</span> for every <em>original tag</em> you create.{' '}
-                  <span className="text-foreground">{CREDITS_PER_REDEMPTION} credits = {SWIPES_PER_REDEMPTION} swipes</span>.
-                  <span className="mx-0.5">⭐</span>
-                  <span className="text-primary font-semibold">XP</span> can be redeemed for bonus swipes and other perks in future updates.
-                </p>
-              </div>
 
                 {!userId && (
                   <div className="mt-4 text-center">
