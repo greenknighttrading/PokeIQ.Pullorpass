@@ -466,7 +466,6 @@ export default function Matches({
                   {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
                   {!isPublicView && <SwipeAgainOrLimit />}
                   {!isPublicView && <ThisOrThatCTA />}
-                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   {!isPublicView && <DailyLimitWidget />}
                   {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
                 </>
@@ -477,6 +476,7 @@ export default function Matches({
                     <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} />
                   )}
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                 </>
               )}
