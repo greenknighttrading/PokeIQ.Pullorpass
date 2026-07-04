@@ -1045,7 +1045,7 @@ export default function PullOrPass() {
                      to="/matches"
                      className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
                    >
-                     <Layers className="w-3 h-3" /> Matches
+                      <Layers className="w-3 h-3" /> Results
                    </Link>
                   <span className="text-muted-foreground/40">·</span>
                   {premiumLoading ? null : premium ? (
