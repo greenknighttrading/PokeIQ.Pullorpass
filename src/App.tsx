@@ -151,6 +151,7 @@ function AppRoutes() {
         <Route path="/matches" element={<PokeIQShell><MatchesResults /></PokeIQShell>} />
         <Route path="/matches/:category" element={<MatchesCollection />} />
         <Route path="/profile" element={<PokeIQShell><Matches /></PokeIQShell>} />
+        <Route path="/binder" element={<PokeIQShell><Matches view="binder" /></PokeIQShell>} />
         <Route path="/pokeyelp" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
         <Route path="/earn" element={<PokeIQShell><PokeYelp /></PokeIQShell>} />
         <Route path="/this-or-that" element={<PokeIQShell><ThisOrThat /></PokeIQShell>} />
