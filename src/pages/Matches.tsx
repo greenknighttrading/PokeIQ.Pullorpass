@@ -1261,7 +1261,7 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
         image_url: like.image_url, price: like.price, rarity: like.rarity,
         artist: like.artist, pokemon_type: like.pokemon_type, card_number: like.card_number,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
+      className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className={cn(
         "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
@@ -1718,7 +1718,7 @@ function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailS
         image_url: r.image_url, price: r.price, rarity: r.rarity,
         artist: r.artist, pokemon_type: r.pokemon_type,
       })}
-      className="group shrink-0 w-[170px] sm:w-[190px] snap-start text-left cursor-pointer"
+      className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
         {r.image_url && !err ? (
