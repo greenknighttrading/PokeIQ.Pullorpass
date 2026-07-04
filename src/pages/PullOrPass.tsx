@@ -130,6 +130,29 @@ function clearResume() {
 // ─── Results state (remember the last completed round so back-nav restores it) ─
 const RESULTS_KEY = 'pop_results_v1';
 type ResultsState = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[] };
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function newRoundId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+
+  const bytes = new Uint8Array(16);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+function validRoundId(roundId?: string | null): string {
+  return roundId && UUID_RE.test(roundId) ? roundId : newRoundId();
+}
+
 function readResults(): ResultsState | null {
   try {
     const raw = localStorage.getItem(RESULTS_KEY);
@@ -306,10 +329,14 @@ export default function PullOrPass() {
       // Try to resume an in-progress round first, then fall back to last results
       const resume = storedResume;
       if (resume) {
+      const safeRoundId = validRoundId(resume.roundId);
       setCards(resume.cards);
       setIndex(resume.index);
       setRecords(resume.records || []);
-      setRoundId(resume.roundId);
+      setRoundId(safeRoundId);
+      if (safeRoundId !== resume.roundId) {
+        writeResume({ ...resume, roundId: safeRoundId });
+      }
       setStage('swiping');
       } else {
       const last = readResults();
@@ -323,7 +350,7 @@ export default function PullOrPass() {
         } else {
           setCards(last.cards);
           setRecords(last.records);
-          setRoundId(last.roundId);
+          setRoundId(validRoundId(last.roundId));
           setIndex(last.cards.length);
           setStage('results');
         }
@@ -471,8 +498,9 @@ export default function PullOrPass() {
     }
     const seedStr = `${identity}|${todayKey()}`;
     const rand = mulberry32(hashStringToSeed(seedStr));
-    // Stable round id per identity+day so resume/results keys line up.
-    setRoundId(`r-${hashStringToSeed(seedStr).toString(16)}`);
+    // Database round_id is a uuid, and each fresh 20-card round needs its own
+    // id so the latest round/results never collapse into older same-day swipes.
+    setRoundId(newRoundId());
 
     // Build an exclusion set of every card this user has ever swiped, so we
     // never show the same card twice. For signed-in users we pull from the
