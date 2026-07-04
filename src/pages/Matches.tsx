@@ -1216,7 +1216,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
     : (isDisliked ? 'Disliked' : 'Liked');
   const description = isPublicView
     ? (isDisliked ? `Cards ${subject} recently passed on.` : `Every card ${subject} pulled — super likes first.`)
-    : 'Complete a round of 20 in Swipe to see cards here.';
+    : (isDisliked ? 'Cards you recently passed on.' : 'Complete a round of 20 swipes to see your liked cards here.');
   const Icon = isDisliked ? XIcon : HeartIcon;
   return (
     <section>
