@@ -531,7 +531,7 @@ export default function Matches({
               {view === 'binder' && (
                 <>
                   {!isPublicView && (
-                    <SwipeStats likes={likes} cardsSwiped={cardsSwiped} />
+                    <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
@@ -1064,22 +1064,46 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function SwipeStats({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: number }) {
+function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: number }) {
   const totalLikes = likes.length;
   const priced = likes.filter((l) => typeof l.price === 'number' && (l.price ?? 0) > 0);
   const avgValue = priced.length ? priced.reduce((s, l) => s + (l.price ?? 0), 0) / priced.length : 0;
   const streak = readSwipeStreak().streak;
-  const tiles: { label: string; value: string; icon: React.ReactNode }[] = [
-    { label: 'Total likes', value: totalLikes.toLocaleString(), icon: <HeartIcon className="w-4 h-4 text-primary" /> },
-    { label: 'Avg. card value', value: avgValue > 0 ? `$${avgValue.toFixed(avgValue >= 100 ? 0 : 2)}` : '—', icon: <Sparkles className="w-4 h-4 text-primary" /> },
-    { label: 'Daily streak', value: `${streak}d`, icon: <Flame className="w-4 h-4 text-primary" /> },
+  const tiles: { label: string; value: string; icon: React.ReactNode; color: string; bg: string; border: string; ring: string }[] = [
+    {
+      label: 'Total cards liked',
+      value: totalLikes.toLocaleString(),
+      icon: <HeartIcon className="w-5 h-5 text-teal-300" />,
+      color: 'text-teal-300',
+      bg: 'bg-teal-500/10',
+      border: 'border-teal-400/20',
+      ring: 'ring-teal-400/20',
+    },
+    {
+      label: 'Avg. card value',
+      value: avgValue > 0 ? `$${avgValue.toFixed(avgValue >= 100 ? 0 : 2)}` : '—',
+      icon: <Sparkles className="w-5 h-5 text-amber-300" />,
+      color: 'text-amber-300',
+      bg: 'bg-amber-500/10',
+      border: 'border-amber-400/20',
+      ring: 'ring-amber-400/20',
+    },
+    {
+      label: 'Daily streak',
+      value: `${streak}d`,
+      icon: <Flame className="w-5 h-5 text-rose-300" />,
+      color: 'text-rose-300',
+      bg: 'bg-rose-500/10',
+      border: 'border-rose-400/20',
+      ring: 'ring-rose-400/20',
+    },
   ];
   return (
     <section>
-      <div className="mb-4">
-        <div className="flex items-center gap-2">
+      <div className="mb-5 text-center">
+        <div className="inline-flex items-center justify-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Swipe stats</h2>
+          <h2 className="text-2xl font-bold text-foreground">Snapshot</h2>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
           A quick snapshot of your swiping so far{cardsSwiped ? ` — ${cardsSwiped.toLocaleString()} cards swiped total` : ''}.
@@ -1087,12 +1111,16 @@ function SwipeStats({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: n
       </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {tiles.map((t) => (
-          <Card key={t.label} className="p-4 sm:p-5 bg-card/60 border-border/60">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-muted-foreground">
+          <Card key={t.label} className={cn("p-3 sm:p-4 border rounded-2xl flex flex-col justify-between", t.bg, t.border)}>
+            <div className={cn("flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border mb-2 sm:mb-3", t.bg, t.border, t.ring)}>
               {t.icon}
-              <span className="truncate">{t.label}</span>
             </div>
-            <div className="mt-2 text-2xl sm:text-3xl font-bold text-foreground tabular-nums">{t.value}</div>
+            <div className="mt-auto">
+              <div className="text-xl sm:text-2xl font-bold text-foreground tabular-nums">{t.value}</div>
+              <div className="text-[10px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground mt-1 leading-tight">
+                {t.label}
+              </div>
+            </div>
           </Card>
         ))}
       </div>
@@ -1188,7 +1216,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
     : (isDisliked ? 'Disliked' : 'Liked');
   const description = isPublicView
     ? (isDisliked ? `Cards ${subject} recently passed on.` : `Every card ${subject} pulled — super likes first.`)
-    : 'Complete a round of 20 in Swipe to see cards here.';
+    : (isDisliked ? 'Cards you recently passed on.' : 'Complete a round of 20 swipes to see your liked cards here.');
   const Icon = isDisliked ? XIcon : HeartIcon;
   return (
     <section>
@@ -1240,11 +1268,11 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
       <div className={cn(
         "relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 shadow-md transition-all duration-300",
         isPass
-          ? "ring-border/40 group-hover:ring-destructive/40"
+          ? "ring-border/40 group-hover:ring-destructive/40 saturate-[0.92]"
           : "ring-border/60 group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50"
       )}>
         {like.image_url && !err ? (
-          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-60 grayscale")} onError={() => setErr(true)} />
+          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-90")} onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
