@@ -346,7 +346,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <Link
                     to={item.href}
                     className={cn(
-                      'flex flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl text-[10px] font-medium transition-all duration-200',
+                      'flex flex-col items-center justify-center gap-0.5 py-0 px-1 rounded-xl text-[10px] font-medium transition-all duration-200',
                       isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
