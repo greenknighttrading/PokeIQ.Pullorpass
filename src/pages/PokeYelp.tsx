@@ -1247,7 +1247,7 @@ export default function PokeYelp() {
                 </div>
 
                 {!userId && (
-                  <div className="mt-4 text-center">
+                  <div className="mt-4 text-center order-3">
                     <p className="text-xs text-muted-foreground mb-2">
                       Sign up to save your contributions and unlock rewards.
                     </p>
