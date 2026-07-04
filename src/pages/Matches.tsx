@@ -923,7 +923,7 @@ function TasteHero({
               </span>
             </h1>
             <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-xl font-semibold">
-              {personalityInfo?.tagline ? `${personalityInfo.tagline} ` : ''}Which helps you collect  SMARTER not Harder.
+              {buildIdentitySentence(taste, isPublicView ? (viewedDisplayName || 'They') : 'You')}
             </p>
 
             {totalLikes === 0 && (
