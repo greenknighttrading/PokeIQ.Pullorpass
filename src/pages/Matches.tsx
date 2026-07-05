@@ -141,6 +141,21 @@ function todayKey() {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+function todaySwipeStats() {
+  try {
+    const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+    const arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) return { likes: 0, swipes: 0, avgValue: 0 };
+    const swipes = arr.filter((x: any) => x && x.card_id && (x.decision === 'pull' || x.decision === 'pass'));
+    const likes = swipes.filter((x: any) => x.decision === 'pull');
+    const prices = likes
+      .map((x: any) => (typeof x.price === 'number' ? x.price : Number(x.price) || 0))
+      .filter((p: number) => p > 0);
+    const avgValue = prices.length ? prices.reduce((s: number, p: number) => s + p, 0) / prices.length : 0;
+    return { likes: likes.length, swipes: swipes.length, avgValue };
+  } catch { return { likes: 0, swipes: 0, avgValue: 0 }; }
+}
+
 function localLatestTwenty(userId: string): RoundDisplayCard[] {
   try {
     const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
