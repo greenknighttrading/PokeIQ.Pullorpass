@@ -68,6 +68,32 @@ const firstSentences = (text: string, n = 2) => {
   return parts.slice(0, n).join(' ').trim();
 };
 
+// Map a Pokémon type (e.g. "Water", "Fire") to the right icon + color chip.
+function pokemonTypeChip(typeLabel: string) {
+  const t = (typeLabel || '').toLowerCase().trim();
+  const baseClass = 'w-3.5 h-3.5';
+  const maps: Record<string, { icon: React.ReactNode; colorClass: string; bgClass: string; borderClass: string }> = {
+    fire: { icon: <Flame className={cn(baseClass, 'text-orange-500')} />, colorClass: 'text-orange-500', bgClass: 'bg-orange-500/5', borderClass: 'border-orange-500/30' },
+    water: { icon: <Droplets className={cn(baseClass, 'text-blue-500')} />, colorClass: 'text-blue-500', bgClass: 'bg-blue-500/5', borderClass: 'border-blue-500/30' },
+    grass: { icon: <Leaf className={cn(baseClass, 'text-green-500')} />, colorClass: 'text-green-500', bgClass: 'bg-green-500/5', borderClass: 'border-green-500/30' },
+    lightning: { icon: <Zap className={cn(baseClass, 'text-yellow-400')} />, colorClass: 'text-yellow-400', bgClass: 'bg-yellow-400/5', borderClass: 'border-yellow-400/30' },
+    psychic: { icon: <Sparkles className={cn(baseClass, 'text-purple-400')} />, colorClass: 'text-purple-400', bgClass: 'bg-purple-400/5', borderClass: 'border-purple-400/30' },
+    fighting: { icon: <Swords className={cn(baseClass, 'text-red-700')} />, colorClass: 'text-red-700', bgClass: 'bg-red-700/5', borderClass: 'border-red-700/30' },
+    darkness: { icon: <Moon className={cn(baseClass, 'text-indigo-400')} />, colorClass: 'text-indigo-400', bgClass: 'bg-indigo-400/5', borderClass: 'border-indigo-400/30' },
+    metal: { icon: <Hexagon className={cn(baseClass, 'text-slate-400')} />, colorClass: 'text-slate-400', bgClass: 'bg-slate-400/5', borderClass: 'border-slate-400/30' },
+    fairy: { icon: <Sun className={cn(baseClass, 'text-pink-400')} />, colorClass: 'text-pink-400', bgClass: 'bg-pink-400/5', borderClass: 'border-pink-400/30' },
+    dragon: { icon: <Crown className={cn(baseClass, 'text-amber-500')} />, colorClass: 'text-amber-500', bgClass: 'bg-amber-500/5', borderClass: 'border-amber-500/30' },
+    colorless: { icon: <Circle className={cn(baseClass, 'text-gray-400')} />, colorClass: 'text-gray-400', bgClass: 'bg-gray-400/5', borderClass: 'border-gray-400/30' },
+  };
+  const m = maps[t] || {
+    icon: <Zap className={cn(baseClass, 'text-primary')} />,
+    colorClass: 'text-primary',
+    bgClass: 'bg-primary/5',
+    borderClass: 'border-primary/30',
+  };
+  return { icon: m.icon, tint: `${m.borderClass} ${m.bgClass}` };
+}
+
 // Build the affiliate-wrapped TCGplayer URL for a card.
 function tcgHref(tcgplayerId?: string | null, name?: string | null): string {
   return tcgPlayerUrl(tcgplayerId, name || '');
