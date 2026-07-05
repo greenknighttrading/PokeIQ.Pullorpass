@@ -560,7 +560,7 @@ const STAGE_LABEL: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 // Editable username card — stores in auth user_metadata.display_name
 // ─────────────────────────────────────────────────────────────
-function UsernameInline() {
+function UsernameInline({ personalitySubtitle }: { personalitySubtitle?: string | null }) {
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [editing, setEditing] = useState(false);
@@ -628,7 +628,9 @@ function UsernameInline() {
             </button>
           </div>
         )}
-        {email && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
+        {personalitySubtitle && (
+          <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{personalitySubtitle}</p>
+        )}
       </div>
     </div>
   );
@@ -875,9 +877,8 @@ function TasteHero({
           <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        {/* Art composition: forest base, readability fades, then a masked
-            foreground Pikachu pass so the focal point stays above the haze. */}
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Subtle background artwork — kept very faint so text stays crisp. */}
+        <div className="absolute inset-0 pointer-events-none opacity-[0.08]">
           <img
             src={tasteHeroArt}
             alt=""
@@ -891,40 +892,45 @@ function TasteHero({
               filter: 'brightness(1.02) contrast(1.05) saturate(1.06)',
             }}
           />
-          {/* Left-side readability fade keeps headline crisp */}
-          <div className="absolute inset-0 z-[1] bg-gradient-to-r from-card via-card/80 md:via-card/55 to-transparent" />
-          {/* Bottom fade so the stat cards sit on a clean surface */}
-          <div className="absolute inset-x-0 bottom-0 z-[1] h-[55%] bg-gradient-to-t from-card via-card/85 to-transparent" />
-          {/* Subtle warm rim-light around the upper-right clearing for atmosphere */}
-          <div className="absolute top-[6%] right-[10%] z-[2] w-[26%] h-[34%] rounded-full bg-warning/10 blur-3xl mix-blend-screen" />
         </div>
 
-        <div className="relative z-10 p-6 sm:p-8 md:p-10 space-y-6 min-h-[360px] md:min-h-[400px] flex flex-col gap-0 px-[32px] py-[10px] mx-0">
-          {/* Username sits inside the widget now */}
+        <div className="relative z-10 px-6 sm:px-8 md:px-10 pt-6 pb-8 flex flex-col">
+          {/* Compact identity header — username + archetype subtitle. */}
           <div className="md:max-w-[62%]">
             {isPublicView
-              ? <UsernameStatic name={viewedDisplayName || 'Collector'} />
-              : <UsernameInline />}
+              ? <UsernameStatic name={viewedDisplayName || 'Collector'} subtitle={personalityType ? `${personalityType} Collector` : undefined} />
+              : <UsernameInline personalitySubtitle={personalityType ? `${personalityType} Collector` : undefined} />}
           </div>
 
-          <div className="md:max-w-[62%]">
-            {personalityType && (
-              <div className="flex items-center gap-2 mb-4">
-                <BookOpen className="text-amber-400 w-[22px] h-[19px]" />
-                <span className="font-bold uppercase tracking-[0.2em] text-amber-400 text-base">
-                  {personalityType}
-                </span>
-              </div>
-            )}
+          {/* Headline + DNA chips */}
+          <div className="md:max-w-[62%] mt-6">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.05]">
               {headlineHead}{' '}
               <span className="bg-clip-text text-transparent bg-gradient-to-br from-primary via-primary to-primary/60">
                 {headlineTail}
               </span>
             </h1>
-            <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-xl font-semibold">
-              {buildIdentitySentence(taste, isPublicView ? (viewedDisplayName || 'They') : 'You')}
-            </p>
+
+            {gravPills.length > 0 ? (
+              <div className="mt-5 flex flex-wrap gap-2">
+                {gravPills.map((p) => (
+                  <span
+                    key={p.label}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs sm:text-sm font-semibold text-foreground/90 backdrop-blur-sm',
+                      p.tint,
+                    )}
+                  >
+                    {p.icon}
+                    <span>{p.label}</span>
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-5 text-base text-foreground/80 leading-relaxed max-w-xl sm:text-lg font-medium">
+                {buildIdentitySentence(taste, isPublicView ? (viewedDisplayName || 'They') : 'You')}
+              </p>
+            )}
 
             {totalLikes === 0 && (
               <div className="mt-6">
@@ -935,10 +941,8 @@ function TasteHero({
             )}
           </div>
 
-          {/* Collector Stats — moved into the hero widget in place of the
-              taste-signal pills. Translucent surfaces so the art still
-              breathes through. */}
-          <div className="mt-auto pt-10 md:pt-16 px-0 py-[4px]">
+          {/* Collector Stats */}
+          <div className="mt-8">
             <div className="flex items-center gap-2 mb-3">
               <ArrowRight className="w-4 h-4 text-primary rotate-[-45deg]" />
               <h2 className="text-sm font-semibold text-foreground">Collector Stats</h2>
@@ -1020,11 +1024,11 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
       <div className="min-w-0 flex-1 w-full">
         <p
           className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap"
-          style={{ fontSize: 'clamp(1.1rem, 3.2vw, 1.5rem)', wordBreak: 'keep-all' }}
+          style={{ fontSize: 'clamp(1.4rem, 4vw, 1.85rem)', wordBreak: 'keep-all' }}
         >
           {value}
         </p>
-        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto flex items-center gap-1">
+        <p className="text-[10px] sm:text-[11px] xl:text-[12px] uppercase tracking-wide text-muted-foreground/80 leading-tight break-words hyphens-auto flex items-center gap-1 mt-0.5">
           <span>{label}</span>
           {info && (
             <TooltipProvider delayDuration={150}>
@@ -1986,7 +1990,7 @@ export function DailyLimitWidget() {
 // ─────────────────────────────────────────────────────────────
 // Public-profile helpers — read-only username + non-user CTA.
 // ─────────────────────────────────────────────────────────────
-function UsernameStatic({ name }: { name: string }) {
+function UsernameStatic({ name, subtitle }: { name: string; subtitle?: string | null }) {
   const initial = (name || 'C').charAt(0).toUpperCase();
   return (
     <div className="flex items-center gap-3">
@@ -1995,7 +1999,9 @@ function UsernameStatic({ name }: { name: string }) {
       </div>
       <div className="flex-1 min-w-0">
         <span className="text-sm sm:text-base font-semibold text-foreground truncate">@{name}</span>
-        <p className="text-[11px] text-muted-foreground truncate">Public collector profile</p>
+        <p className="text-[11px] sm:text-xs text-muted-foreground truncate">
+          {subtitle || 'Public collector profile'}
+        </p>
       </div>
     </div>
   );
