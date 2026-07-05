@@ -861,7 +861,10 @@ function TasteHero({
     gravPills.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/30 bg-amber-400/5' });
   }
   if (topEra) gravPills.push({ label: `${topEra.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
-  if (topType) gravPills.push({ label: `${topType.label} Types`, icon: <Flame className="w-3.5 h-3.5 text-orange-400" />, tint: 'border-orange-400/30 bg-orange-400/5' });
+  if (topType) {
+    const typeChip = pokemonTypeChip(topType.label);
+    gravPills.push({ label: `${topType.label} Types`, icon: typeChip.icon, tint: typeChip.tint });
+  }
   if (topRarity) gravPills.push({ label: topRarity.label, icon: <Star className="w-3.5 h-3.5 text-purple-400" />, tint: 'border-purple-400/30 bg-purple-400/5' });
   if (gravPills.length === 0 && topArtist) {
     gravPills.push({ label: topArtist.label, icon: <Palette className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
