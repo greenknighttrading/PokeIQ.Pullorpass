@@ -1988,10 +1988,7 @@ export function DailyLimitWidget() {
 // ─────────────────────────────────────────────────────────────
 // Public-profile helpers — read-only username + non-user CTA.
 // ─────────────────────────────────────────────────────────────
-function UsernameStatic({ name }: { name: string }) {
-  return <UsernameStaticInner name={name} />;
-}
-function UsernameStaticInner({ name, subtitle }: { name: string; subtitle?: string | null }) {
+function UsernameStatic({ name, subtitle }: { name: string; subtitle?: string | null }) {
   const initial = (name || 'C').charAt(0).toUpperCase();
   return (
     <div className="flex items-center gap-3">
