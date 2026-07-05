@@ -1024,11 +1024,11 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
       <div className="min-w-0 flex-1 w-full">
         <p
           className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap"
-          style={{ fontSize: 'clamp(1.1rem, 3.2vw, 1.5rem)', wordBreak: 'keep-all' }}
+          style={{ fontSize: 'clamp(1.4rem, 4vw, 1.85rem)', wordBreak: 'keep-all' }}
         >
           {value}
         </p>
-        <p className="text-[11px] sm:text-[12px] xl:text-[13px] text-muted-foreground leading-tight break-words hyphens-auto flex items-center gap-1">
+        <p className="text-[10px] sm:text-[11px] xl:text-[12px] uppercase tracking-wide text-muted-foreground/80 leading-tight break-words hyphens-auto flex items-center gap-1 mt-0.5">
           <span>{label}</span>
           {info && (
             <TooltipProvider delayDuration={150}>
