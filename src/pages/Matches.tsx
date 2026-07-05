@@ -560,7 +560,7 @@ const STAGE_LABEL: Record<string, string> = {
 // ─────────────────────────────────────────────────────────────
 // Editable username card — stores in auth user_metadata.display_name
 // ─────────────────────────────────────────────────────────────
-function UsernameInline() {
+function UsernameInline({ personalitySubtitle }: { personalitySubtitle?: string | null }) {
   const [email, setEmail] = useState<string>('');
   const [name, setName] = useState<string>('');
   const [editing, setEditing] = useState(false);
@@ -628,7 +628,9 @@ function UsernameInline() {
             </button>
           </div>
         )}
-        {email && <p className="text-[11px] text-muted-foreground truncate">{email}</p>}
+        {personalitySubtitle && (
+          <p className="text-[11px] sm:text-xs text-muted-foreground truncate">{personalitySubtitle}</p>
+        )}
       </div>
     </div>
   );
