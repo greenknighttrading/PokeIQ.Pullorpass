@@ -570,7 +570,7 @@ export default function Matches({
                 </>
               )}
               {view === 'binder' && (
-                <>
+                <div className="space-y-4 sm:space-y-5">
                   {!isPublicView && (
                     <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
@@ -579,7 +579,7 @@ export default function Matches({
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-                </>
+                </div>
               )}
             </div>
           )}
