@@ -980,27 +980,27 @@ function TasteHero({
               <HeroStat
                 icon={<BookOpen className="w-6 h-6 text-primary" />}
                 tint="bg-primary/15 border-primary/30"
-                value={todayAvgValue > 0 ? `$${todayAvgValue.toFixed(todayAvgValue >= 100 ? 0 : 2)}` : '—'}
-                label="Avg. Value (today)"
+                value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
+                label="Avg Card Value"
               />
               <HeroStat
                 icon={<HeartIcon className="w-6 h-6 text-red-400" />}
                 tint="bg-red-400/15 border-red-400/30"
-                value={todayLikes.toLocaleString()}
-                label="Cards Liked Today"
+                value={totalLikes.toLocaleString()}
+                label="Collection Likes"
               />
               <HeroStat
                 icon={<Eye className="w-6 h-6 text-blue-400" />}
                 tint="bg-blue-400/15 border-blue-400/30"
-                value={todaySwipes.toLocaleString()}
-                label="Cards Swiped Today"
+                value={cardsSwiped.toLocaleString()}
+                label="Cards Swiped"
               />
               <HeroStat
                 icon={<Target className="w-6 h-6 text-purple-400" />}
                 tint="bg-purple-400/15 border-purple-400/30"
-                value={todaySwipes > 0 ? `${todayMatchRate}%` : '—'}
+                value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
                 label="Pull Rate"
-                info={`Out of every 100 cards you swipe today, you Pull about ${todayMatchRate}. It's simply Pulls ÷ total swipes. A low % means you're picky; a high % means you Pull broadly.`}
+                info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's simply Pulls ÷ total swipes. A low % means you're picky; a high % means you Pull broadly.`}
               />
             </div>
 
