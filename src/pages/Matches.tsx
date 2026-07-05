@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target, Plus, HelpCircle, Trophy } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target, Plus, HelpCircle, Trophy, Droplets, Leaf, Sun, Moon, Hexagon, Circle, Swords } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -67,6 +67,32 @@ const firstSentences = (text: string, n = 2) => {
   if (!parts) return text;
   return parts.slice(0, n).join(' ').trim();
 };
+
+// Map a Pokémon type (e.g. "Water", "Fire") to the right icon + color chip.
+function pokemonTypeChip(typeLabel: string) {
+  const t = (typeLabel || '').toLowerCase().trim();
+  const baseClass = 'w-3.5 h-3.5';
+  const maps: Record<string, { icon: React.ReactNode; colorClass: string; bgClass: string; borderClass: string }> = {
+    fire: { icon: <Flame className={cn(baseClass, 'text-orange-500')} />, colorClass: 'text-orange-500', bgClass: 'bg-orange-500/5', borderClass: 'border-orange-500/30' },
+    water: { icon: <Droplets className={cn(baseClass, 'text-blue-500')} />, colorClass: 'text-blue-500', bgClass: 'bg-blue-500/5', borderClass: 'border-blue-500/30' },
+    grass: { icon: <Leaf className={cn(baseClass, 'text-green-500')} />, colorClass: 'text-green-500', bgClass: 'bg-green-500/5', borderClass: 'border-green-500/30' },
+    lightning: { icon: <Zap className={cn(baseClass, 'text-yellow-400')} />, colorClass: 'text-yellow-400', bgClass: 'bg-yellow-400/5', borderClass: 'border-yellow-400/30' },
+    psychic: { icon: <Sparkles className={cn(baseClass, 'text-purple-400')} />, colorClass: 'text-purple-400', bgClass: 'bg-purple-400/5', borderClass: 'border-purple-400/30' },
+    fighting: { icon: <Swords className={cn(baseClass, 'text-red-700')} />, colorClass: 'text-red-700', bgClass: 'bg-red-700/5', borderClass: 'border-red-700/30' },
+    darkness: { icon: <Moon className={cn(baseClass, 'text-indigo-400')} />, colorClass: 'text-indigo-400', bgClass: 'bg-indigo-400/5', borderClass: 'border-indigo-400/30' },
+    metal: { icon: <Hexagon className={cn(baseClass, 'text-slate-400')} />, colorClass: 'text-slate-400', bgClass: 'bg-slate-400/5', borderClass: 'border-slate-400/30' },
+    fairy: { icon: <Sun className={cn(baseClass, 'text-pink-400')} />, colorClass: 'text-pink-400', bgClass: 'bg-pink-400/5', borderClass: 'border-pink-400/30' },
+    dragon: { icon: <Crown className={cn(baseClass, 'text-amber-500')} />, colorClass: 'text-amber-500', bgClass: 'bg-amber-500/5', borderClass: 'border-amber-500/30' },
+    colorless: { icon: <Circle className={cn(baseClass, 'text-gray-400')} />, colorClass: 'text-gray-400', bgClass: 'bg-gray-400/5', borderClass: 'border-gray-400/30' },
+  };
+  const m = maps[t] || {
+    icon: <Zap className={cn(baseClass, 'text-primary')} />,
+    colorClass: 'text-primary',
+    bgClass: 'bg-primary/5',
+    borderClass: 'border-primary/30',
+  };
+  return { icon: m.icon, tint: `${m.borderClass} ${m.bgClass}` };
+}
 
 // Build the affiliate-wrapped TCGplayer URL for a card.
 function tcgHref(tcgplayerId?: string | null, name?: string | null): string {
@@ -861,7 +887,10 @@ function TasteHero({
     gravPills.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/30 bg-amber-400/5' });
   }
   if (topEra) gravPills.push({ label: `${topEra.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
-  if (topType) gravPills.push({ label: `${topType.label} Types`, icon: <Flame className="w-3.5 h-3.5 text-orange-400" />, tint: 'border-orange-400/30 bg-orange-400/5' });
+  if (topType) {
+    const typeChip = pokemonTypeChip(topType.label);
+    gravPills.push({ label: `${topType.label} Types`, icon: typeChip.icon, tint: typeChip.tint });
+  }
   if (topRarity) gravPills.push({ label: topRarity.label, icon: <Star className="w-3.5 h-3.5 text-purple-400" />, tint: 'border-purple-400/30 bg-purple-400/5' });
   if (gravPills.length === 0 && topArtist) {
     gravPills.push({ label: topArtist.label, icon: <Palette className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/30 bg-primary/5' });
@@ -1017,18 +1046,18 @@ function CollectorStat({ icon, tint, value, label }: { icon: React.ReactNode; ti
 
 function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; tint: string; value: string; label: string; info?: string }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-4 xl:p-5 flex flex-col xl:flex-row items-start xl:items-center gap-2 xl:gap-3.5 min-w-0 min-h-[76px]">
-      <div className={cn('w-10 h-10 xl:w-[52px] xl:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
+    <div className="rounded-2xl border border-border/60 bg-card/50 backdrop-blur-md p-3 sm:p-4 xl:p-5 flex flex-col items-center justify-center text-center gap-2 sm:gap-3 min-w-0 min-h-[92px]">
+      <div className={cn('w-12 h-12 xl:w-[52px] xl:h-[52px] rounded-xl border flex items-center justify-center shrink-0', tint)}>
         {icon}
       </div>
-      <div className="min-w-0 flex-1 w-full">
+      <div className="min-w-0 w-full">
         <p
           className="font-bold text-foreground tabular-nums leading-tight whitespace-nowrap"
           style={{ fontSize: 'clamp(1.4rem, 4vw, 1.85rem)', wordBreak: 'keep-all' }}
         >
           {value}
         </p>
-        <p className="text-[10px] sm:text-[11px] xl:text-[12px] uppercase tracking-wide text-muted-foreground/80 leading-tight break-words hyphens-auto flex items-center gap-1 mt-0.5">
+        <p className="text-[10px] sm:text-[11px] xl:text-[12px] uppercase tracking-wide text-muted-foreground/80 leading-tight break-words hyphens-auto flex items-center justify-center gap-1 mt-0.5">
           <span>{label}</span>
           {info && (
             <TooltipProvider delayDuration={150}>
