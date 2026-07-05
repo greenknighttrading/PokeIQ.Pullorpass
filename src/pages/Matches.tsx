@@ -141,6 +141,21 @@ function todayKey() {
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
 }
 
+function todaySwipeStats() {
+  try {
+    const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
+    const arr = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(arr)) return { likes: 0, swipes: 0, avgValue: 0 };
+    const swipes = arr.filter((x: any) => x && x.card_id && (x.decision === 'pull' || x.decision === 'pass'));
+    const likes = swipes.filter((x: any) => x.decision === 'pull');
+    const prices = likes
+      .map((x: any) => (typeof x.price === 'number' ? x.price : Number(x.price) || 0))
+      .filter((p: number) => p > 0);
+    const avgValue = prices.length ? prices.reduce((s: number, p: number) => s + p, 0) / prices.length : 0;
+    return { likes: likes.length, swipes: swipes.length, avgValue };
+  } catch { return { likes: 0, swipes: 0, avgValue: 0 }; }
+}
+
 function localLatestTwenty(userId: string): RoundDisplayCard[] {
   try {
     const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
@@ -555,7 +570,7 @@ export default function Matches({
                 </>
               )}
               {view === 'binder' && (
-                <>
+                <div className="space-y-4 sm:space-y-5">
                   {!isPublicView && (
                     <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
@@ -564,7 +579,7 @@ export default function Matches({
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-                </>
+                </div>
               )}
             </div>
           )}
@@ -1088,15 +1103,13 @@ function HeroStat({ icon, tint, value, label, info }: { icon: React.ReactNode; t
 // SECTION 2 — Recently Liked
 // ─────────────────────────────────────────────────────────────
 
-function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: number }) {
-  const totalLikes = likes.length;
-  const priced = likes.filter((l) => typeof l.price === 'number' && (l.price ?? 0) > 0);
-  const avgValue = priced.length ? priced.reduce((s, l) => s + (l.price ?? 0), 0) / priced.length : 0;
+function Snapshot({}: { likes: LikedCard[]; cardsSwiped: number }) {
+  const { likes: todayLikes, swipes: todaySwipes, avgValue } = todaySwipeStats();
   const streak = readSwipeStreak().streak;
   const tiles: { label: string; value: string; icon: React.ReactNode; accentBg: string; accentBorder: string; accentRing: string; accentText: string }[] = [
     {
-      label: 'Total cards liked',
-      value: totalLikes.toLocaleString(),
+      label: 'Cards liked today',
+      value: todayLikes.toLocaleString(),
       icon: <HeartIcon className="w-5 h-5 text-teal-300" />,
       accentBg: 'bg-teal-500/10',
       accentBorder: 'border-teal-400/20',
@@ -1104,7 +1117,7 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
       accentText: 'text-teal-300',
     },
     {
-      label: 'Avg. card value',
+      label: 'Avg. value (today)',
       value: avgValue > 0 ? `$${avgValue.toFixed(avgValue >= 100 ? 0 : 2)}` : '—',
       icon: <Sparkles className="w-5 h-5 text-amber-300" />,
       accentBg: 'bg-amber-500/10',
@@ -1124,14 +1137,11 @@ function Snapshot({ likes, cardsSwiped }: { likes: LikedCard[]; cardsSwiped: num
   ];
   return (
     <section>
-      <div className="mb-5 text-center">
+      <div className="mb-3 text-center">
         <div className="inline-flex items-center justify-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          <h2 className="text-2xl font-bold text-foreground">Snapshot</h2>
+          <h2 className="text-2xl font-bold text-foreground">Daily Snapshot</h2>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          A quick snapshot of your swiping so far{cardsSwiped ? ` — ${cardsSwiped.toLocaleString()} cards swiped total` : ''}.
-        </p>
       </div>
       <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {tiles.map((t) => (
