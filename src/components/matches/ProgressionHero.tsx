@@ -479,11 +479,12 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
       <h3 className="text-base font-semibold text-foreground mb-4">Swipe Milestones</h3>
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-start gap-0 sm:gap-8 min-w-max pb-1">
+        <div className="flex items-start gap-0 sm:gap-6 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             const isLast = i === SWIPE_MILESTONES.length - 1;
+            const nextDone = !isLast && swiped >= SWIPE_MILESTONES[i + 1].at;
             return (
               <React.Fragment key={m.at}>
                 <div className="flex flex-col items-center text-center gap-2 w-[28%] sm:w-24 shrink-0">
@@ -510,7 +511,16 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                   </div>
                 </div>
                 {!isLast && (
-                  <div className="w-[3%] sm:w-12 border-t border-dashed border-border/50 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                  <div
+                    className="w-[3%] sm:w-16 mt-7 sm:mt-8 shrink-0 h-[2px] bg-repeat-x"
+                    style={{
+                      backgroundImage: `radial-gradient(circle, ${
+                        done && nextDone ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.55)'
+                      } 1.2px, transparent 1.4px)`,
+                      backgroundSize: '8px 2px',
+                    }}
+                    aria-hidden
+                  />
                 )}
               </React.Fragment>
             );
