@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
   Mountain, Award, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
-  Camera, Loader2,
+  Camera, Loader2, Droplets, Flame, Leaf, Zap, Brain, Swords, Moon, Shield,
+  Ghost, Palette, Languages, Hourglass, Gem, Circle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
