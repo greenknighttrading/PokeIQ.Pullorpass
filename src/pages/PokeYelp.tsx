@@ -849,8 +849,8 @@ export default function PokeYelp() {
           </header>
 
           {/* Earn sub-tab pill */}
-          <div className="mb-4 flex justify-center">
-            <div className="inline-flex items-center gap-1 p-1 rounded-full border border-border/60 bg-muted/40 backdrop-blur-sm">
+          <div className="mb-3 flex justify-center">
+            <div className="inline-flex items-center gap-1 p-0.5 rounded-full border border-border/60 bg-muted/40 backdrop-blur-sm">
               {(['train','share'] as const).map((t) => {
                 const active = earnTab === t;
                 const label = t === 'train' ? 'Train' : 'Share';
@@ -859,9 +859,9 @@ export default function PokeYelp() {
                     key={t}
                     type="button"
                     onClick={() => setEarnTab(t)}
-                    className={`px-5 h-10 sm:h-11 rounded-full text-sm font-semibold transition-colors ${
+                    className={`px-4 h-8 sm:h-9 rounded-full text-sm font-semibold transition-colors ${
                       active
-                        ? 'bg-primary text-primary-foreground shadow-[0_0_16px_hsl(var(--primary)/0.35)]'
+                        ? 'bg-primary text-primary-foreground shadow-[0_0_14px_hsl(var(--primary)/0.35)]'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -878,9 +878,9 @@ export default function PokeYelp() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.25, duration: 0.7 }}
-                className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
+                className="text-sm sm:text-base font-semibold text-white max-w-xl mx-auto"
               >
-                Earn swipe credits, help uncode the Collector DNA.
+                Train PokeIQ, Earn Credits
               </motion.p>
 
               {/* Round progress + redeem */}
