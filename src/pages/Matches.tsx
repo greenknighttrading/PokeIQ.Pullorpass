@@ -1893,7 +1893,7 @@ export function SwipeAgainOrLimit() {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col sm:flex-row gap-3 justify-center items-stretch sm:items-center"
     >
-      <Link to="/swipe" state={{ fresh: true }} className="w-full sm:w-auto">
+      <Link to="/swipe" state={{ fresh: true }} className="hidden md:inline-flex w-full sm:w-auto">
         <motion.button
           whileHover={{ y: -2, scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
