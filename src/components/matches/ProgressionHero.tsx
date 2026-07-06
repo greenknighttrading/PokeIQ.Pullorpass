@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Pencil, Check as CheckIcon, X as XClose, Trophy, Flame, Star, Crown, Sparkles,
-  Mountain, Zap, Droplets, Leaf, Sun, Moon, Hexagon, Circle, Swords,
-  Palette, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
-  Gift, ChevronRight, Award,
+  Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
+  Mountain, Award, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
+  Camera, Loader2,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -16,8 +15,7 @@ import squirtleAvatar from '@/assets/squirtle-default.png';
 import type { TasteProfile } from '@/lib/tasteProfile';
 
 // ─────────────────────────────────────────────────────────────
-// LEVELS — Collector progression ladder (1..10).
-// XP thresholds tuned so casual swiping hits mid-tiers within days.
+// LEVELS
 // ─────────────────────────────────────────────────────────────
 export const COLLECTOR_LEVELS: { level: number; title: string; xp: number }[] = [
   { level: 1,  title: 'Novice',      xp: 0 },
@@ -32,7 +30,6 @@ export const COLLECTOR_LEVELS: { level: number; title: string; xp: number }[] = 
   { level: 10, title: 'Legend',      xp: 12000 },
 ];
 
-// XP earned from activity — 5 XP per swipe, +5 bonus per like.
 function computeXp(cardsSwiped: number, likes: number): number {
   return cardsSwiped * 5 + likes * 5;
 }
@@ -52,16 +49,16 @@ function levelFromXp(xp: number) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// SWIPE MILESTONES — separate from personality types.
+// SWIPE MILESTONES
 // ─────────────────────────────────────────────────────────────
-const SWIPE_MILESTONES: { at: number; title: string; reward: string; icon: React.ReactNode; tint: string }[] = [
-  { at: 100,  title: 'Starter',   reward: '+20 Swipes', icon: <Sparkles className="w-5 h-5" />, tint: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
-  { at: 200,  title: 'Explorer',  reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" />, tint: 'text-primary border-primary/40 bg-primary/10' },
-  { at: 500,  title: 'Collector', reward: '+20 Swipes', icon: <Star className="w-5 h-5" />,     tint: 'text-purple-400 border-purple-400/40 bg-purple-400/10' },
-  { at: 1000, title: 'Master',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
-  { at: 2000, title: 'Champion',  reward: '+20 Swipes', icon: <Trophy className="w-5 h-5" />,   tint: 'text-cyan-300 border-cyan-300/40 bg-cyan-300/10' },
-  { at: 3000, title: 'Virtuoso',  reward: '+20 Swipes', icon: <Award className="w-5 h-5" />,    tint: 'text-pink-300 border-pink-300/40 bg-pink-300/10' },
-  { at: 5000, title: 'Legend',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-300 border-amber-300/50 bg-gradient-to-br from-amber-400/20 to-amber-300/5' },
+const SWIPE_MILESTONES: { at: number; title: string; reward: string; icon: React.ReactNode }[] = [
+  { at: 100,  title: 'Starter',   reward: '+20 Swipes', icon: <Sparkles className="w-5 h-5" /> },
+  { at: 200,  title: 'Explorer',  reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" /> },
+  { at: 500,  title: 'Collector', reward: '+20 Swipes', icon: <Star className="w-5 h-5" /> },
+  { at: 1000, title: 'Master',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" /> },
+  { at: 2000, title: 'Champion',  reward: '+20 Swipes', icon: <Trophy className="w-5 h-5" /> },
+  { at: 3000, title: 'Virtuoso',  reward: '+20 Swipes', icon: <Award className="w-5 h-5" /> },
+  { at: 5000, title: 'Legend',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" /> },
 ];
 
 function nextMilestone(swiped: number) {
@@ -69,77 +66,73 @@ function nextMilestone(swiped: number) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// DNA BADGES — reads from existing taste profile, no invented labels.
+// DNA — neutral outlined chips only. No color coding.
 // ─────────────────────────────────────────────────────────────
-function typeChip(label: string) {
-  const t = (label || '').toLowerCase();
-  const cls = 'w-3.5 h-3.5';
-  const map: Record<string, { icon: React.ReactNode; tint: string }> = {
-    fire:      { icon: <Flame className={cn(cls, 'text-orange-500')} />,     tint: 'border-orange-500/40 bg-orange-500/10 text-orange-100' },
-    water:     { icon: <Droplets className={cn(cls, 'text-blue-400')} />,     tint: 'border-blue-400/40 bg-blue-400/10 text-blue-100' },
-    grass:     { icon: <Leaf className={cn(cls, 'text-green-400')} />,        tint: 'border-green-400/40 bg-green-400/10 text-green-100' },
-    lightning: { icon: <Zap className={cn(cls, 'text-yellow-300')} />,        tint: 'border-yellow-300/40 bg-yellow-300/10 text-yellow-100' },
-    psychic:   { icon: <Sparkles className={cn(cls, 'text-purple-400')} />,   tint: 'border-purple-400/40 bg-purple-400/10 text-purple-100' },
-    fighting:  { icon: <Swords className={cn(cls, 'text-red-500')} />,        tint: 'border-red-500/40 bg-red-500/10 text-red-100' },
-    darkness:  { icon: <Moon className={cn(cls, 'text-indigo-300')} />,       tint: 'border-indigo-300/40 bg-indigo-300/10 text-indigo-100' },
-    metal:     { icon: <Hexagon className={cn(cls, 'text-slate-300')} />,     tint: 'border-slate-300/40 bg-slate-300/10 text-slate-100' },
-    fairy:     { icon: <Sun className={cn(cls, 'text-pink-300')} />,          tint: 'border-pink-300/40 bg-pink-300/10 text-pink-100' },
-    dragon:    { icon: <Crown className={cn(cls, 'text-amber-400')} />,       tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' },
-    colorless: { icon: <Circle className={cn(cls, 'text-gray-300')} />,       tint: 'border-gray-300/40 bg-gray-300/10 text-foreground' },
-  };
-  return map[t] || { icon: <Zap className={cn(cls, 'text-primary')} />, tint: 'border-primary/40 bg-primary/10 text-foreground' };
-}
-
-function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
-  const out: { label: string; icon: React.ReactNode; tint: string }[] = [];
-  if (isPremium) {
-    out.push({ label: 'Premium', icon: <Crown className="w-3.5 h-3.5 text-amber-300" />, tint: 'border-amber-300/40 bg-gradient-to-br from-amber-500/20 to-amber-400/5 text-amber-100' });
-  }
+function buildDnaLabels(taste: TasteProfile, isPremium: boolean): string[] {
+  const out: string[] = [];
+  if (isPremium) out.push('Premium');
   const tier = taste.priceDistribution.find((p) => p.key !== 'unknown');
   if (tier && (tier.key === 'grail' || tier.key === 'premium')) {
-    out.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium Cards', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' });
+    out.push(tier.key === 'grail' ? 'Grails' : 'Premium Cards');
   }
   const era = taste.topEras[0];
-  if (era) out.push({ label: `${era.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
+  if (era) out.push(`${era.label.split(' (')[0]} Era`);
   const type = taste.topPokemonTypes[0];
-  if (type) {
-    const c = typeChip(type.label);
-    out.push({ label: `${type.label} Types`, icon: c.icon, tint: c.tint });
-  }
+  if (type) out.push(`${type.label}`);
   const rarity = taste.topRarities[0];
-  if (rarity) out.push({ label: rarity.label, icon: <Star className="w-3.5 h-3.5 text-purple-300" />, tint: 'border-purple-300/40 bg-purple-300/10 text-purple-100' });
+  if (rarity) out.push(rarity.label);
   const artist = taste.topArtists[0];
-  if (artist && artist.count >= 2) out.push({ label: `Art by ${artist.label}`, icon: <Palette className="w-3.5 h-3.5 text-teal-300" />, tint: 'border-teal-300/40 bg-teal-300/10 text-teal-100' });
+  if (artist && artist.count >= 2) out.push(artist.label);
   const pokemon = taste.topPokemon[0];
-  if (pokemon && pokemon.count >= 2) out.push({ label: pokemon.label, icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
-  if (taste.languageMix.find((l) => l.key === 'Japanese' && l.pct >= 20)) {
-    out.push({ label: 'Japanese', icon: <Star className="w-3.5 h-3.5 text-red-300" />, tint: 'border-red-300/40 bg-red-300/10 text-red-100' });
-  }
+  if (pokemon && pokemon.count >= 2) out.push(pokemon.label);
+  if (taste.languageMix.find((l) => l.key === 'Japanese' && l.pct >= 20)) out.push('Japanese');
   return out;
 }
 
 // ─────────────────────────────────────────────────────────────
-// UsernameEditable — self-contained editable username + big avatar.
+// ProfileHeader — avatar (uploadable) + name + level + personality
 // ─────────────────────────────────────────────────────────────
-function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; staticName?: string }) {
-  const [email, setEmail] = useState('');
+function ProfileHeader({
+  readOnly,
+  staticName,
+  level,
+  xp,
+  personalityType,
+}: {
+  readOnly?: boolean;
+  staticName?: string;
+  level: number;
+  xp: number;
+  personalityType?: string | null;
+}) {
+  const [userId, setUserId] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [name, setName] = useState(staticName || '');
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (readOnly) { setName(staticName || 'Collector'); return; }
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      setEmail(user.email ?? '');
+      setUserId(user.id);
       const display =
         (user.user_metadata as { display_name?: string } | null)?.display_name
         || (user.email ? user.email.split('@')[0] : '')
         || 'Collector';
       setName(display);
       setDraft(display);
+      const { data: row } = await supabase
+        .from('user_profiles' as any)
+        .select('avatar_url, display_name')
+        .eq('user_id', user.id)
+        .maybeSingle() as any;
+      if (row?.avatar_url) setAvatarUrl(row.avatar_url);
+      if (row?.display_name) setName(row.display_name);
     })();
   }, [readOnly, staticName]);
 
@@ -155,22 +148,80 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
     toast({ title: 'Username updated' });
   };
 
+  const handleAvatarUpload = async (file: File) => {
+    if (!userId) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: 'Image too large', description: 'Max 5MB.', variant: 'destructive' });
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+      const path = `${userId}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { cacheControl: '3600', upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage.from('avatars').getPublicUrl(path);
+      await supabase
+        .from('user_profiles' as any)
+        .upsert({ user_id: userId, avatar_url: pub.publicUrl }, { onConflict: 'user_id' });
+      setAvatarUrl(pub.publicUrl);
+      toast({ title: 'Profile picture updated' });
+    } catch (e: any) {
+      toast({ title: 'Upload failed', description: e?.message ?? 'Try again.', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const avatarSrc = avatarUrl || squirtleAvatar;
+
   return (
-    <div className="flex items-center gap-4 sm:gap-5">
+    <div className="flex items-start gap-4 sm:gap-5">
       <div className="relative shrink-0">
-        {/* Gradient ring */}
-        <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary via-primary/60 to-amber-400/60 blur-sm opacity-70" aria-hidden />
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border-2 border-primary/60 flex items-center justify-center overflow-hidden shadow-[0_0_30px_-8px_hsl(var(--primary)/0.6)]">
+        <button
+          type="button"
+          onClick={() => !readOnly && fileRef.current?.click()}
+          disabled={readOnly || uploading}
+          className={cn(
+            'group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 border border-border/60 flex items-center justify-center',
+            !readOnly && 'cursor-pointer hover:border-primary/50 transition-colors',
+          )}
+          aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
+        >
           <img
-            src={squirtleAvatar}
-            alt="Default collector avatar"
-            className="w-[85%] h-[85%] object-contain"
+            src={avatarSrc}
+            alt="Collector avatar"
+            className={cn('w-full h-full', avatarUrl ? 'object-cover' : 'object-contain p-2')}
             loading="lazy"
           />
-        </div>
+          {!readOnly && (
+            <span className="absolute inset-0 flex items-center justify-center bg-background/60 opacity-0 group-hover:opacity-100 transition-opacity">
+              {uploading ? (
+                <Loader2 className="w-5 h-5 text-foreground animate-spin" />
+              ) : (
+                <Camera className="w-5 h-5 text-foreground" />
+              )}
+            </span>
+          )}
+        </button>
+        {!readOnly && (
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleAvatarUpload(f);
+              e.target.value = '';
+            }}
+          />
+        )}
       </div>
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pt-1">
         {editing && !readOnly ? (
           <div className="flex items-center gap-2">
             <Input
@@ -178,7 +229,7 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
               onChange={(e) => setDraft(e.target.value)}
               maxLength={32}
               placeholder="Choose a username"
-              className="h-10 max-w-xs text-lg font-bold"
+              className="h-10 max-w-xs text-lg font-semibold"
               autoFocus
               onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setEditing(false); setDraft(name); } }}
             />
@@ -191,13 +242,13 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
           </div>
         ) : (
           <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-foreground truncate tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight">
               {name}
             </h1>
             {!readOnly && (
               <button
                 onClick={() => setEditing(true)}
-                className="text-muted-foreground hover:text-primary p-1.5 rounded-md hover:bg-primary/10 transition-colors shrink-0"
+                className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
                 aria-label="Edit username"
               >
                 <Pencil className="w-3.5 h-3.5" />
@@ -205,13 +256,23 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
             )}
           </div>
         )}
+
+        <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
+          Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
+        </p>
+
+        {personalityType && (
+          <p className="mt-2 text-sm sm:text-base font-medium text-foreground/90">
+            <span className="text-primary">{personalityType}</span> Collector
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// MAIN — ProgressionHero: hero → DNA → next goal → milestones → stats → achievements
+// MAIN
 // ─────────────────────────────────────────────────────────────
 export function ProgressionHero({
   taste,
@@ -235,103 +296,46 @@ export function ProgressionHero({
   const xp = useMemo(() => computeXp(cardsSwiped, totalLikes), [cardsSwiped, totalLikes]);
   const lvl = useMemo(() => levelFromXp(xp), [xp]);
   const nextGoal = nextMilestone(cardsSwiped);
-  const dnaBadges = useMemo(() => buildDnaBadges(taste, isPremium), [taste, isPremium]);
+  const dnaLabels = useMemo(() => buildDnaLabels(taste, isPremium), [taste, isPremium]);
 
   return (
-    <section className="space-y-5 sm:space-y-6">
-      {/* ── 1. HERO ─────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="relative overflow-hidden rounded-3xl border border-primary/30 bg-gradient-to-br from-primary/15 via-card to-card p-6 sm:p-8 shadow-[0_10px_40px_-12px_hsl(var(--primary)/0.35)]"
-      >
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-primary/15 blur-3xl" />
-          <div className="absolute -bottom-32 -left-20 w-80 h-80 rounded-full bg-amber-400/5 blur-3xl" />
-        </div>
+    <section className="space-y-6 sm:space-y-8">
+      {/* Header — no card wrapper, sits on page background */}
+      <ProfileHeader
+        readOnly={isPublicView}
+        staticName={viewedDisplayName}
+        level={lvl.current.level}
+        xp={xp}
+        personalityType={personalityType}
+      />
 
-        <div className="relative z-10">
-          <UsernameEditable readOnly={isPublicView} staticName={viewedDisplayName} />
+      {/* Progress */}
+      <ProgressCard xp={xp} lvl={lvl} />
 
-          <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
-              <Trophy className="w-3.5 h-3.5" />
-              Level {lvl.current.level}
-            </span>
+      {/* Collector DNA */}
+      {dnaLabels.length > 0 && (
+        <div>
+          <h3 className="text-base font-semibold text-foreground mb-3">Your Collector DNA</h3>
+          <div className="flex flex-wrap gap-2">
+            {dnaLabels.map((label) => (
+              <span
+                key={label}
+                className="inline-flex items-center rounded-full border border-border/70 bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium text-foreground/85"
+              >
+                {label}
+              </span>
+            ))}
           </div>
-
-          {personalityType && (
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
-                <Sparkles className="w-3.5 h-3.5" />
-                {personalityType} Collector
-              </span>
-            </div>
-          )}
-
-
-          {/* XP bar */}
-          <div className="mt-5">
-            <div className="flex items-baseline justify-between mb-2">
-              <span className="text-xs sm:text-sm font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                XP Progress
-              </span>
-              <span className="text-xs sm:text-sm tabular-nums font-bold text-foreground">
-                {xp.toLocaleString()} <span className="text-muted-foreground font-medium">/ {lvl.next ? lvl.nextXp.toLocaleString() : 'MAX'} XP</span>
-              </span>
-            </div>
-            <div className="relative h-3 rounded-full bg-muted/60 border border-border/60 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${lvl.pct}%` }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-primary via-primary to-amber-300 shadow-[0_0_16px_hsl(var(--primary)/0.6)]"
-              />
-              <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
-            </div>
-            {lvl.next && (
-              <p className="mt-2 text-xs text-muted-foreground text-right">
-                {(lvl.nextXp - xp).toLocaleString()} XP to <span className="text-foreground font-semibold">Level {lvl.next.level}</span>
-              </p>
-            )}
-
-          </div>
-
-          {/* ── 2. DNA BADGES ─────────────────────────────── */}
-          {dnaBadges.length > 0 && (
-            <div className="mt-6">
-              <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground mb-2.5">
-                Collector DNA
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {dnaBadges.map((b) => (
-                  <span
-                    key={b.label}
-                    className={cn(
-                      'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs sm:text-sm font-semibold backdrop-blur-sm',
-                      b.tint,
-                    )}
-                  >
-                    {b.icon}
-                    <span>{b.label}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-      </motion.div>
-
-      {/* ── 3. NEXT GOAL ──────────────────────────────────── */}
-      {nextGoal && (
-        <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />
       )}
 
-      {/* ── 4. SWIPE MILESTONES TIMELINE ──────────────────── */}
+      {/* Next Goal */}
+      {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
+
+      {/* Swipe Milestones */}
       <MilestonesTimeline swiped={cardsSwiped} />
 
-      {/* ── 5. COLLECTOR STATS ────────────────────────────── */}
+      {/* Stats */}
       <StatsGrid
         avgPrice={avgPrice}
         totalLikes={totalLikes}
@@ -342,7 +346,36 @@ export function ProgressionHero({
   );
 }
 
-// ── Next Goal ─────────────────────────────────────────────
+// ── Progress ─────────────────────────────────────────────
+function ProgressCard({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFromXp> }) {
+  const pct = Math.round(lvl.pct);
+  const remaining = lvl.next ? Math.max(0, lvl.nextXp - xp) : 0;
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+      <div className="flex items-baseline justify-between mb-3">
+        <h3 className="text-base font-semibold text-foreground">Progress</h3>
+        <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
+      </div>
+      <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${lvl.pct}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="absolute inset-y-0 left-0 rounded-full bg-primary"
+        />
+      </div>
+      <p className="mt-3 text-xs sm:text-sm text-muted-foreground">
+        {lvl.next ? (
+          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
+        ) : (
+          <>You've reached the highest level.</>
+        )}
+      </p>
+    </div>
+  );
+}
+
+// ── Next Goal — minimal ─────────────────────────────────
 function NextGoalCard({
   swiped,
   goal,
@@ -357,73 +390,43 @@ function NextGoalCard({
   const remaining = Math.max(0, goal.at - swiped);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.05 }}
-      className="relative overflow-hidden rounded-3xl border border-amber-400/30 bg-gradient-to-br from-amber-500/10 via-card to-card p-5 sm:p-6 shadow-[0_10px_40px_-14px_rgba(251,191,36,0.35)]"
-    >
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-amber-400/10 blur-3xl" />
-      </div>
-
-      <div className="relative z-10 flex items-start justify-between gap-4">
+    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+      <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.22em] text-amber-300 mb-1">
-            Next Goal
-          </p>
-          <h3 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
-            {goal.title} Badge
-          </h3>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
+          <h3 className="text-lg sm:text-xl font-semibold text-foreground">{goal.title} Badge</h3>
+          <p className="mt-0.5 text-xs text-muted-foreground">Reward · {goal.reward}</p>
         </div>
-        <div className={cn('w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center shrink-0 shadow-lg', goal.tint)}>
+        <div className="w-12 h-12 rounded-xl border border-border/70 bg-muted/40 text-foreground/80 flex items-center justify-center shrink-0">
           {goal.icon}
         </div>
       </div>
 
-      <div className="relative z-10 mt-4">
+      <div className="mt-4">
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-2xl sm:text-3xl font-black text-foreground tabular-nums">
-            {swiped.toLocaleString()} <span className="text-muted-foreground text-lg font-bold">/ {goal.at.toLocaleString()}</span>
+          <span className="text-sm text-muted-foreground tabular-nums">
+            <span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes
           </span>
-          <span className="text-xs sm:text-sm font-semibold text-muted-foreground">Swipes</span>
+          <span className="text-sm text-muted-foreground tabular-nums">{remaining.toLocaleString()} to go</span>
         </div>
-        <div className="relative h-3 rounded-full bg-muted/60 border border-border/60 overflow-hidden">
+        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.9, ease: 'easeOut' }}
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-amber-400 via-amber-300 to-amber-200 shadow-[0_0_16px_rgba(251,191,36,0.6)]"
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
           />
         </div>
-        <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
-          <span className="font-bold text-foreground tabular-nums">{remaining.toLocaleString()}</span> swipes remaining
-        </p>
       </div>
-
-      <div className="relative z-10 mt-5 pt-4 border-t border-border/40 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg bg-amber-400/15 border border-amber-400/30 flex items-center justify-center shrink-0">
-          <Gift className="w-4 h-4 text-amber-300" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">Reward</p>
-          <p className="text-sm font-bold text-foreground">
-            {goal.reward} <span className="text-muted-foreground font-medium">·</span> {goal.title} Badge
-          </p>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
 // ── Milestones Timeline ──────────────────────────────────
 function MilestonesTimeline({ swiped }: { swiped: number }) {
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/60 backdrop-blur-md p-5 sm:p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Award className="w-4 h-4 text-primary" />
-        <h3 className="text-sm sm:text-base font-bold text-foreground">Swipe Milestones</h3>
-      </div>
+    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+      <h3 className="text-base font-semibold text-foreground mb-4">Swipe Milestones</h3>
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
         <div className="flex items-start gap-0 sm:gap-8 min-w-max pb-1">
@@ -436,41 +439,39 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                 <div className="flex flex-col items-center text-center gap-2 w-[28%] sm:w-24 shrink-0">
                   <div
                     className={cn(
-                      'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
-                      done && 'border-primary bg-gradient-to-br from-primary to-primary/60 text-primary-foreground shadow-[0_0_22px_hsl(var(--primary)/0.55)]',
-                      !done && current && 'border-amber-400/70 bg-amber-400/10 text-amber-200 animate-pulse',
-                      !done && !current && 'border-border/60 bg-muted/40 text-muted-foreground',
+                      'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center shrink-0 transition-colors',
+                      done && 'border-primary/60 bg-primary/15 text-primary',
+                      !done && current && 'border-foreground/40 bg-muted/40 text-foreground',
+                      !done && !current && 'border-border/50 bg-muted/20 text-muted-foreground/60',
                     )}
                   >
                     {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
                   </div>
                   <div className="min-w-0 w-full">
-                    <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
+                    <p className="text-xs sm:text-sm font-semibold text-foreground tabular-nums leading-none">
                       {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
                     </p>
-                    <p className={cn('text-[10px] sm:text-xs font-semibold mt-1 truncate', done ? 'text-foreground' : 'text-muted-foreground')}>
+                    <p className={cn('text-[10px] sm:text-xs mt-1 truncate', done ? 'text-foreground/80' : 'text-muted-foreground')}>
                       {m.title}
                     </p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 truncate">
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 truncate">
                       {m.reward}
                     </p>
                   </div>
                 </div>
                 {!isLast && (
-                  <div className="w-[3%] sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                  <div className="w-[3%] sm:w-12 border-t border-dashed border-border/50 mt-7 sm:mt-8 shrink-0" aria-hidden />
                 )}
               </React.Fragment>
-
             );
           })}
         </div>
       </div>
-
     </div>
   );
 }
 
-// ── Stats grid — 4 cards with comparison line ───────────
+// ── Stats grid ──────────────────────────────────────────
 function StatsGrid({
   avgPrice, totalLikes, cardsSwiped, matchRate,
 }: {
@@ -478,33 +479,25 @@ function StatsGrid({
 }) {
   return (
     <div>
-      <div className="flex items-center gap-2 mb-3">
-        <ChevronRight className="w-4 h-4 text-primary" />
-        <h3 className="text-sm sm:text-base font-bold text-foreground">Collector Stats</h3>
-      </div>
-
+      <h3 className="text-base font-semibold text-foreground mb-3">Stats</h3>
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <StatCard
-          icon={<BookOpen className="w-5 h-5 text-primary" />}
-          tint="bg-primary/15 border-primary/30"
+          icon={<BookOpen className="w-4 h-4 text-muted-foreground" />}
           value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
           label="Average Value"
         />
         <StatCard
-          icon={<HeartIcon className="w-5 h-5 text-red-400" />}
-          tint="bg-red-400/15 border-red-400/30"
+          icon={<HeartIcon className="w-4 h-4 text-muted-foreground" />}
           value={totalLikes.toLocaleString()}
           label="Collection Likes"
         />
         <StatCard
-          icon={<Eye className="w-5 h-5 text-blue-400" />}
-          tint="bg-blue-400/15 border-blue-400/30"
+          icon={<Eye className="w-4 h-4 text-muted-foreground" />}
           value={cardsSwiped.toLocaleString()}
           label="Cards Swiped"
         />
         <StatCard
-          icon={<Target className="w-5 h-5 text-purple-400" />}
-          tint="bg-purple-400/15 border-purple-400/30"
+          icon={<Target className="w-4 h-4 text-muted-foreground" />}
           value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
           label="Pull Rate"
           info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
@@ -515,20 +508,17 @@ function StatsGrid({
 }
 
 function StatCard({
-  icon, tint, value, label, info,
+  icon, value, label, info,
 }: {
   icon: React.ReactNode;
-  tint: string;
   value: string;
   label: string;
   info?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur-md p-4 sm:p-5 flex flex-col gap-3">
+    <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5 flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <div className={cn('w-10 h-10 rounded-xl border flex items-center justify-center', tint)}>
-          {icon}
-        </div>
+        {icon}
         {info && (
           <TooltipProvider delayDuration={150}>
             <Tooltip>
@@ -545,10 +535,10 @@ function StatCard({
         )}
       </div>
       <div>
-        <p className="text-2xl sm:text-3xl font-black text-foreground tabular-nums leading-none tracking-tight">
+        <p className="text-2xl sm:text-3xl font-semibold text-foreground tabular-nums leading-none tracking-tight">
           {value}
         </p>
-        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-1.5">
+        <p className="text-xs text-muted-foreground mt-1.5">
           {label}
         </p>
       </div>
@@ -557,7 +547,7 @@ function StatCard({
 }
 
 // ─────────────────────────────────────────────────────────────
-// ACHIEVEMENTS — Collector Level ladder (1..10)
+// ACHIEVEMENTS — kept for other callers
 // ─────────────────────────────────────────────────────────────
 export function AchievementsLadder({
   cardsSwiped,
@@ -570,12 +560,8 @@ export function AchievementsLadder({
   const lvl = levelFromXp(xp);
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card/60 backdrop-blur-md p-5 sm:p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Trophy className="w-4 h-4 text-amber-300" />
-        <h3 className="text-sm sm:text-base font-bold text-foreground">Achievements · Collector Levels</h3>
-      </div>
-
+    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+      <h3 className="text-base font-semibold text-foreground mb-4">Collector Levels</h3>
       <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
         {COLLECTOR_LEVELS.map((lv) => {
           const done = xp >= lv.xp;
@@ -584,23 +570,23 @@ export function AchievementsLadder({
             <li
               key={lv.level}
               className={cn(
-                'relative rounded-2xl border p-3 flex flex-col items-center text-center gap-1.5 transition-all',
-                done && !current && 'border-primary/40 bg-primary/5',
-                current && 'border-primary bg-gradient-to-br from-primary/20 to-primary/5 shadow-[0_0_22px_-6px_hsl(var(--primary)/0.6)]',
-                !done && 'border-border/50 bg-muted/20 opacity-70',
+                'relative rounded-xl border p-3 flex flex-col items-center text-center gap-1.5 transition-colors',
+                current && 'border-primary/60 bg-primary/5',
+                done && !current && 'border-border/60 bg-muted/20',
+                !done && 'border-border/40 bg-transparent opacity-70',
               )}
             >
               <div
                 className={cn(
-                  'w-10 h-10 rounded-full border flex items-center justify-center text-sm font-black tabular-nums',
-                  done && 'bg-gradient-to-br from-primary to-primary/60 text-primary-foreground border-primary',
+                  'w-9 h-9 rounded-full border flex items-center justify-center text-sm font-semibold tabular-nums',
+                  done && 'bg-primary/15 text-primary border-primary/40',
                   !done && 'bg-muted/40 text-muted-foreground border-border/60',
                 )}
               >
                 {lv.level}
               </div>
               <div className="min-w-0">
-                <p className={cn('text-xs sm:text-sm font-bold truncate', done ? 'text-foreground' : 'text-muted-foreground')}>
+                <p className={cn('text-xs sm:text-sm font-medium truncate', done ? 'text-foreground' : 'text-muted-foreground')}>
                   {lv.title}
                 </p>
                 <p className="text-[10px] text-muted-foreground tabular-nums">
@@ -608,7 +594,7 @@ export function AchievementsLadder({
                 </p>
               </div>
               {current && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-primary text-primary-foreground text-[9px] font-black uppercase tracking-wider px-2 py-0.5 shadow">
+                <span className="absolute -top-2 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-primary text-primary-foreground text-[9px] font-semibold uppercase tracking-wider px-2 py-0.5">
                   You
                 </span>
               )}
@@ -616,10 +602,6 @@ export function AchievementsLadder({
           );
         })}
       </ul>
-
-      <p className="text-[11px] text-muted-foreground mt-4">
-        Earn XP by swiping, tagging cards, hitting streaks, and unlocking milestones.
-      </p>
     </div>
   );
 }
