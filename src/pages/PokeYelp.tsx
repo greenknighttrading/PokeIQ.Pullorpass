@@ -1525,9 +1525,9 @@ function ArcadeStatLg({ label, value, accent }: { label: string; value: string; 
 // ────────────────────────────────────────────────────────────────
 const REFERRAL_REWARDS: { swipes?: number; premiumDays?: number; label: string }[] = [
   { swipes: 20, label: '+20 swipes' },
-  { swipes: 20, label: '+20 swipes' },
+  { swipes: 30, label: '+30 swipes' },
   { swipes: 40, label: '+40 swipes' },
-  { swipes: 40, label: '+40 swipes' },
+  { swipes: 50, label: '+50 swipes' },
   { premiumDays: 30, label: '1 month PRO free' },
 ];
 
