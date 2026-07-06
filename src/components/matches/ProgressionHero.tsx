@@ -90,6 +90,46 @@ function buildDnaLabels(taste: TasteProfile, isPremium: boolean): string[] {
   return out;
 }
 
+// Map a DNA label to a distinct icon + color. Colors are hex so Tailwind
+// doesn't purge them, applied via inline style for maximum readability.
+function dnaStyle(label: string): { icon: React.ReactNode; color: string } {
+  const l = label.toLowerCase();
+  const mk = (icon: React.ReactNode, color: string) => ({ icon, color });
+  // Pokémon types
+  if (l === 'water')     return mk(<Droplets className="w-3.5 h-3.5" />, '#38bdf8');
+  if (l === 'fire')      return mk(<Flame className="w-3.5 h-3.5" />,    '#f97316');
+  if (l === 'grass')     return mk(<Leaf className="w-3.5 h-3.5" />,     '#4ade80');
+  if (l === 'lightning' || l === 'electric') return mk(<Zap className="w-3.5 h-3.5" />, '#facc15');
+  if (l === 'psychic')   return mk(<Brain className="w-3.5 h-3.5" />,    '#c084fc');
+  if (l === 'fighting')  return mk(<Swords className="w-3.5 h-3.5" />,   '#f87171');
+  if (l === 'darkness' || l === 'dark') return mk(<Moon className="w-3.5 h-3.5" />, '#94a3b8');
+  if (l === 'fairy')     return mk(<HeartIcon className="w-3.5 h-3.5" />, '#f472b6');
+  if (l === 'dragon')    return mk(<Flame className="w-3.5 h-3.5" />,    '#818cf8');
+  if (l === 'metal' || l === 'steel') return mk(<Shield className="w-3.5 h-3.5" />, '#9ca3af');
+  if (l === 'ghost')     return mk(<Ghost className="w-3.5 h-3.5" />,    '#a78bfa');
+  if (l === 'colorless' || l === 'normal') return mk(<Circle className="w-3.5 h-3.5" />, '#d6d3d1');
+  // Rarity
+  if (l.includes('holo'))     return mk(<Sparkles className="w-3.5 h-3.5" />, '#22d3ee');
+  if (l.includes('secret'))   return mk(<Star className="w-3.5 h-3.5" />,    '#e879f9');
+  if (l.includes('ultra'))    return mk(<Star className="w-3.5 h-3.5" />,    '#60a5fa');
+  if (l === 'rare')           return mk(<Star className="w-3.5 h-3.5" />,    '#22d3ee');
+  // Premium / grails
+  if (l === 'premium' || l.includes('premium cards')) return mk(<Crown className="w-3.5 h-3.5" />, '#fbbf24');
+  if (l.includes('grail'))    return mk(<Gem className="w-3.5 h-3.5" />, '#fbbf24');
+  // Eras
+  if (l.includes('vintage era')) return mk(<Hourglass className="w-3.5 h-3.5" />, '#d97706');
+  if (l.includes('classic era')) return mk(<Hourglass className="w-3.5 h-3.5" />, '#eab308');
+  if (l.includes('modern era'))  return mk(<Sparkles className="w-3.5 h-3.5" />,  '#2dd4bf');
+  if (l.includes('era'))         return mk(<BookOpen className="w-3.5 h-3.5" />,  '#a3e635');
+  // Language
+  if (l === 'japanese')  return mk(<Languages className="w-3.5 h-3.5" />, '#f87171');
+  // Fallback: artists, specific pokemon, etc. Use a palette rotation via hash.
+  const palette = ['#3b9e8f', '#c084fc', '#f472b6', '#60a5fa', '#f59e0b', '#4ade80'];
+  let h = 0;
+  for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
+  return mk(<Palette className="w-3.5 h-3.5" />, palette[h % palette.length]);
+}
+
 // ─────────────────────────────────────────────────────────────
 // ProfileHeader — avatar (uploadable) + name + level + personality
 // ─────────────────────────────────────────────────────────────
