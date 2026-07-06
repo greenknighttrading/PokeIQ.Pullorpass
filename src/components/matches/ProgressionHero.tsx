@@ -84,9 +84,9 @@ function typeChip(label: string) {
     metal:     { icon: <Hexagon className={cn(cls, 'text-slate-300')} />,     tint: 'border-slate-300/40 bg-slate-300/10 text-slate-100' },
     fairy:     { icon: <Sun className={cn(cls, 'text-pink-300')} />,          tint: 'border-pink-300/40 bg-pink-300/10 text-pink-100' },
     dragon:    { icon: <Crown className={cn(cls, 'text-amber-400')} />,       tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' },
-    colorless: { icon: <Circle className={cn(cls, 'text-gray-300')} />,       tint: 'border-gray-300/40 bg-gray-300/10 text-gray-100' },
+    colorless: { icon: <Circle className={cn(cls, 'text-gray-300')} />,       tint: 'border-gray-300/40 bg-gray-300/10 text-foreground' },
   };
-  return map[t] || { icon: <Zap className={cn(cls, 'text-primary')} />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' };
+  return map[t] || { icon: <Zap className={cn(cls, 'text-primary')} />, tint: 'border-primary/40 bg-primary/10 text-foreground' };
 }
 
 function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
@@ -99,7 +99,7 @@ function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
     out.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium Cards', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' });
   }
   const era = taste.topEras[0];
-  if (era) out.push({ label: `${era.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' });
+  if (era) out.push({ label: `${era.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
   const type = taste.topPokemonTypes[0];
   if (type) {
     const c = typeChip(type.label);
@@ -110,7 +110,7 @@ function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
   const artist = taste.topArtists[0];
   if (artist && artist.count >= 2) out.push({ label: `Art by ${artist.label}`, icon: <Palette className="w-3.5 h-3.5 text-teal-300" />, tint: 'border-teal-300/40 bg-teal-300/10 text-teal-100' });
   const pokemon = taste.topPokemon[0];
-  if (pokemon && pokemon.count >= 2) out.push({ label: pokemon.label, icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' });
+  if (pokemon && pokemon.count >= 2) out.push({ label: pokemon.label, icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
   if (taste.languageMix.find((l) => l.key === 'Japanese' && l.pct >= 20)) {
     out.push({ label: 'Japanese', icon: <Star className="w-3.5 h-3.5 text-red-300" />, tint: 'border-red-300/40 bg-red-300/10 text-red-100' });
   }
