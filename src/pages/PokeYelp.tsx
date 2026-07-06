@@ -1524,3 +1524,139 @@ function ArcadeStatLg({ label, value, accent }: { label: string; value: string; 
     </div>
   );
 }
+
+// ────────────────────────────────────────────────────────────────
+// Share tab — referral rewards + personality-test share
+// ────────────────────────────────────────────────────────────────
+const REFERRAL_REWARDS: { swipes?: number; premiumDays?: number; label: string }[] = [
+  { swipes: 20, label: '+20 swipes' },
+  { swipes: 20, label: '+20 swipes' },
+  { swipes: 40, label: '+40 swipes' },
+  { swipes: 40, label: '+40 swipes' },
+  { premiumDays: 30, label: '1 month PRO free' },
+];
+
+function ShareEarnView({
+  userId,
+  completedRefs,
+  refCopied,
+  setRefCopied,
+  ptCopied,
+  setPtCopied,
+}: {
+  userId: string | null;
+  completedRefs: number;
+  refCopied: boolean;
+  setRefCopied: (v: boolean) => void;
+  ptCopied: boolean;
+  setPtCopied: (v: boolean) => void;
+}) {
+  const referralLink = userId
+    ? `https://pokeiq.com/swipe?ref=${userId}`
+    : 'https://pokeiq.com/swipe';
+  const personalityLink = userId
+    ? `https://pokeiq.com/personality-test?ref=${userId}`
+    : 'https://pokeiq.com/personality-test';
+
+  const copy = async (text: string, setter: (v: boolean) => void) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setter(true);
+      setTimeout(() => setter(false), 1600);
+      toast.success('Link copied');
+    } catch { toast.error('Could not copy'); }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Referral ladder */}
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+            <Users className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-base sm:text-lg font-semibold tracking-tight">Invite friends to PokeIQ</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              Earn more swipes with every friend that joins. Refer 5 and get PokeIQ PRO free for a month.
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <Input readOnly value={referralLink} onFocus={(e) => e.currentTarget.select()} className="font-mono text-xs bg-background" />
+          <Button type="button" onClick={() => copy(referralLink, setRefCopied)} className="shrink-0">
+            {refCopied ? (<><Check className="w-4 h-4 mr-1" /> Copied</>) : (<><Copy className="w-4 h-4 mr-1" /> Copy</>)}
+          </Button>
+        </div>
+
+        <div className="space-y-2">
+          {REFERRAL_REWARDS.map((r, i) => {
+            const idx = i + 1;
+            const done = completedRefs >= idx;
+            const isPro = !!r.premiumDays;
+            return (
+              <div
+                key={idx}
+                className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-colors ${
+                  done
+                    ? 'border-primary/40 bg-primary/10'
+                    : isPro
+                      ? 'border-violet-500/30 bg-violet-500/5'
+                      : 'border-border/60 bg-muted/20'
+                }`}
+              >
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                  done ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
+                  {done ? <Check className="w-4 h-4" /> : idx}
+                </div>
+                <div className="flex-1 min-w-0 text-sm">
+                  <div className="font-medium">Friend #{idx} joins</div>
+                </div>
+                <div className={`text-sm font-semibold inline-flex items-center gap-1.5 ${
+                  isPro ? 'text-violet-300' : 'text-primary'
+                }`}>
+                  {isPro ? <Crown className="w-4 h-4" /> : <Zap className="w-4 h-4" />}
+                  {r.label}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 text-[11px] text-muted-foreground">
+          {completedRefs} / 5 friends joined
+        </div>
+      </Card>
+
+      {/* Personality test share */}
+      <Card className="p-4 sm:p-5">
+        <div className="flex items-start gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-violet-500/15 flex items-center justify-center shrink-0">
+            <Gift className="w-5 h-5 text-violet-300" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-base sm:text-lg font-semibold tracking-tight">Share the Collector Personality Test</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              Get <span className="text-primary font-semibold">+20 swipes</span> when a friend completes the test with your link.
+            </div>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          <Input readOnly value={personalityLink} onFocus={(e) => e.currentTarget.select()} className="font-mono text-xs bg-background" />
+          <Button type="button" onClick={() => copy(personalityLink, setPtCopied)} className="shrink-0" variant="outline">
+            {ptCopied ? (<><Check className="w-4 h-4 mr-1" /> Copied</>) : (<><Share2 className="w-4 h-4 mr-1" /> Share</>)}
+          </Button>
+        </div>
+      </Card>
+
+      {!userId && (
+        <div className="text-center text-xs text-muted-foreground">
+          Sign in so we can credit your rewards.
+        </div>
+      )}
+    </div>
+  );
+}
