@@ -42,7 +42,7 @@ type SwipeDir = 'left' | 'right' | 'up';
 const SWIPE_THRESHOLD = 110;
 
 // ─── Daily swipe quota (free tier) ───────────────────────
-const DAILY_BASE_LIMIT = 50;
+const DAILY_BASE_LIMIT = 30;
 const EARN_BONUS_PER_BATCH = 10; // +10 swipes per 10 Earn reviews
 const CREDITS_PER_REDEMPTION = 10; // 10 credits → 10 swipes (1 credit = 1 swipe)
 const SWIPES_PER_REDEMPTION = 10;
@@ -283,7 +283,7 @@ export default function PullOrPass() {
         } catch {}
         // First time EVER for this user on this device → grant them their
         // one-time post-signup free swipes bonus so brand-new accounts get
-        // 60 total free swipes (20 daily base + 40 bonus). After that, the
+        // 50 total free swipes (30 daily base + 20 bonus). After that, the
         // normal daily quota applies (earn credits or upgrade to keep swiping).
         try {
           const bonusFlag = `pop_signup_bonus_granted_${session.user.id}`;
@@ -291,7 +291,7 @@ export default function PullOrPass() {
           if (!alreadyGranted) {
             localStorage.setItem(bonusFlag, '1');
             localStorage.setItem('pop_last_user_id', session.user.id);
-            const fresh = { date: todayKey(), used: 0, bonus: 40, lifetime: readQuota().lifetime };
+            const fresh = { date: todayKey(), used: 0, bonus: 20, lifetime: readQuota().lifetime };
             writeQuota(fresh);
             setQuota(fresh);
           }
@@ -590,13 +590,8 @@ export default function PullOrPass() {
         rarity: c.rarity,
       }));
 
-    // New/unauthed users get a shorter 10-card first round so we can prompt
-    // them to sign up sooner. Returning guests + signed-in users get the
-    // full 20-card round.
-    const { data: { session: liveSession } } = await supabase.auth.getSession();
-    const isGuest = !liveSession?.user || liveSession.user.is_anonymous;
-    const isFirstRound = isGuest && readQuota().lifetime === 0;
-    const roundSize = isFirstRound ? 10 : 20;
+    // Every round is 10 cards.
+    const roundSize = 10;
     const picked = pickDiverse20(pool, roundSize, rand);
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
