@@ -820,7 +820,7 @@ export default function PokeYelp() {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-2 pb-8 flex flex-col select-none">
+        <main className={`max-w-4xl w-full mx-auto px-4 pt-2 flex flex-col select-none ${earnTab === 'share' ? 'pb-2' : 'flex-1 pb-8'}`}>
           {/* Cinematic hero */}
           <header className="relative text-center mb-0 pt-0 mx-0 my-0">
             {/* Soft neon glow + animated particles */}
@@ -1525,9 +1525,9 @@ function ArcadeStatLg({ label, value, accent }: { label: string; value: string; 
 // ────────────────────────────────────────────────────────────────
 const REFERRAL_REWARDS: { swipes?: number; premiumDays?: number; label: string }[] = [
   { swipes: 20, label: '+20 swipes' },
-  { swipes: 20, label: '+20 swipes' },
+  { swipes: 30, label: '+30 swipes' },
   { swipes: 40, label: '+40 swipes' },
-  { swipes: 40, label: '+40 swipes' },
+  { swipes: 50, label: '+50 swipes' },
   { premiumDays: 30, label: '1 month PRO free' },
 ];
 
