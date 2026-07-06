@@ -54,10 +54,13 @@ function levelFromXp(xp: number) {
 // SWIPE MILESTONES — separate from personality types.
 // ─────────────────────────────────────────────────────────────
 const SWIPE_MILESTONES: { at: number; title: string; reward: string; icon: React.ReactNode; tint: string }[] = [
-  { at: 100,  title: 'Starter',   reward: '+10 Credits',  icon: <Sparkles className="w-5 h-5" />, tint: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
-  { at: 200,  title: 'Explorer',  reward: '+20 Credits',  icon: <Mountain className="w-5 h-5" />, tint: 'text-primary border-primary/40 bg-primary/10' },
-  { at: 500,  title: 'Collector', reward: '+50 Credits',  icon: <Star className="w-5 h-5" />,     tint: 'text-purple-400 border-purple-400/40 bg-purple-400/10' },
-  { at: 1000, title: 'Master',    reward: '+100 Credits', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { at: 100,  title: 'Starter',   reward: '+20 Swipes', icon: <Sparkles className="w-5 h-5" />, tint: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
+  { at: 200,  title: 'Explorer',  reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" />, tint: 'text-primary border-primary/40 bg-primary/10' },
+  { at: 500,  title: 'Collector', reward: '+20 Swipes', icon: <Star className="w-5 h-5" />,     tint: 'text-purple-400 border-purple-400/40 bg-purple-400/10' },
+  { at: 1000, title: 'Master',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { at: 2000, title: 'Champion',  reward: '+20 Swipes', icon: <Trophy className="w-5 h-5" />,   tint: 'text-cyan-300 border-cyan-300/40 bg-cyan-300/10' },
+  { at: 3000, title: 'Virtuoso',  reward: '+20 Swipes', icon: <Award className="w-5 h-5" />,    tint: 'text-pink-300 border-pink-300/40 bg-pink-300/10' },
+  { at: 5000, title: 'Legend',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-300 border-amber-300/50 bg-gradient-to-br from-amber-400/20 to-amber-300/5' },
 ];
 
 function nextMilestone(swiped: number) {
