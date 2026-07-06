@@ -820,7 +820,7 @@ export default function PokeYelp() {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-2 pb-8 flex flex-col select-none">
+        <main className={`max-w-4xl w-full mx-auto px-4 pt-2 flex flex-col select-none ${earnTab === 'share' ? 'pb-2' : 'flex-1 pb-8'}`}>
           {/* Cinematic hero */}
           <header className="relative text-center mb-0 pt-0 mx-0 my-0">
             {/* Soft neon glow + animated particles */}
