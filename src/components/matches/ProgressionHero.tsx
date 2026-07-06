@@ -357,23 +357,19 @@ export function ProgressionHero({
           <div className="pt-2 border-t border-border/50">
             <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
             <div className="flex flex-wrap gap-2">
-              {dnaLabels.map((label, i) => {
-                const palette = [
-                  'border-primary/60 text-primary',
-                  'border-warning/60 text-warning',
-                  'border-destructive/60 text-destructive',
-                  'border-success/60 text-success',
-                  'border-accent/60 text-accent-foreground',
-                ];
-                const c = palette[i % palette.length];
+              {dnaLabels.map((label) => {
+                const { icon, color } = dnaStyle(label);
                 return (
                   <span
                     key={label}
-                    className={cn(
-                      'inline-flex items-center rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium',
-                      c,
-                    )}
+                    className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
+                    style={{
+                      color,
+                      borderColor: `${color}80`,
+                      backgroundColor: `${color}12`,
+                    }}
                   >
+                    <span aria-hidden style={{ color }}>{icon}</span>
                     {label}
                   </span>
                 );
