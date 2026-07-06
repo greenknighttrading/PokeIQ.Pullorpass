@@ -25,7 +25,7 @@ import dittoDancing from '@/assets/ditto-dancing.gif.asset.json';
 import { DailyLimitWidget } from '@/pages/Matches';
 import { useIsPremium } from '@/hooks/useIsPremium';
 import { useHasFilterAccess } from '@/hooks/useHasFilterAccess';
-import { InviteFriendModal } from '@/components/pullorpass/InviteFriendModal';
+import { PremiumFilterModal } from '@/components/pullorpass/PremiumFilterModal';
 import {
   FeedFiltersDrawer,
   DEFAULT_FILTERS,
@@ -1053,7 +1053,7 @@ export default function PullOrPass() {
                 <div className="flex items-center gap-2">
                    {userId && (
                      <>
-                       {hasFilterAccess ? (
+                        {premium ? (
                          <button
                            type="button"
                            onClick={() => setFiltersOpen(true)}
@@ -1065,8 +1065,8 @@ export default function PullOrPass() {
                          <button
                            type="button"
                            onClick={() => setInviteOpen(true)}
-                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                           title="Invite a friend to unlock filters"
+                            className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-violet-300 hover:text-violet-200 transition-colors"
+                            title="Upgrade to Premium to unlock filters"
                          >
                            <Lock className="w-3 h-3" /> Filter
                          </button>
@@ -1271,14 +1271,10 @@ export default function PullOrPass() {
           onApply={applyFilters}
           onReset={resetFilters}
         />
-        {userId && (
-          <InviteFriendModal
-            open={inviteOpen}
-            onOpenChange={(v) => { setInviteOpen(v); if (!v) refreshFilterAccess(); }}
-            userId={userId}
-            completedReferrals={completedReferrals}
-          />
-        )}
+        <PremiumFilterModal
+          open={inviteOpen}
+          onOpenChange={setInviteOpen}
+        />
         <AnimatePresence>
           {outOfSwipes && stage !== 'intro' && stage !== 'loading' && (stage !== 'swiping' || swipeBlocked) && (
             <OutOfSwipesModal
