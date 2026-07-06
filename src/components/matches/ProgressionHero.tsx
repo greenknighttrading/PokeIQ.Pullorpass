@@ -54,10 +54,13 @@ function levelFromXp(xp: number) {
 // SWIPE MILESTONES — separate from personality types.
 // ─────────────────────────────────────────────────────────────
 const SWIPE_MILESTONES: { at: number; title: string; reward: string; icon: React.ReactNode; tint: string }[] = [
-  { at: 100,  title: 'Starter',   reward: '+10 Credits',  icon: <Sparkles className="w-5 h-5" />, tint: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
-  { at: 200,  title: 'Explorer',  reward: '+20 Credits',  icon: <Mountain className="w-5 h-5" />, tint: 'text-primary border-primary/40 bg-primary/10' },
-  { at: 500,  title: 'Collector', reward: '+50 Credits',  icon: <Star className="w-5 h-5" />,     tint: 'text-purple-400 border-purple-400/40 bg-purple-400/10' },
-  { at: 1000, title: 'Master',    reward: '+100 Credits', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { at: 100,  title: 'Starter',   reward: '+20 Swipes', icon: <Sparkles className="w-5 h-5" />, tint: 'text-emerald-400 border-emerald-400/40 bg-emerald-400/10' },
+  { at: 200,  title: 'Explorer',  reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" />, tint: 'text-primary border-primary/40 bg-primary/10' },
+  { at: 500,  title: 'Collector', reward: '+20 Swipes', icon: <Star className="w-5 h-5" />,     tint: 'text-purple-400 border-purple-400/40 bg-purple-400/10' },
+  { at: 1000, title: 'Master',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-400 border-amber-400/40 bg-amber-400/10' },
+  { at: 2000, title: 'Champion',  reward: '+20 Swipes', icon: <Trophy className="w-5 h-5" />,   tint: 'text-cyan-300 border-cyan-300/40 bg-cyan-300/10' },
+  { at: 3000, title: 'Virtuoso',  reward: '+20 Swipes', icon: <Award className="w-5 h-5" />,    tint: 'text-pink-300 border-pink-300/40 bg-pink-300/10' },
+  { at: 5000, title: 'Legend',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" />,    tint: 'text-amber-300 border-amber-300/50 bg-gradient-to-br from-amber-400/20 to-amber-300/5' },
 ];
 
 function nextMilestone(swiped: number) {
@@ -81,9 +84,9 @@ function typeChip(label: string) {
     metal:     { icon: <Hexagon className={cn(cls, 'text-slate-300')} />,     tint: 'border-slate-300/40 bg-slate-300/10 text-slate-100' },
     fairy:     { icon: <Sun className={cn(cls, 'text-pink-300')} />,          tint: 'border-pink-300/40 bg-pink-300/10 text-pink-100' },
     dragon:    { icon: <Crown className={cn(cls, 'text-amber-400')} />,       tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' },
-    colorless: { icon: <Circle className={cn(cls, 'text-gray-300')} />,       tint: 'border-gray-300/40 bg-gray-300/10 text-gray-100' },
+    colorless: { icon: <Circle className={cn(cls, 'text-gray-300')} />,       tint: 'border-gray-300/40 bg-gray-300/10 text-foreground' },
   };
-  return map[t] || { icon: <Zap className={cn(cls, 'text-primary')} />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' };
+  return map[t] || { icon: <Zap className={cn(cls, 'text-primary')} />, tint: 'border-primary/40 bg-primary/10 text-foreground' };
 }
 
 function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
@@ -96,7 +99,7 @@ function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
     out.push({ label: tier.key === 'grail' ? 'Grails' : 'Premium Cards', icon: <Crown className="w-3.5 h-3.5 text-amber-400" />, tint: 'border-amber-400/40 bg-amber-400/10 text-amber-100' });
   }
   const era = taste.topEras[0];
-  if (era) out.push({ label: `${era.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' });
+  if (era) out.push({ label: `${era.label.split(' (')[0]} Era`, icon: <Mountain className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
   const type = taste.topPokemonTypes[0];
   if (type) {
     const c = typeChip(type.label);
@@ -107,7 +110,7 @@ function buildDnaBadges(taste: TasteProfile, isPremium: boolean) {
   const artist = taste.topArtists[0];
   if (artist && artist.count >= 2) out.push({ label: `Art by ${artist.label}`, icon: <Palette className="w-3.5 h-3.5 text-teal-300" />, tint: 'border-teal-300/40 bg-teal-300/10 text-teal-100' });
   const pokemon = taste.topPokemon[0];
-  if (pokemon && pokemon.count >= 2) out.push({ label: pokemon.label, icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-primary-foreground' });
+  if (pokemon && pokemon.count >= 2) out.push({ label: pokemon.label, icon: <Sparkles className="w-3.5 h-3.5 text-primary" />, tint: 'border-primary/40 bg-primary/10 text-foreground' });
   if (taste.languageMix.find((l) => l.key === 'Japanese' && l.pct >= 20)) {
     out.push({ label: 'Japanese', icon: <Star className="w-3.5 h-3.5 text-red-300" />, tint: 'border-red-300/40 bg-red-300/10 text-red-100' });
   }
@@ -227,8 +230,6 @@ export function ProgressionHero({
 
   const xp = useMemo(() => computeXp(cardsSwiped, totalLikes), [cardsSwiped, totalLikes]);
   const lvl = useMemo(() => levelFromXp(xp), [xp]);
-  const title = personalityType ? `${personalityType} Collector` : `${lvl.current.title} Collector`;
-
   const nextGoal = nextMilestone(cardsSwiped);
   const dnaBadges = useMemo(() => buildDnaBadges(taste, isPremium), [taste, isPremium]);
 
@@ -252,12 +253,23 @@ export function ProgressionHero({
           <div className="mt-4 flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
               <Trophy className="w-3.5 h-3.5" />
-              LEVEL {lvl.current.level}
+              LEVEL {lvl.current.level} · {lvl.current.title.toUpperCase()}
             </span>
-            <span className="text-sm sm:text-base font-semibold text-foreground/90">
-              {title}
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              Swipe Rank
             </span>
           </div>
+          {personalityType && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
+                <Sparkles className="w-3.5 h-3.5" />
+                {personalityType}
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Collector Personality
+              </span>
+            </div>
+          )}
 
           {/* XP bar */}
           <div className="mt-5">
@@ -412,23 +424,13 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
         <h3 className="text-sm sm:text-base font-bold text-foreground">Swipe Milestones</h3>
       </div>
 
-      <div className="relative">
-        {/* Connecting rail */}
-        <div className="absolute top-7 sm:top-8 left-0 right-0 h-0.5 bg-border/60 rounded-full" aria-hidden />
-        <div
-          className="absolute top-7 sm:top-8 left-0 h-0.5 bg-gradient-to-r from-primary via-primary to-amber-300 rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.6)]"
-          style={{
-            width: `${Math.min(100, (swiped / SWIPE_MILESTONES[SWIPE_MILESTONES.length - 1].at) * 100)}%`,
-          }}
-          aria-hidden
-        />
-
-        <div className="relative grid grid-cols-4 gap-2 sm:gap-3">
+      <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
+        <div className="flex items-start gap-6 sm:gap-8 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             return (
-              <div key={m.at} className="flex flex-col items-center text-center gap-2 min-w-0">
+              <div key={m.at} className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
                 <div
                   className={cn(
                     'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
@@ -439,7 +441,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                 >
                   {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 w-full">
                   <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
                     {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
                   </p>
@@ -465,30 +467,6 @@ function StatsGrid({
 }: {
   avgPrice: number; totalLikes: number; cardsSwiped: number; matchRate: number;
 }) {
-  const avgCompare =
-    avgPrice >= 50 ? { text: 'Top 15% of collectors', tint: 'text-amber-300' }
-    : avgPrice >= 20 ? { text: 'Above average', tint: 'text-success' }
-    : avgPrice > 0 ? { text: 'Building your baseline', tint: 'text-muted-foreground' }
-    : null;
-
-  const likesCompare =
-    totalLikes >= 200 ? { text: 'Prolific curator', tint: 'text-amber-300' }
-    : totalLikes >= 50 ? { text: 'Active taste maker', tint: 'text-success' }
-    : totalLikes > 0 ? { text: 'Just getting started', tint: 'text-muted-foreground' }
-    : null;
-
-  const swipedCompare =
-    cardsSwiped >= 500 ? { text: 'Power scanner', tint: 'text-amber-300' }
-    : cardsSwiped >= 100 ? { text: 'Regular explorer', tint: 'text-success' }
-    : cardsSwiped > 0 ? { text: 'Warming up', tint: 'text-muted-foreground' }
-    : null;
-
-  const pullCompare =
-    matchRate >= 40 ? { text: 'Elite pull rate', tint: 'text-amber-300' }
-    : matchRate >= 20 ? { text: 'Above average', tint: 'text-success' }
-    : matchRate > 0 ? { text: 'Picky collector', tint: 'text-muted-foreground' }
-    : null;
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -502,28 +480,24 @@ function StatsGrid({
           tint="bg-primary/15 border-primary/30"
           value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
           label="Average Value"
-          compare={avgCompare}
         />
         <StatCard
           icon={<HeartIcon className="w-5 h-5 text-red-400" />}
           tint="bg-red-400/15 border-red-400/30"
           value={totalLikes.toLocaleString()}
           label="Collection Likes"
-          compare={likesCompare}
         />
         <StatCard
           icon={<Eye className="w-5 h-5 text-blue-400" />}
           tint="bg-blue-400/15 border-blue-400/30"
           value={cardsSwiped.toLocaleString()}
           label="Cards Swiped"
-          compare={swipedCompare}
         />
         <StatCard
           icon={<Target className="w-5 h-5 text-purple-400" />}
           tint="bg-purple-400/15 border-purple-400/30"
           value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
           label="Pull Rate"
-          compare={pullCompare}
           info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
         />
       </div>
@@ -532,13 +506,12 @@ function StatsGrid({
 }
 
 function StatCard({
-  icon, tint, value, label, compare, info,
+  icon, tint, value, label, info,
 }: {
   icon: React.ReactNode;
   tint: string;
   value: string;
   label: string;
-  compare: { text: string; tint: string } | null;
   info?: string;
 }) {
   return (
@@ -569,11 +542,6 @@ function StatCard({
         <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-1.5">
           {label}
         </p>
-        {compare && (
-          <p className={cn('text-[11px] sm:text-xs font-semibold mt-2', compare.tint)}>
-            {compare.text}
-          </p>
-        )}
       </div>
     </div>
   );
