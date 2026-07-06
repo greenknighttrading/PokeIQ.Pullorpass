@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
   Mountain, Award, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
-  Camera, Loader2,
+  Camera, Loader2, Droplets, Flame, Leaf, Zap, Brain, Swords, Moon, Shield,
+  Ghost, Palette, Languages, Hourglass, Gem, Circle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -87,6 +88,46 @@ function buildDnaLabels(taste: TasteProfile, isPremium: boolean): string[] {
   if (pokemon && pokemon.count >= 2) out.push(pokemon.label);
   if (taste.languageMix.find((l) => l.key === 'Japanese' && l.pct >= 20)) out.push('Japanese');
   return out;
+}
+
+// Map a DNA label to a distinct icon + color. Colors are hex so Tailwind
+// doesn't purge them, applied via inline style for maximum readability.
+function dnaStyle(label: string): { icon: React.ReactNode; color: string } {
+  const l = label.toLowerCase();
+  const mk = (icon: React.ReactNode, color: string) => ({ icon, color });
+  // Pokémon types
+  if (l === 'water')     return mk(<Droplets className="w-3.5 h-3.5" />, '#38bdf8');
+  if (l === 'fire')      return mk(<Flame className="w-3.5 h-3.5" />,    '#f97316');
+  if (l === 'grass')     return mk(<Leaf className="w-3.5 h-3.5" />,     '#4ade80');
+  if (l === 'lightning' || l === 'electric') return mk(<Zap className="w-3.5 h-3.5" />, '#facc15');
+  if (l === 'psychic')   return mk(<Brain className="w-3.5 h-3.5" />,    '#c084fc');
+  if (l === 'fighting')  return mk(<Swords className="w-3.5 h-3.5" />,   '#f87171');
+  if (l === 'darkness' || l === 'dark') return mk(<Moon className="w-3.5 h-3.5" />, '#94a3b8');
+  if (l === 'fairy')     return mk(<HeartIcon className="w-3.5 h-3.5" />, '#f472b6');
+  if (l === 'dragon')    return mk(<Flame className="w-3.5 h-3.5" />,    '#818cf8');
+  if (l === 'metal' || l === 'steel') return mk(<Shield className="w-3.5 h-3.5" />, '#9ca3af');
+  if (l === 'ghost')     return mk(<Ghost className="w-3.5 h-3.5" />,    '#a78bfa');
+  if (l === 'colorless' || l === 'normal') return mk(<Circle className="w-3.5 h-3.5" />, '#d6d3d1');
+  // Rarity
+  if (l.includes('holo'))     return mk(<Sparkles className="w-3.5 h-3.5" />, '#22d3ee');
+  if (l.includes('secret'))   return mk(<Star className="w-3.5 h-3.5" />,    '#e879f9');
+  if (l.includes('ultra'))    return mk(<Star className="w-3.5 h-3.5" />,    '#60a5fa');
+  if (l === 'rare')           return mk(<Star className="w-3.5 h-3.5" />,    '#22d3ee');
+  // Premium / grails
+  if (l === 'premium' || l.includes('premium cards')) return mk(<Crown className="w-3.5 h-3.5" />, '#fbbf24');
+  if (l.includes('grail'))    return mk(<Gem className="w-3.5 h-3.5" />, '#fbbf24');
+  // Eras
+  if (l.includes('vintage era')) return mk(<Hourglass className="w-3.5 h-3.5" />, '#d97706');
+  if (l.includes('classic era')) return mk(<Hourglass className="w-3.5 h-3.5" />, '#eab308');
+  if (l.includes('modern era'))  return mk(<Sparkles className="w-3.5 h-3.5" />,  '#2dd4bf');
+  if (l.includes('era'))         return mk(<BookOpen className="w-3.5 h-3.5" />,  '#a3e635');
+  // Language
+  if (l === 'japanese')  return mk(<Languages className="w-3.5 h-3.5" />, '#f87171');
+  // Fallback: artists, specific pokemon, etc. Use a palette rotation via hash.
+  const palette = ['#3b9e8f', '#c084fc', '#f472b6', '#60a5fa', '#f59e0b', '#4ade80'];
+  let h = 0;
+  for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
+  return mk(<Palette className="w-3.5 h-3.5" />, palette[h % palette.length]);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -316,23 +357,19 @@ export function ProgressionHero({
           <div className="pt-2 border-t border-border/50">
             <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
             <div className="flex flex-wrap gap-2">
-              {dnaLabels.map((label, i) => {
-                const palette = [
-                  'border-primary/60 text-primary',
-                  'border-warning/60 text-warning',
-                  'border-destructive/60 text-destructive',
-                  'border-success/60 text-success',
-                  'border-accent/60 text-accent-foreground',
-                ];
-                const c = palette[i % palette.length];
+              {dnaLabels.map((label) => {
+                const { icon, color } = dnaStyle(label);
                 return (
                   <span
                     key={label}
-                    className={cn(
-                      'inline-flex items-center rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium',
-                      c,
-                    )}
+                    className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
+                    style={{
+                      color,
+                      borderColor: `${color}80`,
+                      backgroundColor: `${color}12`,
+                    }}
                   >
+                    <span aria-hidden style={{ color }}>{icon}</span>
                     {label}
                   </span>
                 );
@@ -442,14 +479,15 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
       <h3 className="text-base font-semibold text-foreground mb-4">Swipe Milestones</h3>
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-start gap-0 sm:gap-8 min-w-max pb-1">
+        <div className="flex items-start gap-0 sm:gap-6 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             const isLast = i === SWIPE_MILESTONES.length - 1;
+            const nextDone = !isLast && swiped >= SWIPE_MILESTONES[i + 1].at;
             return (
               <React.Fragment key={m.at}>
-                <div className="flex flex-col items-center text-center gap-2 w-[28%] sm:w-24 shrink-0">
+                <div className="flex flex-col items-center text-center gap-2 w-[27%] sm:w-24 shrink-0">
                   <div
                     className={cn(
                       'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center shrink-0 transition-colors',
@@ -473,7 +511,16 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                   </div>
                 </div>
                 {!isLast && (
-                  <div className="w-[3%] sm:w-12 border-t border-dashed border-border/50 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                  <div
+                    className="w-[5%] sm:w-16 mt-7 sm:mt-8 shrink-0 h-[2px] bg-repeat-x"
+                    style={{
+                      backgroundImage: `radial-gradient(circle, ${
+                        done && nextDone ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.55)'
+                      } 1.2px, transparent 1.4px)`,
+                      backgroundSize: '8px 2px',
+                    }}
+                    aria-hidden
+                  />
                 )}
               </React.Fragment>
             );
