@@ -487,7 +487,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
             const nextDone = !isLast && swiped >= SWIPE_MILESTONES[i + 1].at;
             return (
               <React.Fragment key={m.at}>
-                <div className="flex flex-col items-center text-center gap-2 w-[28%] sm:w-24 shrink-0">
+                <div className="flex flex-col items-center text-center gap-2 w-[27%] sm:w-24 shrink-0">
                   <div
                     className={cn(
                       'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center shrink-0 transition-colors',
@@ -512,7 +512,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                 </div>
                 {!isLast && (
                   <div
-                    className="w-[3%] sm:w-16 mt-7 sm:mt-8 shrink-0 h-[2px] bg-repeat-x"
+                    className="w-[5%] sm:w-16 mt-7 sm:mt-8 shrink-0 h-[2px] bg-repeat-x"
                     style={{
                       backgroundImage: `radial-gradient(circle, ${
                         done && nextDone ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.55)'
