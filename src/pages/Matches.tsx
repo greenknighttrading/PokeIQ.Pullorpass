@@ -1291,14 +1291,14 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   }, [source]);
 
   const sorted = useMemo(() => {
-    if (!isPublicView && roundCards && roundCards.length > 0) return source;
     return [...source].sort((a, b) => {
       const aSuper = a.source === 'super_like' ? 1 : 0;
       const bSuper = b.source === 'super_like' ? 1 : 0;
       if (aSuper !== bSuper) return bSuper - aSuper;
       return (b.liked_at || '').localeCompare(a.liked_at || '');
     });
-  }, [source, isPublicView, roundCards]);
+  }, [source]);
+
   const recent = sorted.slice(0, !isPublicView && roundCards?.length ? 20 : 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   const isDisliked = kind === 'disliked';
