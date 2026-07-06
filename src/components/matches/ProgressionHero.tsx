@@ -291,10 +291,11 @@ export function ProgressionHero({
               <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
             </div>
             {lvl.next && (
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground text-right">
                 {(lvl.nextXp - xp).toLocaleString()} XP to <span className="text-foreground font-semibold">Level {lvl.next.level}</span>
               </p>
             )}
+
           </div>
 
           {/* ── 2. DNA BADGES ─────────────────────────────── */}
