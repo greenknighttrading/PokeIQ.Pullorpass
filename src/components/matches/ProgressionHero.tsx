@@ -495,22 +495,22 @@ function StatsGrid({
       <h3 className="text-base font-semibold text-foreground mb-3">Stats</h3>
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
         <StatCard
-          icon={<BookOpen className="w-4 h-4 text-muted-foreground" />}
+          icon={<BookOpen className="w-4 h-4 text-success" />}
           value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
           label="Average Value"
         />
         <StatCard
-          icon={<HeartIcon className="w-4 h-4 text-muted-foreground" />}
+          icon={<HeartIcon className="w-4 h-4 text-destructive" />}
           value={totalLikes.toLocaleString()}
           label="Collection Likes"
         />
         <StatCard
-          icon={<Eye className="w-4 h-4 text-muted-foreground" />}
+          icon={<Eye className="w-4 h-4 text-primary" />}
           value={cardsSwiped.toLocaleString()}
           label="Cards Swiped"
         />
         <StatCard
-          icon={<Target className="w-4 h-4 text-muted-foreground" />}
+          icon={<Target className="w-4 h-4 text-warning" />}
           value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
           label="Pull Rate"
           info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
