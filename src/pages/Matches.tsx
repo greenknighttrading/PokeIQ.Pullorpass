@@ -37,6 +37,8 @@ import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 import { readSwipeStreak } from '@/pages/PullOrPass';
 import tcgplayerIcon from '@/assets/tcgplayer-icon-transparent.png.asset.json';
 import { tcgPlayerUrl } from '@/lib/packEV';
+import { ProgressionHero, AchievementsLadder } from '@/components/matches/ProgressionHero';
+import { readPersonalityForCurrentUser } from '@/lib/personalityStorage';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
@@ -555,19 +557,15 @@ export default function Matches({
           {!loading && userId && (
             <div className="space-y-6 sm:space-y-8">
               {view === 'profile' && (
-                <>
-                  <TasteHero
-                    taste={taste}
-                    cardsSwiped={cardsSwiped}
-                    isPublicView={isPublicView}
-                    viewedDisplayName={viewedDisplayName}
-                  />
-                  {userId && <ThisOrThatRankings userId={userId} onOpen={setOpenSeed} />}
-                  {!isPublicView && <SwipeAgainOrLimit />}
-                  {!isPublicView && <ThisOrThatCTA />}
-                  {!isPublicView && <DailyLimitWidget />}
-                  {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
-                </>
+                <ProfileView
+                  taste={taste}
+                  cardsSwiped={cardsSwiped}
+                  userId={userId}
+                  isPublicView={isPublicView}
+                  viewerIsOwner={viewerIsOwner}
+                  viewedDisplayName={viewedDisplayName}
+                  onOpen={setOpenSeed}
+                />
               )}
               {view === 'binder' && (
                 <div className="space-y-4 sm:space-y-5">
