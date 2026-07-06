@@ -426,14 +426,14 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
       </div>
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-start gap-6 sm:gap-8 min-w-max pb-1">
+        <div className="flex items-start gap-0 sm:gap-8 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             const isLast = i === SWIPE_MILESTONES.length - 1;
             return (
               <React.Fragment key={m.at}>
-                <div className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
+                <div className="flex flex-col items-center text-center gap-2 w-[30%] sm:w-24 shrink-0">
                   <div
                     className={cn(
                       'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
@@ -457,13 +457,14 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                   </div>
                 </div>
                 {!isLast && (
-                  <div className="w-8 sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                  <div className="w-[5%] sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
                 )}
               </React.Fragment>
             );
           })}
         </div>
       </div>
+
     </div>
   );
 }
