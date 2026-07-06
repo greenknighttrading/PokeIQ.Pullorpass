@@ -467,30 +467,6 @@ function StatsGrid({
 }: {
   avgPrice: number; totalLikes: number; cardsSwiped: number; matchRate: number;
 }) {
-  const avgCompare =
-    avgPrice >= 50 ? { text: 'Top 15% of collectors', tint: 'text-amber-300' }
-    : avgPrice >= 20 ? { text: 'Above average', tint: 'text-success' }
-    : avgPrice > 0 ? { text: 'Building your baseline', tint: 'text-muted-foreground' }
-    : null;
-
-  const likesCompare =
-    totalLikes >= 200 ? { text: 'Prolific curator', tint: 'text-amber-300' }
-    : totalLikes >= 50 ? { text: 'Active taste maker', tint: 'text-success' }
-    : totalLikes > 0 ? { text: 'Just getting started', tint: 'text-muted-foreground' }
-    : null;
-
-  const swipedCompare =
-    cardsSwiped >= 500 ? { text: 'Power scanner', tint: 'text-amber-300' }
-    : cardsSwiped >= 100 ? { text: 'Regular explorer', tint: 'text-success' }
-    : cardsSwiped > 0 ? { text: 'Warming up', tint: 'text-muted-foreground' }
-    : null;
-
-  const pullCompare =
-    matchRate >= 40 ? { text: 'Elite pull rate', tint: 'text-amber-300' }
-    : matchRate >= 20 ? { text: 'Above average', tint: 'text-success' }
-    : matchRate > 0 ? { text: 'Picky collector', tint: 'text-muted-foreground' }
-    : null;
-
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
@@ -504,28 +480,24 @@ function StatsGrid({
           tint="bg-primary/15 border-primary/30"
           value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
           label="Average Value"
-          compare={avgCompare}
         />
         <StatCard
           icon={<HeartIcon className="w-5 h-5 text-red-400" />}
           tint="bg-red-400/15 border-red-400/30"
           value={totalLikes.toLocaleString()}
           label="Collection Likes"
-          compare={likesCompare}
         />
         <StatCard
           icon={<Eye className="w-5 h-5 text-blue-400" />}
           tint="bg-blue-400/15 border-blue-400/30"
           value={cardsSwiped.toLocaleString()}
           label="Cards Swiped"
-          compare={swipedCompare}
         />
         <StatCard
           icon={<Target className="w-5 h-5 text-purple-400" />}
           tint="bg-purple-400/15 border-purple-400/30"
           value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
           label="Pull Rate"
-          compare={pullCompare}
           info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
         />
       </div>
@@ -534,13 +506,12 @@ function StatsGrid({
 }
 
 function StatCard({
-  icon, tint, value, label, compare, info,
+  icon, tint, value, label, info,
 }: {
   icon: React.ReactNode;
   tint: string;
   value: string;
   label: string;
-  compare: { text: string; tint: string } | null;
   info?: string;
 }) {
   return (
@@ -571,11 +542,6 @@ function StatCard({
         <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-1.5">
           {label}
         </p>
-        {compare && (
-          <p className={cn('text-[11px] sm:text-xs font-semibold mt-2', compare.tint)}>
-            {compare.text}
-          </p>
-        )}
       </div>
     </div>
   );
