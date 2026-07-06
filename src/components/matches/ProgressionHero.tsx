@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Pencil, Check, X as XClose, Trophy, Flame, Star, Crown, Sparkles,
+  Pencil, Check as CheckIcon, X as XClose, Trophy, Flame, Star, Crown, Sparkles,
   Mountain, Zap, Droplets, Leaf, Sun, Moon, Hexagon, Circle, Swords,
   Palette, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
   Gift, ChevronRight, Award,
@@ -176,7 +176,7 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
               onKeyDown={(e) => { if (e.key === 'Enter') save(); if (e.key === 'Escape') { setEditing(false); setDraft(name); } }}
             />
             <Button size="icon" variant="ghost" onClick={save} disabled={saving} className="h-9 w-9">
-              <Check className="w-4 h-4 text-success" />
+              <CheckIcon className="w-4 h-4 text-success" />
             </Button>
             <Button size="icon" variant="ghost" onClick={() => { setEditing(false); setDraft(name); }} className="h-9 w-9">
               <XClose className="w-4 h-4" />
@@ -437,7 +437,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                     !done && !current && 'border-border/60 bg-muted/40 text-muted-foreground',
                   )}
                 >
-                  {done ? <Check className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
+                  {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
@@ -456,15 +456,6 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
         </div>
       </div>
     </div>
-  );
-}
-
-// ── Check icon (imported inline to avoid conflict) ─────
-function Check({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
   );
 }
 
