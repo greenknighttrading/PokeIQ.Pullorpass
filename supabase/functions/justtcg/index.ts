@@ -47,23 +47,28 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // ── Auth: require valid user JWT to prevent paid API abuse ──
+  // ── Auth: if a Bearer token is provided, validate it. Anonymous callers
+  // are allowed through (protected by rate limiting) so public pages work
+  // for signed-out users. ──
   const authHeader = req.headers.get("authorization") || "";
-  if (!authHeader.startsWith("Bearer ")) {
-    return json({ error: "Unauthorized" }, 401);
-  }
-  try {
-    const authClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_ANON_KEY")!,
-    );
+  if (authHeader.startsWith("Bearer ")) {
     const token = authHeader.replace("Bearer ", "");
-    const { data, error } = await authClient.auth.getUser(token);
-    if (error || !data?.user) {
-      return json({ error: "Unauthorized" }, 401);
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+    // Skip validation when the client just forwards the anon key as the bearer.
+    if (token && token !== anonKey) {
+      try {
+        const authClient = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          anonKey,
+        );
+        const { data, error } = await authClient.auth.getUser(token);
+        if (error || !data?.user) {
+          return json({ error: "Unauthorized" }, 401);
+        }
+      } catch {
+        return json({ error: "Unauthorized" }, 401);
+      }
     }
-  } catch {
-    return json({ error: "Unauthorized" }, 401);
   }
 
   // ── Rate limiting ──
