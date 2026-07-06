@@ -451,6 +451,19 @@ export default function PokeYelp() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Load completed referral count for the Share tab
+  useEffect(() => {
+    if (!userId) { setCompletedRefs(0); return; }
+    (async () => {
+      const { count } = await supabase
+        .from('pullorpass_referrals')
+        .select('id', { count: 'exact', head: true })
+        .eq('referrer_id', userId)
+        .not('completed_at', 'is', null);
+      setCompletedRefs(count ?? 0);
+    })();
+  }, [userId, earnTab]);
+
   const current = pool[index];
 
   useEffect(() => {
