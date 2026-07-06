@@ -911,21 +911,43 @@ export default function PokeYelp() {
             })()}
           </header>
 
-          {/* This or That CTA */}
-          <Card className="mb-4 p-4 sm:p-5 flex items-center gap-4 bg-gradient-to-r from-primary/10 via-card to-card border-primary/30">
-            <div className="hidden sm:flex w-12 h-12 rounded-full bg-primary/15 items-center justify-center shrink-0">
-              <Gamepad2 className="w-6 h-6 text-primary" />
+          {/* Earn sub-tab pill */}
+          <div className="mb-4 flex justify-center">
+            <div className="inline-flex items-center gap-1 p-1 rounded-full border border-border/60 bg-muted/40 backdrop-blur-sm">
+              {(['train','share'] as const).map((t) => {
+                const active = earnTab === t;
+                const label = t === 'train' ? 'Train' : 'Share';
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setEarnTab(t)}
+                    className={`px-5 h-10 sm:h-11 rounded-full text-sm font-semibold transition-colors ${
+                      active
+                        ? 'bg-primary text-primary-foreground shadow-[0_0_16px_hsl(var(--primary)/0.35)]'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-base sm:text-lg font-semibold tracking-tight">This or That</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">
-                Choose between two cards and help PokeIQ learn your collecting taste.
-              </div>
-            </div>
-            <Button onClick={() => navigate('/this-or-that')} className="shrink-0">
-              Play Now
-            </Button>
-          </Card>
+          </div>
+
+          {earnTab === 'share' && (
+            <ShareEarnView
+              userId={userId}
+              completedRefs={completedRefs}
+              refCopied={refCopied}
+              setRefCopied={setRefCopied}
+              ptCopied={ptCopied}
+              setPtCopied={setPtCopied}
+            />
+          )}
+
+          {earnTab === 'train' && (
+          <>
 
           {/* Filters panel */}
           <AnimatePresence initial={false}>
