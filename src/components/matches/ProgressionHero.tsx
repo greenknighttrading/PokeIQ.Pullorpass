@@ -230,8 +230,6 @@ export function ProgressionHero({
 
   const xp = useMemo(() => computeXp(cardsSwiped, totalLikes), [cardsSwiped, totalLikes]);
   const lvl = useMemo(() => levelFromXp(xp), [xp]);
-  const title = personalityType ? `${personalityType} Collector` : `${lvl.current.title} Collector`;
-
   const nextGoal = nextMilestone(cardsSwiped);
   const dnaBadges = useMemo(() => buildDnaBadges(taste, isPremium), [taste, isPremium]);
 
@@ -255,12 +253,23 @@ export function ProgressionHero({
           <div className="mt-4 flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
               <Trophy className="w-3.5 h-3.5" />
-              LEVEL {lvl.current.level}
+              LEVEL {lvl.current.level} · {lvl.current.title.toUpperCase()}
             </span>
-            <span className="text-sm sm:text-base font-semibold text-foreground/90">
-              {title}
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+              Swipe Rank
             </span>
           </div>
+          {personalityType && (
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
+                <Sparkles className="w-3.5 h-3.5" />
+                {personalityType}
+              </span>
+              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                Collector Personality
+              </span>
+            </div>
+          )}
 
           {/* XP bar */}
           <div className="mt-5">
