@@ -254,6 +254,13 @@ export function ProgressionHero({
         <div className="relative z-10">
           <UsernameEditable readOnly={isPublicView} staticName={viewedDisplayName} />
 
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
+              <Trophy className="w-3.5 h-3.5" />
+              Level {lvl.current.level}
+            </span>
+          </div>
+
           {personalityType && (
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
@@ -263,12 +270,6 @@ export function ProgressionHero({
             </div>
           )}
 
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
-              <Trophy className="w-3.5 h-3.5" />
-              Level {lvl.current.level}
-            </span>
-          </div>
 
           {/* XP bar */}
           <div className="mt-5">
@@ -290,10 +291,11 @@ export function ProgressionHero({
               <div className="absolute inset-0 rounded-full bg-gradient-to-b from-white/15 to-transparent pointer-events-none" />
             </div>
             {lvl.next && (
-              <p className="mt-2 text-xs text-muted-foreground">
+              <p className="mt-2 text-xs text-muted-foreground text-right">
                 {(lvl.nextXp - xp).toLocaleString()} XP to <span className="text-foreground font-semibold">Level {lvl.next.level}</span>
               </p>
             )}
+
           </div>
 
           {/* ── 2. DNA BADGES ─────────────────────────────── */}
@@ -424,14 +426,14 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
       </div>
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-start gap-6 sm:gap-8 min-w-max pb-1">
+        <div className="flex items-start gap-0 sm:gap-8 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             const isLast = i === SWIPE_MILESTONES.length - 1;
             return (
               <React.Fragment key={m.at}>
-                <div className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
+                <div className="flex flex-col items-center text-center gap-2 w-[28%] sm:w-24 shrink-0">
                   <div
                     className={cn(
                       'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
@@ -455,13 +457,15 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                   </div>
                 </div>
                 {!isLast && (
-                  <div className="w-8 sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                  <div className="w-[3%] sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
                 )}
               </React.Fragment>
+
             );
           })}
         </div>
       </div>
+
     </div>
   );
 }
