@@ -592,6 +592,70 @@ export default function Matches({
 // SECTION 1 — DNA Profile Hero
 // ─────────────────────────────────────────────────────────────
 
+// New progression-oriented profile view. Uses ProgressionHero for the
+// game-like hero + DNA + goal + milestones + stats, keeps existing
+// ThisOrThatRankings as the "top 10", then Achievements + Personality CTA.
+function ProfileView({
+  taste,
+  cardsSwiped,
+  userId,
+  isPublicView,
+  viewerIsOwner,
+  viewedDisplayName,
+  onOpen,
+}: {
+  taste: TasteProfile;
+  cardsSwiped: number;
+  userId: string;
+  isPublicView: boolean;
+  viewerIsOwner: boolean;
+  viewedDisplayName?: string;
+  onOpen: (s: CardDetailSeed) => void;
+}) {
+  const { isPremium } = useIsPremium();
+  const [personalityType, setPersonalityType] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const parsed: any = await readPersonalityForCurrentUser();
+        if (!cancelled) setPersonalityType(parsed?.type ?? null);
+      } catch { if (!cancelled) setPersonalityType(null); }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div className="space-y-6 sm:space-y-8">
+      <ProgressionHero
+        taste={taste}
+        cardsSwiped={cardsSwiped}
+        isPremium={isPremium}
+        isPublicView={isPublicView}
+        viewedDisplayName={viewedDisplayName}
+        personalityType={personalityType}
+      />
+
+      {/* 6. Top 10 rankings */}
+      <ThisOrThatRankings userId={userId} onOpen={onOpen} />
+
+      {/* 7. Achievements — Collector Levels */}
+      <AchievementsLadder cardsSwiped={cardsSwiped} totalLikes={taste.totalLikes} />
+
+      {/* Personality CTA + swipe-again controls */}
+      {!isPublicView && <SwipeAgainOrLimit />}
+      {!isPublicView && <ThisOrThatCTA />}
+      {!isPublicView && <DailyLimitWidget />}
+      <PersonalityTestCTA
+        personalityType={personalityType}
+        name={isPublicView ? (viewedDisplayName || 'Collector') : undefined}
+      />
+      {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
+    </div>
+  );
+}
+
 const STAGE_LABEL: Record<string, string> = {
   seedling: 'Seedling', sprouting: 'Sprouting', established: 'Established', expert: 'Expert',
 };
