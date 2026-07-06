@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState, useCallback, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Bookmark, Sparkles, ImageOff, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react';
+import { X, Heart, Bookmark, Sparkles, ExternalLink, TrendingUp, TrendingDown } from 'lucide-react';
+import squirtleFallback from '@/assets/squirtle-default.png';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -515,8 +516,13 @@ export function CardDetailModal({
                     onError={() => { setImgErr(true); setImgLoaded(true); }}
                   />
                 ) : imgErr ? (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ImageOff className="w-8 h-8 text-muted-foreground" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+                    <img
+                      src={squirtleFallback}
+                      alt="Card image unavailable"
+                      className="w-24 h-24 object-contain opacity-80"
+                      loading="lazy"
+                    />
                   </div>
                 ) : null}
               </div>

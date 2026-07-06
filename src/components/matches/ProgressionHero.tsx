@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import squirtleAvatar from '@/assets/squirtle-default.png';
 import type { TasteProfile } from '@/lib/tasteProfile';
 
 // ─────────────────────────────────────────────────────────────
@@ -154,15 +155,18 @@ function UsernameEditable({ readOnly, staticName }: { readOnly?: boolean; static
     toast({ title: 'Username updated' });
   };
 
-  const initial = (name || 'C').charAt(0).toUpperCase();
-
   return (
     <div className="flex items-center gap-4 sm:gap-5">
       <div className="relative shrink-0">
         {/* Gradient ring */}
         <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-primary via-primary/60 to-amber-400/60 blur-sm opacity-70" aria-hidden />
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border-2 border-primary/60 text-primary flex items-center justify-center text-3xl sm:text-4xl font-black shadow-[0_0_30px_-8px_hsl(var(--primary)/0.6)]">
-          {initial}
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-primary/40 to-primary/10 border-2 border-primary/60 flex items-center justify-center overflow-hidden shadow-[0_0_30px_-8px_hsl(var(--primary)/0.6)]">
+          <img
+            src={squirtleAvatar}
+            alt="Default collector avatar"
+            className="w-[85%] h-[85%] object-contain"
+            loading="lazy"
+          />
         </div>
       </div>
 
@@ -250,26 +254,21 @@ export function ProgressionHero({
         <div className="relative z-10">
           <UsernameEditable readOnly={isPublicView} staticName={viewedDisplayName} />
 
-          <div className="mt-4 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
-              <Trophy className="w-3.5 h-3.5" />
-              LEVEL {lvl.current.level} · {lvl.current.title.toUpperCase()}
-            </span>
-            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-              Swipe Rank
-            </span>
-          </div>
           {personalityType && (
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
                 <Sparkles className="w-3.5 h-3.5" />
-                {personalityType}
-              </span>
-              <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
-                Collector Personality
+                {personalityType} Collector
               </span>
             </div>
           )}
+
+          <div className="mt-3 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
+              <Trophy className="w-3.5 h-3.5" />
+              Level {lvl.current.level}
+            </span>
+          </div>
 
           {/* XP bar */}
           <div className="mt-5">
@@ -292,7 +291,7 @@ export function ProgressionHero({
             </div>
             {lvl.next && (
               <p className="mt-2 text-xs text-muted-foreground">
-                {(lvl.nextXp - xp).toLocaleString()} XP to <span className="text-foreground font-semibold">Level {lvl.next.level} · {lvl.next.title}</span>
+                {(lvl.nextXp - xp).toLocaleString()} XP to <span className="text-foreground font-semibold">Level {lvl.next.level}</span>
               </p>
             )}
           </div>
@@ -426,33 +425,39 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
 
       <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
         <div className="flex items-start gap-6 sm:gap-8 min-w-max pb-1">
-          {SWIPE_MILESTONES.map((m) => {
+          {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
+            const isLast = i === SWIPE_MILESTONES.length - 1;
             return (
-              <div key={m.at} className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
-                <div
-                  className={cn(
-                    'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
-                    done && 'border-primary bg-gradient-to-br from-primary to-primary/60 text-primary-foreground shadow-[0_0_22px_hsl(var(--primary)/0.55)]',
-                    !done && current && 'border-amber-400/70 bg-amber-400/10 text-amber-200 animate-pulse',
-                    !done && !current && 'border-border/60 bg-muted/40 text-muted-foreground',
-                  )}
-                >
-                  {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
+              <React.Fragment key={m.at}>
+                <div className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
+                  <div
+                    className={cn(
+                      'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
+                      done && 'border-primary bg-gradient-to-br from-primary to-primary/60 text-primary-foreground shadow-[0_0_22px_hsl(var(--primary)/0.55)]',
+                      !done && current && 'border-amber-400/70 bg-amber-400/10 text-amber-200 animate-pulse',
+                      !done && !current && 'border-border/60 bg-muted/40 text-muted-foreground',
+                    )}
+                  >
+                    {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
+                      {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
+                    </p>
+                    <p className={cn('text-[10px] sm:text-xs font-semibold mt-1 truncate', done ? 'text-foreground' : 'text-muted-foreground')}>
+                      {m.title}
+                    </p>
+                    <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 truncate">
+                      {m.reward}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
-                    {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
-                  </p>
-                  <p className={cn('text-[10px] sm:text-xs font-semibold mt-1 truncate', done ? 'text-foreground' : 'text-muted-foreground')}>
-                    {m.title}
-                  </p>
-                  <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 truncate">
-                    {m.reward}
-                  </p>
-                </div>
-              </div>
+                {!isLast && (
+                  <div className="w-8 sm:w-12 border-t-2 border-dashed border-border/60 mt-7 sm:mt-8 shrink-0" aria-hidden />
+                )}
+              </React.Fragment>
             );
           })}
         </div>

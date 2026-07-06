@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { ImageOff } from 'lucide-react';
+import squirtleFallback from '@/assets/squirtle-default.png';
 
 interface CardImageProps {
   src?: string;
@@ -33,11 +33,16 @@ export function CardImage({
       <div 
         className={cn(
           sizeClasses[size],
-          'flex items-center justify-center bg-muted rounded-lg border border-border',
+          'flex items-center justify-center bg-muted/50 rounded-lg border border-border overflow-hidden',
           className
         )}
       >
-        <ImageOff className="h-6 w-6 text-muted-foreground" />
+        <img
+          src={squirtleFallback}
+          alt={alt || 'Pokémon card placeholder'}
+          className="w-full h-full object-contain opacity-80"
+          loading="lazy"
+        />
       </div>
     );
   }
