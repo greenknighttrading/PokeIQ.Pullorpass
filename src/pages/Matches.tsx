@@ -37,7 +37,7 @@ import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
 import { readSwipeStreak } from '@/pages/PullOrPass';
 import tcgplayerIcon from '@/assets/tcgplayer-icon-transparent.png.asset.json';
 import { tcgPlayerUrl } from '@/lib/packEV';
-import { ProgressionHero, AchievementsLadder } from '@/components/matches/ProgressionHero';
+import { ProgressionHero } from '@/components/matches/ProgressionHero';
 import { readPersonalityForCurrentUser } from '@/lib/personalityStorage';
 
 // Map of personality type → portrait illustration (matches /personality-types).
@@ -639,9 +639,6 @@ function ProfileView({
 
       {/* 6. Top 10 rankings */}
       <ThisOrThatRankings userId={userId} onOpen={onOpen} />
-
-      {/* 7. Achievements — Collector Levels */}
-      <AchievementsLadder cardsSwiped={cardsSwiped} totalLikes={taste.totalLikes} />
 
       {/* Personality CTA + swipe-again controls */}
       {!isPublicView && <SwipeAgainOrLimit />}
