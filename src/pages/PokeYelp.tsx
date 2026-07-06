@@ -822,7 +822,7 @@ export default function PokeYelp() {
 
         <main className="flex-1 max-w-4xl w-full mx-auto px-4 pt-2 pb-8 flex flex-col select-none">
           {/* Cinematic hero */}
-          <header className="relative text-center mb-3 pt-0 mx-0 my-0">
+          <header className="relative text-center mb-0 pt-0 mx-0 my-0">
             {/* Soft neon glow + animated particles */}
             <div aria-hidden className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[260px] rounded-full blur-3xl opacity-40 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.45),transparent_70%)]" />
@@ -846,69 +846,6 @@ export default function PokeYelp() {
                 transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
               />
             </div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight"
-              style={{ textShadow: '0 0 24px hsl(var(--primary) / 0.3)' }}
-            >
-              PokeIQ Training Lab
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25, duration: 0.7 }}
-              className="mt-2 text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
-            >
-              Earn swipe credits, help uncode the Collector DNA.
-            </motion.p>
-
-            {/* Round progress + redeem */}
-            {(() => {
-              const inRound = reviewedCount % REVIEWS_PER_SWIPE_BATCH;
-              const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
-              const canRedeem = credits >= CREDITS_PER_REDEMPTION && credits % CREDITS_PER_REDEMPTION === 0;
-              const needed = credits < CREDITS_PER_REDEMPTION
-                ? CREDITS_PER_REDEMPTION - credits
-                : CREDITS_PER_REDEMPTION - (credits % CREDITS_PER_REDEMPTION);
-              const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
-              return (
-                <div className="mt-3 max-w-2xl mx-auto">
-                  <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-1 px-1 py-0 my-0 mx-0">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
-                      <span>/ {REVIEWS_PER_SWIPE_BATCH} this round</span>
-                    </span>
-                    {canRedeem ? (
-                      <button
-                        onClick={redeemCredits}
-                        disabled={redeeming}
-                        className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-semibold normal-case tracking-normal transition-colors disabled:opacity-50"
-                      >
-                        <RotateCw className="w-3.5 h-3.5" />
-                        {redeeming ? 'Redeeming…' : `Redeem ${redeemAmount} credits → ${redeemAmount} swipes`}
-                      </button>
-                    ) : (
-                      <span className="normal-case tracking-normal tabular-nums">
-                        {needed} more credit{needed === 1 ? '' : 's'} to redeem
-                      </span>
-                    )}
-                  </div>
-                  <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
-                    <motion.div
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${pct}%` }}
-                      transition={{ duration: 0.8, ease: 'easeOut' }}
-                      style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
-                    />
-                  </div>
-                </div>
-              );
-            })()}
           </header>
 
           {/* Earn sub-tab pill */}
@@ -934,6 +871,64 @@ export default function PokeYelp() {
               })}
             </div>
           </div>
+
+          {earnTab === 'train' && (
+            <div className="text-center mb-3">
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.7 }}
+                className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto"
+              >
+                Earn swipe credits, help uncode the Collector DNA.
+              </motion.p>
+
+              {/* Round progress + redeem */}
+              {(() => {
+                const inRound = reviewedCount % REVIEWS_PER_SWIPE_BATCH;
+                const pct = (inRound / REVIEWS_PER_SWIPE_BATCH) * 100;
+                const canRedeem = credits >= CREDITS_PER_REDEMPTION && credits % CREDITS_PER_REDEMPTION === 0;
+                const needed = credits < CREDITS_PER_REDEMPTION
+                  ? CREDITS_PER_REDEMPTION - credits
+                  : CREDITS_PER_REDEMPTION - (credits % CREDITS_PER_REDEMPTION);
+                const redeemAmount = Math.floor(credits / CREDITS_PER_REDEMPTION) * CREDITS_PER_REDEMPTION;
+                return (
+                  <div className="mt-3 max-w-2xl mx-auto">
+                    <div className="flex items-center justify-between text-[11px] uppercase tracking-wider text-muted-foreground mb-1 px-1 py-0 my-0 mx-0">
+                      <span className="inline-flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-foreground font-semibold tabular-nums">{inRound}</span>
+                        <span>/ {REVIEWS_PER_SWIPE_BATCH} this round</span>
+                      </span>
+                      {canRedeem ? (
+                        <button
+                          onClick={redeemCredits}
+                          disabled={redeeming}
+                          className="inline-flex items-center gap-1.5 text-primary hover:text-primary/80 font-semibold normal-case tracking-normal transition-colors disabled:opacity-50"
+                        >
+                          <RotateCw className="w-3.5 h-3.5" />
+                          {redeeming ? 'Redeeming…' : `Redeem ${redeemAmount} credits → ${redeemAmount} swipes`}
+                        </button>
+                      ) : (
+                        <span className="normal-case tracking-normal tabular-nums">
+                          {needed} more credit{needed === 1 ? '' : 's'} to redeem
+                        </span>
+                      )}
+                    </div>
+                    <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+                      <motion.div
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-accent rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.8, ease: 'easeOut' }}
+                        style={{ boxShadow: '0 0 12px hsl(var(--primary) / 0.5)' }}
+                      />
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
 
           {earnTab === 'share' && (
             <ShareEarnView
