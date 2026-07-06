@@ -1906,7 +1906,7 @@ export function SwipeAgainOrLimit() {
           )}
         </motion.button>
       </Link>
-      <Link to="/personality-types" className="w-full sm:w-auto">
+      <Link to="/personality-types" className="hidden md:inline-flex w-full sm:w-auto">
         <motion.button
           whileHover={{ y: -2, scale: 1.02 }}
           whileTap={{ scale: 0.97 }}
