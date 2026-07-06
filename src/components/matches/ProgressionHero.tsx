@@ -300,34 +300,47 @@ export function ProgressionHero({
 
   return (
     <section className="space-y-6 sm:space-y-8">
-      {/* Header — no card wrapper, sits on page background */}
-      <ProfileHeader
-        readOnly={isPublicView}
-        staticName={viewedDisplayName}
-        level={lvl.current.level}
-        xp={xp}
-        personalityType={personalityType}
-      />
+      {/* Identity card — header + progress + DNA all together */}
+      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6">
+        <ProfileHeader
+          readOnly={isPublicView}
+          staticName={viewedDisplayName}
+          level={lvl.current.level}
+          xp={xp}
+          personalityType={personalityType}
+        />
 
-      {/* Progress */}
-      <ProgressCard xp={xp} lvl={lvl} />
+        <ProgressInline xp={xp} lvl={lvl} />
 
-      {/* Collector DNA */}
-      {dnaLabels.length > 0 && (
-        <div>
-          <h3 className="text-base font-semibold text-foreground mb-3">Your Collector DNA</h3>
-          <div className="flex flex-wrap gap-2">
-            {dnaLabels.map((label) => (
-              <span
-                key={label}
-                className="inline-flex items-center rounded-full border border-border/70 bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium text-foreground/85"
-              >
-                {label}
-              </span>
-            ))}
+        {dnaLabels.length > 0 && (
+          <div className="pt-2 border-t border-border/50">
+            <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
+            <div className="flex flex-wrap gap-2">
+              {dnaLabels.map((label, i) => {
+                const palette = [
+                  'border-primary/60 text-primary',
+                  'border-warning/60 text-warning',
+                  'border-destructive/60 text-destructive',
+                  'border-success/60 text-success',
+                  'border-accent/60 text-accent-foreground',
+                ];
+                const c = palette[i % palette.length];
+                return (
+                  <span
+                    key={label}
+                    className={cn(
+                      'inline-flex items-center rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium',
+                      c,
+                    )}
+                  >
+                    {label}
+                  </span>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Next Goal */}
       {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
@@ -346,14 +359,14 @@ export function ProgressionHero({
   );
 }
 
-// ── Progress ─────────────────────────────────────────────
-function ProgressCard({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFromXp> }) {
+// ── Progress (inline, no wrapper card) ─────────────────
+function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFromXp> }) {
   const pct = Math.round(lvl.pct);
   const remaining = lvl.next ? Math.max(0, lvl.nextXp - xp) : 0;
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-      <div className="flex items-baseline justify-between mb-3">
-        <h3 className="text-base font-semibold text-foreground">Progress</h3>
+    <div>
+      <div className="flex items-baseline justify-between mb-2">
+        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progress</span>
         <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
       </div>
       <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
@@ -364,7 +377,7 @@ function ProgressCard({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFro
           className="absolute inset-y-0 left-0 rounded-full bg-primary"
         />
       </div>
-      <p className="mt-3 text-xs sm:text-sm text-muted-foreground">
+      <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
         ) : (
