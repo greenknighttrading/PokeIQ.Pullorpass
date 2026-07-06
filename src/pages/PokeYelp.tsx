@@ -190,6 +190,10 @@ export default function PokeYelp() {
 
   // Filters
   const [showFilters, setShowFilters] = useState(false);
+  const [earnTab, setEarnTab] = useState<'train' | 'share'>('train');
+  const [refCopied, setRefCopied] = useState(false);
+  const [ptCopied, setPtCopied] = useState(false);
+  const [completedRefs, setCompletedRefs] = useState<number>(0);
   const [minPrice, setMinPrice] = useState<string>('5');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [setQuery, setSetQuery] = useState<string>('');
