@@ -590,8 +590,8 @@ export default function PullOrPass() {
         rarity: c.rarity,
       }));
 
-    // Every round is 10 cards.
-    const roundSize = 10;
+    // Every round is 15 cards.
+    const roundSize = 15;
     const picked = pickDiverse20(pool, roundSize, rand);
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
@@ -1032,7 +1032,7 @@ export default function PullOrPass() {
                 className="w-32 h-32 object-contain"
                 style={{ imageRendering: 'pixelated' }}
               />
-              <p className="text-sm">Loading 20 randomized cards to start mapping your collector DNA</p>
+              <p className="text-sm">Loading 15 randomized cards to start mapping your collector DNA</p>
             </div>
           )}
 
@@ -1701,7 +1701,7 @@ export function ResultsView({
             <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.
               {(() => {
-                const roundSize = records.length > 10 ? 20 : 10;
+                const roundSize = 15;
                 const remainingSwipes = Math.max(0, roundSize - records.length);
                 return remainingSwipes > 0 ? (
                   <>
