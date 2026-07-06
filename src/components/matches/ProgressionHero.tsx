@@ -254,6 +254,13 @@ export function ProgressionHero({
         <div className="relative z-10">
           <UsernameEditable readOnly={isPublicView} staticName={viewedDisplayName} />
 
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
+              <Trophy className="w-3.5 h-3.5" />
+              Level {lvl.current.level}
+            </span>
+          </div>
+
           {personalityType && (
             <div className="mt-2 flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-amber-400/40 bg-amber-400/10 text-amber-200 text-xs sm:text-sm font-bold">
@@ -263,12 +270,6 @@ export function ProgressionHero({
             </div>
           )}
 
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary to-primary/70 text-primary-foreground text-xs sm:text-sm font-black tracking-wide shadow-[0_0_20px_-4px_hsl(var(--primary)/0.7)]">
-              <Trophy className="w-3.5 h-3.5" />
-              Level {lvl.current.level}
-            </span>
-          </div>
 
           {/* XP bar */}
           <div className="mt-5">
