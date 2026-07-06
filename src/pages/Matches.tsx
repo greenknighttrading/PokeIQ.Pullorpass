@@ -2248,9 +2248,6 @@ function ThisOrThatCTA() {
       <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
         <div className="flex-1 min-w-0">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-[10px] font-bold uppercase tracking-[0.18em] text-primary mb-3">
-            <Sparkles className="w-3 h-3" /> New training lab
-          </div>
           <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-2">
             🔥 Try <span className="text-primary">This or That</span> — now live on PokeIQ
           </h3>
