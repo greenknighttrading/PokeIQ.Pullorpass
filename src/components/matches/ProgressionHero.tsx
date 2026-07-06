@@ -424,23 +424,13 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
         <h3 className="text-sm sm:text-base font-bold text-foreground">Swipe Milestones</h3>
       </div>
 
-      <div className="relative">
-        {/* Connecting rail */}
-        <div className="absolute top-7 sm:top-8 left-0 right-0 h-0.5 bg-border/60 rounded-full" aria-hidden />
-        <div
-          className="absolute top-7 sm:top-8 left-0 h-0.5 bg-gradient-to-r from-primary via-primary to-amber-300 rounded-full shadow-[0_0_10px_hsl(var(--primary)/0.6)]"
-          style={{
-            width: `${Math.min(100, (swiped / SWIPE_MILESTONES[SWIPE_MILESTONES.length - 1].at) * 100)}%`,
-          }}
-          aria-hidden
-        />
-
-        <div className="relative grid grid-cols-4 gap-2 sm:gap-3">
+      <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
+        <div className="flex items-start gap-6 sm:gap-8 min-w-max pb-1">
           {SWIPE_MILESTONES.map((m) => {
             const done = swiped >= m.at;
             const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
             return (
-              <div key={m.at} className="flex flex-col items-center text-center gap-2 min-w-0">
+              <div key={m.at} className="flex flex-col items-center text-center gap-2 w-20 sm:w-24 shrink-0">
                 <div
                   className={cn(
                     'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-all',
@@ -451,7 +441,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
                 >
                   {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 w-full">
                   <p className="text-xs sm:text-sm font-black text-foreground tabular-nums leading-none">
                     {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
                   </p>
