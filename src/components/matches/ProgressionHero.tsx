@@ -140,11 +140,13 @@ function ProfileHeader({
   staticName,
   level,
   xp,
+  personalityType,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
+  personalityType?: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
