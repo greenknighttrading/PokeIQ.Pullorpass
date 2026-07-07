@@ -438,6 +438,39 @@ export function ProgressionHero({
         )}
       </div>
 
+      {/* Mobile-only personality card — sits right after the identity card */}
+      {personalityType && PERSONALITY_PORTRAITS[personalityType as PersonalityType] && (
+        <div className="block sm:hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 overflow-hidden">
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-primary/20 bg-muted/30">
+              <img
+                src={PERSONALITY_PORTRAITS[personalityType as PersonalityType]}
+                alt={`${personalityType} collector personality illustration`}
+                loading="lazy"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Collector Personality</p>
+              <h3 className="text-lg font-bold text-foreground leading-tight mt-0.5">{personalityType}</h3>
+              <p className="text-xs text-muted-foreground leading-snug line-clamp-2 mt-1">
+                {PERSONALITY_INFO[personalityType as PersonalityType]?.tagline}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 mt-4">
+            <Button asChild size="sm" className="flex-1 h-9 text-xs font-semibold">
+              <Link to="/personality-types">Learn More</Link>
+            </Button>
+            <Link
+              to="/test"
+              className="flex-1 text-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
+            >
+              Retake the test
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Next Goal */}
       {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
