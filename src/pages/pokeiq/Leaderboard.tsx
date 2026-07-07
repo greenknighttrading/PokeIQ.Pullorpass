@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Trophy, BookOpen, Tag, Sparkles, Users, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Crown, Trophy, BookOpen, Tag, Sparkles, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -68,10 +67,6 @@ export default function Leaderboard() {
     return arr.map((c, i) => ({ ...c, rank: i + 1 }));
   }, []);
 
-  // Mock current user
-  const me = { rank: 24, percentile: 'Top 3%', name: 'PokeNovice', title: 'Rising Collector', cardsSwiped: 1250, cardsTagged: 244 };
-  const myPoints = me.cardsSwiped + me.cardsTagged * 5; // 1250 + 1220 = 2470
-
   const totals = collectors.reduce(
     (acc, c) => ({ swiped: acc.swiped + c.cardsSwiped, tagged: acc.tagged + c.cardsTagged }),
     { swiped: 0, tagged: 0 }
@@ -137,37 +132,6 @@ export default function Leaderboard() {
 
         {/* Side column */}
         <aside className="space-y-4">
-          <div className="rounded-xl border border-border/60 bg-card/30 p-5">
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Your Rank</div>
-            <div className="flex items-center gap-4">
-              <div className="relative w-20 h-20 rounded-full bg-muted/30 flex items-center justify-center border-2 border-primary/40">
-                <div className="text-center">
-                  <div className="text-xl font-bold">{me.rank}</div>
-                  <div className="text-[9px] text-primary font-medium">{me.percentile}</div>
-                </div>
-              </div>
-              <div className="w-16 h-16 rounded-full bg-muted/40 overflow-hidden flex items-center justify-center">
-                <img src={avatarUrl(25)} alt="" className="w-full h-full object-contain" />
-              </div>
-            </div>
-            <div className="mt-3">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold">{me.name}</span>
-                <span className="text-[9px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/15 text-primary">You</span>
-              </div>
-              <div className="text-xs text-muted-foreground">{me.title}</div>
-            </div>
-            <div className="mt-4 space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-muted-foreground">Cards Swiped</span><span className="tabular-nums font-medium">{me.cardsSwiped.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Cards Tagged</span><span className="tabular-nums font-medium">{me.cardsTagged.toLocaleString()}</span></div>
-              <div className="flex justify-between"><span className="text-muted-foreground">Total Points</span><span className="tabular-nums font-bold text-primary">{myPoints.toLocaleString()}</span></div>
-            </div>
-            <Link to="/profile">
-              <Button variant="outline" size="sm" className="w-full mt-4 gap-2">
-                View My Profile <ArrowRight className="w-3 h-3" />
-              </Button>
-            </Link>
-          </div>
 
           <div className="rounded-xl border border-border/60 bg-card/30 p-5">
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-3">Leaderboard Insights</div>
