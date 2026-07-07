@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
@@ -14,6 +15,35 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import { cn } from '@/lib/utils';
 import squirtleAvatar from '@/assets/squirtle-default.png';
 import type { TasteProfile } from '@/lib/tasteProfile';
+import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+
+import investorPortrait from '@/assets/personalities/investor.jpg';
+import archivistPortrait from '@/assets/personalities/archivist.jpg';
+import dreamerPortrait from '@/assets/personalities/dreamer.jpg';
+import flipperPortrait from '@/assets/personalities/flipper.jpg';
+import analystPortrait from '@/assets/personalities/analyst.jpg';
+import hunterPortrait from '@/assets/personalities/hunter.jpg';
+import explorerPortrait from '@/assets/personalities/explorer.jpg';
+import curatorPortrait from '@/assets/personalities/curator.jpg';
+import monkPortrait from '@/assets/personalities/monk.jpg';
+import gamblerPortrait from '@/assets/personalities/gambler.jpg';
+import showmanPortrait from '@/assets/personalities/showman.jpg';
+import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
+
+const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
+  Investor: investorPortrait,
+  Archivist: archivistPortrait,
+  Dreamer: dreamerPortrait,
+  Flipper: flipperPortrait,
+  Analyst: analystPortrait,
+  Hunter: hunterPortrait,
+  Explorer: explorerPortrait,
+  Curator: curatorPortrait,
+  Monk: monkPortrait,
+  Gambler: gamblerPortrait,
+  Showman: showmanPortrait,
+  Minimalist: minimalistPortrait,
+};
 
 // ─────────────────────────────────────────────────────────────
 // LEVELS
@@ -408,6 +438,39 @@ export function ProgressionHero({
         )}
       </div>
 
+      {/* Mobile-only personality card — sits right after the identity card */}
+      {personalityType && PERSONALITY_PORTRAITS[personalityType as PersonalityType] && (
+        <div className="block sm:hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 overflow-hidden">
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-primary/20 bg-muted/30">
+              <img
+                src={PERSONALITY_PORTRAITS[personalityType as PersonalityType]}
+                alt={`${personalityType} collector personality illustration`}
+                loading="lazy"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Collector Personality</p>
+              <h3 className="text-lg font-bold text-foreground leading-tight mt-0.5">{personalityType}</h3>
+              <p className="text-xs text-muted-foreground leading-snug line-clamp-2 mt-1">
+                {PERSONALITY_INFO[personalityType as PersonalityType]?.tagline}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 mt-4">
+            <Button asChild size="sm" className="flex-1 h-9 text-xs font-semibold">
+              <Link to="/personality-types">Learn More</Link>
+            </Button>
+            <Link
+              to="/test"
+              className="flex-1 text-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
+            >
+              Retake the test
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Next Goal */}
       {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
