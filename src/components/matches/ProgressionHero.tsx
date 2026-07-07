@@ -221,10 +221,10 @@ function ProfileHeader({
   return (
     <div className="flex items-start gap-4 sm:gap-5">
       <div className="relative shrink-0">
-        {/* Subtle emerald radial gradient behind avatar */}
+        {/* Subtle emerald radial gradient behind avatar — 10% opacity at center */}
         <div
-          className="absolute -inset-5 rounded-full pointer-events-none z-0"
-          style={{ background: 'radial-gradient(circle at center, rgba(59, 158, 143, 0.08) 0%, transparent 65%)' }}
+          className="absolute -inset-6 rounded-full pointer-events-none z-0"
+          style={{ background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.10) 0%, transparent 60%)' }}
           aria-hidden
         />
         <button
@@ -232,8 +232,8 @@ function ProfileHeader({
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/25 shadow-[0_6px_24px_rgba(59,158,143,0.12)]',
-            !readOnly && 'cursor-pointer hover:ring-primary/40 transition-all',
+            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
+            !readOnly && 'cursor-pointer hover:ring-primary/60 hover:shadow-[0_10px_40px_rgba(59,158,143,0.25)] transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
         >
@@ -309,7 +309,10 @@ function ProfileHeader({
         </p>
 
         {personalityType && (
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
+          <div
+            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/[0.14] px-3.5 py-1.5 text-sm font-medium text-primary/95 backdrop-blur-sm"
+            style={{ boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.15), 0 2px 12px -2px hsl(var(--primary) / 0.15)' }}
+          >
             <Sparkles className="w-3.5 h-3.5" />
             <span>{personalityType} Collector</span>
           </div>
@@ -352,14 +355,14 @@ export function ProgressionHero({
       <div
         className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6"
         style={{
-          boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 10px 40px -12px rgba(0, 0, 0, 0.4)',
+          boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.06), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
         }}
       >
-        {/* Subtle background texture — barely visible constellation dots */}
+        {/* Subtle background texture — barely visible constellation dots at 4% opacity */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)',
             backgroundSize: '24px 24px',
           }}
           aria-hidden
@@ -433,15 +436,15 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progress</span>
         <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
       </div>
-      <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${lvl.pct}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="absolute inset-y-0 left-0 rounded-full bg-primary"
-          style={{ boxShadow: '0 0 10px 1px hsl(var(--primary) / 0.25)' }}
-        />
-      </div>
+        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${lvl.pct}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+            style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
+          />
+        </div>
       <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
