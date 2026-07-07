@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
@@ -14,6 +15,35 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/comp
 import { cn } from '@/lib/utils';
 import squirtleAvatar from '@/assets/squirtle-default.png';
 import type { TasteProfile } from '@/lib/tasteProfile';
+import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
+
+import investorPortrait from '@/assets/personalities/investor.jpg';
+import archivistPortrait from '@/assets/personalities/archivist.jpg';
+import dreamerPortrait from '@/assets/personalities/dreamer.jpg';
+import flipperPortrait from '@/assets/personalities/flipper.jpg';
+import analystPortrait from '@/assets/personalities/analyst.jpg';
+import hunterPortrait from '@/assets/personalities/hunter.jpg';
+import explorerPortrait from '@/assets/personalities/explorer.jpg';
+import curatorPortrait from '@/assets/personalities/curator.jpg';
+import monkPortrait from '@/assets/personalities/monk.jpg';
+import gamblerPortrait from '@/assets/personalities/gambler.jpg';
+import showmanPortrait from '@/assets/personalities/showman.jpg';
+import minimalistPortrait from '@/assets/personalities/minimalist.jpg';
+
+const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
+  Investor: investorPortrait,
+  Archivist: archivistPortrait,
+  Dreamer: dreamerPortrait,
+  Flipper: flipperPortrait,
+  Analyst: analystPortrait,
+  Hunter: hunterPortrait,
+  Explorer: explorerPortrait,
+  Curator: curatorPortrait,
+  Monk: monkPortrait,
+  Gambler: gamblerPortrait,
+  Showman: showmanPortrait,
+  Minimalist: minimalistPortrait,
+};
 
 // ─────────────────────────────────────────────────────────────
 // LEVELS
