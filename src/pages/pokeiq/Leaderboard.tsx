@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Trophy, BookOpen, Tag, Sparkles, Users, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Crown, Trophy, BookOpen, Tag, Sparkles, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
