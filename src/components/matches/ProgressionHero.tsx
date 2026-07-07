@@ -361,7 +361,6 @@ export function ProgressionHero({
           staticName={viewedDisplayName}
           level={lvl.current.level}
           xp={xp}
-          personalityType={personalityType}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
