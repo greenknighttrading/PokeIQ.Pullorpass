@@ -138,13 +138,11 @@ function ProfileHeader({
   staticName,
   level,
   xp,
-  personalityType,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
-  personalityType?: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -307,16 +305,6 @@ function ProfileHeader({
         <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
           Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
         </p>
-
-        {personalityType && (
-          <div
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/[0.14] px-3.5 py-1.5 text-sm font-medium text-primary/95 backdrop-blur-sm"
-            style={{ boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.15), 0 2px 12px -2px hsl(var(--primary) / 0.15)' }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{personalityType} Collector</span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -373,7 +361,6 @@ export function ProgressionHero({
           staticName={viewedDisplayName}
           level={lvl.current.level}
           xp={xp}
-          personalityType={personalityType}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
@@ -384,14 +371,14 @@ export function ProgressionHero({
               <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
-              <div className="flex flex-wrap gap-3">
+              <h3 className="text-sm font-semibold text-foreground mb-2">Your Collector DNA</h3>
+              <div className="flex flex-wrap gap-2">
                 {dnaLabels.map((label) => {
                   const { icon, color } = dnaStyle(label);
                   return (
                     <span
                       key={label}
-                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
+                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-2.5 py-1 text-xs font-medium"
                       style={{
                         color,
                         borderColor: `${color}80`,
@@ -408,6 +395,21 @@ export function ProgressionHero({
           </>
         )}
       </div>
+
+      {/* Collector Personality — standalone card above Next Goal */}
+      {personalityType && (
+        <div className="rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 sm:p-5 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
+              <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">{personalityType}</h3>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Next Goal */}
       {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
@@ -445,7 +447,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
             style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
           />
         </div>
-      <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
+      <p className="mt-2 text-[10px] sm:text-xs text-muted-foreground text-right">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
         ) : (
@@ -476,7 +478,7 @@ function NextGoalCard({
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
           <h3 className="text-lg sm:text-xl font-semibold text-foreground">{goal.title} Badge</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">Reward · {goal.reward}</p>
+          <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">Reward · {goal.reward}</p>
         </div>
         <div className="w-12 h-12 rounded-xl border border-border/70 bg-muted/40 text-foreground/80 flex items-center justify-center shrink-0">
           {goal.icon}
