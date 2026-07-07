@@ -221,13 +221,19 @@ function ProfileHeader({
   return (
     <div className="flex items-start gap-4 sm:gap-5">
       <div className="relative shrink-0">
+        {/* Subtle emerald radial gradient behind avatar */}
+        <div
+          className="absolute -inset-5 rounded-full pointer-events-none z-0"
+          style={{ background: 'radial-gradient(circle at center, rgba(59, 158, 143, 0.08) 0%, transparent 65%)' }}
+          aria-hidden
+        />
         <button
           type="button"
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 border border-border/60 flex items-center justify-center',
-            !readOnly && 'cursor-pointer hover:border-primary/50 transition-colors',
+            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/25 shadow-[0_6px_24px_rgba(59,158,143,0.12)]',
+            !readOnly && 'cursor-pointer hover:ring-primary/40 transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
         >
