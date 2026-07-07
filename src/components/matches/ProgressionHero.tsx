@@ -436,15 +436,15 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progress</span>
         <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
       </div>
-      <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${lvl.pct}%` }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="absolute inset-y-0 left-0 rounded-full bg-primary"
-          style={{ boxShadow: '0 0 10px 1px hsl(var(--primary) / 0.25)' }}
-        />
-      </div>
+        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${lvl.pct}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="absolute inset-y-0 left-0 rounded-full bg-primary"
+            style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
+          />
+        </div>
       <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
