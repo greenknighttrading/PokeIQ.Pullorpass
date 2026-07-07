@@ -392,13 +392,7 @@ export default function PersonalityTypes() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => {
-                        setSelected(null);
-                        if (searchParams.get('highlight')) {
-                          searchParams.delete('highlight');
-                          setSearchParams(searchParams, { replace: true });
-                        }
-                      }}
+                      onClick={handleExploreOthers}
                     >
                       Explore other personality types
                       <ArrowRight className="w-4 h-4 ml-2" />
