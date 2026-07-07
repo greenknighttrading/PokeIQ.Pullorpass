@@ -119,9 +119,14 @@ export default function PersonalityTypes() {
   useEffect(() => {
     if (highlight && cardRefs.current[highlight]) {
       const el = cardRefs.current[highlight];
-      setTimeout(() => {
-        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 150);
+      // Retry a few times to survive image loads / layout shifts
+      const delays = [100, 400, 800, 1400];
+      const timers = delays.map((d) =>
+        setTimeout(() => {
+          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, d)
+      );
+      return () => timers.forEach(clearTimeout);
     }
   }, [highlight]);
 
