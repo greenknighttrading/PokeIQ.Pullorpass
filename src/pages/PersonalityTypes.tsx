@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
   PersonalityType,
@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Seo } from '@/components/seo/Seo';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
@@ -112,6 +112,18 @@ export default function PersonalityTypes() {
   const [selected, setSelected] = useState<PersonalityType | null>(null);
   const info = selected ? PERSONALITY_INFO[selected] : null;
   const SelectedIcon = selected ? TYPE_ICONS[selected] : null;
+  const [searchParams] = useSearchParams();
+  const highlight = searchParams.get('highlight') as PersonalityType | null;
+  const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  useEffect(() => {
+    if (highlight && cardRefs.current[highlight]) {
+      const el = cardRefs.current[highlight];
+      setTimeout(() => {
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
+  }, [highlight]);
 
   return (
     <>
@@ -156,6 +168,7 @@ export default function PersonalityTypes() {
               return (
                 <motion.button
                   key={type}
+                  ref={(el) => { cardRefs.current[type] = el; }}
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
@@ -164,12 +177,21 @@ export default function PersonalityTypes() {
                 >
                   <Card
                     style={{
-                      borderColor: `${accent}40`,
+                      borderColor: highlight === type ? accent : `${accent}40`,
+                      boxShadow: highlight === type ? `0 20px 50px -15px ${accent}80, 0 0 0 2px ${accent}` : undefined,
                       ['--accent' as string]: accent,
                     } as React.CSSProperties}
                     className="h-full flex flex-col overflow-hidden bg-card transition-all duration-300 cursor-pointer group-hover:-translate-y-1"
-                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = `0 20px 50px -15px ${accent}59`; e.currentTarget.style.borderColor = `${accent}AA`; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = ''; e.currentTarget.style.borderColor = `${accent}40`; }}
+                    onMouseEnter={(e) => {
+                      if (highlight === type) return;
+                      e.currentTarget.style.boxShadow = `0 20px 50px -15px ${accent}59`;
+                      e.currentTarget.style.borderColor = `${accent}AA`;
+                    }}
+                    onMouseLeave={(e) => {
+                      if (highlight === type) return;
+                      e.currentTarget.style.boxShadow = '';
+                      e.currentTarget.style.borderColor = `${accent}40`;
+                    }}
                   >
                     {/* Header: icon + name + philosophy — fixed height so images align */}
                     <div className="flex items-start gap-3 px-4 pt-4 pb-3 h-[92px]">
