@@ -1306,6 +1306,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   const recent = sorted.slice(0, !isPublicView && roundCards?.length ? 20 : 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   const isDisliked = kind === 'disliked';
+  const [expanded, setExpanded] = useState(!isDisliked);
   const heading = isPublicView
     ? (isDisliked ? 'Recently passed' : 'Latest matches')
     : (isDisliked ? 'Disliked' : 'Liked');
