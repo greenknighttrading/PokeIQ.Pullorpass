@@ -353,9 +353,9 @@ export function ProgressionHero({
     <section className="space-y-6 sm:space-y-8">
       {/* Identity card — header + progress + DNA all together */}
       <div
-        className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6"
+        className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 sm:p-6 space-y-6"
         style={{
-          boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.06), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
+          boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.12), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
         }}
       >
         {/* Subtle background texture — barely visible constellation dots at 4% opacity */}
