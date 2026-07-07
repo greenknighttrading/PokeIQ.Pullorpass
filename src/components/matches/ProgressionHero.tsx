@@ -349,7 +349,22 @@ export function ProgressionHero({
   return (
     <section className="space-y-6 sm:space-y-8">
       {/* Identity card — header + progress + DNA all together */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6"
+        style={{
+          boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 10px 40px -12px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        {/* Subtle background texture — barely visible constellation dots */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+          aria-hidden
+        />
+
         <ProfileHeader
           readOnly={isPublicView}
           staticName={viewedDisplayName}
@@ -361,28 +376,33 @@ export function ProgressionHero({
         <ProgressInline xp={xp} lvl={lvl} />
 
         {dnaLabels.length > 0 && (
-          <div className="pt-2 border-t border-border/50">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
-            <div className="flex flex-wrap gap-2">
-              {dnaLabels.map((label) => {
-                const { icon, color } = dnaStyle(label);
-                return (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
-                    style={{
-                      color,
-                      borderColor: `${color}80`,
-                      backgroundColor: `${color}12`,
-                    }}
-                  >
-                    <span aria-hidden style={{ color }}>{icon}</span>
-                    {label}
-                  </span>
-                );
-              })}
+          <>
+            <div className="relative h-px w-full">
+              <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
             </div>
-          </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
+              <div className="flex flex-wrap gap-3">
+                {dnaLabels.map((label) => {
+                  const { icon, color } = dnaStyle(label);
+                  return (
+                    <span
+                      key={label}
+                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
+                      style={{
+                        color,
+                        borderColor: `${color}80`,
+                        backgroundColor: `${color}12`,
+                      }}
+                    >
+                      <span aria-hidden style={{ color }}>{icon}</span>
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
       </div>
 
