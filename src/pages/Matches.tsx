@@ -1316,12 +1316,30 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   const Icon = isDisliked ? XIcon : HeartIcon;
   return (
     <section>
-      <div className="mb-5">
-        <div className="flex items-center gap-2">
-          <Icon className={cn('w-5 h-5', isDisliked ? 'text-destructive' : 'text-primary')} />
-          <h2 className="text-2xl font-bold text-foreground">{heading}</h2>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Icon className={cn('w-5 h-5', isDisliked ? 'text-destructive' : 'text-primary')} />
+            <h2 className="text-2xl font-bold text-foreground">{heading}</h2>
+            {isDisliked && recent.length > 0 && (
+              <span className="text-xs tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                {recent.length}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        {isDisliked && recent.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setExpanded((v) => !v)}
+            className="shrink-0 gap-1"
+          >
+            {expanded ? 'Hide' : 'Expand'}
+            <ChevronDown className={cn('w-4 h-4 transition-transform', expanded && 'rotate-180')} />
+          </Button>
+        )}
       </div>
       {recent.length === 0 ? (
         <Card className="p-6 text-sm text-muted-foreground bg-card/40 border-dashed border-border/60">
@@ -1330,18 +1348,33 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
             : 'No likes yet — swipe right on a card to see it here.'}
         </Card>
       ) : (
-        <CarouselRow ariaLabel={isDisliked ? 'recently disliked' : 'liked cards'}>
-          {recent.map((c) => (
-            <RecentCard
-              key={`${kind}-${c.id}`}
-              like={c}
-              decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
-              isSuper={c.source === 'super_like'}
-              onOpen={onOpen}
-              tcgplayerId={tcgMeta.get(c.card_id)}
-            />
-          ))}
-        </CarouselRow>
+        <>
+          {isDisliked && !expanded ? (
+            <Card className="p-6 bg-card/40 border-dashed border-border/60">
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                Show {recent.length} passed card{recent.length === 1 ? '' : 's'}
+              </button>
+            </Card>
+          ) : (
+            <CarouselRow ariaLabel={isDisliked ? 'recently disliked' : 'liked cards'}>
+              {recent.map((c) => (
+                <RecentCard
+                  key={`${kind}-${c.id}`}
+                  like={c}
+                  decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
+                  isSuper={c.source === 'super_like'}
+                  onOpen={onOpen}
+                  tcgplayerId={tcgMeta.get(c.card_id)}
+                />
+              ))}
+            </CarouselRow>
+          )}
+        </>
       )}
     </section>
   );
