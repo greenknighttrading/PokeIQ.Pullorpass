@@ -16,7 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Seo } from '@/components/seo/Seo';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
@@ -113,7 +113,9 @@ export default function PersonalityTypes() {
   const info = selected ? PERSONALITY_INFO[selected] : null;
   const SelectedIcon = selected ? TYPE_ICONS[selected] : null;
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const highlight = searchParams.get('highlight') as PersonalityType | null;
+  const from = searchParams.get('from');
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   useEffect(() => {
@@ -122,6 +124,28 @@ export default function PersonalityTypes() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlight]);
+
+  const handleExploreOthers = () => {
+    setSelected(null);
+    if (searchParams.get('highlight')) {
+      searchParams.delete('highlight');
+      searchParams.delete('from');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  const handleDialogClose = () => {
+    if (from === 'profile') {
+      navigate('/profile', { replace: true });
+      return;
+    }
+    setSelected(null);
+    if (searchParams.get('highlight')) {
+      searchParams.delete('highlight');
+      searchParams.delete('from');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   return (
     <>
@@ -275,13 +299,7 @@ export default function PersonalityTypes() {
         <Dialog
           open={!!selected}
           onOpenChange={(open) => {
-            if (!open) {
-              setSelected(null);
-              if (searchParams.get('highlight')) {
-                searchParams.delete('highlight');
-                setSearchParams(searchParams, { replace: true });
-              }
-            }
+            if (!open) handleDialogClose();
           }}
         >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -374,13 +392,7 @@ export default function PersonalityTypes() {
                     <Button
                       variant="outline"
                       className="w-full"
-                      onClick={() => {
-                        setSelected(null);
-                        if (searchParams.get('highlight')) {
-                          searchParams.delete('highlight');
-                          setSearchParams(searchParams, { replace: true });
-                        }
-                      }}
+                      onClick={handleExploreOthers}
                     >
                       Explore other personality types
                       <ArrowRight className="w-4 h-4 ml-2" />
