@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
@@ -14,7 +13,6 @@ import { toast } from '@/hooks/use-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import squirtleAvatar from '@/assets/squirtle-default.png';
-import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { TasteProfile } from '@/lib/tasteProfile';
 
 // ─────────────────────────────────────────────────────────────
@@ -140,11 +138,13 @@ function ProfileHeader({
   staticName,
   level,
   xp,
+  personalityType,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
+  personalityType?: string | null;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -307,6 +307,15 @@ function ProfileHeader({
         <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
           Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
         </p>
+
+        {personalityType && (
+          <div className="mt-2.5 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-2.5 py-1 text-xs font-semibold ring-1 ring-primary/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              {personalityType}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -322,7 +331,6 @@ export function ProgressionHero({
   isPublicView = false,
   viewedDisplayName,
   personalityType,
-  personalityPortrait,
 }: {
   taste: TasteProfile;
   cardsSwiped: number;
@@ -330,7 +338,6 @@ export function ProgressionHero({
   isPublicView?: boolean;
   viewedDisplayName?: string;
   personalityType?: string | null;
-  personalityPortrait?: string;
 }) {
   const totalLikes = taste.totalLikes;
   const avgPrice = taste.avgPrice;
@@ -365,6 +372,7 @@ export function ProgressionHero({
           staticName={viewedDisplayName}
           level={lvl.current.level}
           xp={xp}
+          personalityType={personalityType}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
@@ -400,56 +408,6 @@ export function ProgressionHero({
         )}
       </div>
 
-      {/* Collector Personality — standalone card above Next Goal */}
-      {personalityType && (
-        <>
-          {/* Mobile: rich card with portrait, one-liner, and actions */}
-          <div className="block sm:hidden rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 overflow-hidden">
-            <div className="flex gap-4">
-              {personalityPortrait && (
-                <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-border/60 bg-card">
-                  <img
-                    src={personalityPortrait}
-                    alt={`${personalityType} personality portrait`}
-                    className="absolute inset-0 w-full h-full object-cover object-top"
-                    loading="lazy"
-                  />
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
-                <h3 className="text-lg font-semibold text-foreground truncate">{personalityType}</h3>
-                {PERSONALITY_INFO[personalityType as PersonalityType]?.summary && (
-                  <p className="mt-1 text-xs text-foreground/80 line-clamp-2">
-                    {PERSONALITY_INFO[personalityType as PersonalityType].summary}
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-3">
-              <Button asChild size="sm" variant="outline" className="flex-1 h-9 text-xs border-primary/30 bg-transparent hover:bg-primary/10">
-                <Link to="/personality-types">Learn More</Link>
-              </Button>
-              <Button asChild size="sm" className="flex-1 h-9 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
-                <Link to="/test">Retake the test</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Desktop: simple compact card */}
-          <div className="hidden sm:flex rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 sm:p-5 items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">{personalityType}</h3>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Next Goal */}
       {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
