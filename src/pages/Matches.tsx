@@ -1087,7 +1087,9 @@ function TasteHero({
       </div>
 
       {/* Personality result — sits directly under the Collector DNA widget */}
-      <PersonalityTestCTA personalityType={personalityType} name={isPublicView ? (viewedDisplayName || 'Collector') : undefined} />
+      <div className="hidden sm:block">
+        <PersonalityTestCTA personalityType={personalityType} name={isPublicView ? (viewedDisplayName || 'Collector') : undefined} />
+      </div>
     </section>
   );
 }
