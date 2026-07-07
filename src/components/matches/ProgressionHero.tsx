@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
@@ -8,13 +7,11 @@ import {
   Ghost, Palette, Languages, Hourglass, Gem, Circle,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import squirtleAvatar from '@/assets/squirtle-default.png';
-import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
 import type { TasteProfile } from '@/lib/tasteProfile';
 
 // ─────────────────────────────────────────────────────────────
