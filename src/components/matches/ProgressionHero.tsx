@@ -402,17 +402,53 @@ export function ProgressionHero({
 
       {/* Collector Personality — standalone card above Next Goal */}
       {personalityType && (
-        <div className="rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 sm:p-5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
-              <Sparkles className="w-5 h-5" />
+        <>
+          {/* Mobile: rich card with portrait, one-liner, and actions */}
+          <div className="block sm:hidden rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 overflow-hidden">
+            <div className="flex gap-4">
+              {personalityPortrait && (
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-border/60 bg-card">
+                  <img
+                    src={personalityPortrait}
+                    alt={`${personalityType} personality portrait`}
+                    className="absolute inset-0 w-full h-full object-cover object-top"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
+                <h3 className="text-lg font-semibold text-foreground truncate">{personalityType}</h3>
+                {PERSONALITY_INFO[personalityType as PersonalityType]?.summary && (
+                  <p className="mt-1 text-xs text-foreground/80 line-clamp-2">
+                    {PERSONALITY_INFO[personalityType as PersonalityType].summary}
+                  </p>
+                )}
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
-              <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">{personalityType}</h3>
+            <div className="flex items-center gap-3 mt-3">
+              <Button asChild size="sm" variant="outline" className="flex-1 h-9 text-xs border-primary/30 bg-transparent hover:bg-primary/10">
+                <Link to="/personality-types">Learn More</Link>
+              </Button>
+              <Button asChild size="sm" className="flex-1 h-9 text-xs bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/test">Retake the test</Link>
+              </Button>
             </div>
           </div>
-        </div>
+
+          {/* Desktop: simple compact card */}
+          <div className="hidden sm:flex rounded-2xl border border-primary/30 bg-primary/[0.08] p-4 sm:p-5 items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Collector Personality</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground truncate">{personalityType}</h3>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Next Goal */}
