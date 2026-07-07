@@ -307,16 +307,6 @@ function ProfileHeader({
         <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
           Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
         </p>
-
-        {personalityType && (
-          <div
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/[0.14] px-3.5 py-1.5 text-sm font-medium text-primary/95 backdrop-blur-sm"
-            style={{ boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.15), 0 2px 12px -2px hsl(var(--primary) / 0.15)' }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{personalityType} Collector</span>
-          </div>
-        )}
       </div>
     </div>
   );
