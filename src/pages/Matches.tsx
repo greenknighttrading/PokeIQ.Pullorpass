@@ -635,7 +635,6 @@ function ProfileView({
         isPublicView={isPublicView}
         viewedDisplayName={viewedDisplayName}
         personalityType={personalityType}
-        personalityPortrait={personalityType ? PERSONALITY_PORTRAITS[personalityType as PersonalityType] : undefined}
       />
 
       {/* 6. Top 10 rankings */}
