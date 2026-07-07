@@ -309,9 +309,10 @@ function ProfileHeader({
         </p>
 
         {personalityType && (
-          <p className="mt-2 text-sm sm:text-base font-medium text-foreground/90">
-            <span className="text-primary">{personalityType}</span> Collector
-          </p>
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{personalityType} Collector</span>
+          </div>
         )}
       </div>
     </div>
