@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target, Plus, HelpCircle, Trophy, Droplets, Leaf, Sun, Moon, Hexagon, Circle, Swords } from 'lucide-react';
+import { Sparkles, ArrowLeft, ImageOff, LogIn, Lock, ChevronLeft, ChevronRight, ChevronDown, Wand2, Palette, Layers, Zap, BookOpen, Clock, ArrowRight, Heart as HeartIcon, X as XIcon, Pencil, Check, X as XClose, Mountain, Flame, Star, Crown, Eye, Target, Plus, HelpCircle, Trophy, Droplets, Leaf, Sun, Moon, Hexagon, Circle, Swords } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -572,10 +572,10 @@ export default function Matches({
                   {!isPublicView && (
                     <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
+                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                 </div>
               )}
@@ -1306,6 +1306,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   const recent = sorted.slice(0, !isPublicView && roundCards?.length ? 20 : 24);
   const subject = isPublicView ? (viewedDisplayName || 'Collector') : 'you';
   const isDisliked = kind === 'disliked';
+  const [expanded, setExpanded] = useState(!isDisliked);
   const heading = isPublicView
     ? (isDisliked ? 'Recently passed' : 'Latest matches')
     : (isDisliked ? 'Disliked' : 'Liked');
@@ -1315,12 +1316,30 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   const Icon = isDisliked ? XIcon : HeartIcon;
   return (
     <section>
-      <div className="mb-5">
-        <div className="flex items-center gap-2">
-          <Icon className={cn('w-5 h-5', isDisliked ? 'text-destructive' : 'text-primary')} />
-          <h2 className="text-2xl font-bold text-foreground">{heading}</h2>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <Icon className={cn('w-5 h-5', isDisliked ? 'text-destructive' : 'text-primary')} />
+            <h2 className="text-2xl font-bold text-foreground">{heading}</h2>
+            {isDisliked && recent.length > 0 && (
+              <span className="text-xs tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                {recent.length}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        {isDisliked && recent.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setExpanded((v) => !v)}
+            className="shrink-0 gap-1"
+          >
+            {expanded ? 'Hide' : 'Expand'}
+            <ChevronDown className={cn('w-4 h-4 transition-transform', expanded && 'rotate-180')} />
+          </Button>
+        )}
       </div>
       {recent.length === 0 ? (
         <Card className="p-6 text-sm text-muted-foreground bg-card/40 border-dashed border-border/60">
@@ -1329,18 +1348,33 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
             : 'No likes yet — swipe right on a card to see it here.'}
         </Card>
       ) : (
-        <CarouselRow ariaLabel={isDisliked ? 'recently disliked' : 'liked cards'}>
-          {recent.map((c) => (
-            <RecentCard
-              key={`${kind}-${c.id}`}
-              like={c}
-              decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
-              isSuper={c.source === 'super_like'}
-              onOpen={onOpen}
-              tcgplayerId={tcgMeta.get(c.card_id)}
-            />
-          ))}
-        </CarouselRow>
+        <>
+          {isDisliked && !expanded ? (
+            <Card className="p-6 bg-card/40 border-dashed border-border/60">
+              <button
+                type="button"
+                onClick={() => setExpanded(true)}
+                className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                Show {recent.length} passed card{recent.length === 1 ? '' : 's'}
+              </button>
+            </Card>
+          ) : (
+            <CarouselRow ariaLabel={isDisliked ? 'recently disliked' : 'liked cards'}>
+              {recent.map((c) => (
+                <RecentCard
+                  key={`${kind}-${c.id}`}
+                  like={c}
+                  decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
+                  isSuper={c.source === 'super_like'}
+                  onOpen={onOpen}
+                  tcgplayerId={tcgMeta.get(c.card_id)}
+                />
+              ))}
+            </CarouselRow>
+          )}
+        </>
       )}
     </section>
   );
