@@ -478,7 +478,7 @@ function NextGoalCard({
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
           <h3 className="text-lg sm:text-xl font-semibold text-foreground">{goal.title} Badge</h3>
-          <p className="mt-0.5 text-xs text-muted-foreground">Reward · {goal.reward}</p>
+          <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">Reward · {goal.reward}</p>
         </div>
         <div className="w-12 h-12 rounded-xl border border-border/70 bg-muted/40 text-foreground/80 flex items-center justify-center shrink-0">
           {goal.icon}
