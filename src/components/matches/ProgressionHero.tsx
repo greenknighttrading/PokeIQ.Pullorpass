@@ -355,14 +355,14 @@ export function ProgressionHero({
       <div
         className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6"
         style={{
-          boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 10px 40px -12px rgba(0, 0, 0, 0.4)',
+          boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.06), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
         }}
       >
-        {/* Subtle background texture — barely visible constellation dots */}
+        {/* Subtle background texture — barely visible constellation dots at 4% opacity */}
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          className="pointer-events-none absolute inset-0 opacity-[0.04]"
           style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
+            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)',
             backgroundSize: '24px 24px',
           }}
           aria-hidden
