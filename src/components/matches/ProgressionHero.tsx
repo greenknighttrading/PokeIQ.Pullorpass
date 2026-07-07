@@ -221,13 +221,19 @@ function ProfileHeader({
   return (
     <div className="flex items-start gap-4 sm:gap-5">
       <div className="relative shrink-0">
+        {/* Subtle emerald radial gradient behind avatar */}
+        <div
+          className="absolute -inset-5 rounded-full pointer-events-none z-0"
+          style={{ background: 'radial-gradient(circle at center, rgba(59, 158, 143, 0.08) 0%, transparent 65%)' }}
+          aria-hidden
+        />
         <button
           type="button"
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 border border-border/60 flex items-center justify-center',
-            !readOnly && 'cursor-pointer hover:border-primary/50 transition-colors',
+            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/25 shadow-[0_6px_24px_rgba(59,158,143,0.12)]',
+            !readOnly && 'cursor-pointer hover:ring-primary/40 transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
         >
@@ -303,9 +309,10 @@ function ProfileHeader({
         </p>
 
         {personalityType && (
-          <p className="mt-2 text-sm sm:text-base font-medium text-foreground/90">
-            <span className="text-primary">{personalityType}</span> Collector
-          </p>
+          <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary backdrop-blur-sm">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>{personalityType} Collector</span>
+          </div>
         )}
       </div>
     </div>
@@ -342,7 +349,22 @@ export function ProgressionHero({
   return (
     <section className="space-y-6 sm:space-y-8">
       {/* Identity card — header + progress + DNA all together */}
-      <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6">
+      <div
+        className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-5 sm:p-6 space-y-6"
+        style={{
+          boxShadow: 'inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 10px 40px -12px rgba(0, 0, 0, 0.4)',
+        }}
+      >
+        {/* Subtle background texture — barely visible constellation dots */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--foreground)) 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+          aria-hidden
+        />
+
         <ProfileHeader
           readOnly={isPublicView}
           staticName={viewedDisplayName}
@@ -354,28 +376,33 @@ export function ProgressionHero({
         <ProgressInline xp={xp} lvl={lvl} />
 
         {dnaLabels.length > 0 && (
-          <div className="pt-2 border-t border-border/50">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
-            <div className="flex flex-wrap gap-2">
-              {dnaLabels.map((label) => {
-                const { icon, color } = dnaStyle(label);
-                return (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
-                    style={{
-                      color,
-                      borderColor: `${color}80`,
-                      backgroundColor: `${color}12`,
-                    }}
-                  >
-                    <span aria-hidden style={{ color }}>{icon}</span>
-                    {label}
-                  </span>
-                );
-              })}
+          <>
+            <div className="relative h-px w-full">
+              <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
             </div>
-          </div>
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Your Collector DNA</h3>
+              <div className="flex flex-wrap gap-3">
+                {dnaLabels.map((label) => {
+                  const { icon, color } = dnaStyle(label);
+                  return (
+                    <span
+                      key={label}
+                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1.5 text-xs sm:text-sm font-medium"
+                      style={{
+                        color,
+                        borderColor: `${color}80`,
+                        backgroundColor: `${color}12`,
+                      }}
+                    >
+                      <span aria-hidden style={{ color }}>{icon}</span>
+                      {label}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -412,6 +439,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
           animate={{ width: `${lvl.pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           className="absolute inset-y-0 left-0 rounded-full bg-primary"
+          style={{ boxShadow: '0 0 10px 1px hsl(var(--primary) / 0.25)' }}
         />
       </div>
       <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
