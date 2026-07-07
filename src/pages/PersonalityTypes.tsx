@@ -299,13 +299,7 @@ export default function PersonalityTypes() {
         <Dialog
           open={!!selected}
           onOpenChange={(open) => {
-            if (!open) {
-              setSelected(null);
-              if (searchParams.get('highlight')) {
-                searchParams.delete('highlight');
-                setSearchParams(searchParams, { replace: true });
-              }
-            }
+            if (!open) handleDialogClose();
           }}
         >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
