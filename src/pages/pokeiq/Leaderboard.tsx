@@ -67,10 +67,6 @@ export default function Leaderboard() {
     return arr.map((c, i) => ({ ...c, rank: i + 1 }));
   }, []);
 
-  // Mock current user
-  const me = { rank: 24, percentile: 'Top 3%', name: 'PokeNovice', title: 'Rising Collector', cardsSwiped: 1250, cardsTagged: 244 };
-  const myPoints = me.cardsSwiped + me.cardsTagged * 5; // 1250 + 1220 = 2470
-
   const totals = collectors.reduce(
     (acc, c) => ({ swiped: acc.swiped + c.cardsSwiped, tagged: acc.tagged + c.cardsTagged }),
     { swiped: 0, tagged: 0 }
