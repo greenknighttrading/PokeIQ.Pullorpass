@@ -112,22 +112,15 @@ export default function PersonalityTypes() {
   const [selected, setSelected] = useState<PersonalityType | null>(null);
   const info = selected ? PERSONALITY_INFO[selected] : null;
   const SelectedIcon = selected ? TYPE_ICONS[selected] : null;
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const highlight = searchParams.get('highlight') as PersonalityType | null;
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   useEffect(() => {
-    if (highlight && cardRefs.current[highlight]) {
-      const el = cardRefs.current[highlight];
-      // Retry a few times to survive image loads / layout shifts
-      const delays = [100, 400, 800, 1400];
-      const timers = delays.map((d) =>
-        setTimeout(() => {
-          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, d)
-      );
-      return () => timers.forEach(clearTimeout);
+    if (highlight && PERSONALITY_INFO[highlight]) {
+      setSelected(highlight);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlight]);
 
   return (
@@ -279,7 +272,18 @@ export default function PersonalityTypes() {
           </div>
         </main>
 
-        <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <Dialog
+          open={!!selected}
+          onOpenChange={(open) => {
+            if (!open) {
+              setSelected(null);
+              if (searchParams.get('highlight')) {
+                searchParams.delete('highlight');
+                setSearchParams(searchParams, { replace: true });
+              }
+            }
+          }}
+        >
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             {selected && info && SelectedIcon && (
               <>
@@ -364,6 +368,23 @@ export default function PersonalityTypes() {
                       <h4 className="text-sm uppercase tracking-wider text-muted-foreground mb-1">Try This</h4>
                       <p className="text-foreground/80 text-sm">{info.recommendedAction}</p>
                     </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setSelected(null);
+                        if (searchParams.get('highlight')) {
+                          searchParams.delete('highlight');
+                          setSearchParams(searchParams, { replace: true });
+                        }
+                      }}
+                    >
+                      Explore other personality types
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
                   </div>
                 </div>
               </>
