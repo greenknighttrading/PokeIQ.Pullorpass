@@ -447,7 +447,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
             style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
           />
         </div>
-      <p className="mt-2 text-xs sm:text-sm text-muted-foreground text-right">
+      <p className="mt-2 text-[10px] sm:text-xs text-muted-foreground text-right">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
         ) : (
