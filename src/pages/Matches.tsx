@@ -645,10 +645,12 @@ function ProfileView({
       {!isPublicView && <SwipeAgainOrLimit />}
       {!isPublicView && <ThisOrThatCTA />}
       {!isPublicView && <DailyLimitWidget />}
-      <PersonalityTestCTA
-        personalityType={personalityType}
-        name={isPublicView ? (viewedDisplayName || 'Collector') : undefined}
-      />
+      <div className="hidden sm:block">
+        <PersonalityTestCTA
+          personalityType={personalityType}
+          name={isPublicView ? (viewedDisplayName || 'Collector') : undefined}
+        />
+      </div>
       {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
     </div>
   );
