@@ -309,6 +309,15 @@ function ProfileHeader({
         <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
           Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
         </p>
+
+        {personalityType && (
+          <div className="mt-2.5 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-2.5 py-1 text-xs font-semibold ring-1 ring-primary/20">
+              <Sparkles className="w-3.5 h-3.5" />
+              {personalityType}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
