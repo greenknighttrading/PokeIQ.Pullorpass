@@ -333,7 +333,6 @@ export function ProgressionHero({
   isPublicView = false,
   viewedDisplayName,
   personalityType,
-  personalityPortrait,
 }: {
   taste: TasteProfile;
   cardsSwiped: number;
@@ -341,7 +340,6 @@ export function ProgressionHero({
   isPublicView?: boolean;
   viewedDisplayName?: string;
   personalityType?: string | null;
-  personalityPortrait?: string;
 }) {
   const totalLikes = taste.totalLikes;
   const avgPrice = taste.avgPrice;
