@@ -460,7 +460,7 @@ export function ProgressionHero({
           </div>
           <div className="flex items-center gap-3 mt-4">
             <Button asChild size="sm" className="flex-1 h-9 text-xs font-semibold">
-              <Link to="/personality-types">Learn More</Link>
+              <Link to={`/personality-types?highlight=${personalityType}`}>Learn More</Link>
             </Button>
             <Link
               to="/test"
