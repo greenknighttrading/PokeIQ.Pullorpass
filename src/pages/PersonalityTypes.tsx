@@ -113,7 +113,9 @@ export default function PersonalityTypes() {
   const info = selected ? PERSONALITY_INFO[selected] : null;
   const SelectedIcon = selected ? TYPE_ICONS[selected] : null;
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const highlight = searchParams.get('highlight') as PersonalityType | null;
+  const from = searchParams.get('from');
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   useEffect(() => {
@@ -122,6 +124,28 @@ export default function PersonalityTypes() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [highlight]);
+
+  const handleExploreOthers = () => {
+    setSelected(null);
+    if (searchParams.get('highlight')) {
+      searchParams.delete('highlight');
+      searchParams.delete('from');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
+
+  const handleDialogClose = () => {
+    if (from === 'profile') {
+      navigate('/profile', { replace: true });
+      return;
+    }
+    setSelected(null);
+    if (searchParams.get('highlight')) {
+      searchParams.delete('highlight');
+      searchParams.delete('from');
+      setSearchParams(searchParams, { replace: true });
+    }
+  };
 
   return (
     <>
