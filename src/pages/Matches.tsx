@@ -39,6 +39,7 @@ import tcgplayerIcon from '@/assets/tcgplayer-icon-transparent.png.asset.json';
 import { tcgPlayerUrl } from '@/lib/packEV';
 import { ProgressionHero } from '@/components/matches/ProgressionHero';
 import { readPersonalityForCurrentUser } from '@/lib/personalityStorage';
+import { compactImageSources, dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
@@ -138,6 +139,16 @@ type RoundDisplayCard = LikedCard & {
   created_at?: string;
 };
 
+type CardImageMeta = { tcgplayerId?: string | null; imageUrl?: string | null };
+
+function cleanLikedCards<T extends LikedCard>(items: T[]): T[] {
+  return dedupeByCardId(items.filter(isDisplayableSingleCard));
+}
+
+function cleanRoundCards<T extends RoundDisplayCard>(items: T[]): T[] {
+  return dedupeByCardId(items.filter(isDisplayableSingleCard));
+}
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -163,7 +174,7 @@ function localLatestTwenty(userId: string): RoundDisplayCard[] {
     const raw = localStorage.getItem('pop_today_swiped_' + todayKey());
     const arr = raw ? JSON.parse(raw) : [];
     if (!Array.isArray(arr)) return [];
-    return arr
+    return cleanRoundCards(arr
       .filter((x: any) => x?.card_id && (x.decision === 'pull' || x.decision === 'pass'))
       .map((x: any, i: number): RoundDisplayCard => ({
         id: `local-round-${x.decision}-${x.card_id}-${x.client_ts ?? i}`,
@@ -193,7 +204,7 @@ function localLatestTwenty(userId: string): RoundDisplayCard[] {
       }))
       .sort((a, b) => (b.client_ts || '').localeCompare(a.client_ts || ''))
       .slice(0, 20)
-      .reverse();
+      .reverse());
   } catch { return []; }
 }
 
@@ -267,7 +278,7 @@ function localSwipeRecordsForProfile(uid: string): { likes: LikedCard[]; passes:
     };
   };
 
-  const mapped = rawRecords.map(toLike).filter(Boolean) as LikedCard[];
+  const mapped = cleanLikedCards(rawRecords.map(toLike).filter(Boolean) as LikedCard[]);
   return {
     likes: mapped.filter((r) => r.source !== 'pass'),
     passes: mapped.filter((r) => r.source === 'pass'),
@@ -317,14 +328,14 @@ export default function Matches({
           const countRpc = isAdminView ? 'get_admin_swipe_count' : 'get_public_swipe_count';
           const passesRpc = isAdminView ? 'get_admin_recent_passes' : 'get_public_recent_passes';
           const { data: likesData } = await supabase.rpc(likesRpc as any, { p_user_id: uid });
-          const liked = (likesData ?? []) as LikedCard[];
+          const liked = cleanLikedCards((likesData ?? []) as LikedCard[]);
           setLikes(liked);
 
           const { data: countData } = await supabase.rpc(countRpc as any, { p_user_id: uid });
           setCardsSwiped(Number(countData) || 0);
 
           const { data: passRows } = await supabase.rpc(passesRpc as any, { p_user_id: uid });
-          const mapped: LikedCard[] = (passRows ?? []).map((r: any) => ({
+          const mapped: LikedCard[] = cleanLikedCards((passRows ?? []).map((r: any) => ({
             id: `pass-${r.card_id}-${r.created_at}`,
             user_id: uid,
             card_id: r.card_id, card_name: r.card_name,
@@ -336,7 +347,7 @@ export default function Matches({
             price: Number(r.card_price) || null,
             price_tier: null, image_url: r.card_image ?? null,
             source: 'pass', liked_at: r.created_at,
-          }));
+          })));
           setPasses(mapped);
 
           if (liked.length > 0) {
@@ -367,8 +378,8 @@ export default function Matches({
         const likeIds = new Set(localProfile.likes.map((l) => l.card_id));
         const passIds = new Set(localProfile.passes.map((l) => l.card_id));
         return {
-          likes: [...localProfile.likes, ...serverLikes.filter((l) => !likeIds.has(l.card_id))],
-          passes: [...localProfile.passes, ...serverPasses.filter((l) => !passIds.has(l.card_id))],
+          likes: cleanLikedCards([...localProfile.likes, ...serverLikes.filter((l) => !likeIds.has(l.card_id))]),
+          passes: cleanLikedCards([...localProfile.passes, ...serverPasses.filter((l) => !passIds.has(l.card_id))]),
         };
       };
       if (localProfile.total > 0) {
@@ -399,7 +410,7 @@ export default function Matches({
         setLoading(false);
       }
 
-      const liked = await fetchLikes(uid);
+      const liked = cleanLikedCards(await fetchLikes(uid));
       const mergedInitial = mergeLocal(liked, cached?.passes ?? []);
       const effectiveLikes = mergedInitial.likes;
       const latestLikedAt = effectiveLikes.reduce<string | null>(
@@ -466,7 +477,7 @@ export default function Matches({
           .eq('decision', 'pass')
           .order('created_at', { ascending: false })
           .limit(40);
-        mapped = (passRows ?? []).map((r: any) => ({
+        mapped = cleanLikedCards((passRows ?? []).map((r: any) => ({
           id: `pass-${r.card_id}-${r.created_at}`,
           user_id: uid,
           card_id: r.card_id,
@@ -489,7 +500,7 @@ export default function Matches({
           image_url: r.card_image ?? null,
           source: 'pass',
           liked_at: r.created_at,
-        }));
+        })));
         const merged = mergeLocal(liked, mapped);
         mapped = merged.passes;
         setLikes(merged.likes);
