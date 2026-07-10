@@ -1049,8 +1049,8 @@ export default function PullOrPass() {
             <div className="relative flex-1 min-h-0 flex flex-col">
               <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
               {/* Progress + quota */}
-              <div className="flex items-center justify-between mb-3 gap-3">
-                <span className="text-sm font-medium text-muted-foreground tabular-nums">
+              <div className="flex items-center justify-between mb-1.5 sm:mb-3 gap-3">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground tabular-nums">
                   Card <span className="text-foreground font-semibold">{index + 1}</span>
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
@@ -1089,7 +1089,7 @@ export default function PullOrPass() {
                   )}
                 </div>
               </div>
-              <div className="h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-4 shadow-inner">
+              <div className="h-1.5 sm:h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-2 sm:mb-4 shadow-inner">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
                   initial={false}
@@ -1100,7 +1100,7 @@ export default function PullOrPass() {
 
               {/* Card stack */}
               {/* Branded game title */}
-              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2 select-none">
+              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-1 sm:mb-2 select-none">
                 {/* Animated glow backdrop */}
                 <motion.div
                   aria-hidden
@@ -1126,7 +1126,7 @@ export default function PullOrPass() {
                 <div className="inline-flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
                   <motion.h1
-                    className="font-black uppercase tracking-[0.18em] text-3xl sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
+                    className="font-black uppercase tracking-[0.18em] text-2xl sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
                     style={{
                       backgroundImage:
                         'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
@@ -1141,7 +1141,7 @@ export default function PullOrPass() {
                   </motion.h1>
                   <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
                 </div>
-                <p className="mt-1.5 text-[11px] sm:text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
+                <p className="mt-0.5 sm:mt-1.5 text-[10px] sm:text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
                   A game by <span className="text-primary/90 font-semibold">PokeIQ</span>
                 </p>
               </div>
@@ -1199,8 +1199,6 @@ export default function PullOrPass() {
                   </div>
                   <p className="text-sm text-muted-foreground/90 font-medium">
                     <span>{current.set_name ?? 'Unknown set'}</span>
-                    <span className="mx-2 text-primary/60">•</span>
-                    <span className="text-foreground/90">${current.price.toFixed(2)}</span>
                     {current.rarity && (
                       <>
                         <span className="mx-2 text-primary/60">•</span>
