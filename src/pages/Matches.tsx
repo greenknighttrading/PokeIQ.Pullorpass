@@ -1732,7 +1732,9 @@ function BinderSlot({
   onDragStart: () => void;
   onDragEnd: () => void;
 }) {
-  const [err, setErr] = useState(false);
+  const imageSources = compactImageSources(like?.image_url, tcgplayerImageUrl((like as any)?.tcgplayer_id));
+  const [imgIndex, setImgIndex] = useState(0);
+  const img = imageSources[imgIndex] ?? null;
   const [over, setOver] = useState(false);
 
   const acceptDrop = (e: React.DragEvent) => {
@@ -1787,12 +1789,12 @@ function BinderSlot({
       title={[like.card_name, like.set_name, like.artist && `by ${like.artist}`].filter(Boolean).join(' · ')}
       onClick={() => onOpen({
         card_id: like.card_id, card_name: like.card_name, set_name: like.set_name,
-        image_url: like.image_url, price: like.price, rarity: like.rarity,
+        image_url: img ?? like.image_url, price: like.price, rarity: like.rarity,
         artist: like.artist, pokemon_type: like.pokemon_type, card_number: like.card_number,
       })}
     >
-      {like.image_url && !err ? (
-        <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" draggable={false} className="w-full h-full object-cover pointer-events-none" onError={() => setErr(true)} />
+      {img ? (
+        <img src={img} alt={like.card_name} loading="lazy" decoding="async" draggable={false} className="w-full h-full object-cover pointer-events-none" onError={() => setImgIndex((i) => i + 1)} />
       ) : (
         <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-4 h-4 text-muted-foreground" /></div>
       )}
@@ -1861,21 +1863,23 @@ function RecommendedRow({ items, onOpen }: { items: RecommendedCard[]; onOpen: (
 }
 
 function RecRowCard({ r, onOpen }: { r: RecommendedCard; onOpen: (s: CardDetailSeed) => void }) {
-  const [err, setErr] = useState(false);
+  const imageSources = compactImageSources(r.image_url, tcgplayerImageUrl(r.tcgplayer_id));
+  const [imgIndex, setImgIndex] = useState(0);
+  const img = imageSources[imgIndex] ?? null;
   return (
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 280, damping: 22 }}
       onClick={() => onOpen({
         card_id: r.card_id, card_name: r.card_name, set_name: r.set_name,
-        image_url: r.image_url, price: r.price, rarity: r.rarity,
-        artist: r.artist, pokemon_type: r.pokemon_type,
+        image_url: img ?? r.image_url, price: r.price, rarity: r.rarity,
+        artist: r.artist, pokemon_type: r.pokemon_type, tcgplayer_id: r.tcgplayer_id,
       })}
       className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
       <div className="relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 ring-1 ring-border/60 shadow-md group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50 transition-all duration-300">
-        {r.image_url && !err ? (
-          <img src={r.image_url} alt={r.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setErr(true)} />
+        {img ? (
+          <img src={img} alt={r.card_name} loading="lazy" decoding="async" className="w-full h-full object-cover" onError={() => setImgIndex((i) => i + 1)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
