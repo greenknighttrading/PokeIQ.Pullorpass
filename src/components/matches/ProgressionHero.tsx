@@ -438,11 +438,11 @@ export function ProgressionHero({
         )}
       </div>
 
-      {/* Mobile-only personality card — sits right after the identity card */}
+      {/* Personality card — sits right after the identity card */}
       {personalityType && PERSONALITY_PORTRAITS[personalityType as PersonalityType] && (
-        <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 overflow-hidden">
-          <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-primary/20 bg-muted/30">
+        <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 md:p-6 overflow-hidden">
+          <div className="flex items-center gap-4 md:flex-col md:items-center md:gap-5">
+            <div className="relative w-20 h-20 md:w-64 md:h-64 rounded-xl overflow-hidden shrink-0 border border-primary/20 bg-muted/30">
               <img
                 src={PERSONALITY_PORTRAITS[personalityType as PersonalityType]}
                 alt={`${personalityType} collector personality illustration`}
@@ -450,21 +450,24 @@ export function ProgressionHero({
                 className="w-full h-full object-cover object-top"
               />
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 md:w-full md:text-center">
               <p className="text-[10px] uppercase tracking-wider text-primary font-bold">Collector Personality</p>
-              <h3 className="text-lg font-bold text-foreground leading-tight mt-0.5">{personalityType}</h3>
-              <p className="text-xs text-muted-foreground leading-snug line-clamp-2 mt-1">
+              <h3 className="text-lg md:text-2xl font-bold text-foreground leading-tight mt-0.5">{personalityType}</h3>
+              <p className="md:hidden text-xs text-muted-foreground leading-snug line-clamp-2 mt-1">
                 {PERSONALITY_INFO[personalityType as PersonalityType]?.tagline}
+              </p>
+              <p className="hidden md:block text-sm text-muted-foreground leading-relaxed mt-2">
+                {PERSONALITY_INFO[personalityType as PersonalityType]?.summary}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-4">
-            <Button asChild size="sm" className="flex-1 h-9 text-xs font-semibold">
+          <div className="flex items-center gap-3 mt-4 md:justify-center">
+            <Button asChild size="sm" className="flex-1 md:flex-none md:w-auto md:px-8 h-9 text-xs font-semibold">
               <Link to={`/personality-types?highlight=${personalityType}&from=profile`}>Learn More</Link>
             </Button>
             <Link
               to="/test"
-              className="flex-1 text-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
+              className="flex-1 md:flex-none md:w-auto md:px-8 md:h-9 md:inline-flex md:items-center md:justify-center text-center text-xs font-semibold text-muted-foreground hover:text-primary transition-colors"
             >
               Retake the test
             </Link>
