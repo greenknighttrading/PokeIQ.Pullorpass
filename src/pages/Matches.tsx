@@ -655,12 +655,6 @@ function ProfileView({
       {!isPublicView && <SwipeAgainOrLimit />}
       {!isPublicView && <ThisOrThatCTA />}
       {!isPublicView && <DailyLimitWidget />}
-      <div className="hidden sm:block">
-        <PersonalityTestCTA
-          personalityType={personalityType}
-          name={isPublicView ? (viewedDisplayName || 'Collector') : undefined}
-        />
-      </div>
       {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
     </div>
   );
@@ -1096,10 +1090,6 @@ function TasteHero({
 
       </div>
 
-      {/* Personality result — sits directly under the Collector DNA widget */}
-      <div className="hidden sm:block">
-        <PersonalityTestCTA personalityType={personalityType} name={isPublicView ? (viewedDisplayName || 'Collector') : undefined} />
-      </div>
     </section>
   );
 }
