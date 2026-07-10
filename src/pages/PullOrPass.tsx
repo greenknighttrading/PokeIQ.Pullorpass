@@ -33,7 +33,7 @@ import {
   matchesEras,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
-import { dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
+import { isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -848,9 +848,9 @@ export default function PullOrPass() {
     const liked = likedPoolRef.current;
     const useLiked = liked.length >= 2 && Math.random() < 0.99;
     const pool: SwipeCard[] = useLiked
-      ? liked
+        ? liked.filter(isSwipeCardDisplayable)
       : cards.filter((c, i) =>
-          i !== index && i !== index + 1 && !SEALED_RE.test(c.name || '')
+          i !== index && i !== index + 1 && isSwipeCardDisplayable(c)
         );
     if (pool.length < 2) return;
     const a = pool[Math.floor(Math.random() * pool.length)];
