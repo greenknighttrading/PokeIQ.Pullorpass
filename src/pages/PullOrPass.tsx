@@ -199,12 +199,6 @@ async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecor
     .limit(1);
 
   if (existing?.[0]?.id) {
-    const { error } = await supabase
-      .from('pullorpass_swipes')
-      .update(row)
-      .eq('id', existing[0].id)
-      .eq('user_id', userId);
-    if (error) console.error('swipe update', error);
     return;
   }
 
