@@ -1248,7 +1248,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
         .order('created_at', { ascending: false })
         .limit(20);
       if (cancelled) return;
-      const mapped: RoundDisplayCard[] = (rows ?? []).map((r: any) => ({
+      const mapped: RoundDisplayCard[] = cleanRoundCards((rows ?? []).map((r: any) => ({
         id: `round-${r.created_at}-${r.card_id}`,
         user_id: userId,
         card_id: r.card_id,
@@ -1264,7 +1264,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
         liked_at: r.created_at,
         decision: r.decision,
         created_at: r.created_at,
-      })).reverse();
+      })).reverse());
       const localNewest = newestRoundCardTime(localRound);
       const serverNewest = newestRoundCardTime(mapped);
       setRoundCards(localRound.length && (!mapped.length || !serverNewest || (localNewest && localNewest > serverNewest)) ? localRound : mapped);
@@ -1279,12 +1279,12 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
       return pool.map((like) => ({ ...like, decision: like.source === 'pass' ? 'pass' : 'pull' }));
     })();
     return kind === 'disliked'
-      ? base.filter((c) => c.decision === 'pass' || c.source === 'pass')
-      : base.filter((c) => !(c.decision === 'pass' || c.source === 'pass'));
+      ? cleanRoundCards(base.filter((c) => c.decision === 'pass' || c.source === 'pass'))
+      : cleanRoundCards(base.filter((c) => !(c.decision === 'pass' || c.source === 'pass')));
   }, [isPublicView, roundCards, likes, passes, kind]);
 
   // Fetch TCGplayer IDs for the cards shown so we can link out with affiliate tracking.
-  const [tcgMeta, setTcgMeta] = useState<Map<string, string>>(new Map());
+  const [imageMeta, setImageMeta] = useState<Map<string, CardImageMeta>>(new Map());
   useEffect(() => {
     const ids = source.map((c) => c.card_id).filter(Boolean) as string[];
     if (ids.length === 0) return;
@@ -1292,15 +1292,15 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
     (async () => {
       const { data } = await supabase
         .from('market_snapshots')
-        .select('card_id, tcgplayer_id')
+        .select('card_id, tcgplayer_id, image_url')
         .in('card_id', ids)
         .limit(ids.length);
       if (cancelled) return;
-      const map = new Map<string, string>();
+      const map = new Map<string, CardImageMeta>();
       (data ?? []).forEach((m: any) => {
-        if (m.card_id && m.tcgplayer_id) map.set(m.card_id, m.tcgplayer_id as string);
+        if (m.card_id) map.set(m.card_id, { tcgplayerId: m.tcgplayer_id ?? null, imageUrl: m.image_url ?? null });
       });
-      setTcgMeta(map);
+      setImageMeta(map);
     })();
     return () => { cancelled = true; };
   }, [source]);
@@ -1380,7 +1380,7 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
                   decision={c.decision === 'pass' || c.source === 'pass' ? 'pass' : 'pull'}
                   isSuper={c.source === 'super_like'}
                   onOpen={onOpen}
-                  tcgplayerId={tcgMeta.get(c.card_id)}
+                  imageMeta={imageMeta.get(c.card_id)}
                 />
               ))}
             </CarouselRow>
@@ -1391,17 +1391,21 @@ function RecentlyLiked({ likes, passes, onOpen, isPublicView, viewedDisplayName,
   );
 }
 
-function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: LikedCard; decision: 'pull' | 'pass'; isSuper?: boolean; onOpen: (s: CardDetailSeed) => void; tcgplayerId?: string }) {
-  const [err, setErr] = useState(false);
+function RecentCard({ like, decision, isSuper, onOpen, imageMeta }: { like: LikedCard; decision: 'pull' | 'pass'; isSuper?: boolean; onOpen: (s: CardDetailSeed) => void; imageMeta?: CardImageMeta }) {
+  const imageSources = compactImageSources(like.image_url, imageMeta?.imageUrl, tcgplayerImageUrl(imageMeta?.tcgplayerId));
+  const [imgIndex, setImgIndex] = useState(0);
+  const img = imageSources[imgIndex] ?? null;
   const isPass = decision === 'pass';
+  const resolvedImage = img ?? like.image_url ?? imageMeta?.imageUrl ?? null;
   return (
     <motion.div
       whileHover={{ y: -6 }}
       transition={{ type: 'spring', stiffness: 280, damping: 22 }}
       onClick={() => onOpen({
         card_id: like.card_id, card_name: like.card_name, set_name: like.set_name,
-        image_url: like.image_url, price: like.price, rarity: like.rarity,
+        image_url: resolvedImage, price: like.price, rarity: like.rarity,
         artist: like.artist, pokemon_type: like.pokemon_type, card_number: like.card_number,
+        tcgplayer_id: imageMeta?.tcgplayerId ?? undefined,
       })}
       className="group shrink-0 w-[150px] sm:w-[190px] snap-start text-left cursor-pointer"
     >
@@ -1411,8 +1415,15 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
           ? "ring-border/40 group-hover:ring-destructive/40 saturate-[0.92]"
           : "ring-border/60 group-hover:shadow-[0_18px_40px_-12px_hsl(var(--primary)/0.55)] group-hover:ring-primary/50"
       )}>
-        {like.image_url && !err ? (
-          <img src={like.image_url} alt={like.card_name} loading="lazy" decoding="async" className={cn("w-full h-full object-cover", isPass && "opacity-90")} onError={() => setErr(true)} />
+        {img ? (
+          <img
+            src={img}
+            alt={like.card_name}
+            loading="lazy"
+            decoding="async"
+            className={cn("w-full h-full object-cover", isPass && "opacity-90")}
+            onError={() => setImgIndex((i) => i + 1)}
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}
@@ -1430,7 +1441,7 @@ function RecentCard({ like, decision, isSuper, onOpen, tcgplayerId }: { like: Li
               ? <><Sparkles className="w-2.5 h-2.5" /> Super</>
               : <><HeartIcon className="w-2.5 h-2.5" /> Pull</>}
         </div>
-        <TcgLinkIcon tcgplayerId={tcgplayerId} name={like.card_name} />
+        <TcgLinkIcon tcgplayerId={imageMeta?.tcgplayerId ?? undefined} name={like.card_name} />
       </div>
       <p className="mt-2.5 text-sm text-foreground font-medium truncate">{like.card_name}</p>
       <p className="text-xs text-muted-foreground truncate">
