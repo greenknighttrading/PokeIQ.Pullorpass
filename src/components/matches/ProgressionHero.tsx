@@ -440,7 +440,7 @@ export function ProgressionHero({
 
       {/* Mobile-only personality card — sits right after the identity card */}
       {personalityType && PERSONALITY_PORTRAITS[personalityType as PersonalityType] && (
-        <div className="block sm:hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 overflow-hidden">
+        <div className="rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 overflow-hidden">
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-primary/20 bg-muted/30">
               <img
