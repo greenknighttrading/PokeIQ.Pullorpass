@@ -683,12 +683,12 @@ export default function PullOrPass() {
     } catch {}
     cards.forEach((c) => seen.add(c.card_id));
 
-    const productTypes = formatsToProductTypes(filters.formats);
+    const productTypes = formatsToProductTypes(filters.formats).filter((t) => t === 'card');
     let query = supabase
       .from('market_snapshots')
       .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
       .eq('game', 'Pokemon')
-      .in('product_type', productTypes.filter((t) => t === 'card'))
+      .in('product_type', productTypes.length ? productTypes : ['card'])
       .gte('price', filters.priceMin)
       .lte('price', filters.priceMax)
       .not('tcgplayer_id', 'is', null);
@@ -798,18 +798,7 @@ export default function PullOrPass() {
     persistSwipeProgress(rec, newRecords, persistedRoundId);
 
     if (userId) {
-      supabase.from('pullorpass_swipes').insert({
-        user_id: userId,
-        round_id: persistedRoundId,
-        card_id: rec.card.card_id,
-        card_name: rec.card.name,
-        card_set: rec.card.set_name,
-        card_image: rec.card.image_url,
-        card_price: rec.card.price,
-        card_rarity: rec.card.rarity,
-        decision: rec.decision,
-        tags: rec.tags,
-      }).then(({ error }) => { if (error) console.error('swipe insert', error); });
+      persistUserSwipe(userId, persistedRoundId, rec).catch((e) => console.error('swipe persist', e));
       if (rec.decision === 'pull') {
         saveLike(userId, {
           card_id: rec.card.card_id,
@@ -942,18 +931,7 @@ export default function PullOrPass() {
       const persistedRoundId = validRoundId(roundId);
       persistSwipeProgress(rec, newRecords, persistedRoundId);
       if (userId) {
-        supabase.from('pullorpass_swipes').insert({
-          user_id: userId,
-          round_id: persistedRoundId,
-          card_id: rec.card.card_id,
-          card_name: rec.card.name,
-          card_set: rec.card.set_name,
-          card_image: rec.card.image_url,
-          card_price: rec.card.price,
-          card_rarity: rec.card.rarity,
-          decision: rec.decision,
-          tags: rec.tags,
-        }).then(({ error }) => { if (error) console.error('swipe insert', error); });
+        persistUserSwipe(userId, persistedRoundId, rec).catch((e) => console.error('swipe persist', e));
         saveLike(userId, {
           card_id: rec.card.card_id,
           card_name: rec.card.name,
