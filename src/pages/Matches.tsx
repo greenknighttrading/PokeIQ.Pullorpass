@@ -764,7 +764,7 @@ function PersonalityTestCTA({ personalityType, name }: { personalityType: string
         <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/25 via-primary/10 to-card p-5 sm:p-6 md:p-8 shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
           <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-4 sm:gap-6 text-center sm:text-left">
             {portrait ? (
-              <div className="relative w-28 h-28 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60 px-[100px] mx-0 py-[99px]">
+              <div className="relative w-40 h-40 sm:w-auto sm:h-auto sm:self-stretch sm:aspect-square rounded-2xl overflow-hidden bg-card shrink-0 border border-border/60">
                 <img
                   src={portrait}
                   alt={`Illustration of ${article} ${personalityType}`}
