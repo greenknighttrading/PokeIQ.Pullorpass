@@ -1,40 +1,33 @@
-# Nav Reorganization Plan
+## Plan
 
-## Final top-level nav (in PokeIQShell sidebar)
+1. **Create one shared card-quality filter**
+   - Add a small reusable utility that clearly separates displayable single cards from sealed/non-card products.
+   - Treat a card as invalid if it is explicitly `sealed`, or if its name/set/card id contains sealed/product terms like booster, box, pack, deck, tin, ETB, bundle, blister, case, collection, code card, energy, trainer, etc.
+   - Use this stricter predicate even when the backend row says `product_type = card`, because the data sample shows mislabeled rows.
 
-1. **Pull or Pass** → `/swipe`
-2. **Profile** (was "Smart Profile") → `/profile`
-3. **Identity** (was "Personality Test") → `/personality-types`
-4. **Earn** (was "Training Lab") → `/pokeyelp`
-5. **Market** (was "Market Report") → `/pokeiq-daily`
+2. **Apply the filter at card source points**
+   - Update Pull or Pass round loading so new swipe rounds only include single cards.
+   - Update feed filter refresh so selecting formats cannot accidentally reintroduce sealed products into the standard card feed.
+   - Update recommendations so “Recommended for you” cannot include sealed/code/energy/trainer products.
+   - Update likes/pass/profile rendering so old bad data already stored for users is hidden from Matches/Binder/Profile.
 
-Removed from top-level: Matches, Leaderboard, Card Search (routes preserved, just nested).
+3. **Deduplicate cards before display**
+   - Deduplicate swipe-history rows by `card_id` before rendering Liked, Disliked, binder, and recent-round sections.
+   - For repeated swipe records, keep the latest decision for the recent Liked/Disliked carousels so a user sees one card once.
+   - Keep existing `pokeiq_likes` behavior, but add UI-side dedupe as a safety net for cached/local/server merges.
 
-> Note: your instructions rename "Market Report → market" but the final list still says "Market Report". I'll use **Market** per the rename directive. Say the word if you'd rather keep "Market Report".
+4. **Fix thumbnail image fallback behavior**
+   - For Matches rows, fetch both `tcgplayer_id` and stored `image_url` metadata for visible cards, not only affiliate ids.
+   - Render thumbnails with an ordered fallback list: saved image → database image → TCGPlayer CDN URL from id.
+   - If the first image fails, automatically try the next candidate instead of immediately showing the broken-image placeholder.
+   - Pass the resolved image into the detail modal so the thumbnail and click-in view use the same best available art.
 
-## 1. `src/components/layout/PokeIQShell.tsx`
+5. **Prevent future duplicate swipe records**
+   - Before inserting a swipe, check whether that user has already swiped that `card_id`; if yes, update/skip instead of inserting another duplicate.
+   - Add a backend uniqueness guard for future data if feasible: one swipe row per `user_id + card_id`, with latest decision/tags preserved.
+   - Avoid destructive cleanup in this pass; old duplicates will be hidden by the display dedupe.
 
-Rewrite `primaryNav` to the 5 items above with new labels. Remove Matches, Leaderboard, Card Search entries. Update the account dropdown item "Smart Profile" → "Profile".
-
-## 2. Nest Matches inside Pull or Pass — `src/pages/PullOrPass.tsx`
-
-Add a persistent **"Matches" pill button** (Heart icon + count if easy, else just label) in the top-right of the Pull or Pass header that routes to `/matches`. Keep `/matches` route working as-is. Pattern: same style as existing header actions so it stays visually consistent.
-
-## 3. Nest Leaderboard inside Profile — `src/pages/Matches.tsx` (the `/profile` page)
-
-Add a **Leaderboard entry card/button** near the top of the Profile page (Trophy icon, "Leaderboard — See top collectors", `NEW` badge) that navigates to `/leaderboard`. Route stays live.
-
-## 4. Nest Card Search inside Market — `src/pages/PokeIQDaily.tsx`
-
-Add a **"Card Search" secondary action** in the Market page header (Search icon button/link) that routes to `/buylist/scanner`. Route stays live.
-
-## 5. Other references to update
-
-- `src/components/layout/GlobalNavBar.tsx` — update labels ("Personality Test" → "Identity", "Training Lab" → "Earn", "Smart Profile" → "Profile" in any dropdown copy) and drop standalone Matches / Card Search / Leaderboard items where they appear as siblings of the renamed top-level tabs. Keep them reachable via the nested entry points above.
-- Any hardcoded label strings like "Smart Profile", "Personality Test", "Training Lab", "Market Report" in the shell/nav components will be updated. Non-nav page titles/H1s are **not** touched (UI-copy-only rename is limited to nav surfaces) unless you want deeper copy changes.
-
-## Out of scope
-
-- No route path changes (`/profile`, `/personality-types`, `/pokeyelp`, `/pokeiq-daily`, `/matches`, `/leaderboard`, `/buylist/scanner` all preserved) so no redirect logic needed and no broken deep links.
-- No changes to premium/collect section of the sidebar.
-- No business-logic or backend changes.
+6. **Verify**
+   - Check `/binder` after changes: Recommended above Liked, Liked images render or fall back properly, Disliked remains collapsed.
+   - Confirm no visible sealed/code/energy/trainer products appear in Recommended, Liked, Disliked, or Binder.
+   - Confirm duplicate cards appear only once for users with repeated swipe history.
