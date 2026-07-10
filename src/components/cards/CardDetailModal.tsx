@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getAffiliateUrl } from '@/lib/affiliate';
 import tcgplayerLogo from '@/assets/tcgplayer-logo.png';
+import { compactImageSources, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
 
 const PriceHistoryChart = lazy(() => import('@/components/buylist/PriceHistoryChart'));
 
@@ -341,6 +342,7 @@ export function CardDetailModal({
   const [historyLoading, setHistoryLoading] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgErr, setImgErr] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
   const { isInWatchlist, addToWatchlist, removeFromWatchlist } = useWatchlist();
   const [liked, setLiked] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
@@ -362,6 +364,7 @@ export function CardDetailModal({
     if (!open || !seed) return;
     setImgLoaded(false);
     setImgErr(false);
+    setImgIndex(0);
     setDetails(detailCache.get(seed.card_id) ?? null);
     setHistory(historyCache.get(seed.card_id) ?? null);
 
@@ -467,7 +470,8 @@ export function CardDetailModal({
 
   if (!open || !seed) return null;
 
-  const img = details?.image_url ?? seed.image_url ?? null;
+  const imageSources = compactImageSources(seed.image_url, details?.image_url, tcgplayerImageUrl(details?.tcgplayer_id ?? seed.tcgplayer_id));
+  const img = imageSources[imgIndex] ?? null;
   const inWatch = userId ? isInWatchlist(seed.card_id) : false;
 
   const body = (
@@ -513,7 +517,15 @@ export function CardDetailModal({
                     alt={seed.card_name}
                     className={`w-full h-full object-cover transition-opacity duration-200 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
                     onLoad={() => setImgLoaded(true)}
-                    onError={() => { setImgErr(true); setImgLoaded(true); }}
+                    onError={() => {
+                      if (imgIndex < imageSources.length - 1) {
+                        setImgIndex((i) => i + 1);
+                        setImgLoaded(false);
+                      } else {
+                        setImgErr(true);
+                        setImgLoaded(true);
+                      }
+                    }}
                   />
                 ) : imgErr ? (
                   <div className="absolute inset-0 flex items-center justify-center bg-muted/30">

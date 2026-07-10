@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Seo } from '@/components/seo/Seo';
+import { compactImageSources, dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
 
 const PAGE_SIZE = 24;
 
@@ -23,6 +24,7 @@ type Swipe = {
   tags: string[];
   decision: 'pull' | 'pass';
   created_at: string;
+  image_sources?: string[];
 };
 
 type Category = 'matches' | 'likes' | 'passes';
@@ -58,8 +60,28 @@ export default function MatchesCollection() {
       else q = q.eq('decision', 'pass');
 
       const { data } = await q.order('created_at', { ascending: false }).limit(1000);
-      let rows = (data as any[]) || [];
+      let rows = ((data as any[]) || []).filter((r) => isDisplayableSingleCard({
+        card_id: r.card_id,
+        card_name: r.card_name,
+        card_set: r.card_set,
+      }));
       if (cat === 'likes') rows = rows.filter((r) => !(r.tags || []).includes('Match'));
+      rows = dedupeByCardId(rows);
+      try {
+        const ids = rows.map((r) => r.card_id).filter(Boolean);
+        const { data: meta } = ids.length
+          ? await supabase.from('market_snapshots').select('card_id, image_url, tcgplayer_id').in('card_id', ids).limit(ids.length)
+          : { data: [] as any[] };
+        const metaById = new Map((meta ?? []).map((m: any) => [m.card_id, m]));
+        rows = rows.map((r) => {
+          const m = metaById.get(r.card_id) as any;
+          return {
+            ...r,
+            card_image: r.card_image ?? m?.image_url ?? tcgplayerImageUrl(m?.tcgplayer_id),
+            image_sources: compactImageSources(r.card_image, m?.image_url, tcgplayerImageUrl(m?.tcgplayer_id)),
+          };
+        });
+      } catch { /* keep original swipe images */ }
       setItems(rows);
       setLoading(false);
     })();
@@ -146,7 +168,9 @@ export default function MatchesCollection() {
 }
 
 function Thumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }) {
-  const [err, setErr] = useState(false);
+  const [imgIndex, setImgIndex] = useState(0);
+  const imageSources = m.image_sources?.length ? m.image_sources : compactImageSources(m.card_image);
+  const img = imageSources[imgIndex] ?? null;
   const dim = badge === 'pass';
   const superLiked = (m.tags || []).includes('Loved');
   return (
@@ -156,8 +180,8 @@ function Thumb({ m, badge }: { m: Swipe; badge: 'match' | 'like' | 'pass' }) {
       className="space-y-1.5 group"
     >
       <div className={`relative aspect-[2.5/3.5] rounded-xl overflow-hidden bg-muted/30 shadow-md transition-shadow duration-300 group-hover:shadow-[0_12px_40px_-12px_hsl(var(--primary)/0.45)] ring-1 ring-border/40 group-hover:ring-primary/40 ${dim ? 'opacity-50 grayscale group-hover:opacity-80 group-hover:grayscale-0' : ''}`}>
-        {m.card_image && !err ? (
-          <img src={m.card_image} alt={m.card_name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+        {img ? (
+          <img src={img} alt={m.card_name} className="w-full h-full object-cover" onError={() => setImgIndex((i) => i + 1)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center"><ImageOff className="w-5 h-5 text-muted-foreground" /></div>
         )}

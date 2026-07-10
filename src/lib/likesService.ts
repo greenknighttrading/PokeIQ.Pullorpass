@@ -2,6 +2,7 @@
 // This is the foundation of the MVP taste engine: no vibes, just facts.
 
 import { supabase } from '@/integrations/supabase/client';
+import { isDisplayableSingleCard } from '@/lib/cardDisplayFilters';
 
 export interface LikeSeed {
   card_id: string;
@@ -97,7 +98,7 @@ function detectLanguage(name: string, setName?: string | null): string {
   return 'English';
 }
 
-const SEALED_RX = /booster|box|pack|deck|tin|etb|bundle|collection|case/i;
+const SEALED_RX = /booster|box|pack|deck|tin|etb|bundle|blister|collection|case|sealed|code card|energy|trainer/i;
 const GRADED_RX = /\b(psa|bgs|cgc|sgc|beckett)\s*\d/i;
 function detectProductCategory(name: string): string {
   if (GRADED_RX.test(name)) return 'graded';
@@ -204,7 +205,7 @@ export async function fetchLikes(userId: string): Promise<LikedCard[]> {
     console.error('fetchLikes', error);
     return [];
   }
-  return (data ?? []) as LikedCard[];
+  return ((data ?? []) as LikedCard[]).filter(isDisplayableSingleCard);
 }
 
 // ──────────────────────────────────────────────────────────

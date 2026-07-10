@@ -3,6 +3,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LikedCard, classifyEra, priceTier, extractPokemonName } from './likesService';
+import { isDisplayableSingleCard, tcgplayerImageUrl } from './cardDisplayFilters';
 
 export interface RecommendedCard {
   card_id: string;
@@ -48,11 +49,6 @@ const W = {
   priceTier: 1,
 };
 
-function tcgImage(tcgplayerId?: string | null): string | null {
-  if (!tcgplayerId) return null;
-  return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
-}
-
 const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
 
 export async function recommendForUser(
@@ -82,7 +78,7 @@ export async function recommendForUser(
     if (values.length === 0) return;
     const { data } = await supabase
       .from('market_snapshots')
-      .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price')
+      .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price, product_type')
       .in(column, values)
       .eq('game', 'Pokemon')
       .limit(400);
@@ -90,11 +86,12 @@ export async function recommendForUser(
       const id = c.card_id || c.tcgplayer_id;
       if (!id || likedIds.has(id) || candidates.has(id)) continue;
       if (EXCLUDE.test(c.name || '')) continue;
+      if (!isDisplayableSingleCard({ card_id: id, name: c.name, set_name: c.set_name, product_type: c.product_type })) continue;
       candidates.set(id, {
         card_id: id,
         card_name: c.name,
         set_name: c.set_name,
-        image_url: c.image_url || tcgImage(c.tcgplayer_id),
+        image_url: c.image_url || tcgplayerImageUrl(c.tcgplayer_id),
         price: c.price != null ? Number(c.price) : null,
         rarity: c.rarity,
         artist: c.artist,
@@ -118,7 +115,7 @@ export async function recommendForUser(
     for (const name of names) {
       const { data } = await supabase
         .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price')
+        .select('card_id, tcgplayer_id, name, set_name, rarity, artist, pokemon_type, image_url, price, product_type')
         .ilike('name', `%${name}%`)
         .eq('game', 'Pokemon')
         .limit(80);
@@ -126,11 +123,12 @@ export async function recommendForUser(
         const id = c.card_id || c.tcgplayer_id;
         if (!id || likedIds.has(id) || candidates.has(id)) continue;
         if (EXCLUDE.test(c.name || '')) continue;
+        if (!isDisplayableSingleCard({ card_id: id, name: c.name, set_name: c.set_name, product_type: c.product_type })) continue;
         candidates.set(id, {
           card_id: id,
           card_name: c.name,
           set_name: c.set_name,
-          image_url: c.image_url || tcgImage(c.tcgplayer_id),
+          image_url: c.image_url || tcgplayerImageUrl(c.tcgplayer_id),
           price: c.price != null ? Number(c.price) : null,
           rarity: c.rarity,
           artist: c.artist,
