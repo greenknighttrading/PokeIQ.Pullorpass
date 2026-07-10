@@ -33,6 +33,7 @@ import {
   matchesEras,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
+import { dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -169,9 +170,46 @@ function clearResults() {
   try { localStorage.removeItem(RESULTS_KEY); } catch {}
 }
 
-function tcgImage(tcgplayerId: string | null): string | null {
-  if (!tcgplayerId) return null;
-  return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
+const tcgImage = tcgplayerImageUrl;
+
+function isSwipeCardDisplayable(card: SwipeCard): boolean {
+  return isDisplayableSingleCard({ card_id: card.card_id, name: card.name, set_name: card.set_name });
+}
+
+async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecord) {
+  const row = {
+    user_id: userId,
+    round_id: roundId,
+    card_id: rec.card.card_id,
+    card_name: rec.card.name,
+    card_set: rec.card.set_name,
+    card_image: rec.card.image_url,
+    card_price: rec.card.price,
+    card_rarity: rec.card.rarity,
+    decision: rec.decision,
+    tags: rec.tags,
+  };
+
+  const { data: existing } = await supabase
+    .from('pullorpass_swipes')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('card_id', rec.card.card_id)
+    .order('created_at', { ascending: false })
+    .limit(1);
+
+  if (existing?.[0]?.id) {
+    const { error } = await supabase
+      .from('pullorpass_swipes')
+      .update(row)
+      .eq('id', existing[0].id)
+      .eq('user_id', userId);
+    if (error) console.error('swipe update', error);
+    return;
+  }
+
+  const { error } = await supabase.from('pullorpass_swipes').insert(row);
+  if (error) console.error('swipe insert', error);
 }
 
 export default function PullOrPass() {
@@ -394,7 +432,6 @@ export default function PullOrPass() {
   useEffect(() => {
     if (!userId) { likedPoolRef.current = []; return; }
     let cancelled = false;
-    const SEALED_RE = /booster|box|pack|deck|tin|etb|bundle|blister|case|collection|chest|toolkit|stadium/i;
     (async () => {
       const { data } = await supabase
         .from('pokeiq_likes')
@@ -405,8 +442,7 @@ export default function PullOrPass() {
       if (cancelled) return;
       const pool: SwipeCard[] = (data ?? [])
         .filter((r: any) =>
-          r.product_category !== 'sealed' &&
-          !SEALED_RE.test(r.card_name || '') &&
+          isDisplayableSingleCard(r) &&
           !!r.image_url
         )
         .map((r: any) => ({
@@ -547,7 +583,7 @@ export default function PullOrPass() {
       const offset = Math.floor(rand() * 400);
       const { data: chunk, error: e } = await supabase
         .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, price, rarity')
+        .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
         .eq('game', 'Pokemon')
         .eq('product_type', 'card')
         .gte('price', lo)
@@ -577,6 +613,7 @@ export default function PullOrPass() {
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
+      if (!isDisplayableSingleCard(c)) continue;
       if (seen.has(c.card_id)) continue;
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
@@ -585,7 +622,7 @@ export default function PullOrPass() {
         card_id: c.card_id,
         name: c.name,
         set_name: c.set_name,
-        image_url: tcgImage(c.tcgplayer_id),
+        image_url: c.image_url ?? tcgImage(c.tcgplayer_id),
         price: Number(c.price),
         rarity: c.rarity,
       }));
@@ -649,9 +686,9 @@ export default function PullOrPass() {
     const productTypes = formatsToProductTypes(filters.formats);
     let query = supabase
       .from('market_snapshots')
-      .select('card_id, tcgplayer_id, name, set_name, price, rarity')
+      .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
       .eq('game', 'Pokemon')
-      .in('product_type', productTypes)
+      .in('product_type', productTypes.filter((t) => t === 'card'))
       .gte('price', filters.priceMin)
       .lte('price', filters.priceMax)
       .not('tcgplayer_id', 'is', null);
@@ -673,6 +710,7 @@ export default function PullOrPass() {
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
+      if (!isDisplayableSingleCard(c)) continue;
       if (seen.has(c.card_id)) continue;
       // Era + language filtered server-side via dedicated columns.
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
@@ -682,7 +720,7 @@ export default function PullOrPass() {
       card_id: c.card_id,
       name: c.name,
       set_name: c.set_name,
-      image_url: tcgImage(c.tcgplayer_id),
+      image_url: c.image_url ?? tcgImage(c.tcgplayer_id),
       price: Number(c.price),
       rarity: c.rarity,
     }));
