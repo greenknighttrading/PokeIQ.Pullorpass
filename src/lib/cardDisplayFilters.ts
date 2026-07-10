@@ -8,7 +8,7 @@ export type CardDisplayCandidate = {
   product_type?: string | null;
 };
 
-const SEALED_OR_PRODUCT_RE = /\b(booster|box|pack|deck|tin|etb|elite trainer box|bundle|blister|case|carton|collection|chest|toolkit|stadium|theme deck|starter deck|battle deck|build\s*(and|&)\s*battle|premium collection|ultra premium|sealed|unopened|factory sealed)\b/i;
+const SEALED_OR_PRODUCT_RE = /\b(booster|box|pack|deck|tin|etb|elite trainer box|bundle|blister|case|carton|collection box|premium collection|ultra premium collection|chest|toolkit|stadium|theme deck|starter deck|battle deck|build\s*(and|&)\s*battle|sealed|unopened|factory sealed|southern islands collection|trading card game classic)\b/i;
 const NON_CARD_RE = /\b(code card|\bcode\b|energy|trainer|supporter|tool card|item card)\b/i;
 const NON_CARD_SET_RE = /\b(world championship decks|deck exclusives|miscellaneous cards\s*&\s*products|miscellaneous cards|prize pack series cards)\b/i;
 
