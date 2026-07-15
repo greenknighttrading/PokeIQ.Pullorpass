@@ -198,7 +198,13 @@ export default function Premium() {
               'text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
               billing === 'annual' ? 'bg-white/20 text-white' : 'bg-violet-500/20 text-violet-300'
             )}>
-              Save 25%
+              Best value
+            </span>
+            <span className={cn(
+              'hidden sm:inline text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
+              billing === 'annual' ? 'bg-white/20 text-white' : 'bg-violet-500/20 text-violet-300'
+            )}>
+              Save 37%
             </span>
           </button>
         </div>
