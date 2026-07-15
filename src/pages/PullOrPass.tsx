@@ -2828,7 +2828,7 @@ function OutOfSwipesModal({
               <div className="space-y-1.5">
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">Swiping a lot lately?</h2>
                 <p className="text-sm text-muted-foreground">
-                  Skip the credit grind. Go PokeIQ Premium for unlimited swipes — or keep training and earning.
+                  Skip the credit grind. Go PokeIQ Pro for +300 swipes/month (rolls over up to 600) — or keep training and earning.
                 </p>
               </div>
               <div className="space-y-2.5 pt-1">
