@@ -51,6 +51,43 @@ const REDEMPTIONS_BEFORE_PRO_NUDGE = 3;
 const REDEMPTION_COUNT_KEY = 'pop_redemption_count_v1';
 const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
 
+// ─── PokeIQ Pro monthly swipe bank ─────────────────────
+// Pro subscribers get +300 swipes deposited into their bank at the start
+// of each calendar month. Unused swipes roll over up to a 600 cap.
+const PRO_MONTHLY_GRANT = 300;
+const PRO_BANK_CAP = 600;
+function monthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}`;
+}
+type ProBank = { balance: number; lastGrantMonth: string | null };
+function proBankKey(uid: string) { return `pop_pro_bank_v1_${uid}`; }
+function readProBank(uid: string): ProBank {
+  try {
+    const raw = localStorage.getItem(proBankKey(uid));
+    if (!raw) return { balance: 0, lastGrantMonth: null };
+    const v = JSON.parse(raw);
+    return {
+      balance: Number.isFinite(v?.balance) ? v.balance : 0,
+      lastGrantMonth: v?.lastGrantMonth ?? null,
+    };
+  } catch { return { balance: 0, lastGrantMonth: null }; }
+}
+function writeProBank(uid: string, v: ProBank) {
+  try { localStorage.setItem(proBankKey(uid), JSON.stringify(v)); } catch {}
+}
+function ensureMonthlyGrant(uid: string): ProBank {
+  const cur = readProBank(uid);
+  const mk = monthKey();
+  if (cur.lastGrantMonth === mk) return cur;
+  const next: ProBank = {
+    balance: Math.min(PRO_BANK_CAP, cur.balance + PRO_MONTHLY_GRANT),
+    lastGrantMonth: mk,
+  };
+  writeProBank(uid, next);
+  return next;
+}
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
@@ -286,18 +323,39 @@ export default function PullOrPass() {
 
   const dailyLimit = DAILY_BASE_LIMIT + quota.bonus;
   const { isPremium: premium, loading: premiumLoading } = useIsPremium();
-  const remaining = premium ? Infinity : Math.max(0, dailyLimit - quota.used);
+  const [proBank, setProBank] = useState<number>(0);
+  const remaining = premium
+    ? proBank
+    : Math.max(0, dailyLimit - quota.used);
   // Compute out-of-swipes eagerly (without waiting for the async premium
   // check) so the gating modal mounts on the same paint as the page. This
   // avoids a brief flash of the results/intro view before the modal pops in
   // when navigating in from /matches. Premium users will hide it the moment
   // their cached premium flag resolves.
-  const outOfSwipes = !premium && remaining <= 0;
+  const outOfSwipes = premium ? proBank <= 0 : remaining <= 0;
   const canRedeem = !premium && credits >= CREDITS_PER_REDEMPTION;
   const showProNudge =
     !premium &&
     redemptionCount >= REDEMPTIONS_BEFORE_PRO_NUDGE &&
     !proNudgeDismissed;
+
+  // Keep the Pro monthly swipe bank in sync: grant +300 (cap 600) on the
+  // first render each calendar month, and hydrate the balance from storage.
+  useEffect(() => {
+    if (!premium || !userId) return;
+    const bank = ensureMonthlyGrant(userId);
+    setProBank(bank.balance);
+    const refresh = () => {
+      const b = readProBank(userId);
+      setProBank(b.balance);
+    };
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, [premium, userId]);
 
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
@@ -844,6 +902,19 @@ export default function PullOrPass() {
   };
 
   const bumpQuota = () => {
+    // Pro subscribers draw from their monthly swipe bank instead of the
+    // free-tier daily quota. Bank is granted +300 on the 1st Pro swipe of
+    // each calendar month and caps at 600.
+    if (premium && userId) {
+      setProBank((b) => {
+        const next = Math.max(0, b - 1);
+        writeProBank(userId, { balance: next, lastGrantMonth: monthKey() });
+        return next;
+      });
+      bumpSwipeStreak();
+      maybeTriggerInterstitial();
+      return;
+    }
     setQuota((q) => {
       const next = { ...q, used: q.used + 1, lifetime: q.lifetime + 1 };
       writeQuota(next);
@@ -1104,8 +1175,8 @@ export default function PullOrPass() {
                      </>
                    )}
                     {premiumLoading ? null : premium ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
-                      <Crown className="w-3 h-3" /> Unlimited
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 tabular-nums">
+                      <Crown className="w-3 h-3" /> {proBank} left
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 tabular-nums">
@@ -2166,7 +2237,7 @@ export function ResultsView({
       {isAuthed && premium && (
         <motion.section {...fadeUp}>
           <div className="flex flex-col items-center gap-3 pt-2">
-            <p className="text-sm text-muted-foreground">PokeIQ Premium · unlimited swipes unlocked.</p>
+            <p className="text-sm text-muted-foreground">PokeIQ Pro · +300 swipes/month, rolls over up to 600 in your bank.</p>
             <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
               <RotateCw className="w-4 h-4" />
               Play Another Round
@@ -2658,13 +2729,13 @@ function _OutOfSwipesViewImpl({
               <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">Best Value</span>
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Unlock the full power of PokeIQ — unlimited swipes and every premium tool.
+              Unlock the full power of PokeIQ — +300 bonus swipes every month (rolls over up to 600) plus every premium tool.
             </p>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground flex-1">
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
-              <span>Unlimited swipes, every single day</span>
+              <span>+300 bonus swipes/month · rolls over up to 600</span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
@@ -2757,7 +2828,7 @@ function OutOfSwipesModal({
               <div className="space-y-1.5">
                 <h2 className="text-2xl font-bold text-foreground tracking-tight">Swiping a lot lately?</h2>
                 <p className="text-sm text-muted-foreground">
-                  Skip the credit grind. Go PokeIQ Premium for unlimited swipes — or keep training and earning.
+                  Skip the credit grind. Go PokeIQ Pro for +300 swipes/month (rolls over up to 600) — or keep training and earning.
                 </p>
               </div>
               <div className="space-y-2.5 pt-1">
