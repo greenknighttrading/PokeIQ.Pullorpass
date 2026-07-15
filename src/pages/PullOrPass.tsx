@@ -2729,13 +2729,13 @@ function _OutOfSwipesViewImpl({
               <span className="text-[10px] uppercase tracking-wider font-semibold text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">Best Value</span>
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Unlock the full power of PokeIQ — unlimited swipes and every premium tool.
+              Unlock the full power of PokeIQ — +300 bonus swipes every month (rolls over up to 600) plus every premium tool.
             </p>
           </div>
           <ul className="space-y-2 text-sm text-muted-foreground flex-1">
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
-              <span>Unlimited swipes, every single day</span>
+              <span>+300 bonus swipes/month · rolls over up to 600</span>
             </li>
             <li className="flex items-start gap-2">
               <Check className="w-4 h-4 text-amber-400 mt-0.5 shrink-1" />
