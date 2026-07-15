@@ -65,10 +65,10 @@ export default function Premium() {
   }, []);
 
   const monthlyPrice = 4;
-  const annualTotal = 36;
-  const annualMonthly = (annualTotal / 12).toFixed(2); // 3.00
-  const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
-  const priceId = billing === 'annual' ? 'premium_annual_v2' : 'premium_monthly';
+  const annualTotal = 29.99;
+  const annualMonthly = 2.50;
+  const shown = billing === 'annual' ? annualMonthly.toFixed(2) : monthlyPrice.toFixed(2);
+  const priceId = billing === 'annual' ? 'premium_annual_v3' : 'premium_monthly_v2';
 
   const handleGetPremium = () => {
     if (!user) {
