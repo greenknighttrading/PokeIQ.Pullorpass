@@ -2237,7 +2237,7 @@ export function ResultsView({
       {isAuthed && premium && (
         <motion.section {...fadeUp}>
           <div className="flex flex-col items-center gap-3 pt-2">
-            <p className="text-sm text-muted-foreground">PokeIQ Premium · unlimited swipes unlocked.</p>
+            <p className="text-sm text-muted-foreground">PokeIQ Pro · +300 swipes/month, rolls over up to 600 in your bank.</p>
             <Button onClick={onPlayAgain} size="lg" className="gap-2 min-w-[280px]">
               <RotateCw className="w-4 h-4" />
               Play Another Round
