@@ -118,6 +118,17 @@ export default function PersonalityTypes() {
   const from = searchParams.get('from');
   const cardRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
+  // Capture ?ref=<uuid> from a shared referral link and persist it so the
+  // referrer is credited when this visitor eventually signs up.
+  useEffect(() => {
+    try {
+      const ref = searchParams.get('ref');
+      if (ref && /^[0-9a-f-]{32,40}$/i.test(ref)) {
+        sessionStorage.setItem('pop_referrer_id', ref);
+      }
+    } catch {}
+  }, [searchParams]);
+
   useEffect(() => {
     if (highlight && PERSONALITY_INFO[highlight]) {
       setSelected(highlight);
