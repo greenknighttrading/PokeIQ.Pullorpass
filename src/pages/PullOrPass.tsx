@@ -339,6 +339,24 @@ export default function PullOrPass() {
     redemptionCount >= REDEMPTIONS_BEFORE_PRO_NUDGE &&
     !proNudgeDismissed;
 
+  // Keep the Pro monthly swipe bank in sync: grant +300 (cap 600) on the
+  // first render each calendar month, and hydrate the balance from storage.
+  useEffect(() => {
+    if (!premium || !userId) return;
+    const bank = ensureMonthlyGrant(userId);
+    setProBank(bank.balance);
+    const refresh = () => {
+      const b = readProBank(userId);
+      setProBank(b.balance);
+    };
+    window.addEventListener('focus', refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, [premium, userId]);
+
   // Auth check (optional — anyone can play, sign-in saves results)
   useEffect(() => {
     const handleSignedIn = (session: any) => {
