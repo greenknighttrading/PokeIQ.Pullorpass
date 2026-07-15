@@ -51,6 +51,43 @@ const REDEMPTIONS_BEFORE_PRO_NUDGE = 3;
 const REDEMPTION_COUNT_KEY = 'pop_redemption_count_v1';
 const PRO_NUDGE_DISMISSED_KEY = 'pop_pro_nudge_dismissed_v1';
 
+// ─── PokeIQ Pro monthly swipe bank ─────────────────────
+// Pro subscribers get +300 swipes deposited into their bank at the start
+// of each calendar month. Unused swipes roll over up to a 600 cap.
+const PRO_MONTHLY_GRANT = 300;
+const PRO_BANK_CAP = 600;
+function monthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth() + 1}`;
+}
+type ProBank = { balance: number; lastGrantMonth: string | null };
+function proBankKey(uid: string) { return `pop_pro_bank_v1_${uid}`; }
+function readProBank(uid: string): ProBank {
+  try {
+    const raw = localStorage.getItem(proBankKey(uid));
+    if (!raw) return { balance: 0, lastGrantMonth: null };
+    const v = JSON.parse(raw);
+    return {
+      balance: Number.isFinite(v?.balance) ? v.balance : 0,
+      lastGrantMonth: v?.lastGrantMonth ?? null,
+    };
+  } catch { return { balance: 0, lastGrantMonth: null }; }
+}
+function writeProBank(uid: string, v: ProBank) {
+  try { localStorage.setItem(proBankKey(uid), JSON.stringify(v)); } catch {}
+}
+function ensureMonthlyGrant(uid: string): ProBank {
+  const cur = readProBank(uid);
+  const mk = monthKey();
+  if (cur.lastGrantMonth === mk) return cur;
+  const next: ProBank = {
+    balance: Math.min(PRO_BANK_CAP, cur.balance + PRO_MONTHLY_GRANT),
+    lastGrantMonth: mk,
+  };
+  writeProBank(uid, next);
+  return next;
+}
+
 function todayKey() {
   const d = new Date();
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
