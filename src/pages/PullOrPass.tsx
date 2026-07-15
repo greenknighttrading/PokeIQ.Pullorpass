@@ -117,7 +117,16 @@ function readResume(): ResumeState | null {
     if (!raw) return null;
     const v = JSON.parse(raw);
     if (!v?.cards?.length) return null;
-    if (typeof v.index !== 'number' || v.index >= v.cards.length) return null;
+    const cards = (v.cards as SwipeCard[]).filter((card) =>
+      isDisplayableSingleCard({ card_id: card.card_id, name: card.name, set_name: card.set_name, rarity: card.rarity }),
+    );
+    if (cards.length !== v.cards.length) {
+      v.cards = cards;
+      v.index = Math.min(Math.max(Number(v.index) || 0, 0), Math.max(cards.length - 1, 0));
+      try { localStorage.setItem(RESUME_KEY, JSON.stringify(v)); } catch {}
+    }
+    if (!cards.length) return null;
+    if (typeof v.index !== 'number' || v.index >= cards.length) return null;
     return v as ResumeState;
   } catch { return null; }
 }
@@ -160,6 +169,22 @@ function readResults(): ResultsState | null {
     if (!raw) return null;
     const v = JSON.parse(raw);
     if (!v?.records?.length) return null;
+    if (Array.isArray(v.cards)) {
+      v.cards = (v.cards as SwipeCard[]).filter((card) =>
+        isDisplayableSingleCard({ card_id: card.card_id, name: card.name, set_name: card.set_name, rarity: card.rarity }),
+      );
+    }
+    if (Array.isArray(v.records)) {
+      v.records = (v.records as SwipeRecord[]).filter((record) =>
+        isDisplayableSingleCard({
+          card_id: record.card?.card_id,
+          name: record.card?.name,
+          set_name: record.card?.set_name,
+          rarity: record.card?.rarity,
+        }),
+      );
+    }
+    if (!v.records.length) return null;
     return v as ResultsState;
   } catch { return null; }
 }
@@ -173,7 +198,7 @@ function clearResults() {
 const tcgImage = tcgplayerImageUrl;
 
 function isSwipeCardDisplayable(card: SwipeCard): boolean {
-  return isDisplayableSingleCard({ card_id: card.card_id, name: card.name, set_name: card.set_name });
+  return isDisplayableSingleCard({ card_id: card.card_id, name: card.name, set_name: card.set_name, rarity: card.rarity });
 }
 
 async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecord) {
