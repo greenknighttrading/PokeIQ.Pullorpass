@@ -1175,8 +1175,8 @@ export default function PullOrPass() {
                      </>
                    )}
                     {premiumLoading ? null : premium ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950">
-                      <Crown className="w-3 h-3" /> Unlimited
+                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 tabular-nums">
+                      <Crown className="w-3 h-3" /> {proBank} left
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 tabular-nums">
