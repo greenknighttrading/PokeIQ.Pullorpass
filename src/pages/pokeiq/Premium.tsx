@@ -219,7 +219,7 @@ export default function Premium() {
         <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
         <div className="relative">
           <div className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-violet-500 text-white mb-4">
-            Most popular
+            {billing === 'annual' ? 'Annual — BEST VALUE' : 'Most popular'}
           </div>
           <div className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
             <Crown className="w-5 h-5 text-violet-300" /> Premium
