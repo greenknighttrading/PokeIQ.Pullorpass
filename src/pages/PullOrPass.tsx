@@ -884,6 +884,19 @@ export default function PullOrPass() {
   };
 
   const bumpQuota = () => {
+    // Pro subscribers draw from their monthly swipe bank instead of the
+    // free-tier daily quota. Bank is granted +300 on the 1st Pro swipe of
+    // each calendar month and caps at 600.
+    if (premium && userId) {
+      setProBank((b) => {
+        const next = Math.max(0, b - 1);
+        writeProBank(userId, { balance: next, lastGrantMonth: monthKey() });
+        return next;
+      });
+      bumpSwipeStreak();
+      maybeTriggerInterstitial();
+      return;
+    }
     setQuota((q) => {
       const next = { ...q, used: q.used + 1, lifetime: q.lifetime + 1 };
       writeQuota(next);
