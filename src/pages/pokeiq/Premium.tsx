@@ -65,10 +65,10 @@ export default function Premium() {
   }, []);
 
   const monthlyPrice = 4;
-  const annualTotal = 36;
-  const annualMonthly = (annualTotal / 12).toFixed(2); // 3.00
-  const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
-  const priceId = billing === 'annual' ? 'premium_annual_v2' : 'premium_monthly';
+  const annualTotal = 29.99;
+  const annualMonthly = 2.50;
+  const shown = billing === 'annual' ? annualMonthly.toFixed(2) : monthlyPrice.toFixed(2);
+  const priceId = billing === 'annual' ? 'premium_annual_v3' : 'premium_monthly_v2';
 
   const handleGetPremium = () => {
     if (!user) {
@@ -198,7 +198,13 @@ export default function Premium() {
               'text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
               billing === 'annual' ? 'bg-white/20 text-white' : 'bg-violet-500/20 text-violet-300'
             )}>
-              Save 25%
+              Best value
+            </span>
+            <span className={cn(
+              'hidden sm:inline text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded-full',
+              billing === 'annual' ? 'bg-white/20 text-white' : 'bg-violet-500/20 text-violet-300'
+            )}>
+              Save 37%
             </span>
           </button>
         </div>
@@ -213,7 +219,7 @@ export default function Premium() {
         <div className="pointer-events-none absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
         <div className="relative">
           <div className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full bg-violet-500 text-white mb-4">
-            Most popular
+            {billing === 'annual' ? 'Annual — BEST VALUE' : 'Most popular'}
           </div>
           <div className="text-lg font-semibold mb-2 flex items-center justify-center gap-2">
             <Crown className="w-5 h-5 text-violet-300" /> Premium
