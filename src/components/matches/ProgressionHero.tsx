@@ -83,13 +83,13 @@ function levelFromXp(xp: number) {
 // SWIPE MILESTONES
 // ─────────────────────────────────────────────────────────────
 const SWIPE_MILESTONES: { at: number; title: string; reward: string; icon: React.ReactNode }[] = [
-  { at: 100,  title: 'Starter',   reward: '+20 Swipes', icon: <Sparkles className="w-5 h-5" /> },
-  { at: 200,  title: 'Explorer',  reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" /> },
-  { at: 500,  title: 'Collector', reward: '+20 Swipes', icon: <Star className="w-5 h-5" /> },
-  { at: 1000, title: 'Master',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" /> },
-  { at: 2000, title: 'Champion',  reward: '+20 Swipes', icon: <Trophy className="w-5 h-5" /> },
-  { at: 3000, title: 'Virtuoso',  reward: '+20 Swipes', icon: <Award className="w-5 h-5" /> },
-  { at: 5000, title: 'Legend',    reward: '+20 Swipes', icon: <Crown className="w-5 h-5" /> },
+  { at: 100,    title: 'Rookie',  reward: '+15 Swipes', icon: <Sparkles className="w-5 h-5" /> },
+  { at: 250,    title: 'Scout',   reward: '+20 Swipes', icon: <Mountain className="w-5 h-5" /> },
+  { at: 500,    title: 'Pro',     reward: '+30 Swipes', icon: <Star className="w-5 h-5" /> },
+  { at: 1000,   title: 'Veteran', reward: '+50 Swipes', icon: <Trophy className="w-5 h-5" /> },
+  { at: 2500,   title: 'Elite',   reward: '+100 Swipes', icon: <Crown className="w-5 h-5" /> },
+  { at: 5000,   title: 'Master',  reward: '+200 Swipes', icon: <Award className="w-5 h-5" /> },
+  { at: 10000,  title: 'Legend',  reward: 'Exclusive Legend Badge', icon: <Gem className="w-5 h-5" /> },
 ];
 
 function nextMilestone(swiped: number) {
