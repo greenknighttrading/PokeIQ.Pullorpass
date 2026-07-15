@@ -91,7 +91,7 @@ export default function Premium() {
       </div>
 
       {/* Hero headline */}
-      <h1 className="text-center text-4xl font-bold tracking-tight leading-[1.05] mb-8 md:text-3xl px-[79px]">
+      <h1 className="text-center text-3xl md:text-4xl font-bold tracking-tight leading-[1.1] mb-8 md:px-[79px]">
         Built for collectors chasing{' '}
         <span className="bg-gradient-to-b from-violet-300 to-fuchsia-400 bg-clip-text text-transparent">JOY</span>
         , not just ROI.
@@ -122,7 +122,7 @@ export default function Premium() {
       </div>
 
       {/* Premium features pill */}
-      <div className="text-center mb-5 py-0 mx-[38px]">
+      <div className="text-center mb-5 py-0">
         <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-violet-300 rounded-full border border-violet-500/30 bg-violet-500/5 px-[19px] py-[7px]">
           <Sparkles className="w-3.5 h-3.5" /> Premium Features
         </div>
@@ -149,7 +149,7 @@ export default function Premium() {
       </div>
 
       <div className="flex flex-col gap-5 mb-10">
-        <PullOrPassCard />
+        <div className="hidden md:block"><PullOrPassCard /></div>
         <div className="hidden md:block"><FeatureCard
           icon={BarChart3}
           title="Advanced portfolio analytics"
@@ -249,13 +249,13 @@ export default function Premium() {
             </Button>
           )}
 
-          {/* Unlimited Pull or Pass — included perks */}
+          {/* Included perks */}
           <div className="pt-6 border-t border-violet-500/25 text-left max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-3 justify-center">
               <Heart className="w-4 h-4 text-violet-300" />
-              <span className="text-sm font-semibold">+300 bonus swipes/month · rolls over up to 600</span>
+              <span className="text-sm font-semibold">What's included</span>
             </div>
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 font-sans font-semibold text-slate-50 text-5xl">
+            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
               {coreFeatures.map((f) => (
                 <div key={f} className="flex items-start gap-2 text-xs">
                   <Check className="w-3.5 h-3.5 text-violet-300 shrink-0 mt-0.5" />
