@@ -1,3 +1,5 @@
+import { POKEMON_NAMES } from '@/lib/pokemonNames';
+
 export type CardDisplayCandidate = {
   card_id?: string | null;
   card_name?: string | null;
@@ -8,8 +10,6 @@ export type CardDisplayCandidate = {
   product_category?: string | null;
   product_type?: string | null;
 };
-
-import { POKEMON_NAMES } from '@/lib/pokemonNames';
 
 const SEALED_OR_PRODUCT_RE = /\b(booster|box|pack|deck|tin|etb|elite trainer box|bundle|blister|case|carton|collection box|premium collection|ultra premium collection|chest|toolkit|trainer kit|stadium|theme deck|starter deck|battle deck|build\s*(and|&)\s*battle|prerelease kit|sealed|unopened|factory sealed|southern islands collection|trading card game classic)\b/i;
 const NON_CARD_RE = /\b(code card|\bcode\b|basic energy|special energy|energy card|trainer card|supporter|tool card|item card|pokemon tool)\b/i;
