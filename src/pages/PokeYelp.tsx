@@ -1550,8 +1550,8 @@ function ShareEarnView({
     ? `https://pokeiq.com/swipe?ref=${userId}`
     : 'https://pokeiq.com/swipe';
   const personalityLink = userId
-    ? `https://pokeiq.com/test?ref=${userId}`
-    : 'https://pokeiq.com/test';
+    ? `https://pokeiq.com/personality-types?ref=${userId}`
+    : 'https://pokeiq.com/personality-types';
 
   const copy = async (text: string, setter: (v: boolean) => void) => {
     try {
