@@ -571,55 +571,67 @@ function NextGoalCard({
 
 // ── Milestones Timeline ──────────────────────────────────
 function MilestonesTimeline({ swiped }: { swiped: number }) {
+  const N = SWIPE_MILESTONES.length;
+  // Fraction (0..1) of the total line that should be filled teal.
+  let filledSegments = 0;
+  for (let i = 0; i < N - 1; i++) {
+    const a = SWIPE_MILESTONES[i].at;
+    const b = SWIPE_MILESTONES[i + 1].at;
+    if (swiped >= b) filledSegments += 1;
+    else if (swiped > a) filledSegments += (swiped - a) / (b - a);
+  }
+  const fillPct = (filledSegments / (N - 1)) * 100;
+  // With equal-width columns, first/last circle centers sit at 100/(2N)% from each edge.
+  const inset = 100 / (2 * N); // percent
+
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
+    <div className="rounded-2xl border border-border/60 bg-card px-6 py-5 sm:px-7 sm:py-6">
       <h3 className="text-base font-semibold text-foreground mb-4">Swipe Milestones</h3>
 
-      <div className="-mx-5 sm:-mx-6 px-5 sm:px-6 overflow-x-auto scrollbar-none">
-        <div className="flex items-start gap-0 sm:gap-6 min-w-max pb-1">
+      <div className="relative">
+        {/* Continuous progress track behind the circles */}
+        <div
+          className="absolute top-7 sm:top-8 h-[2px] -translate-y-1/2 rounded-full bg-muted-foreground/20"
+          style={{ left: `${inset}%`, right: `${inset}%` }}
+          aria-hidden
+        />
+        <div
+          className="absolute top-7 sm:top-8 h-[2px] -translate-y-1/2 rounded-full bg-primary transition-[width] duration-500"
+          style={{
+            left: `${inset}%`,
+            width: `calc(${100 - 2 * inset}% * ${fillPct / 100})`,
+          }}
+          aria-hidden
+        />
+
+        <div className="relative grid" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
-            const current = !done && swiped >= (SWIPE_MILESTONES[SWIPE_MILESTONES.indexOf(m) - 1]?.at ?? 0);
-            const isLast = i === SWIPE_MILESTONES.length - 1;
-            const nextDone = !isLast && swiped >= SWIPE_MILESTONES[i + 1].at;
+            const current = !done && swiped >= (SWIPE_MILESTONES[i - 1]?.at ?? 0);
             return (
-              <React.Fragment key={m.at}>
-                <div className="flex flex-col items-center text-center gap-2 w-[27%] sm:w-24 shrink-0">
-                  <div
-                    className={cn(
-                      'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border flex items-center justify-center shrink-0 transition-colors',
-                      done && 'border-primary/60 bg-primary/15 text-primary',
-                      !done && current && 'border-foreground/40 bg-muted/40 text-foreground',
-                      !done && !current && 'border-border/50 bg-muted/20 text-muted-foreground/60',
-                    )}
-                  >
-                    {done ? <CheckIcon className="w-6 h-6" /> : current ? m.icon : <Lock className="w-4 h-4" />}
-                  </div>
-                  <div className="min-w-0 w-full">
-                    <p className="text-xs sm:text-sm font-semibold text-foreground tabular-nums leading-none">
-                      {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
-                    </p>
-                    <p className={cn('text-[10px] sm:text-xs mt-1 truncate', done ? 'text-foreground/80' : 'text-muted-foreground')}>
-                      {m.title}
-                    </p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 truncate">
-                      {m.reward}
-                    </p>
-                  </div>
+              <div key={m.at} className="flex flex-col items-center text-center gap-2">
+                <div
+                  className={cn(
+                    'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors bg-card',
+                    done && 'border-primary bg-primary/15 text-primary',
+                    !done && current && 'border-primary/70 bg-card text-foreground ring-4 ring-primary/10',
+                    !done && !current && 'border-border/60 bg-card text-muted-foreground/70',
+                  )}
+                >
+                  {done ? <CheckIcon className="w-6 h-6" /> : m.icon}
                 </div>
-                {!isLast && (
-                  <div
-                    className="w-[5%] sm:w-16 mt-7 sm:mt-8 shrink-0 h-[2px] bg-repeat-x"
-                    style={{
-                      backgroundImage: `radial-gradient(circle, ${
-                        done && nextDone ? 'hsl(var(--primary))' : 'hsl(var(--muted-foreground) / 0.55)'
-                      } 1.2px, transparent 1.4px)`,
-                      backgroundSize: '8px 2px',
-                    }}
-                    aria-hidden
-                  />
-                )}
-              </React.Fragment>
+                <div className="min-w-0 w-full">
+                  <p className="text-sm font-semibold text-foreground tabular-nums leading-none">
+                    {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
+                  </p>
+                  <p className={cn('text-xs mt-1 truncate', done || current ? 'text-foreground/80' : 'text-muted-foreground')}>
+                    {m.title}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">
+                    {m.reward}
+                  </p>
+                </div>
+              </div>
             );
           })}
         </div>
