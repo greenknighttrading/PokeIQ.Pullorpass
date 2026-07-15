@@ -370,13 +370,13 @@ function PullOrPassCard() {
             <Heart className="w-4 h-4 text-violet-300" />
           </div>
           <h3 className="text-xl font-semibold mb-2 flex items-center gap-2 flex-wrap">
-            Unlimited Pull or Pass
+            Bonus Pull or Pass swipes
             <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
               CORE
             </span>
           </h3>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-            The complete Pull or Pass experience. Unlimited swipes, custom filters, and profile analytics.
+            +300 additional swipes every month that carry over up to a 600-swipe bank. Plus custom filters and profile analytics.
           </p>
           <div className="grid sm:grid-cols-2 gap-x-4 gap-y-2">
             {coreFeatures.map((f) => (
