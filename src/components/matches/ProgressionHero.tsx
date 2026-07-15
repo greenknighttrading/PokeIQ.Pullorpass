@@ -572,65 +572,68 @@ function NextGoalCard({
 // ── Milestones Timeline ──────────────────────────────────
 function MilestonesTimeline({ swiped }: { swiped: number }) {
   const N = SWIPE_MILESTONES.length;
-  // Fraction (0..1) of the total line that should be filled teal.
-  let filledSegments = 0;
-  for (let i = 0; i < N - 1; i++) {
-    const a = SWIPE_MILESTONES[i].at;
-    const b = SWIPE_MILESTONES[i + 1].at;
-    if (swiped >= b) filledSegments += 1;
-    else if (swiped > a) filledSegments += (swiped - a) / (b - a);
-  }
-  const fillPct = (filledSegments / (N - 1)) * 100;
-  // With equal-width columns, first/last circle centers sit at 100/(2N)% from each edge.
-  const inset = 100 / (2 * N); // percent
-
   return (
-    <div className="rounded-2xl border border-border/60 bg-card px-6 py-5 sm:px-7 sm:py-6">
-      <h3 className="text-base font-semibold text-foreground mb-4">Swipe Milestones</h3>
+    <div className="rounded-2xl border border-border/60 bg-card py-5 sm:py-6">
+      <h3 className="text-base font-semibold text-foreground mb-4 px-6 sm:px-7">Swipe Milestones</h3>
 
-      <div className="relative">
-        {/* Continuous progress track behind the circles */}
-        <div
-          className="absolute top-7 sm:top-8 h-[2px] -translate-y-1/2 rounded-full bg-muted-foreground/20"
-          style={{ left: `${inset}%`, right: `${inset}%` }}
-          aria-hidden
-        />
-        <div
-          className="absolute top-7 sm:top-8 h-[2px] -translate-y-1/2 rounded-full bg-primary transition-[width] duration-500"
-          style={{
-            left: `${inset}%`,
-            width: `calc(${100 - 2 * inset}% * ${fillPct / 100})`,
-          }}
-          aria-hidden
-        />
-
-        <div className="relative grid" style={{ gridTemplateColumns: `repeat(${N}, minmax(0, 1fr))` }}>
+      {/* Horizontal scroll on mobile — 3 visible at a time. */}
+      <div className="overflow-x-auto scrollbar-none px-6 sm:px-7">
+        <div className="flex items-start min-w-max">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
-            const current = !done && swiped >= (SWIPE_MILESTONES[i - 1]?.at ?? 0);
+            const prevAt = SWIPE_MILESTONES[i - 1]?.at ?? 0;
+            const current = !done && swiped >= prevAt;
+            const isLast = i === N - 1;
+            // Segment (this circle -> next circle) fill fraction.
+            let segFill = 0;
+            if (!isLast) {
+              const a = m.at;
+              const b = SWIPE_MILESTONES[i + 1].at;
+              if (swiped >= b) segFill = 1;
+              else if (swiped > a) segFill = (swiped - a) / (b - a);
+            }
             return (
-              <div key={m.at} className="flex flex-col items-center text-center gap-2">
-                <div
-                  className={cn(
-                    'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors bg-card',
-                    done && 'border-primary bg-primary/15 text-primary',
-                    !done && current && 'border-primary/70 bg-card text-foreground ring-4 ring-primary/10',
-                    !done && !current && 'border-border/60 bg-card text-muted-foreground/70',
-                  )}
-                >
-                  {done ? <CheckIcon className="w-6 h-6" /> : m.icon}
+              <div
+                key={m.at}
+                className="flex items-start shrink-0"
+                style={{ width: 'calc((100vw - 4rem) / 3)', maxWidth: '140px', minWidth: '104px' }}
+              >
+                {/* Milestone column (circle + labels) */}
+                <div className="flex flex-col items-center text-center gap-2 shrink-0 w-14 sm:w-16">
+                  <div
+                    className={cn(
+                      'relative w-14 h-14 sm:w-16 sm:h-16 rounded-full border-2 flex items-center justify-center transition-colors bg-card',
+                      done && 'border-primary bg-primary/15 text-primary',
+                      !done && current && 'border-primary/70 bg-card text-foreground ring-4 ring-primary/10',
+                      !done && !current && 'border-border/60 bg-card text-muted-foreground/70',
+                    )}
+                  >
+                    {done ? <CheckIcon className="w-6 h-6" /> : m.icon}
+                  </div>
+                  <div className="w-full">
+                    <p className="text-sm font-semibold text-foreground tabular-nums leading-none">
+                      {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
+                    </p>
+                    <p className={cn('text-xs mt-1 truncate', done || current ? 'text-foreground/80' : 'text-muted-foreground')}>
+                      {m.title}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">
+                      {m.reward}
+                    </p>
+                  </div>
                 </div>
-                <div className="min-w-0 w-full">
-                  <p className="text-sm font-semibold text-foreground tabular-nums leading-none">
-                    {m.at >= 1000 ? `${m.at / 1000}K` : m.at}
-                  </p>
-                  <p className={cn('text-xs mt-1 truncate', done || current ? 'text-foreground/80' : 'text-muted-foreground')}>
-                    {m.title}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">
-                    {m.reward}
-                  </p>
-                </div>
+
+                {/* Connector — fills the gap between this circle's right edge and the next circle's left edge. */}
+                {!isLast && (
+                  <div className="relative flex-1 h-14 sm:h-16 flex items-center" aria-hidden>
+                    <div className="relative w-full h-[2px] rounded-full bg-muted-foreground/20 mx-1">
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width] duration-500"
+                        style={{ width: `${segFill * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
