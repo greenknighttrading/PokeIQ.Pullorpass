@@ -25,7 +25,7 @@ import { toast } from 'sonner';
 import { useIsPremium } from '@/hooks/useIsPremium';
 
 const coreFeatures = [
-  'Unlimited Pull or Pass swipes',
+  '+300 bonus swipes/month (rolls over up to 600)',
   'Advanced recommendation engine',
   'Collector DNA insights',
   'Personalized card discoveries',
@@ -64,9 +64,9 @@ export default function Premium() {
     });
   }, []);
 
-  const monthlyPrice = 5;
-  const annualTotal = 48;
-  const annualMonthly = (annualTotal / 12).toFixed(2); // 4.00
+  const monthlyPrice = 4;
+  const annualTotal = 36;
+  const annualMonthly = (annualTotal / 12).toFixed(2); // 3.00
   const shown = billing === 'annual' ? annualMonthly : monthlyPrice.toFixed(2);
   const priceId = billing === 'annual' ? 'premium_annual_v2' : 'premium_monthly';
 
@@ -150,28 +150,28 @@ export default function Premium() {
 
       <div className="flex flex-col gap-5 mb-10">
         <PullOrPassCard />
-        <FeatureCard
+        <div className="hidden md:block"><FeatureCard
           icon={BarChart3}
           title="Advanced portfolio analytics"
           badge="BETA"
           description="Track Health Score, era allocation, value-over-time, and risk exposure across your entire collection — the full Portfolio Review at your fingertips."
           chips={['Health Score', 'Era allocation', 'Value over time']}
           preview={<AnalyticsPreview />}
-        />
-        <FeatureCard
+        /></div>
+        <div className="hidden md:block"><FeatureCard
           icon={FileText}
           title="Collector Report Card"
           description="Your Collector Archetype meets your portfolio. We use your DNA — Investor, Archivist, Gambler — to tailor every recommendation in your monthly briefing."
           chips={['Archetype-driven', 'Tailored picks', 'Monthly briefing']}
           preview={<ReportPreview />}
-        />
-        <FeatureCard
+        /></div>
+        <div className="hidden md:block"><FeatureCard
           icon={Rss}
           title="Custom Smart Feed"
           description="Daily curated picks based on your budget, taste, and the cards trending in your favorite sets."
           chips={['Daily picks', 'Budget-aware', 'Trend-driven']}
           preview={<SmartFeedPreview />}
-        />
+        /></div>
       </div>
 
       {/* Billing toggle — sits right above the pricing widget */}
@@ -253,7 +253,7 @@ export default function Premium() {
           <div className="pt-6 border-t border-violet-500/25 text-left max-w-md mx-auto">
             <div className="flex items-center gap-2 mb-3 justify-center">
               <Heart className="w-4 h-4 text-violet-300" />
-              <span className="text-sm font-semibold">Unlimited Pull or Pass included</span>
+              <span className="text-sm font-semibold">+300 bonus swipes/month · rolls over up to 600</span>
             </div>
             <div className="grid sm:grid-cols-2 gap-x-6 gap-y-2 font-sans font-semibold text-slate-50 text-5xl">
               {coreFeatures.map((f) => (
@@ -273,7 +273,7 @@ export default function Premium() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Crown className="w-5 h-5 text-violet-300" />
-              PokeIQ Premium — {billing === 'annual' ? '$48 / year' : '$5 / month'}
+              PokeIQ Premium — {billing === 'annual' ? `$${annualTotal} / year` : `$${monthlyPrice} / month`}
             </DialogTitle>
           </DialogHeader>
           {checkoutOpen && user && (
