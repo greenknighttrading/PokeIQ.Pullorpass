@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import PulseCard from './PulseCard';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, TrendingUp, TrendingDown, Eye,
+  Loader2, TrendingUp, TrendingDown,
   Zap, LogIn, PlusCircle, CheckCircle,
   SlidersHorizontal, ChevronDown, Newspaper, ExternalLink, Layers, CreditCard,
   Briefcase, AlertTriangle, Lock, ArrowDownRight, ArrowUpRight, ShoppingCart,
@@ -35,7 +35,6 @@ import { MoverCard, getImageUrl, getChangeForTime, getBuyScore, getRecommendatio
 import { useWatchlist } from '@/hooks/useWatchlist';
 import SetsExplorer from './SetsExplorer';
 import EraTimeline from './EraTimeline';
-import PackPicker from './PackPicker';
 
 /* ── Types ── */
 interface Headline {
@@ -636,163 +635,6 @@ function MoversList({ cards, label, color, isAuthed, onLoginPrompt, maxVisible =
   );
 }
 
-/* ── Watchlist Grid Card (matches GreatestHitsRow style) ── */
-function WatchlistGridCard({ card, timePeriod, navigate }: { card: MoverCard; timePeriod: string; navigate: (path: string) => void }) {
-  const imgUrl = getImageUrl(card);
-  const change = getChangeForTime(card, timePeriod) ?? 0;
-  const isUp = change >= 0;
-
-  return (
-    <button
-      onClick={() => navigate(`/buylist/mover/${card.card_id || card.id}`)}
-      className="glass-card rounded-xl p-3 flex flex-col items-center text-center hover:border-primary/30 transition-all group"
-    >
-      {imgUrl ? (
-        <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-20 h-28 object-contain rounded-lg mb-2"
-          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-        />
-      ) : (
-        <div className="w-20 h-28 rounded-lg bg-muted flex items-center justify-center text-[9px] text-muted-foreground mb-2">No img</div>
-      )}
-      <p className="text-xs font-bold truncate max-w-full group-hover:text-primary transition-colors">{card.name}</p>
-      <p className="text-[10px] text-muted-foreground truncate max-w-full mt-0.5">{card.set_name}</p>
-      <div className="flex items-center gap-1 mt-2">
-        {isUp ? <TrendingUp className="w-3.5 h-3.5 text-success" /> : <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-        <span className={cn('text-sm font-black tabular-nums', isUp ? 'text-success' : 'text-destructive')}>
-          {isUp ? '+' : ''}{change.toFixed(1)}%
-        </span>
-      </div>
-      <span className="text-xs font-bold tabular-nums mt-1">${(card.price ?? 0).toFixed(2)}</span>
-    </button>
-  );
-}
-
-/* ── Watchlist Brief (post-login personalized view) ── */
-function WatchlistBrief({ isAuthed }: { isAuthed: boolean }) {
-  const { items, loading } = useWatchlist();
-  const [watchlistData, setWatchlistData] = useState<MoverCard[]>([]);
-  const [dataLoading, setDataLoading] = useState(false);
-  const [timePeriod, setTimePeriod] = useState<'7d' | '30d' | '90d'>('7d');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isAuthed || items.length === 0) return;
-    setDataLoading(true);
-    const cardIds = items.map(i => i.card_id);
-    supabase
-      .from('market_snapshots')
-      .select('id, card_id, name, set_name, rarity, tcgplayer_id, price, price_change_7d, price_change_30d, price_change_90d, product_type')
-      .in('card_id', cardIds)
-      .then(({ data }) => {
-        setWatchlistData((data ?? []) as unknown as MoverCard[]);
-        setDataLoading(false);
-      });
-  }, [isAuthed, items]);
-
-  const deduped = useMemo(() => {
-    const seen = new Set<string>();
-    return watchlistData.filter(c => {
-      const key = c.card_id || c.id;
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  }, [watchlistData]);
-
-  const sorted = useMemo(() => [...deduped].sort((a, b) =>
-    Math.abs(getChangeForTime(b, timePeriod) ?? 0) - Math.abs(getChangeForTime(a, timePeriod) ?? 0)
-  ).slice(0, 12), [deduped, timePeriod]);
-
-  if (!isAuthed) return null;
-  if (loading || dataLoading) return (
-    <div className="flex items-center gap-2 justify-center py-6 text-muted-foreground">
-      <Loader2 className="w-4 h-4 animate-spin" /><span className="text-xs">Loading your watchlist…</span>
-    </div>
-  );
-
-  if (items.length === 0) {
-    return (
-      <div className="glass-card rounded-xl p-8 text-center space-y-4">
-        <PlusCircle className="w-8 h-8 text-muted-foreground mx-auto" />
-        <p className="text-sm font-semibold">Your watchlist is empty</p>
-        <p className="text-xs text-muted-foreground">
-          Use the <PlusCircle className="w-3 h-3 inline" /> button on any card below to add it to your personalized brief.
-        </p>
-        <Button variant="outline" size="sm" onClick={() => navigate('/smartlist')}>
-          <SlidersHorizontal className="w-4 h-4 mr-2" /> Browse Smart List
-        </Button>
-      </div>
-    );
-  }
-
-
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-bold">Your Items ({items.length})</p>
-          {items.length > 8 && (
-            <Button variant="ghost" size="sm" onClick={() => navigate('/buylist/watchlist')} className="text-xs gap-1.5">
-              View All →
-            </Button>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border overflow-hidden mr-2">
-            <button onClick={() => setViewMode('grid')} className={cn('p-1.5 transition-colors', viewMode === 'grid' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/30')}>
-              <Layers className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => setViewMode('list')} className={cn('p-1.5 transition-colors', viewMode === 'list' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted/30')}>
-              <ChevronDown className="w-3.5 h-3.5" />
-            </button>
-          </div>
-          {(['7d', '30d', '90d'] as const).map(t => (
-            <button key={t} onClick={() => setTimePeriod(t)}
-              className={cn(
-                'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
-                timePeriod === t ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted/30'
-              )}
-            >{t.toUpperCase()}</button>
-          ))}
-        </div>
-      </div>
-      {viewMode === 'grid' ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-          {sorted.map(card => (
-            <WatchlistGridCard key={card.card_id || card.id} card={card} timePeriod={timePeriod} navigate={navigate} />
-          ))}
-        </div>
-      ) : (
-        <div className="space-y-1">
-          {sorted.map((card, i) => {
-            const change = getChangeForTime(card, timePeriod) ?? 0;
-            const isUp = change >= 0;
-            const imgUrl = getImageUrl(card);
-            return (
-              <button key={card.card_id || card.id} onClick={() => navigate(`/buylist/mover/${card.card_id || card.id}`)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted/20 transition-colors text-left group">
-                {imgUrl && <img referrerPolicy="no-referrer" src={imgUrl} alt="" className="w-7 h-9 object-contain rounded shrink-0" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold truncate group-hover:text-primary transition-colors">{card.name}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{card.set_name}</p>
-                </div>
-                <div className="flex flex-col items-end shrink-0">
-                  <span className="text-xs font-bold tabular-nums">${(card.price ?? 0).toFixed(2)}</span>
-                  <span className={cn('text-[10px] font-bold tabular-nums flex items-center gap-0.5', isUp ? 'text-success' : 'text-destructive')}>
-                    {isUp ? <TrendingUp className="w-2.5 h-2.5" /> : <TrendingDown className="w-2.5 h-2.5" />}
-                    {isUp ? '+' : ''}{change.toFixed(1)}%
-                  </span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* ── Prime Window — Sets 2-3 years old, breaking-news style ── */
 const PRIME_SETS = [
@@ -1766,33 +1608,17 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
         <GreatestHitsIndex />
       </div>
 
-      {/* Watchlist / Greatest Hits Row */}
       {/* Investing Ideas — daily rotating picks */}
       <SectionRule title="Market Spotlight · 7D" icon={ShoppingCart} />
       <InvestingIdeas />
 
-      {/* Sets Explorer + Era Timeline + Pack Picker */}
+      {/* Sets Explorer + Era Timeline */}
       <div id="sets-explorer-section" />
       <SectionRule title="Sets Overview" icon={Layers} />
       <EraTimeline />
-      <div className="mt-3 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4 items-start">
-        <PackPicker />
+      <div className="mt-3">
         <SetsExplorer initialLimit={5} />
       </div>
-
-      {/* Watchlist section */}
-      {!hideWatchlist && (
-        <>
-          <SectionRule title="Watchlist · 7D" icon={Eye} />
-          <div className="mt-2">
-            {isAuthed ? (
-              <WatchlistBrief isAuthed={isAuthed} />
-            ) : (
-              <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
-            )}
-          </div>
-        </>
-      )}
 
       {/* Movers & Pullbacks */}
       <SectionRule title="Movers & Pullbacks" icon={Zap} />
