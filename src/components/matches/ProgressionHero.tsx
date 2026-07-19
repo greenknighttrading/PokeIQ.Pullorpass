@@ -160,6 +160,26 @@ function dnaStyle(label: string): { icon: React.ReactNode; color: string } {
   return mk(<Palette className="w-3.5 h-3.5" />, palette[h % palette.length]);
 }
 
+// Category dot color for the redesigned flat DNA pills.
+// amber = rarity/tier, blue = type/attribute, purple = people/character.
+function dnaDotColor(label: string): string {
+  const l = label.toLowerCase();
+  const RARITY = '#f59e0b';
+  const TYPE = '#3b82f6';
+  const PERSON = '#a78bfa';
+  if (
+    l === 'premium' || l.includes('premium cards') || l.includes('grail') ||
+    l.includes('era') || l.includes('vintage') || l.includes('classic') || l.includes('modern')
+  ) return RARITY;
+  if (
+    l === 'water' || l === 'fire' || l === 'grass' || l === 'lightning' || l === 'electric' ||
+    l === 'psychic' || l === 'fighting' || l === 'darkness' || l === 'dark' || l === 'fairy' ||
+    l === 'dragon' || l === 'metal' || l === 'steel' || l === 'ghost' || l === 'colorless' || l === 'normal' ||
+    l.includes('holo') || l.includes('secret') || l.includes('ultra') || l === 'rare'
+  ) return TYPE;
+  return PERSON;
+}
+
 // ─────────────────────────────────────────────────────────────
 // ProfileHeader — avatar (uploadable) + name + level + personality
 // ─────────────────────────────────────────────────────────────
