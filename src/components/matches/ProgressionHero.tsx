@@ -417,7 +417,6 @@ export function ProgressionHero({
           level={lvl.current.level}
           xp={xp}
           personalityType={personalityType}
-          progressPct={lvl.pct}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
