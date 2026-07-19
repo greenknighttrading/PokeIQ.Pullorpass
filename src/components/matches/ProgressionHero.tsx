@@ -189,14 +189,12 @@ function ProfileHeader({
   level,
   xp,
   personalityType,
-  progressPct,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
   personalityType?: string | null;
-  progressPct?: number;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -417,7 +415,6 @@ export function ProgressionHero({
           level={lvl.current.level}
           xp={xp}
           personalityType={personalityType}
-          progressPct={lvl.pct}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
@@ -588,8 +585,8 @@ function MilestonesTimeline({
       </div>
 
       {/* Horizontal scroll on mobile — 3 visible at a time. */}
-      <div className="overflow-x-auto scrollbar-none px-5 sm:px-6 mt-5 sm:mt-6">
-        <div className="flex items-start min-w-max">
+      <div className="overflow-x-auto scrollbar-none mt-5 sm:mt-6">
+        <div className="flex items-start min-w-max px-5 sm:px-6">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
             const milestonePrevAt = SWIPE_MILESTONES[i - 1]?.at ?? 0;
