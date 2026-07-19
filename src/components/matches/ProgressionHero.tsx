@@ -422,6 +422,7 @@ export function ProgressionHero({
           level={lvl.current.level}
           xp={xp}
           personalityType={personalityType}
+          progressPct={lvl.pct}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
@@ -433,20 +434,20 @@ export function ProgressionHero({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-2">Your Collector DNA</h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {dnaLabels.map((label) => {
-                  const { icon, color } = dnaStyle(label);
+                  const dot = dnaDotColor(label);
                   return (
                     <span
                       key={label}
-                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-2.5 py-1 text-xs font-medium"
-                      style={{
-                        color,
-                        borderColor: `${color}80`,
-                        backgroundColor: `${color}12`,
-                      }}
+                      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium"
+                      style={{ backgroundColor: '#1a1c1a', color: '#d1d5db' }}
                     >
-                      <span aria-hidden style={{ color }}>{icon}</span>
+                      <span
+                        aria-hidden
+                        className="inline-block rounded-full shrink-0"
+                        style={{ width: 6, height: 6, backgroundColor: dot }}
+                      />
                       {label}
                     </span>
                   );
