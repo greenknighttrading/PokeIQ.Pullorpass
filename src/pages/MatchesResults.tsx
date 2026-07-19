@@ -7,6 +7,7 @@ import { Seo } from '@/components/seo/Seo';
 import { supabase } from '@/integrations/supabase/client';
 import { ResultsView } from './PullOrPass';
 import type { SwipeCard, SwipeRecord } from '@/lib/pullorpass';
+import { DailyBattleEntryCard } from '@/components/pullorpass/DailyBattleEntryCard';
 
 type Stored = { records: SwipeRecord[]; roundId: string; cards: SwipeCard[]; index?: number };
 type TimedSwipeRecord = SwipeRecord & { client_ts?: string; created_at?: string };
@@ -175,6 +176,9 @@ export default function MatchesResults() {
       <Seo title="Your Matches | PokeIQ" description="Cards you pulled in your latest Pull or Pass round." />
       <div className="min-h-screen bg-background">
         <main className="w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start">
+          <div className="w-full max-w-3xl mx-auto px-3 sm:px-4 mb-3">
+            <DailyBattleEntryCard />
+          </div>
           <ResultsView
             records={records}
             onPlayAgain={() => navigate('/swipe')}
