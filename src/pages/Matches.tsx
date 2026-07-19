@@ -2165,15 +2165,15 @@ function BuildYourOwnProfileCTA() {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-primary/40 bg-gradient-to-br from-primary/20 via-primary/10 to-card p-8 sm:p-12 text-center shadow-[0_0_40px_-12px_hsl(var(--primary)/0.4)]">
       <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-      <Sparkles className="w-9 h-9 text-primary mx-auto mb-4" />
+      <Crown className="w-9 h-9 text-primary mx-auto mb-4" />
       <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground whitespace-pre-line">
-        UNLIMITED{"\n"}Matches
+        Go Pro for more{"\n"}matches & features
       </h2>
       <p className="mt-3 text-sm sm:text-base text-foreground/80 max-w-md mx-auto">
-        Start swiping to discover your taste, unlock your personality, and build a profile like this one.
+        Unlock unlimited swipes, advanced filters, and deeper collector insights when you upgrade to PokeIQ Pro.
       </p>
-      <Button asChild size="lg" className="mt-6 gap-2">
-        <Link to="/swipe">Start swiping <ArrowRight className="w-4 h-4" /></Link>
+      <Button asChild size="lg" className="mt-6 gap-2 bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 hover:from-amber-300 hover:to-amber-400 font-bold shadow-[0_0_24px_rgba(251,191,36,0.45)]">
+        <Link to="/premium">Go PokeIQ Pro <ArrowRight className="w-4 h-4" /></Link>
       </Button>
     </section>
   );
