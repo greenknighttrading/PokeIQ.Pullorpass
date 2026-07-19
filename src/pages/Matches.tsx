@@ -40,6 +40,7 @@ import { tcgPlayerUrl } from '@/lib/packEV';
 import { ProgressionHero } from '@/components/matches/ProgressionHero';
 import { readPersonalityForCurrentUser } from '@/lib/personalityStorage';
 import { compactImageSources, dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
+import { DailyBattleEntryCard } from '@/components/pullorpass/DailyBattleEntryCard';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
@@ -586,6 +587,7 @@ export default function Matches({
                   {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
+                  {!isPublicView && <DailyBattleEntryCard />}
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                 </div>
