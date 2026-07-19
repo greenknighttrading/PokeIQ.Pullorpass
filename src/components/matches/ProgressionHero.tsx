@@ -593,7 +593,7 @@ function MilestonesTimeline({
       </div>
 
       {/* Horizontal scroll on mobile — 3 visible at a time. */}
-      <div className="overflow-x-auto scrollbar-none px-5 sm:px-6">
+      <div className="overflow-x-auto scrollbar-none px-5 sm:px-6 mt-5 sm:mt-6">
         <div className="flex items-start min-w-max">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
