@@ -279,7 +279,7 @@ export default function DailyBattle() {
                           : 'loser'
                     }
                     pct={pctFor(currentPair.a.card_id)}
-                    showPct={locked != null}
+                    showPct={false}
                     onPick={() => onPick(currentPair.a, currentPair.b)}
                   />
 
@@ -309,7 +309,7 @@ export default function DailyBattle() {
                           : 'loser'
                     }
                     pct={pctFor(currentPair.b.card_id)}
-                    showPct={locked != null}
+                    showPct={false}
                     onPick={() => onPick(currentPair.b, currentPair.a)}
                   />
                 </div>
@@ -318,8 +318,8 @@ export default function DailyBattle() {
               <div className="mt-4 text-center min-h-[24px]">
                 {locked ? (
                   <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5" />
-                    Community results • {totalVotes.toLocaleString()} vote{totalVotes === 1 ? '' : 's'} today
+                    <Check className="w-3.5 h-3.5 text-primary" />
+                    Locked in — results at the end
                   </p>
                 ) : (
                   <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
