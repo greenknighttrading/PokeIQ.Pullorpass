@@ -189,14 +189,12 @@ function ProfileHeader({
   level,
   xp,
   personalityType,
-  progressPct,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
   personalityType?: string | null;
-  progressPct?: number;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
