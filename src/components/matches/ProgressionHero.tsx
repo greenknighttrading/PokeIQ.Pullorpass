@@ -523,7 +523,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
           className="absolute inset-y-0 left-0 rounded-full bg-primary"
         />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-1.5 text-xs text-muted-foreground">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to level {lvl.next.level}</>
         ) : (
