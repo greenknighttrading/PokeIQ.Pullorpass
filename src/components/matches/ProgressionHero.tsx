@@ -475,11 +475,9 @@ export function ProgressionHero({
         </div>
       )}
 
-      {/* Next Goal */}
-      {nextGoal && <NextGoalCard swiped={cardsSwiped} goal={nextGoal} />}
+      {/* Swipe Milestones + Next Goal combined */}
+      <MilestonesTimeline swiped={cardsSwiped} goal={nextGoal} />
 
-      {/* Swipe Milestones */}
-      <MilestonesTimeline swiped={cardsSwiped} />
 
       {/* Stats */}
       <StatsGrid
