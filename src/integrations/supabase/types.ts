@@ -638,6 +638,24 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_battles: {
+        Row: {
+          battle_date: string
+          created_at: string
+          pairs: Json
+        }
+        Insert: {
+          battle_date: string
+          created_at?: string
+          pairs: Json
+        }
+        Update: {
+          battle_date?: string
+          created_at?: string
+          pairs?: Json
+        }
+        Relationships: []
+      }
       greatest_hits_cache: {
         Row: {
           avg_change_7d: number
@@ -1840,11 +1858,13 @@ export type Database = {
       }
       this_or_that_matchups: {
         Row: {
+          battle_date: string | null
           card_a_id: string
           card_b_id: string
           created_at: string
           id: string
           loser_card_id: string
+          matchup_index: number | null
           user_id: string
           winner_artist: string | null
           winner_card_id: string
@@ -1857,11 +1877,13 @@ export type Database = {
           winner_type: string | null
         }
         Insert: {
+          battle_date?: string | null
           card_a_id: string
           card_b_id: string
           created_at?: string
           id?: string
           loser_card_id: string
+          matchup_index?: number | null
           user_id: string
           winner_artist?: string | null
           winner_card_id: string
@@ -1874,11 +1896,13 @@ export type Database = {
           winner_type?: string | null
         }
         Update: {
+          battle_date?: string | null
           card_a_id?: string
           card_b_id?: string
           created_at?: string
           id?: string
           loser_card_id?: string
+          matchup_index?: number | null
           user_id?: string
           winner_artist?: string | null
           winner_card_id?: string
@@ -2046,6 +2070,7 @@ export type Database = {
       change_pokeiq_credits: { Args: { p_delta: number }; Returns: number }
       classify_card_language: { Args: { card_name: string }; Returns: string }
       classify_set_era: { Args: { s: string }; Returns: string }
+      ensure_daily_battles: { Args: { p_date?: string }; Returns: Json }
       get_admin_likes: {
         Args: { p_user_id: string }
         Returns: {
@@ -2094,6 +2119,21 @@ export type Database = {
         }[]
       }
       get_admin_swipe_count: { Args: { p_user_id: string }; Returns: number }
+      get_daily_battle_results: {
+        Args: { p_date?: string }
+        Returns: {
+          matchup_index: number
+          votes: number
+          winner_card_id: string
+        }[]
+      }
+      get_my_daily_battle_picks: {
+        Args: { p_date?: string }
+        Returns: {
+          matchup_index: number
+          winner_card_id: string
+        }[]
+      }
       get_public_likes: {
         Args: { p_user_id: string }
         Returns: {
