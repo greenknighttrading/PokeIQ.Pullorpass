@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Check, ImageOff, Loader2, Sparkles, Trophy, Users } from 'lucide-react';
+import { ArrowLeft, Check, ImageOff, Loader2, Sparkles, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
