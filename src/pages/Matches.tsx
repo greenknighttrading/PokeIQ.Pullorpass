@@ -588,6 +588,7 @@ export default function Matches({
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                  {!isPublicView && <DNAReportCTA taste={taste} />}
                 </div>
               )}
             </div>
