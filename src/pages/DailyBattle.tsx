@@ -350,8 +350,8 @@ function ResultsScreen({
 }) {
   const navigate = useNavigate();
   const score = agreementScore(picks, results);
-  const totalVoters = Object.values(results).reduce((max, tally) => {
-    const t = Object.values(tally).reduce((s, n) => s + n, 0);
+  const totalVoters = Object.values(results).reduce<number>((max, tally) => {
+    const t = Object.values(tally).reduce<number>((s, n) => s + (n as number), 0);
     return t > max ? t : max;
   }, 0);
 
@@ -393,7 +393,7 @@ function ResultsScreen({
           <div className="space-y-3 mt-5">
             {pairs.map((pair, i) => {
               const tally = results[i] || {};
-              const total = Object.values(tally).reduce((s, n) => s + n, 0) || 1;
+              const total = Object.values(tally).reduce<number>((s, n) => s + (n as number), 0) || 1;
               const myPick = picks.find((p) => p.matchup_index === i)?.winner_card_id;
               const pctA = Math.round(((tally[pair.a.card_id] || 0) / total) * 100);
               const pctB = 100 - pctA;
