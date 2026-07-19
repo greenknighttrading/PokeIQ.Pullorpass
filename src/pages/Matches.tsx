@@ -40,6 +40,7 @@ import { tcgPlayerUrl } from '@/lib/packEV';
 import { ProgressionHero } from '@/components/matches/ProgressionHero';
 import { readPersonalityForCurrentUser } from '@/lib/personalityStorage';
 import { compactImageSources, dedupeByCardId, isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
+import { DailyBattleEntryCard } from '@/components/pullorpass/DailyBattleEntryCard';
 
 // Map of personality type → portrait illustration (matches /personality-types).
 const PERSONALITY_PORTRAITS: Record<PersonalityType, string> = {
