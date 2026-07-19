@@ -530,8 +530,14 @@ export default function PokeYelp() {
     else setIndex(index + 1);
   }, [index, pool.length, loadPool]);
 
+  const hasSelection = selected.size > 0 || custom.length > 0 || customInput.trim().length > 0;
+
   const submit = async () => {
     if (!current) return;
+    if (!hasSelection) {
+      toast.error('Select a tag or add a custom tag before submitting', { position: 'top-center' });
+      return;
+    }
     const isPriorityCard = todaysMode;
     if (!userId) {
       // Track anon-reviewed priority cards so they don't repeat in the locked pool
