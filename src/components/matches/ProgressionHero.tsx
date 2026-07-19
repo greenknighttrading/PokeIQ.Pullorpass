@@ -552,9 +552,9 @@ function MilestonesTimeline({
   const remaining = goal ? Math.max(0, goal.at - swiped) : 0;
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card py-5 sm:py-6">
+    <div className="rounded-2xl border border-border/60 bg-card py-4 sm:py-5">
       {/* Combined header: Next Goal + Milestones title */}
-      <div className="px-6 sm:px-7">
+      <div className="px-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
@@ -573,7 +573,7 @@ function MilestonesTimeline({
         </div>
 
         {goal && (
-          <div className="mt-4">
+          <div className="mt-3">
             <div className="flex items-baseline justify-between mb-2">
               <span className="text-sm text-muted-foreground tabular-nums">
                 <span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes
@@ -590,13 +590,7 @@ function MilestonesTimeline({
             </div>
           </div>
         )}
-
-        <div className="relative h-px w-full mt-5 mb-4">
-          <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
-        </div>
       </div>
-
-      <h3 className="text-base font-semibold text-foreground mb-4 px-6 sm:px-7">Swipe Milestones</h3>
 
       {/* Horizontal scroll on mobile — 3 visible at a time. */}
       <div className="overflow-x-auto scrollbar-none px-6 sm:px-7">
