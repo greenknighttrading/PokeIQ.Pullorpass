@@ -271,11 +271,11 @@ function ProfileHeader({
   const avatarSrc = avatarUrl || squirtleAvatar;
 
   return (
-    <div className="flex items-start gap-4 sm:gap-5">
+    <div className="flex items-center gap-4 sm:gap-5">
       <div className="relative shrink-0">
         {/* Subtle emerald radial gradient behind avatar — 10% opacity at center */}
         <div
-          className="absolute -inset-6 rounded-full pointer-events-none z-0"
+          className="absolute -inset-5 rounded-full pointer-events-none z-0"
           style={{ background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.10) 0%, transparent 60%)' }}
           aria-hidden
         />
@@ -284,7 +284,7 @@ function ProfileHeader({
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
+            'group relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
             !readOnly && 'cursor-pointer hover:ring-primary/60 hover:shadow-[0_10px_40px_rgba(59,158,143,0.25)] transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
@@ -320,7 +320,7 @@ function ProfileHeader({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pt-1">
+      <div className="flex-1 min-w-0">
         {editing && !readOnly ? (
           <div className="flex items-center gap-2">
             <Input
@@ -342,7 +342,7 @@ function ProfileHeader({
         ) : (
           <div className="flex items-center justify-between gap-3">
             <h1
-              className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight min-w-0"
+              className="text-xl sm:text-2xl font-bold text-foreground truncate tracking-tight min-w-0"
               onDoubleClick={() => !readOnly && setEditing(true)}
               title={!readOnly ? 'Double-click to edit' : undefined}
             >
@@ -356,7 +356,7 @@ function ProfileHeader({
           </div>
         )}
 
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           <span className="tabular-nums">Level {level}</span>
           {personalityType && (
             <>
