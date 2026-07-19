@@ -1771,28 +1771,13 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
       <SectionRule title="Market Spotlight · 7D" icon={ShoppingCart} />
       <InvestingIdeas />
 
-      {/* Sets Explorer + Era Timeline + Pack Picker */}
+      {/* Sets Explorer + Era Timeline */}
       <div id="sets-explorer-section" />
       <SectionRule title="Sets Overview" icon={Layers} />
       <EraTimeline />
-      <div className="mt-3 grid grid-cols-1 lg:grid-cols-[1fr_1fr] gap-4 items-start">
-        <PackPicker />
+      <div className="mt-3">
         <SetsExplorer initialLimit={5} />
       </div>
-
-      {/* Watchlist section */}
-      {!hideWatchlist && (
-        <>
-          <SectionRule title="Watchlist · 7D" icon={Eye} />
-          <div className="mt-2">
-            {isAuthed ? (
-              <WatchlistBrief isAuthed={isAuthed} />
-            ) : (
-              <GreatestHitsRow isAuthed={isAuthed} onLoginPrompt={handleLoginPrompt} />
-            )}
-          </div>
-        </>
-      )}
 
       {/* Movers & Pullbacks */}
       <SectionRule title="Movers & Pullbacks" icon={Zap} />
