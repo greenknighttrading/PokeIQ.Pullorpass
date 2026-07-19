@@ -348,11 +348,6 @@ function ProfileHeader({
             >
               {name}
             </h1>
-            {typeof progressPct === 'number' && (
-              <span className="text-lg sm:text-xl font-semibold text-primary tabular-nums shrink-0">
-                {Math.round(progressPct)}%
-              </span>
-            )}
           </div>
         )}
 
