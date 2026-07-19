@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
+  Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
   Mountain, Award, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
   Camera, Loader2, Droplets, Flame, Leaf, Zap, Brain, Swords, Moon, Shield,
   Ghost, Palette, Languages, Hourglass, Gem, Circle,
@@ -160,6 +160,26 @@ function dnaStyle(label: string): { icon: React.ReactNode; color: string } {
   return mk(<Palette className="w-3.5 h-3.5" />, palette[h % palette.length]);
 }
 
+// Category dot color for the redesigned flat DNA pills.
+// amber = rarity/tier, blue = type/attribute, purple = people/character.
+function dnaDotColor(label: string): string {
+  const l = label.toLowerCase();
+  const RARITY = '#f59e0b';
+  const TYPE = '#3b82f6';
+  const PERSON = '#a78bfa';
+  if (
+    l === 'premium' || l.includes('premium cards') || l.includes('grail') ||
+    l.includes('era') || l.includes('vintage') || l.includes('classic') || l.includes('modern')
+  ) return RARITY;
+  if (
+    l === 'water' || l === 'fire' || l === 'grass' || l === 'lightning' || l === 'electric' ||
+    l === 'psychic' || l === 'fighting' || l === 'darkness' || l === 'dark' || l === 'fairy' ||
+    l === 'dragon' || l === 'metal' || l === 'steel' || l === 'ghost' || l === 'colorless' || l === 'normal' ||
+    l.includes('holo') || l.includes('secret') || l.includes('ultra') || l === 'rare'
+  ) return TYPE;
+  return PERSON;
+}
+
 // ─────────────────────────────────────────────────────────────
 // ProfileHeader — avatar (uploadable) + name + level + personality
 // ─────────────────────────────────────────────────────────────
@@ -169,12 +189,14 @@ function ProfileHeader({
   level,
   xp,
   personalityType,
+  progressPct,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
   personalityType?: string | null;
+  progressPct?: number;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -318,34 +340,31 @@ function ProfileHeader({
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight">
+          <div className="flex items-center justify-between gap-3">
+            <h1
+              className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight min-w-0"
+              onDoubleClick={() => !readOnly && setEditing(true)}
+              title={!readOnly ? 'Double-click to edit' : undefined}
+            >
               {name}
             </h1>
-            {!readOnly && (
-              <button
-                onClick={() => setEditing(true)}
-                className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
-                aria-label="Edit username"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
+            {typeof progressPct === 'number' && (
+              <span className="text-lg sm:text-xl font-semibold text-primary tabular-nums shrink-0">
+                {Math.round(progressPct)}%
+              </span>
             )}
           </div>
         )}
 
-        <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
-          Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          <span className="tabular-nums">Level {level}</span>
+          {personalityType && (
+            <>
+              <span className="text-muted-foreground/60 mx-1.5">·</span>
+              <span className="text-foreground font-medium">{personalityType}</span>
+            </>
+          )}
         </p>
-
-        {personalityType && (
-          <div className="mt-2.5 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-2.5 py-1 text-xs font-semibold ring-1 ring-primary/20">
-              <Sparkles className="w-3.5 h-3.5" />
-              {personalityType}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -403,6 +422,7 @@ export function ProgressionHero({
           level={lvl.current.level}
           xp={xp}
           personalityType={personalityType}
+          progressPct={lvl.pct}
         />
 
         <ProgressInline xp={xp} lvl={lvl} />
@@ -414,20 +434,20 @@ export function ProgressionHero({
             </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-2">Your Collector DNA</h3>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5">
                 {dnaLabels.map((label) => {
-                  const { icon, color } = dnaStyle(label);
+                  const dot = dnaDotColor(label);
                   return (
                     <span
                       key={label}
-                      className="inline-flex items-center gap-1.5 rounded-full border bg-transparent px-2.5 py-1 text-xs font-medium"
-                      style={{
-                        color,
-                        borderColor: `${color}80`,
-                        backgroundColor: `${color}12`,
-                      }}
+                      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium"
+                      style={{ backgroundColor: '#1a1c1a', color: '#d1d5db' }}
                     >
-                      <span aria-hidden style={{ color }}>{icon}</span>
+                      <span
+                        aria-hidden
+                        className="inline-block rounded-full shrink-0"
+                        style={{ width: 6, height: 6, backgroundColor: dot }}
+                      />
                       {label}
                     </span>
                   );
@@ -492,26 +512,20 @@ export function ProgressionHero({
 
 // ── Progress (inline, no wrapper card) ─────────────────
 function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFromXp> }) {
-  const pct = Math.round(lvl.pct);
   const remaining = lvl.next ? Math.max(0, lvl.nextXp - xp) : 0;
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progress</span>
-        <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
+      <div className="relative rounded-full bg-muted/60 overflow-hidden" style={{ height: 3 }}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${lvl.pct}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="absolute inset-y-0 left-0 rounded-full bg-primary"
+        />
       </div>
-        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${lvl.pct}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute inset-y-0 left-0 rounded-full bg-primary"
-            style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
-          />
-        </div>
-      <p className="mt-2 text-[10px] sm:text-xs text-muted-foreground text-right">
+      <p className="mt-2 text-xs text-muted-foreground">
         {lvl.next ? (
-          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
+          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to level {lvl.next.level}</>
         ) : (
           <>You've reached the highest level.</>
         )}
