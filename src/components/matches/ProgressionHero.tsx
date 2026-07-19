@@ -520,58 +520,68 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
   );
 }
 
-// ── Next Goal — minimal ─────────────────────────────────
-function NextGoalCard({
+// ── Milestones Timeline (includes Next Goal) ─────────────────
+function MilestonesTimeline({
   swiped,
   goal,
 }: {
   swiped: number;
-  goal: (typeof SWIPE_MILESTONES)[number];
+  goal: (typeof SWIPE_MILESTONES)[number] | null;
 }) {
-  const prev = [...SWIPE_MILESTONES].reverse().find((m) => m.at <= swiped)?.at ?? 0;
-  const denom = Math.max(1, goal.at - prev);
-  const done = Math.max(0, swiped - prev);
-  const pct = Math.min(100, (done / denom) * 100);
-  const remaining = Math.max(0, goal.at - swiped);
-
-  return (
-    <div className="rounded-2xl border border-border/60 bg-card p-5 sm:p-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
-          <h3 className="text-lg sm:text-xl font-semibold text-foreground">{goal.title} Badge</h3>
-          <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">Reward · {goal.reward}</p>
-        </div>
-        <div className="w-12 h-12 rounded-xl border border-border/70 bg-muted/40 text-foreground/80 flex items-center justify-center shrink-0">
-          {goal.icon}
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <div className="flex items-baseline justify-between mb-2">
-          <span className="text-sm text-muted-foreground tabular-nums">
-            <span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes
-          </span>
-          <span className="text-sm text-muted-foreground tabular-nums">{remaining.toLocaleString()} to go</span>
-        </div>
-        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute inset-y-0 left-0 rounded-full bg-primary"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Milestones Timeline ──────────────────────────────────
-function MilestonesTimeline({ swiped }: { swiped: number }) {
   const N = SWIPE_MILESTONES.length;
+
+  // Next Goal progress calculations
+  const prevAt = goal ? ([...SWIPE_MILESTONES].reverse().find((m) => m.at <= swiped)?.at ?? 0) : 0;
+  const denom = goal ? Math.max(1, goal.at - prevAt) : 1;
+  const done = goal ? Math.max(0, swiped - prevAt) : 0;
+  const pct = goal ? Math.min(100, (done / denom) * 100) : 0;
+  const remaining = goal ? Math.max(0, goal.at - swiped) : 0;
+
   return (
     <div className="rounded-2xl border border-border/60 bg-card py-5 sm:py-6">
+      {/* Combined header: Next Goal + Milestones title */}
+      <div className="px-6 sm:px-7">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground">
+              {goal ? `${goal.title} Badge` : 'All Milestones Complete'}
+            </h3>
+            <p className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground">
+              {goal ? `Reward · ${goal.reward}` : 'You have reached every milestone'}
+            </p>
+          </div>
+          {goal && (
+            <div className="w-12 h-12 rounded-xl border border-border/70 bg-muted/40 text-foreground/80 flex items-center justify-center shrink-0">
+              {goal.icon}
+            </div>
+          )}
+        </div>
+
+        {goal && (
+          <div className="mt-4">
+            <div className="flex items-baseline justify-between mb-2">
+              <span className="text-sm text-muted-foreground tabular-nums">
+                <span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes
+              </span>
+              <span className="text-sm text-muted-foreground tabular-nums">{remaining.toLocaleString()} to go</span>
+            </div>
+            <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 0.8, ease: 'easeOut' }}
+                className="absolute inset-y-0 left-0 rounded-full bg-primary"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="relative h-px w-full mt-5 mb-4">
+          <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
+        </div>
+      </div>
+
       <h3 className="text-base font-semibold text-foreground mb-4 px-6 sm:px-7">Swipe Milestones</h3>
 
       {/* Horizontal scroll on mobile — 3 visible at a time. */}
@@ -579,8 +589,8 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
         <div className="flex items-start min-w-max">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
-            const prevAt = SWIPE_MILESTONES[i - 1]?.at ?? 0;
-            const current = !done && swiped >= prevAt;
+            const milestonePrevAt = SWIPE_MILESTONES[i - 1]?.at ?? 0;
+            const current = !done && swiped >= milestonePrevAt;
             const isLast = i === N - 1;
             // Segment (this circle -> next circle) fill fraction.
             let segFill = 0;
@@ -640,6 +650,7 @@ function MilestonesTimeline({ swiped }: { swiped: number }) {
     </div>
   );
 }
+
 
 // ── Stats grid ──────────────────────────────────────────
 function StatsGrid({
