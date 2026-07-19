@@ -588,7 +588,6 @@ export default function Matches({
                   <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
                   <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
                   <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-                  {!isPublicView && <DNAReportCTA taste={taste} />}
                 </div>
               )}
             </div>
@@ -1963,79 +1962,6 @@ function InsightTable({ items, label }: { items: AttrCount[]; label: string }) {
           );
         })}
       </ul>
-    </Card>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// DNA Report CTA — Pro users view, free users upgrade prompt
-// ─────────────────────────────────────────────────────────────
-function DNAReportCTA({ taste }: { taste: TasteProfile }) {
-  const navigate = useNavigate();
-  const { isPremium, loading } = useIsPremium();
-  const [personalityType, setPersonalityType] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const parsed: any = await readPersonalityForCurrentUser();
-        if (!cancelled) setPersonalityType(parsed?.type ?? null);
-      } catch { if (!cancelled) setPersonalityType(null); }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const likesCount = taste.totalLikes;
-  const personaLabel = personalityType ? ` and your ${personalityType} personality` : '';
-
-  if (loading) return null;
-
-  if (isPremium) {
-    return (
-      <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/[0.08] via-primary/[0.04] to-transparent p-6 sm:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
-          <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6 text-primary" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-lg sm:text-xl font-bold text-foreground">Your PokeIQ DNA Report</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              A living report built from every card you've swiped{personaLabel}. It continues to evolve as you do.
-            </p>
-          </div>
-          <Button
-            size="lg"
-            onClick={() => navigate('/report/generated?source=dna')}
-            className="gap-2 shrink-0"
-          >
-            View PokeIQ DNA <ArrowRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="relative overflow-hidden border-primary/30 bg-gradient-to-br from-primary/[0.08] via-primary/[0.04] to-transparent p-6 sm:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
-        <div className="w-12 h-12 rounded-xl bg-primary/15 border border-primary/30 flex items-center justify-center shrink-0">
-          <Lock className="w-6 h-6 text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="text-lg sm:text-xl font-bold text-foreground">Generate your custom collector report</h3>
-          <p className="text-sm text-muted-foreground mt-1">
-            Turn your {likesCount > 0 ? `${likesCount} likes` : 'swipes'}{personaLabel} into a personalized PokeIQ DNA report — a living profile that evolves with every swipe. Available to Pro members.
-          </p>
-        </div>
-        <Button
-          size="lg"
-          onClick={() => navigate('/premium')}
-          className="gap-2 shrink-0"
-        >
-          Upgrade to Pro <ArrowRight className="w-4 h-4" />
-        </Button>
-      </div>
     </Card>
   );
 }
