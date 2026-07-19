@@ -530,8 +530,14 @@ export default function PokeYelp() {
     else setIndex(index + 1);
   }, [index, pool.length, loadPool]);
 
+  const hasSelection = selected.size > 0 || custom.length > 0 || customInput.trim().length > 0;
+
   const submit = async () => {
     if (!current) return;
+    if (!hasSelection) {
+      toast.error('Select a tag or add a custom tag before submitting', { position: 'top-center' });
+      return;
+    }
     const isPriorityCard = todaysMode;
     if (!userId) {
       // Track anon-reviewed priority cards so they don't repeat in the locked pool
@@ -1248,8 +1254,9 @@ export default function PokeYelp() {
                   <motion.div whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}>
                     <Button
                       onClick={submit}
-                      className="w-full h-12 sm:h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary my-[19px] py-[31px]"
-                      style={{ boxShadow: '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' }}
+                      disabled={!hasSelection}
+                      className="w-full h-12 sm:h-14 text-base font-bold rounded-2xl gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground hover:from-primary hover:to-primary disabled:opacity-40 disabled:cursor-not-allowed my-[19px] py-[31px]"
+                      style={{ boxShadow: hasSelection ? '0 0 28px hsl(var(--primary) / 0.45), 0 8px 24px hsl(var(--primary) / 0.25)' : 'none' }}
                     >
                        <Zap className="w-5 h-5" />
                       Submit Tags
