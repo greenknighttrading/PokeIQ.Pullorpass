@@ -271,11 +271,11 @@ function ProfileHeader({
   const avatarSrc = avatarUrl || squirtleAvatar;
 
   return (
-    <div className="flex items-start gap-4 sm:gap-5">
+    <div className="flex items-center gap-4 sm:gap-5">
       <div className="relative shrink-0">
         {/* Subtle emerald radial gradient behind avatar — 10% opacity at center */}
         <div
-          className="absolute -inset-6 rounded-full pointer-events-none z-0"
+          className="absolute -inset-5 rounded-full pointer-events-none z-0"
           style={{ background: 'radial-gradient(circle at center, hsl(var(--primary) / 0.10) 0%, transparent 60%)' }}
           aria-hidden
         />
@@ -284,7 +284,7 @@ function ProfileHeader({
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative z-10 w-24 h-24 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
+            'group relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
             !readOnly && 'cursor-pointer hover:ring-primary/60 hover:shadow-[0_10px_40px_rgba(59,158,143,0.25)] transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
@@ -320,7 +320,7 @@ function ProfileHeader({
         )}
       </div>
 
-      <div className="flex-1 min-w-0 pt-1">
+      <div className="flex-1 min-w-0">
         {editing && !readOnly ? (
           <div className="flex items-center gap-2">
             <Input
@@ -342,7 +342,7 @@ function ProfileHeader({
         ) : (
           <div className="flex items-center justify-between gap-3">
             <h1
-              className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight min-w-0"
+              className="text-xl sm:text-2xl font-bold text-foreground truncate tracking-tight min-w-0"
               onDoubleClick={() => !readOnly && setEditing(true)}
               title={!readOnly ? 'Double-click to edit' : undefined}
             >
@@ -356,7 +356,7 @@ function ProfileHeader({
           </div>
         )}
 
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="mt-1 text-sm text-muted-foreground">
           <span className="tabular-nums">Level {level}</span>
           {personalityType && (
             <>
@@ -401,7 +401,7 @@ export function ProgressionHero({
     <section className="space-y-6 sm:space-y-8">
       {/* Identity card — header + progress + DNA all together */}
       <div
-        className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-5 sm:p-6 space-y-6"
+        className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 sm:p-5 space-y-4"
         style={{
           boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.12), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
         }}
@@ -523,7 +523,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
           className="absolute inset-y-0 left-0 rounded-full bg-primary"
         />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-1.5 text-xs text-muted-foreground">
         {lvl.next ? (
           <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to level {lvl.next.level}</>
         ) : (
@@ -552,9 +552,9 @@ function MilestonesTimeline({
   const remaining = goal ? Math.max(0, goal.at - swiped) : 0;
 
   return (
-    <div className="rounded-2xl border border-border/60 bg-card py-5 sm:py-6">
+    <div className="rounded-2xl border border-border/60 bg-card py-4 sm:py-5">
       {/* Combined header: Next Goal + Milestones title */}
-      <div className="px-6 sm:px-7">
+      <div className="px-5 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-1">Next Goal</p>
@@ -573,7 +573,7 @@ function MilestonesTimeline({
         </div>
 
         {goal && (
-          <div className="mt-4">
+          <div className="mt-3">
             <div className="flex items-baseline justify-between mb-2">
               <span className="text-sm text-muted-foreground tabular-nums">
                 <span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes
@@ -590,16 +590,10 @@ function MilestonesTimeline({
             </div>
           </div>
         )}
-
-        <div className="relative h-px w-full mt-5 mb-4">
-          <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
-        </div>
       </div>
 
-      <h3 className="text-base font-semibold text-foreground mb-4 px-6 sm:px-7">Swipe Milestones</h3>
-
       {/* Horizontal scroll on mobile — 3 visible at a time. */}
-      <div className="overflow-x-auto scrollbar-none px-6 sm:px-7">
+      <div className="overflow-x-auto scrollbar-none px-5 sm:px-6">
         <div className="flex items-start min-w-max">
           {SWIPE_MILESTONES.map((m, i) => {
             const done = swiped >= m.at;
