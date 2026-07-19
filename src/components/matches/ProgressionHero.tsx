@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Pencil, Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
+  Check as CheckIcon, X as XClose, Trophy, Star, Crown, Sparkles,
   Mountain, Award, BookOpen, Heart as HeartIcon, Eye, Target, HelpCircle, Lock,
   Camera, Loader2, Droplets, Flame, Leaf, Zap, Brain, Swords, Moon, Shield,
   Ghost, Palette, Languages, Hourglass, Gem, Circle,
