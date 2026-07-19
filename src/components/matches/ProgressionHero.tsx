@@ -512,26 +512,20 @@ export function ProgressionHero({
 
 // ── Progress (inline, no wrapper card) ─────────────────
 function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelFromXp> }) {
-  const pct = Math.round(lvl.pct);
   const remaining = lvl.next ? Math.max(0, lvl.nextXp - xp) : 0;
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-2">
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Progress</span>
-        <span className="text-sm font-semibold text-foreground tabular-nums">{pct}%</span>
+      <div className="relative rounded-full bg-muted/60 overflow-hidden" style={{ height: 3 }}>
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${lvl.pct}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="absolute inset-y-0 left-0 rounded-full bg-primary"
+        />
       </div>
-        <div className="relative h-2 rounded-full bg-muted/60 overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${lvl.pct}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute inset-y-0 left-0 rounded-full bg-primary"
-            style={{ boxShadow: '0 0 14px 2px hsl(var(--primary) / 0.32)' }}
-          />
-        </div>
-      <p className="mt-2 text-[10px] sm:text-xs text-muted-foreground text-right">
+      <p className="mt-2 text-xs text-muted-foreground">
         {lvl.next ? (
-          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP until Level {lvl.next.level}</>
+          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to level {lvl.next.level}</>
         ) : (
           <>You've reached the highest level.</>
         )}
