@@ -1608,7 +1608,6 @@ export default function PokeIQDailyTab({ mastheadTitle, mastheadSubtitle, hideWa
         <GreatestHitsIndex />
       </div>
 
-      {/* Watchlist / Greatest Hits Row */}
       {/* Investing Ideas — daily rotating picks */}
       <SectionRule title="Market Spotlight · 7D" icon={ShoppingCart} />
       <InvestingIdeas />
