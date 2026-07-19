@@ -35,7 +35,6 @@ import { MoverCard, getImageUrl, getChangeForTime, getBuyScore, getRecommendatio
 import { useWatchlist } from '@/hooks/useWatchlist';
 import SetsExplorer from './SetsExplorer';
 import EraTimeline from './EraTimeline';
-import PackPicker from './PackPicker';
 
 /* ── Types ── */
 interface Headline {
