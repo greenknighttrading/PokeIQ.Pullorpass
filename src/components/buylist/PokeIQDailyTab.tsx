@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react'
 import PulseCard from './PulseCard';
 import { useNavigate } from 'react-router-dom';
 import {
-  Loader2, TrendingUp, TrendingDown, Eye,
+  Loader2, TrendingUp, TrendingDown,
   Zap, LogIn, PlusCircle, CheckCircle,
   SlidersHorizontal, ChevronDown, Newspaper, ExternalLink, Layers, CreditCard,
   Briefcase, AlertTriangle, Lock, ArrowDownRight, ArrowUpRight, ShoppingCart,
