@@ -189,12 +189,14 @@ function ProfileHeader({
   level,
   xp,
   personalityType,
+  progressPct,
 }: {
   readOnly?: boolean;
   staticName?: string;
   level: number;
   xp: number;
   personalityType?: string | null;
+  progressPct?: number;
 }) {
   const [userId, setUserId] = useState<string | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -338,34 +340,31 @@ function ProfileHeader({
             </Button>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight">
+          <div className="flex items-center justify-between gap-3">
+            <h1
+              className="text-2xl sm:text-3xl font-bold text-foreground truncate tracking-tight min-w-0"
+              onDoubleClick={() => !readOnly && setEditing(true)}
+              title={!readOnly ? 'Double-click to edit' : undefined}
+            >
               {name}
             </h1>
-            {!readOnly && (
-              <button
-                onClick={() => setEditing(true)}
-                className="text-muted-foreground hover:text-foreground p-1.5 rounded-md hover:bg-muted transition-colors shrink-0"
-                aria-label="Edit username"
-              >
-                <Pencil className="w-3.5 h-3.5" />
-              </button>
+            {typeof progressPct === 'number' && (
+              <span className="text-lg sm:text-xl font-semibold text-primary tabular-nums shrink-0">
+                {Math.round(progressPct)}%
+              </span>
             )}
           </div>
         )}
 
-        <p className="mt-1.5 text-sm text-muted-foreground tabular-nums">
-          Level {level} <span className="text-muted-foreground/60 mx-1">·</span> {xp.toLocaleString()} XP
+        <p className="mt-1.5 text-sm text-muted-foreground">
+          <span className="tabular-nums">Level {level}</span>
+          {personalityType && (
+            <>
+              <span className="text-muted-foreground/60 mx-1.5">·</span>
+              <span className="text-foreground font-medium">{personalityType}</span>
+            </>
+          )}
         </p>
-
-        {personalityType && (
-          <div className="mt-2.5 flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary px-2.5 py-1 text-xs font-semibold ring-1 ring-primary/20">
-              <Sparkles className="w-3.5 h-3.5" />
-              {personalityType}
-            </span>
-          </div>
-        )}
       </div>
     </div>
   );
