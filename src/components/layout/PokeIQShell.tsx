@@ -31,7 +31,7 @@ const primaryNav: NavItem[] = [
   { label: 'Matches', href: '/binder', icon: BookOpen },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
-  { label: 'Social', href: '/leaderboard', icon: Trophy },
+  { label: 'Arena', href: '/arena', icon: Trophy },
 ];
 
 // Mobile bottom bar order (Profile lives in the top-right avatar)
@@ -40,7 +40,7 @@ const mobileNav: NavItem[] = [
   { label: 'Matches', href: '/binder', icon: BookOpen },
   { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
-  { label: 'Social', href: '/leaderboard', icon: Trophy },
+  { label: 'Arena', href: '/arena', icon: Trophy },
   { label: 'Profile', href: '/profile', icon: User },
 ];
 
