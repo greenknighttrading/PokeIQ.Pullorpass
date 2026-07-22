@@ -20,6 +20,21 @@ import {
   UserPick,
 } from '@/lib/dailyBattle';
 
+const GUEST_PICKS_KEY_PREFIX = 'pop_daily_battle_guest_';
+function guestKey() { return `${GUEST_PICKS_KEY_PREFIX}${estToday()}`; }
+function readGuestPicks(): Array<UserPick & { pair: DailyBattlePair; winner: DailyBattleCard; loser: DailyBattleCard }> {
+  try {
+    const raw = localStorage.getItem(guestKey());
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function writeGuestPicks(picks: Array<UserPick & { pair: DailyBattlePair; winner: DailyBattleCard; loser: DailyBattleCard }>) {
+  try { localStorage.setItem(guestKey(), JSON.stringify(picks)); } catch {}
+}
+function clearGuestPicks() { try { localStorage.removeItem(guestKey()); } catch {} }
+
 function formatCountdown(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
