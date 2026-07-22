@@ -1,33 +1,29 @@
-## Plan
+## Rename "Social" to "Arena" and build the Arena hub
 
-1. **Create one shared card-quality filter**
-   - Add a small reusable utility that clearly separates displayable single cards from sealed/non-card products.
-   - Treat a card as invalid if it is explicitly `sealed`, or if its name/set/card id contains sealed/product terms like booster, box, pack, deck, tin, ETB, bundle, blister, case, collection, code card, energy, trainer, etc.
-   - Use this stricter predicate even when the backend row says `product_type = card`, because the data sample shows mislabeled rows.
+Turn the current single-link Social tab into an **Arena** hub — a landing page at `/arena` that houses Daily Battle (free, for everyone), This or That (premium), and the Leaderboard. Daily Battle gets top billing because it's the everyday shared experience; This or That is clearly marked as the premium extension of the same idea.
 
-2. **Apply the filter at card source points**
-   - Update Pull or Pass round loading so new swipe rounds only include single cards.
-   - Update feed filter refresh so selecting formats cannot accidentally reintroduce sealed products into the standard card feed.
-   - Update recommendations so “Recommended for you” cannot include sealed/code/energy/trainer products.
-   - Update likes/pass/profile rendering so old bad data already stored for users is hidden from Matches/Binder/Profile.
+### Changes
 
-3. **Deduplicate cards before display**
-   - Deduplicate swipe-history rows by `card_id` before rendering Liked, Disliked, binder, and recent-round sections.
-   - For repeated swipe records, keep the latest decision for the recent Liked/Disliked carousels so a user sees one card once.
-   - Keep existing `pokeiq_likes` behavior, but add UI-side dedupe as a safety net for cached/local/server merges.
+**Navigation (`src/components/layout/PokeIQShell.tsx`)**
+- Rename the `Social` item in both `primaryNav` and `mobileNav` to **Arena**, keep the `Trophy` icon, and point `href` to `/arena`.
 
-4. **Fix thumbnail image fallback behavior**
-   - For Matches rows, fetch both `tcgplayer_id` and stored `image_url` metadata for visible cards, not only affiliate ids.
-   - Render thumbnails with an ordered fallback list: saved image → database image → TCGPlayer CDN URL from id.
-   - If the first image fails, automatically try the next candidate instead of immediately showing the broken-image placeholder.
-   - Pass the resolved image into the detail modal so the thumbnail and click-in view use the same best available art.
+**New route (`src/App.tsx` + `src/pages/Arena.tsx`)**
+- Add `/arena` route wrapped in `PokeIQShell`, lazy-loaded like siblings.
+- The `Arena` page has three sections stacked for mobile, 2-column-ish grid on desktop:
+  1. **Daily Battle (hero card, free for everyone)** — reuses `DailyBattleEntryCard` at full width with a "Free · Daily · Everyone plays" caption. Copy makes clear all 5 battles are free.
+  2. **This or That (premium)** — large card that links to `/this-or-that`. Shows a small `Crown` badge + "Premium" pill; for non-premium users the primary CTA reads "Unlock with Pro" and routes to `/premium`, with a secondary "Preview" link to `/this-or-that`. Copy: "200 personalized battles — pick your favorite and train your taste."
+  3. **Leaderboard** — card linking to `/leaderboard` with a short "See how you rank against every collector" line and a preview of top ranks (optional stretch: read top 3 from existing leaderboard query; skip if it adds complexity).
 
-5. **Prevent future duplicate swipe records**
-   - Before inserting a swipe, check whether that user has already swiped that `card_id`; if yes, update/skip instead of inserting another duplicate.
-   - Add a backend uniqueness guard for future data if feasible: one swipe row per `user_id + card_id`, with latest decision/tags preserved.
-   - Avoid destructive cleanup in this pass; old duplicates will be hidden by the display dedupe.
+**Leaderboard page**
+- Keep `/leaderboard` intact. Add a small "← Back to Arena" breadcrumb link at the top so users who deep-link out of Arena can return.
 
-6. **Verify**
-   - Check `/binder` after changes: Recommended above Liked, Liked images render or fall back properly, Disliked remains collapsed.
-   - Confirm no visible sealed/code/energy/trainer products appear in Recommended, Liked, Disliked, or Binder.
-   - Confirm duplicate cards appear only once for users with repeated swipe history.
+**SEO**
+- Set `<title>Arena — Daily Battle, This or That, Leaderboard</title>` and matching meta description via the existing `Seo` component on the Arena page.
+
+### Out of scope
+- No changes to Daily Battle mechanics, This or That gating, or Leaderboard data.
+- No database changes.
+- Existing entry cards on Matches / Results pages stay put.
+
+### Visual direction
+Follows current dark/teal system: cards use `bg-card/40`, `border-border/60`, primary teal accents for Daily Battle, violet accents (matching Premium tab) on the This or That card, gold `Trophy` accent on Leaderboard. No new palette.

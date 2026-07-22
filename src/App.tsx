@@ -71,6 +71,7 @@ const DailyBattle = lazy(() => import("./pages/DailyBattle"));
 const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const PokeIQLeaderboard = lazy(() => import("./pages/pokeiq/Leaderboard"));
+const Arena = lazy(() => import("./pages/Arena"));
 const PokeIQPremium = lazy(() => import("./pages/pokeiq/Premium"));
 const PokeIQCardIntelligence = lazy(() => import("./pages/pokeiq/CardIntelligence"));
 const PokeIQLastRound = lazy(() => import("./pages/pokeiq/LastRound"));
@@ -158,6 +159,7 @@ function AppRoutes() {
         <Route path="/this-or-that" element={<PokeIQShell><ThisOrThat /></PokeIQShell>} />
         <Route path="/daily-battle" element={<PokeIQShell><DailyBattle /></PokeIQShell>} />
         <Route path="/leaderboard" element={<PokeIQShell><PokeIQLeaderboard /></PokeIQShell>} />
+        <Route path="/arena" element={<PokeIQShell><Arena /></PokeIQShell>} />
         <Route path="/card-intelligence" element={<PokeIQShell><BuyListScanner /></PokeIQShell>} />
         <Route path="/premium" element={<PokeIQShell><PokeIQPremium /></PokeIQShell>} />
         <Route path="/checkout/return" element={<CheckoutReturn />} />
