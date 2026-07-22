@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { Sparkles, User, BarChart3, Heart, ChevronRight } from 'lucide-react';
+import { Sparkles, User, BarChart3, Heart, ChevronRight, Zap, Infinity as InfinityIcon, Brain, Trophy } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -214,10 +214,38 @@ export default function Auth() {
       <div className="lg:w-1/2 p-8 lg:p-16 flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Get Started</CardTitle>
-            <CardDescription>Create an account or login to continue</CardDescription>
+            <CardTitle className="text-2xl">Unlock your Collector DNA</CardTitle>
+            <CardDescription>Create a free account to save your picks — and see what Pro unlocks.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Premium benefits */}
+            <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] to-transparent p-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-widest font-bold text-primary bg-primary/15 border border-primary/30 rounded-full px-2 py-0.5">
+                  PokeIQ Pro
+                </span>
+                <span className="text-[11px] text-muted-foreground">What you get when you upgrade</span>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  { icon: Zap, title: '+300 bonus swipes / month', desc: 'Rollover up to 600 in the bank.' },
+                  { icon: InfinityIcon, title: 'Unlimited Battle Arena', desc: '1B+ matchups to sharpen your Collector DNA.' },
+                  { icon: Brain, title: 'Advanced collector insights', desc: 'Personality deep-dives, era trends, price signals.' },
+                  { icon: Trophy, title: 'Leaderboards & badges', desc: 'Climb the ranks and earn exclusive rewards.' },
+                ].map((b) => (
+                  <li key={b.title} className="flex items-start gap-2.5">
+                    <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
+                      <b.icon className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold leading-tight">{b.title}</p>
+                      <p className="text-[11px] text-muted-foreground leading-snug">{b.desc}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             {/* Google Sign-In */}
             <Button
               variant="outline"

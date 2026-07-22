@@ -20,6 +20,21 @@ import {
   UserPick,
 } from '@/lib/dailyBattle';
 
+const GUEST_PICKS_KEY_PREFIX = 'pop_daily_battle_guest_';
+function guestKey() { return `${GUEST_PICKS_KEY_PREFIX}${estToday()}`; }
+function readGuestPicks(): Array<UserPick & { pair: DailyBattlePair; winner: DailyBattleCard; loser: DailyBattleCard }> {
+  try {
+    const raw = localStorage.getItem(guestKey());
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+function writeGuestPicks(picks: Array<UserPick & { pair: DailyBattlePair; winner: DailyBattleCard; loser: DailyBattleCard }>) {
+  try { localStorage.setItem(guestKey(), JSON.stringify(picks)); } catch {}
+}
+function clearGuestPicks() { try { localStorage.removeItem(guestKey()); } catch {} }
+
 function formatCountdown(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
   const h = Math.floor(s / 3600);
@@ -141,9 +156,42 @@ export default function DailyBattle() {
           fetchCommunityResults(),
         ]);
         setPairs(dailyPairs);
-        setPicks(myPicks);
         setResults(comm);
-        setIndex(Math.min(myPicks.length, dailyPairs.length));
+
+        // If user just signed in and had guest picks queued, flush them now.
+        if (uid) {
+          const pending = readGuestPicks();
+          const existingIdx = new Set(myPicks.map((p) => p.matchup_index));
+          const toSubmit = pending.filter((p) => !existingIdx.has(p.matchup_index));
+          if (toSubmit.length) {
+            await Promise.all(
+              toSubmit.map((p) =>
+                submitDailyVote({
+                  matchupIndex: p.matchup_index,
+                  pair: p.pair,
+                  winner: p.winner,
+                  loser: p.loser,
+                  userId: uid,
+                }),
+              ),
+            );
+            clearGuestPicks();
+            const merged = [...myPicks, ...toSubmit.map((p) => ({ matchup_index: p.matchup_index, winner_card_id: p.winner_card_id }))];
+            setPicks(merged);
+            setIndex(Math.min(merged.length, dailyPairs.length));
+            const fresh = await fetchCommunityResults();
+            setResults(fresh);
+          } else {
+            setPicks(myPicks);
+            setIndex(Math.min(myPicks.length, dailyPairs.length));
+          }
+        } else {
+          // Guest — hydrate from localStorage so they can resume today's picks.
+          const guest = readGuestPicks();
+          const guestPicks: UserPick[] = guest.map((g) => ({ matchup_index: g.matchup_index, winner_card_id: g.winner_card_id }));
+          setPicks(guestPicks);
+          setIndex(Math.min(guestPicks.length, dailyPairs.length));
+        }
       } catch (e) {
         console.warn('daily battle load failed', e);
       } finally {
@@ -164,19 +212,29 @@ export default function DailyBattle() {
     async (winner: DailyBattleCard, loser: DailyBattleCard) => {
       if (!currentPair || locked) return;
 
-      if (!userId) {
-        navigate('/auth', { state: { from: '/daily-battle' } });
-        return;
-      }
-
       setLocked({ winnerId: winner.card_id, loserId: loser.card_id });
-      await submitDailyVote({
-        matchupIndex: index,
-        pair: currentPair,
-        winner,
-        loser,
-        userId,
-      });
+      if (userId) {
+        await submitDailyVote({
+          matchupIndex: index,
+          pair: currentPair,
+          winner,
+          loser,
+          userId,
+        });
+      } else {
+        // Guest — save pick locally so we can submit after sign-in.
+        const prev = readGuestPicks();
+        writeGuestPicks([
+          ...prev,
+          {
+            matchup_index: index,
+            winner_card_id: winner.card_id,
+            pair: currentPair,
+            winner,
+            loser,
+          },
+        ]);
+      }
       // Immediately reflect the vote so agreement math is stable
       setPicks((prev) => [...prev, { matchup_index: index, winner_card_id: winner.card_id }]);
       // Optimistic community bump
@@ -187,8 +245,8 @@ export default function DailyBattle() {
         next[index] = tally;
         return next;
       });
-      // Then re-fetch fresh totals
-      await refreshResults();
+      // Then re-fetch fresh totals (skip for guests — RPC may require auth)
+      if (userId) await refreshResults();
 
       // Show results for ~2.2s then advance
       window.setTimeout(() => {
@@ -210,6 +268,9 @@ export default function DailyBattle() {
 
   // ── Results / completed view ─────────────────────────────
   if (!loading && completed) {
+    if (!userId) {
+      return <SignInGate onSignIn={() => navigate('/auth', { state: { from: '/daily-battle' } })} onBack={() => navigate(-1)} />;
+    }
     return <ResultsScreen pairs={pairs} picks={picks} results={results} countdown={countdownMs} onBack={() => navigate(-1)} />;
   }
 
@@ -457,6 +518,40 @@ function MiniCard({
         <div className={`text-sm font-bold tabular-nums ${isWinner ? 'text-primary' : 'text-muted-foreground'}`}>{pct}%</div>
       </div>
     </div>
+  );
+}
+
+function SignInGate({ onSignIn, onBack }: { onSignIn: () => void; onBack: () => void }) {
+  return (
+    <>
+      <Seo title="Sign in to see your results — Daily Battle | PokeIQ" description="Create a free account to unlock today's community results and unlock Pro perks." />
+      <main className="min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto w-full px-4 pt-4 pb-16">
+          <div className="flex items-center gap-3 mb-4">
+            <Button variant="ghost" size="sm" onClick={onBack} className="px-2">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-xl sm:text-2xl font-bold">All 5 battles locked in</h1>
+          </div>
+
+          <Card className="p-6 text-center bg-primary/[0.06] border-primary/25 mb-5">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/15 mb-3">
+              <Trophy className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold">Sign in to see your results</h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Create a free account to reveal how you stacked up against the community — and save today's picks to your Collector DNA.
+            </p>
+            <Button size="lg" className="mt-5 w-full sm:w-auto px-8" onClick={onSignIn}>
+              Sign in to reveal results
+            </Button>
+            <p className="text-[11px] text-muted-foreground mt-2">Free forever. No credit card.</p>
+          </Card>
+
+          <ProUpsell />
+        </div>
+      </main>
+    </>
   );
 }
 
