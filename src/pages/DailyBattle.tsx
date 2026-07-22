@@ -521,6 +521,40 @@ function MiniCard({
   );
 }
 
+function SignInGate({ onSignIn, onBack }: { onSignIn: () => void; onBack: () => void }) {
+  return (
+    <>
+      <Seo title="Sign in to see your results — Daily Battle | PokeIQ" description="Create a free account to unlock today's community results and unlock Pro perks." />
+      <main className="min-h-screen bg-background">
+        <div className="max-w-2xl mx-auto w-full px-4 pt-4 pb-16">
+          <div className="flex items-center gap-3 mb-4">
+            <Button variant="ghost" size="sm" onClick={onBack} className="px-2">
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <h1 className="text-xl sm:text-2xl font-bold">All 5 battles locked in</h1>
+          </div>
+
+          <Card className="p-6 text-center bg-primary/[0.06] border-primary/25 mb-5">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/15 mb-3">
+              <Trophy className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold">Sign in to see your results</h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Create a free account to reveal how you stacked up against the community — and save today's picks to your Collector DNA.
+            </p>
+            <Button size="lg" className="mt-5 w-full sm:w-auto px-8" onClick={onSignIn}>
+              Sign in to reveal results
+            </Button>
+            <p className="text-[11px] text-muted-foreground mt-2">Free forever. No credit card.</p>
+          </Card>
+
+          <ProUpsell />
+        </div>
+      </main>
+    </>
+  );
+}
+
 function ProUpsell() {
   return (
     <Card className="p-4 border-primary/30 bg-gradient-to-br from-primary/[0.08] to-transparent">
