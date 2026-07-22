@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchMyPicks, msUntilMidnightEST } from '@/lib/dailyBattle';
 
 interface Props {
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'hero';
   className?: string;
 }
 
@@ -36,7 +36,59 @@ export function DailyBattleEntryCard({ variant = 'default', className = '' }: Pr
   }, []);
 
   const done = completedCount >= 5;
-  const cta = done ? 'View Results' : completedCount > 0 ? 'Continue' : 'Start';
+  const cta = done ? 'View Results' : completedCount > 0 ? 'Continue Battle' : 'Start Battle';
+
+  if (variant === 'hero') {
+    return (
+      <Link
+        to="/daily-battle"
+        className={`block group ${className}`}
+        aria-label={done ? "View today's battle results" : "Play today's battle"}
+      >
+        <div className="relative overflow-hidden rounded-2xl border-2 border-primary/30 bg-gradient-to-br from-primary/[0.14] via-background to-background hover:from-primary/[0.2] transition-colors p-5 sm:p-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-8">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center">
+              {done ? (
+                <Check className="w-7 h-7 sm:w-9 sm:h-9 text-primary" strokeWidth={2.5} />
+              ) : (
+                <Swords className="w-7 h-7 sm:w-9 sm:h-9 text-primary" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-bold uppercase tracking-[0.14em] px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Free · Everyone Plays
+                </span>
+              </div>
+              <h2 className="mt-2 text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+                Today's Battle
+              </h2>
+              {!done && loaded && (
+                <div className="mt-1 text-sm font-semibold text-primary tabular-nums">
+                  {completedCount}/5
+                </div>
+              )}
+              {done && (
+                <div className="mt-1 text-sm font-semibold text-primary uppercase tracking-wider">
+                  Completed
+                </div>
+              )}
+              <p className="mt-2 text-sm sm:text-base text-muted-foreground max-w-lg">
+                {done
+                  ? 'Compare your picks with the community now that you\'ve finished.'
+                  : 'The same 5 matchups for every collector today. Compare your results with the community after you finish.'}
+              </p>
+            </div>
+            <div className="shrink-0">
+              <span className="inline-flex items-center gap-2 rounded-xl bg-primary text-primary-foreground px-6 py-3.5 text-base font-semibold shadow-[0_0_24px_hsl(var(--primary)/0.35)] transition-transform group-hover:translate-x-0.5">
+                {cta} <ArrowRight className="w-5 h-5" />
+              </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   return (
     <Link
