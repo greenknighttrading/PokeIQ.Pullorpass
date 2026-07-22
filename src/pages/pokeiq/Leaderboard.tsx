@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Crown, Trophy, BookOpen, Tag, Sparkles, Users } from 'lucide-react';
+import { Crown, Trophy, BookOpen, Tag, Sparkles, Users, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -74,6 +74,12 @@ export default function Leaderboard() {
 
   return (
     <div className="px-4 sm:px-6 lg:px-10 py-8 max-w-[1500px] mx-auto">
+      <Link
+        to="/arena"
+        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-4"
+      >
+        <ArrowLeft className="w-3.5 h-3.5" /> Back to Arena
+      </Link>
       <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-6">
         {/* Main column */}
         <div>
