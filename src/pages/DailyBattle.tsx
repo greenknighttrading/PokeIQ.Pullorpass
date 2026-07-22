@@ -156,9 +156,42 @@ export default function DailyBattle() {
           fetchCommunityResults(),
         ]);
         setPairs(dailyPairs);
-        setPicks(myPicks);
         setResults(comm);
-        setIndex(Math.min(myPicks.length, dailyPairs.length));
+
+        // If user just signed in and had guest picks queued, flush them now.
+        if (uid) {
+          const pending = readGuestPicks();
+          const existingIdx = new Set(myPicks.map((p) => p.matchup_index));
+          const toSubmit = pending.filter((p) => !existingIdx.has(p.matchup_index));
+          if (toSubmit.length) {
+            await Promise.all(
+              toSubmit.map((p) =>
+                submitDailyVote({
+                  matchupIndex: p.matchup_index,
+                  pair: p.pair,
+                  winner: p.winner,
+                  loser: p.loser,
+                  userId: uid,
+                }),
+              ),
+            );
+            clearGuestPicks();
+            const merged = [...myPicks, ...toSubmit.map((p) => ({ matchup_index: p.matchup_index, winner_card_id: p.winner_card_id }))];
+            setPicks(merged);
+            setIndex(Math.min(merged.length, dailyPairs.length));
+            const fresh = await fetchCommunityResults();
+            setResults(fresh);
+          } else {
+            setPicks(myPicks);
+            setIndex(Math.min(myPicks.length, dailyPairs.length));
+          }
+        } else {
+          // Guest — hydrate from localStorage so they can resume today's picks.
+          const guest = readGuestPicks();
+          const guestPicks: UserPick[] = guest.map((g) => ({ matchup_index: g.matchup_index, winner_card_id: g.winner_card_id }));
+          setPicks(guestPicks);
+          setIndex(Math.min(guestPicks.length, dailyPairs.length));
+        }
       } catch (e) {
         console.warn('daily battle load failed', e);
       } finally {
@@ -179,19 +212,29 @@ export default function DailyBattle() {
     async (winner: DailyBattleCard, loser: DailyBattleCard) => {
       if (!currentPair || locked) return;
 
-      if (!userId) {
-        navigate('/auth', { state: { from: '/daily-battle' } });
-        return;
-      }
-
       setLocked({ winnerId: winner.card_id, loserId: loser.card_id });
-      await submitDailyVote({
-        matchupIndex: index,
-        pair: currentPair,
-        winner,
-        loser,
-        userId,
-      });
+      if (userId) {
+        await submitDailyVote({
+          matchupIndex: index,
+          pair: currentPair,
+          winner,
+          loser,
+          userId,
+        });
+      } else {
+        // Guest — save pick locally so we can submit after sign-in.
+        const prev = readGuestPicks();
+        writeGuestPicks([
+          ...prev,
+          {
+            matchup_index: index,
+            winner_card_id: winner.card_id,
+            pair: currentPair,
+            winner,
+            loser,
+          },
+        ]);
+      }
       // Immediately reflect the vote so agreement math is stable
       setPicks((prev) => [...prev, { matchup_index: index, winner_card_id: winner.card_id }]);
       // Optimistic community bump
@@ -202,8 +245,8 @@ export default function DailyBattle() {
         next[index] = tally;
         return next;
       });
-      // Then re-fetch fresh totals
-      await refreshResults();
+      // Then re-fetch fresh totals (skip for guests — RPC may require auth)
+      if (userId) await refreshResults();
 
       // Show results for ~2.2s then advance
       window.setTimeout(() => {
@@ -225,6 +268,9 @@ export default function DailyBattle() {
 
   // ── Results / completed view ─────────────────────────────
   if (!loading && completed) {
+    if (!userId) {
+      return <SignInGate onSignIn={() => navigate('/auth', { state: { from: '/daily-battle' } })} onBack={() => navigate(-1)} />;
+    }
     return <ResultsScreen pairs={pairs} picks={picks} results={results} countdown={countdownMs} onBack={() => navigate(-1)} />;
   }
 
