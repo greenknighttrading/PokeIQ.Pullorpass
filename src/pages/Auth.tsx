@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
-import { Sparkles, User, BarChart3, Heart, ChevronRight, Zap, Infinity as InfinityIcon, Brain, Trophy } from 'lucide-react';
+import { Sparkles, User, BarChart3, Heart, ChevronRight, Zap, Swords, Newspaper, Medal, LayoutDashboard } from 'lucide-react';
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -215,23 +215,24 @@ export default function Auth() {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Unlock your Collector DNA</CardTitle>
-            <CardDescription>Create a free account to save your picks — and see what Pro unlocks.</CardDescription>
+            <CardDescription>Create a free account to save your picks and compete with collectors everywhere.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Premium benefits */}
+            {/* Free benefits */}
             <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/[0.08] to-transparent p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] uppercase tracking-widest font-bold text-primary bg-primary/15 border border-primary/30 rounded-full px-2 py-0.5">
-                  PokeIQ Pro
+                  Free for everyone
                 </span>
-                <span className="text-[11px] text-muted-foreground">What you get when you upgrade</span>
+                <span className="text-[11px] text-muted-foreground">What you get when you join</span>
               </div>
               <ul className="space-y-2.5">
                 {[
-                  { icon: Zap, title: '+300 bonus swipes / month', desc: 'Rollover up to 600 in the bank.' },
-                  { icon: InfinityIcon, title: 'Unlimited Battle Arena', desc: '1B+ matchups to sharpen your Collector DNA.' },
-                  { icon: Brain, title: 'Advanced collector insights', desc: 'Personality deep-dives, era trends, price signals.' },
-                  { icon: Trophy, title: 'Leaderboards & badges', desc: 'Climb the ranks and earn exclusive rewards.' },
+                  { icon: User, title: 'Collector Personality Test', desc: 'Discover your collector type and share it with friends.' },
+                  { icon: Swords, title: '5 Daily Battles', desc: 'Play the same matchups as everyone and see community results.' },
+                  { icon: Heart, title: 'Free Pull or Pass Swipes', desc: 'Build your Collector DNA with daily free swipes.' },
+                  { icon: LayoutDashboard, title: 'Portfolio Analysis', desc: 'Upload your collection and get a free health score report.' },
+                  { icon: Medal, title: 'Leaderboards & Rankings', desc: 'Earn points from Daily Battles and climb the ranks.' },
                 ].map((b) => (
                   <li key={b.title} className="flex items-start gap-2.5">
                     <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center shrink-0">
