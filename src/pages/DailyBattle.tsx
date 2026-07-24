@@ -224,7 +224,8 @@ export default function DailyBattle() {
 
       setLocked({ winnerId: winner.card_id, loserId: loser.card_id });
       if (userId) {
-        await submitDailyVote({
+        // Fire-and-forget: don't block the UI on network round-trip
+        void submitDailyVote({
           matchupIndex: index,
           pair: currentPair,
           winner,
@@ -255,14 +256,14 @@ export default function DailyBattle() {
         next[index] = tally;
         return next;
       });
-      // Then re-fetch fresh totals (skip for guests — RPC may require auth)
-      if (userId) await refreshResults();
+      // Then re-fetch fresh totals in the background (skip for guests)
+      if (userId) void refreshResults();
 
-      // Show results for ~2.2s then advance
+      // Brief confirmation, then advance
       window.setTimeout(() => {
         setLocked(null);
         setIndex((i) => i + 1);
-      }, 2200);
+      }, 700);
     },
     [currentPair, locked, userId, index, navigate, refreshResults],
   );
