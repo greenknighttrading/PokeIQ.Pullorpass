@@ -152,6 +152,19 @@ export default function DailyBattle() {
     return () => window.clearInterval(t);
   }, []);
 
+  // Preload upcoming pair images so advancing feels instant
+  useEffect(() => {
+    for (let k = index; k <= index + 2; k++) {
+      const p = pairs[k];
+      if (!p) continue;
+      [p.a.image_url, p.b.image_url].forEach((src) => {
+        if (!src) return;
+        const img = new Image();
+        img.src = src;
+      });
+    }
+  }, [pairs, index]);
+
   useEffect(() => {
     (async () => {
       setLoading(true);
