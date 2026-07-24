@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Seo } from '@/components/seo/Seo';
 import { supabase } from '@/integrations/supabase/client';
+import squirtleFallback from '@/assets/squirtle-default.png';
 import {
   agreementScore,
   DailyBattleCard,
@@ -57,6 +58,10 @@ function CardFace({
   onPick: () => void;
 }) {
   const [err, setErr] = useState(false);
+  const fallback = card.card_id
+    ? `https://tcgplayer-cdn.tcgplayer.com/product/${card.card_id.split('-').pop()}_in_1000x1000.jpg`
+    : null;
+  const showFallbackImg = !card.image_url || err;
   return (
     <motion.div
       className="flex-1 flex flex-col items-center w-full"
@@ -77,17 +82,22 @@ function CardFace({
               : '0 6px 24px hsl(var(--background) / 0.6)',
         }}
       >
-        {card.image_url && !err ? (
+        {!showFallbackImg ? (
           <img
-            src={card.image_url}
+            src={card.image_url!}
             alt={card.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain bg-muted/30"
             onError={() => setErr(true)}
             draggable={false}
+            loading="eager"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="w-10 h-10 text-muted-foreground" />
+          <div className="w-full h-full flex items-center justify-center bg-muted/30">
+            <img
+              src={squirtleFallback}
+              alt={card.name || 'Card placeholder'}
+              className="w-3/4 h-3/4 object-contain opacity-70"
+            />
           </div>
         )}
 
