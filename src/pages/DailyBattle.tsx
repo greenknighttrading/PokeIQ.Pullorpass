@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { hiResImageUrl } from '@/lib/cardDisplayFilters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, ImageOff, Loader2, Sparkles, Trophy } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -84,7 +85,7 @@ function CardFace({
       >
         {!showFallbackImg ? (
           <img
-            src={card.image_url!}
+            src={hiResImageUrl(card.image_url)!}
             alt={card.name}
             className="w-full h-full object-contain bg-muted/30"
             onError={() => setErr(true)}
@@ -157,7 +158,7 @@ export default function DailyBattle() {
     for (let k = index; k <= index + 2; k++) {
       const p = pairs[k];
       if (!p) continue;
-      [p.a.image_url, p.b.image_url].forEach((src) => {
+      [hiResImageUrl(p.a.image_url), hiResImageUrl(p.b.image_url)].forEach((src) => {
         if (!src) return;
         const img = new Image();
         img.src = src;
@@ -530,7 +531,7 @@ function MiniCard({
         className={`relative w-10 h-14 rounded-md overflow-hidden border ${isMine ? 'border-primary shadow-[0_0_0_2px_hsl(var(--primary)/0.35)]' : 'border-border'} bg-muted/30 shrink-0`}
       >
         {card.image_url && !err ? (
-          <img src={card.image_url} alt={card.name} className="w-full h-full object-cover" onError={() => setErr(true)} />
+          <img src={hiResImageUrl(card.image_url)!} alt={card.name} className="w-full h-full object-cover" onError={() => setErr(true)} />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <ImageOff className="w-4 h-4 text-muted-foreground" />
