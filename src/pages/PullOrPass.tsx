@@ -281,6 +281,8 @@ export default function PullOrPass() {
   const [flyAnim, setFlyAnim] = useState<{ type: 'pull' | 'love' | 'pass'; key: number } | null>(null);
   const [exitDir, setExitDir] = useState<SwipeDir | null>(null);
   const [matchCard, setMatchCard] = useState<SwipeCard | null>(null);
+  // @ts-ignore - dev preview hook
+  React.useEffect(() => { (window as any).__setMatchCard = (c: SwipeCard | null) => setMatchCard(c); }, []);
   const [matchCount, setMatchCount] = useState(0);
   const [pendingMatchAdvance, setPendingMatchAdvance] = useState<null | (() => void)>(null);
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
