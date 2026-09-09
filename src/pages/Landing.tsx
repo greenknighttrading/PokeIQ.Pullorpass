@@ -69,7 +69,7 @@ function useGreatestHits() {
           const current = row.price ?? 0;
           const pct = row.price_change_7d ?? 0;
           const prev = current / (1 + pct / 100);
-          const imgUrl = row.image_url || (row.tcgplayer_id ? `https://tcgplayer-cdn.tcgplayer.com/product/${row.tcgplayer_id}_in_200x200.jpg` : null);
+          const imgUrl = row.image_url || (row.tcgplayer_id ? `https://product-images.tcgplayer.com/fit-in/400x400/${row.tcgplayer_id}.jpg` : null);
           const card: MoverCard = {
             id: row.id, card_id: row.card_id, name: row.name,
             setName: row.set_name ?? '', rarity: row.rarity,

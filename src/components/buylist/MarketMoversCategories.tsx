@@ -96,7 +96,7 @@ function getChangeCol(period: TimePeriod): 'price_change_7d' | 'price_change_30d
 
 function getImageUrl(row: SnapshotRow): string | null {
   if (row.image_url) return row.image_url;
-  if (row.tcgplayer_id) return `https://tcgplayer-cdn.tcgplayer.com/product/${row.tcgplayer_id}_in_200x200.jpg`;
+  if (row.tcgplayer_id) return `https://product-images.tcgplayer.com/fit-in/400x400/${row.tcgplayer_id}.jpg`;
   return null;
 }
 
