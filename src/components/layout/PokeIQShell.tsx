@@ -272,16 +272,16 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
         {sidebarInner}
       </aside>
 
-      <main className="flex-1 min-w-0 pb-24 md:pb-0">
+      <main className="flex-1 min-w-0 pb-20 md:pb-0">
         {/* Top bar with profile in upper right */}
         <div
           className={cn(
-            'sticky top-0 z-30 flex items-center gap-2 px-5 py-3 bg-background/70 backdrop-blur-md border-b border-border/40'
+            'sticky top-0 z-30 flex items-center gap-2 px-5 py-2.5 bg-background/80 backdrop-blur-xl border-b border-border/40'
           )}
         >
           {/* Mobile brand */}
           <Link to="/" className="md:hidden flex items-center gap-2">
-            <img src={pokeiqLogo} alt="PokeIQ" className="h-7 w-auto" />
+             <img src={pokeiqLogo} alt="PokeIQ" className="h-7 w-auto drop-shadow-[0_0_10px_hsl(var(--primary)/0.3)]" />
             <span className="font-bold text-base tracking-tight">PokeIQ</span>
           </Link>
 
@@ -332,10 +332,10 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
 
         {/* Mobile floating pill tab bar */}
         <nav
-          className="md:hidden fixed bottom-2 left-4 right-4 z-40 rounded-[32px] border border-border/60 bg-background/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.25)] pb-[env(safe-area-inset-bottom)]"
+          className="md:hidden fixed bottom-2 left-3 right-3 z-40 rounded-[28px] border border-border/80 bg-background/95 backdrop-blur-xl shadow-[0_10px_34px_hsl(var(--background)/0.8)] pb-[env(safe-area-inset-bottom)]"
           aria-label="Primary"
         >
-          <ul className="flex items-center justify-around px-1 pt-0 pb-2">
+          <ul className="flex items-center justify-around px-1 py-1.5">
             {mobileNav.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -346,13 +346,13 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
                   <Link
                     to={item.href}
                     className={cn(
-                      'flex flex-col items-center justify-center gap-0 py-0 px-1 rounded-xl text-[10px] font-medium transition-all duration-200',
+                       'flex flex-col items-center justify-center gap-0.5 px-0.5 rounded-xl text-[9px] font-semibold transition-all duration-200',
                       isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
                     )}
                   >
                     <span
                       className={cn(
-                        'flex items-center justify-center w-8 h-8 rounded-full transition-colors duration-200',
+                         'flex items-center justify-center w-8 h-7 rounded-full transition-colors duration-200',
                         isActive
                           ? 'bg-primary/20 text-primary shadow-[0_0_12px_hsl(var(--primary)/0.2)]'
                           : 'text-muted-foreground'

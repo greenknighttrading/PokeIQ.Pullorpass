@@ -1105,9 +1105,9 @@ export default function PullOrPass() {
         title="Pull or Pass — Train Your DNA Profile | PokeIQ"
         description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving DNA Profile."
       />
-      <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-screen overflow-hidden'}`}>
+      <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-[calc(100dvh-7.75rem)] md:h-screen overflow-hidden'}`}>
 
-        <main className={`flex-1 min-h-0 w-full mx-auto py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
+        <main className={`flex-1 min-h-0 w-full mx-auto py-1.5 sm:py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
           <AnimatePresence>
@@ -1145,8 +1145,8 @@ export default function PullOrPass() {
             <div className="relative flex-1 min-h-0 flex flex-col">
               <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
               {/* Progress + quota */}
-              <div className="flex items-center justify-between mb-1.5 sm:mb-3 gap-3">
-                <span className="text-xs sm:text-sm font-medium text-muted-foreground tabular-nums">
+              <div className="flex items-center justify-between mb-1 gap-3 px-0.5">
+                <span className="text-[10px] sm:text-sm font-semibold uppercase text-muted-foreground tabular-nums">
                   Card <span className="text-foreground font-semibold">{index + 1}</span>
                   <span className="text-muted-foreground/60"> / {cards.length}</span>
                 </span>
@@ -1154,24 +1154,27 @@ export default function PullOrPass() {
                    {userId && (
                      <>
                         {premium ? (
-                         <button
+                         <Button
+                           variant="outline"
+                           size="sm"
                            type="button"
                            onClick={() => setFiltersOpen(true)}
-                           className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-primary hover:text-primary/80 transition-colors"
+                           className="h-8 rounded-full gap-1.5 px-3 text-xs font-semibold text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
                          >
-                           <SlidersHorizontal className="w-3 h-3" /> Filter
-                         </button>
+                           <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
+                         </Button>
                        ) : (
-                         <button
+                         <Button
+                           variant="outline"
+                           size="sm"
                            type="button"
                            onClick={() => setInviteOpen(true)}
-                            className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-violet-300 hover:text-violet-200 transition-colors"
+                            className="h-8 rounded-full gap-1.5 px-3 text-xs font-semibold text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
                             title="Upgrade to Premium to unlock filters"
                          >
-                           <Lock className="w-3 h-3" /> Filter
-                         </button>
+                            <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
+                          </Button>
                        )}
-                       <span className="text-muted-foreground/40">·</span>
                      </>
                    )}
                     {premiumLoading ? null : premium ? (
@@ -1185,7 +1188,7 @@ export default function PullOrPass() {
                   )}
                 </div>
               </div>
-              <div className="h-1.5 sm:h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-2 sm:mb-4 shadow-inner">
+              <div className="h-[3px] sm:h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-1.5 sm:mb-4 shadow-inner">
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
                   initial={false}
@@ -1196,7 +1199,7 @@ export default function PullOrPass() {
 
               {/* Card stack */}
               {/* Branded game title */}
-              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-1 sm:mb-2 select-none">
+              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2 sm:mb-2 select-none">
                 {/* Animated glow backdrop */}
                 <motion.div
                   aria-hidden
@@ -1222,7 +1225,7 @@ export default function PullOrPass() {
                 <div className="inline-flex items-center gap-2.5">
                   <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
                   <motion.h1
-                    className="font-black uppercase tracking-[0.18em] text-2xl sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
+                    className="font-black uppercase tracking-[0.12em] text-[28px] sm:text-4xl md:text-5xl leading-none bg-clip-text text-transparent"
                     style={{
                       backgroundImage:
                         'linear-gradient(100deg, hsl(var(--primary)) 0%, #b8fff0 25%, hsl(var(--primary)) 50%, #c7a8ff 75%, hsl(var(--primary)) 100%)',
@@ -1237,21 +1240,21 @@ export default function PullOrPass() {
                   </motion.h1>
                   <Sparkles className="w-4 h-4 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.9)] animate-pulse" />
                 </div>
-                <p className="mt-0.5 sm:mt-1.5 text-[10px] sm:text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
+                <p className="hidden sm:block mt-1.5 text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
                   A game by <span className="text-primary/90 font-semibold">PokeIQ</span>
                 </p>
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 min-h-0 flex flex-col items-center justify-start gap-3 relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start relative">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
-                  className="relative aspect-[2.5/3.5] w-auto"
-                  style={{ touchAction: 'none', height: 'min(56vh, 420px)' }}
+                  className="relative aspect-[2.5/3.5] w-auto max-w-full"
+                  style={{ touchAction: 'none', height: 'min(49dvh, 430px)' }}
                 >
                   {/* Soft ambient glow behind the card */}
-                  <div className="absolute -inset-8 rounded-[2.5rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
-                  <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/15 via-transparent to-purple-500/15 blur-2xl pointer-events-none -z-10" />
+                  <div className="absolute -inset-5 rounded-[2rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
+                  <div className="absolute -inset-3 rounded-[1.5rem] bg-gradient-to-br from-primary/15 via-transparent to-accent/15 blur-2xl pointer-events-none -z-10" />
                   {/* Behind cards — stable keys so they smoothly promote forward */}
                   {after && (
                     <StackCardShell key={after.card_id} offset={2}>
@@ -1272,7 +1275,7 @@ export default function PullOrPass() {
                   />
                 </div>
 
-                <div className="text-center space-y-1.5 mt-4 sm:mt-5">
+                <div className="hidden sm:block text-center space-y-1.5 mt-5">
                   <div className="flex items-center justify-center gap-3">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-none">
                       {current.name}
@@ -1305,7 +1308,7 @@ export default function PullOrPass() {
                 </div>
 
                 <>
-                  <div className="flex items-end justify-center gap-7 sm:gap-10 pt-1">
+                  <div className="relative z-30 flex items-start justify-center gap-6 sm:gap-10 -mt-8 sm:mt-1 pt-0">
                     <ActionButton
                       onClick={handlePass}
                       label="Pass"
@@ -1317,18 +1320,18 @@ export default function PullOrPass() {
                       onClick={handleLove}
                       label="Love"
                       ariaLabel="Love"
-                      icon={<Star className="w-6 h-6 fill-current" />}
+                       icon={<Heart className="w-7 h-7 fill-current" />}
                       tone="love"
                     />
                     <ActionButton
                       onClick={handlePull}
                       label="Pull"
                       ariaLabel="Pull"
-                      icon={<Heart className="w-6 h-6 fill-current" />}
+                       icon={<Check className="w-7 h-7" strokeWidth={3.5} />}
                       tone="pull"
                     />
                   </div>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium">
+                  <p className="hidden sm:block text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mt-2">
                     Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
                   </p>
                 </>
@@ -1480,7 +1483,7 @@ function StackCardShell({ offset, children }: { offset: number; children: React.
   const opacity = offset === 1 ? 0.9 : 0.6;
   return (
     <motion.div
-      className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-xl"
+      className="absolute inset-0 rounded-[1.35rem] overflow-hidden bg-muted/30 shadow-xl ring-1 ring-border/40"
       initial={{ scale: scale - 0.04, y: y + 10, opacity: 0 }}
       animate={{ scale, y, opacity }}
       transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.6 }}
@@ -1506,7 +1509,7 @@ function CardArt({ card }: { card: SwipeCard }) {
       src={card.image_url}
       alt={card.name}
       draggable={false}
-      className="w-full h-full object-cover pointer-events-none"
+      className="w-full h-full object-contain pointer-events-none bg-muted/20"
       onError={() => setErr(true)}
     />
   );
@@ -1528,12 +1531,12 @@ function ActionButton({
 }) {
   const toneStyles = {
     pass: {
-      btn: 'bg-zinc-900/80 border-zinc-700/80 text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800 hover:shadow-[0_0_22px_rgba(255,255,255,0.08)]',
-      label: 'text-muted-foreground',
+      btn: 'bg-card border-destructive text-destructive shadow-[0_0_22px_hsl(var(--destructive)/0.22)] hover:bg-destructive/10 hover:shadow-[0_0_34px_hsl(var(--destructive)/0.35)]',
+      label: 'text-destructive',
     },
     love: {
-      btn: 'bg-amber-500/10 border-amber-400/60 text-amber-300 hover:bg-amber-400/15 hover:border-amber-300 hover:shadow-[0_0_28px_rgba(251,191,36,0.45)]',
-      label: 'text-amber-300/90',
+      btn: 'bg-card border-accent text-accent shadow-[0_0_22px_hsl(var(--accent)/0.25)] hover:bg-accent/10 hover:shadow-[0_0_34px_hsl(var(--accent)/0.4)]',
+      label: 'text-accent',
     },
     pull: {
       btn: 'bg-primary text-primary-foreground border-primary/80 shadow-[0_0_24px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_38px_hsl(var(--primary)/0.8)] hover:bg-primary/95',
@@ -1542,7 +1545,7 @@ function ActionButton({
   }[tone];
 
   return (
-    <div className="flex flex-col items-center gap-2">
+    <div className="flex flex-col items-center gap-1.5">
       <motion.button
         type="button"
         onClick={onClick}
@@ -1550,11 +1553,11 @@ function ActionButton({
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.88 }}
         transition={{ type: 'spring', stiffness: 420, damping: 18 }}
-        className={`rounded-full h-16 w-16 sm:h-[68px] sm:w-[68px] border-2 flex items-center justify-center transition-shadow transition-colors ${toneStyles.btn}`}
+        className={`rounded-full h-[72px] w-[72px] sm:h-[68px] sm:w-[68px] border-[3px] flex items-center justify-center transition-shadow transition-colors ${toneStyles.btn}`}
       >
         {icon}
       </motion.button>
-      <span className={`text-[10px] uppercase tracking-[0.22em] font-bold ${toneStyles.label}`}>
+      <span className={`text-[11px] uppercase tracking-[0.16em] font-bold ${toneStyles.label}`}>
         {label}
       </span>
     </div>
@@ -1647,7 +1650,7 @@ function DraggableCard({
 
   return (
     <motion.div
-      className="absolute inset-0 rounded-2xl overflow-hidden bg-muted/30 shadow-2xl cursor-grab active:cursor-grabbing"
+      className="absolute inset-0 rounded-[1.35rem] overflow-hidden bg-muted/30 shadow-2xl ring-1 ring-border/50 cursor-grab active:cursor-grabbing"
       style={exitDir ? { zIndex: 20, touchAction: 'none' } : { x, y, rotate, zIndex: 20, touchAction: 'none' }}
       drag={disabled || exitDir ? false : true}
       dragElastic={0.6}
