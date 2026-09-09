@@ -96,14 +96,16 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
           transition={{ duration: 0.25 }}
         >
           <motion.div
-            className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+            className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onDismiss}
           />
 
-          <div className="relative flex flex-col items-center gap-5 px-8 py-8 max-w-md text-center bg-card/95 border border-border/60 rounded-3xl shadow-2xl">
+          <Confetti />
+
+          <div className="relative z-20 flex flex-col items-center gap-5 px-8 py-8 max-w-md text-center bg-card border border-border rounded-3xl shadow-2xl">
             <button
               onClick={onDismiss}
               aria-label="Close"
