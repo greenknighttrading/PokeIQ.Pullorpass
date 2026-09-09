@@ -96,14 +96,14 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
           transition={{ duration: 0.25 }}
         >
           <motion.div
-            className="absolute inset-0 bg-background/80 backdrop-blur-md cursor-pointer"
+            className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onDismiss}
           />
 
-          <div className="relative flex flex-col items-center gap-5 px-6 max-w-md text-center">
+          <div className="relative flex flex-col items-center gap-5 px-8 py-8 max-w-md text-center bg-card/95 border border-border/60 rounded-3xl shadow-2xl">
             <button
               onClick={onDismiss}
               aria-label="Close"
@@ -130,7 +130,7 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.08, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl md:text-6xl font-bold tracking-tight gradient-text"
+              className="text-4xl md:text-5xl font-bold tracking-tight text-foreground"
             >
               It's a Match
             </motion.h2>
