@@ -1863,17 +1863,17 @@ export function ResultsView({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="pt-6 px-0 mx-0 py-[19px]"
+          transition={{ delay: 0.25, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-1 sm:pt-6 px-0 mx-0 py-0 sm:py-[19px]"
         >
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-6 sm:gap-8">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-8">
             <Link to="/binder" className="inline-flex">
               <motion.button
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className="h-14 w-full sm:w-auto px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow"
+                className="h-11 sm:h-14 w-full sm:w-auto px-6 sm:px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-sm sm:text-base tracking-wide inline-flex items-center justify-center gap-2 sm:gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow"
               >
-                <UserIcon className="w-5 h-5" />
+                <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 View Matches
               </motion.button>
             </Link>
@@ -1882,14 +1882,14 @@ export function ResultsView({
               whileTap={{ scale: 0.97 }}
               onClick={onPlayAgain}
               disabled={outOfSwipes}
-              className="h-14 px-10 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-base tracking-wide inline-flex items-center justify-center gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-11 sm:h-14 px-6 sm:px-10 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-sm sm:text-base tracking-wide inline-flex items-center justify-center gap-2 sm:gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <RotateCw className="w-5 h-5 text-primary" />
-              Continue Swiping
+              <RotateCw className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              Swipe Again
             </motion.button>
           </div>
           {outOfSwipes && (
-            <p className="mt-2.5 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs text-muted-foreground">
               You're out of swipes — go to{' '}
               <Link to="/earn" className="text-primary underline underline-offset-2 hover:text-primary/80">Earn Credits</Link>{' '}
               or upgrade to Premium.
