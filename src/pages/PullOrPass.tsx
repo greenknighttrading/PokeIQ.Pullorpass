@@ -1783,20 +1783,20 @@ export function ResultsView({
   } as const;
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-[1400px] px-4 lg:px-12 sm:px-0 py-[32px] mx-0 my-[19px] gap-[13px]">
+    <div className="flex-1 flex flex-col w-full max-w-[1400px] px-4 lg:px-12 sm:px-0 py-4 sm:py-6 mx-0 my-0 gap-3 sm:gap-4">
       {/* ── SECTION 1: Hero ───────────────────────────────────── */}
-      <motion.section {...fadeUp} className="text-center space-y-4">
+      <motion.section {...fadeUp} className="text-center space-y-2 sm:space-y-3">
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-          className="inline-flex flex-col items-center gap-1"
+          className="inline-flex items-center gap-1.5"
         >
           <div className="relative">
             <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
-            <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
+            <Trophy className="relative w-5 h-5 sm:w-7 sm:h-7 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
         </motion.div>
         {!isAuthed ? (
           <>
