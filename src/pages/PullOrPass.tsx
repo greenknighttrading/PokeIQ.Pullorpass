@@ -1783,43 +1783,43 @@ export function ResultsView({
   } as const;
 
   return (
-    <div className="flex-1 flex flex-col w-full max-w-[1400px] px-4 lg:px-12 sm:px-0 py-[32px] mx-0 my-[19px] gap-[13px]">
+    <div className="flex-1 flex flex-col w-full max-w-[1400px] px-4 lg:px-12 sm:px-0 py-4 sm:py-6 mx-0 my-0 gap-3 sm:gap-4">
       {/* ── SECTION 1: Hero ───────────────────────────────────── */}
-      <motion.section {...fadeUp} className="text-center space-y-4">
+      <motion.section {...fadeUp} className="text-center space-y-2 sm:space-y-3">
         <motion.div
           initial={{ scale: 0.7, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, damping: 18 }}
-          className="inline-flex flex-col items-center gap-1"
+          className="inline-flex items-center gap-1.5"
         >
           <div className="relative">
             <div className="absolute inset-0 bg-primary/40 blur-2xl rounded-full" />
-            <Trophy className="relative w-8 h-8 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
+            <Trophy className="relative w-5 h-5 sm:w-7 sm:h-7 text-primary drop-shadow-[0_0_12px_hsl(var(--primary)/0.7)]" />
           </div>
-          <p className="text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
+          <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-muted-foreground">Round Results</p>
         </motion.div>
         {!isAuthed ? (
           <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground tracking-tight">
               Your DNA Profile Is Taking Shape <span className="inline-block">✨</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-xl mx-auto">
               Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
             </p>
           </>
         ) : (
           <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground tracking-tight">
               Round Results <span className="inline-block">✨</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.
               {(() => {
                 const roundSize = 15;
                 const remainingSwipes = Math.max(0, roundSize - records.length);
                 return remainingSwipes > 0 ? (
                   <>
-                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more time{remainingSwipes === 1 ? '' : 's'} to complete the round and add the cards permanently into your binder in Matches.
+                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more to complete the round.
                   </>
                 ) : null;
               })()}
@@ -1827,33 +1827,33 @@ export function ResultsView({
           </>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-5 pt-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-4 sm:grid-cols-4 gap-1.5 sm:gap-5 pt-1 sm:pt-4 max-w-5xl mx-auto">
           <StatGlowCard
-            icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
+            icon={<Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-primary text-primary" />}
             tint="primary"
             value={String(a.pulls)}
             label="Liked"
             sub="Cards you connected with"
           />
           <StatGlowCard
-            icon={<X className="w-5 h-5 text-purple-400" />}
+            icon={<X className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />}
             tint="purple"
             value={String(a.passes)}
             label="Passed"
             sub="Cards you didn't vibe with"
           />
           <StatGlowCard
-            icon={<DollarSign className="w-5 h-5 text-amber-400" />}
+            icon={<DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />}
             tint="amber"
             value={`$${a.avgPullPrice.toFixed(0)}`}
-            label="Avg Value Preference"
+            label="Avg Value"
             sub="Your sweet spot"
           />
           <StatGlowCard
-            icon={<Flame className="w-5 h-5 text-orange-400" />}
+            icon={<Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />}
             tint="flame"
             value={`${readSwipeStreak().streak}d`}
-            label="Daily Streak"
+            label="Streak"
             sub="Swipe every day to grow it"
           />
         </div>
@@ -1863,17 +1863,17 @@ export function ResultsView({
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.35, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-          className="pt-6 px-0 mx-0 py-[19px]"
+          transition={{ delay: 0.25, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="pt-1 sm:pt-6 px-0 mx-0 py-0 sm:py-[19px]"
         >
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-6 sm:gap-8">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-8">
             <Link to="/binder" className="inline-flex">
               <motion.button
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className="h-14 w-full sm:w-auto px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-base tracking-wide inline-flex items-center justify-center gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow"
+                className="h-11 sm:h-14 w-full sm:w-auto px-6 sm:px-10 rounded-2xl bg-primary text-primary-foreground font-bold text-sm sm:text-base tracking-wide inline-flex items-center justify-center gap-2 sm:gap-3 shadow-[0_0_32px_hsl(var(--primary)/0.55)] hover:shadow-[0_0_48px_hsl(var(--primary)/0.8)] transition-shadow"
               >
-                <UserIcon className="w-5 h-5" />
+                <UserIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                 View Matches
               </motion.button>
             </Link>
@@ -1882,14 +1882,14 @@ export function ResultsView({
               whileTap={{ scale: 0.97 }}
               onClick={onPlayAgain}
               disabled={outOfSwipes}
-              className="h-14 px-10 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-base tracking-wide inline-flex items-center justify-center gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
+              className="h-11 sm:h-14 px-6 sm:px-10 rounded-2xl bg-card/60 backdrop-blur border border-primary/40 text-foreground font-semibold text-sm sm:text-base tracking-wide inline-flex items-center justify-center gap-2 sm:gap-3 hover:border-primary/70 hover:bg-primary/10 transition-colors shadow-[0_0_28px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              <RotateCw className="w-5 h-5 text-primary" />
-              Continue Swiping
+              <RotateCw className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+              Swipe Again
             </motion.button>
           </div>
           {outOfSwipes && (
-            <p className="mt-2.5 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs text-muted-foreground">
               You're out of swipes — go to{' '}
               <Link to="/earn" className="text-primary underline underline-offset-2 hover:text-primary/80">Earn Credits</Link>{' '}
               or upgrade to Premium.
@@ -2318,13 +2318,13 @@ function StatGlowCard({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className={`rounded-xl border ${ring} bg-card/60 p-3 sm:p-5 transition-all duration-300`}
+      className={`rounded-xl border ${ring} bg-card/60 p-2 sm:p-5 transition-all duration-300`}
     >
-      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
-        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${iconBg} shrink-0`}>{icon}</div>
+      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-4">
+        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${iconBg} shrink-0`}>{icon}</div>
         <div className="text-center sm:text-left">
-          <p className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums leading-none">{value}</p>
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5 sm:mt-1">{label}</p>
+          <p className="text-lg sm:text-3xl font-bold text-foreground tabular-nums leading-none">{value}</p>
+          <p className="text-[9px] sm:text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5 sm:mt-1">{label}</p>
         </div>
       </div>
       <p className="text-[10px] sm:text-xs text-muted-foreground/80 mt-2 sm:mt-3 hidden sm:block">{sub}</p>
