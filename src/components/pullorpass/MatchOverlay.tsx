@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Sparkles, ImageOff, X } from 'lucide-react';
 import type { SwipeCard } from '@/lib/pullorpass';
 
-const CONFETTI_COUNT = 26;
+const CONFETTI_COUNT = 14;
 const CONFETTI_COLORS = [
   'hsl(var(--primary))',
   'hsl(var(--accent))',
@@ -35,9 +35,9 @@ function Confetti() {
       {pieces.map((p, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 0.4 }}
-          animate={{ opacity: [1, 1, 0], x: p.dx, y: p.dy, rotate: p.rot, scale: 1 }}
-          transition={{ duration: 1.8, delay: p.delay, ease: [0.2, 0.7, 0.3, 1] }}
+          initial={{ opacity: 0.9, x: 0, y: 0, rotate: 0, scale: 0.4 }}
+          animate={{ opacity: [0.9, 0.7, 0], x: p.dx, y: p.dy, rotate: p.rot, scale: 1 }}
+          transition={{ duration: 1.1, delay: p.delay, ease: [0.2, 0.7, 0.3, 1] }}
           style={{
             position: 'absolute',
             width: p.shape === 2 ? p.size * 0.4 : p.size,
@@ -96,14 +96,16 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
           transition={{ duration: 0.25 }}
         >
           <motion.div
-            className="absolute inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+            className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onDismiss}
           />
 
-          <div className="relative flex flex-col items-center gap-5 px-8 py-8 max-w-md text-center bg-card/95 border border-border/60 rounded-3xl shadow-2xl">
+          <Confetti />
+
+          <div className="relative z-20 flex flex-col items-center gap-5 px-8 py-8 max-w-md text-center bg-card border border-border rounded-3xl shadow-2xl">
             <button
               onClick={onDismiss}
               aria-label="Close"
@@ -116,13 +118,13 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30"
             >
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="text-[11px] uppercase tracking-[0.3em] text-primary font-semibold">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-[11px] uppercase tracking-[0.3em] text-primary font-bold">
                 PokeIQ Match
               </span>
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkles className="w-4 h-4 text-primary" />
             </motion.div>
 
             <motion.h2
@@ -184,12 +186,12 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.25, duration: 0.45 }}
-              className="space-y-1"
+              className="space-y-1.5"
             >
-              <p className="text-sm text-foreground font-medium">
+              <p className="text-[15px] text-foreground font-semibold leading-snug">
                 We think this card is a great fit based on your profile.
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-foreground/65 leading-snug">
                 The more cards you review, the smarter your matches become.
               </p>
             </motion.div>
@@ -204,8 +206,6 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               Continue
             </motion.button>
           </div>
-
-          <Confetti />
         </motion.div>
       )}
     </AnimatePresence>
