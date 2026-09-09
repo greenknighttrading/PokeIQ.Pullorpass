@@ -34,9 +34,10 @@ const primaryNav: NavItem[] = [
   { label: 'Arena', href: '/arena', icon: Trophy },
 ];
 
-// Mobile bottom bar order (Profile lives in the top-right avatar)
+// Mobile bottom bar order
 const mobileNav: NavItem[] = [
   { label: 'Swipe', href: '/swipe', icon: Layers },
+  { label: 'Profile', href: '/profile', icon: User },
   { label: 'Matches', href: '/binder', icon: BookOpen },
   { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
