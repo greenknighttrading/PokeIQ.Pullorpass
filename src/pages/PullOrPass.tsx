@@ -1210,7 +1210,7 @@ export default function PullOrPass() {
               <div className="flex-1 min-h-0 flex flex-col items-center justify-start relative pb-20 sm:pb-0">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
-                  className="relative aspect-[2.5/3.5] w-auto max-w-full h-[min(calc(100dvh-10.25rem),calc((100vw-1rem)*1.4))] sm:h-[min(49dvh,430px)]"
+                  className="relative aspect-[2.5/3.5] w-auto max-w-full h-[min(calc(100dvh-13.5rem),calc((100vw-3.5rem)*1.4))] sm:h-[min(49dvh,430px)]"
                   style={{ touchAction: 'none' }}
                 >
                   {/* Soft ambient glow behind the card */}

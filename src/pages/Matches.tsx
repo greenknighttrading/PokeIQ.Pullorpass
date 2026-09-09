@@ -2196,7 +2196,7 @@ type RankedTotCard = {
 
 function totTcgImage(id: string | null): string | null {
   if (!id) return null;
-  return `https://tcgplayer-cdn.tcgplayer.com/product/${id}_in_1000x1000.jpg`;
+  return `https://product-images.tcgplayer.com/fit-in/874x874/${id}.jpg`;
 }
 
 function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: CardDetailSeed) => void }) {

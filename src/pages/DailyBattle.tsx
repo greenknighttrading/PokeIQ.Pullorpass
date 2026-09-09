@@ -60,7 +60,7 @@ function CardFace({
 }) {
   const [err, setErr] = useState(false);
   const fallback = card.card_id
-    ? `https://tcgplayer-cdn.tcgplayer.com/product/${card.card_id.split('-').pop()}_in_1000x1000.jpg`
+    ? `https://product-images.tcgplayer.com/fit-in/874x874/${card.card_id.split('-').pop()}.jpg`
     : null;
   const showFallbackImg = !card.image_url || err;
   return (

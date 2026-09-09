@@ -29,16 +29,18 @@ const POKEMON_NAME_RE = new RegExp(
 
 export function tcgplayerImageUrl(tcgplayerId?: string | number | null): string | null {
   if (!tcgplayerId) return null;
-  return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
+  // product-images serves a genuinely large render; the *_in_1000x1000 CDN path
+  // often returns a tiny (200x282) upscale that looks blurry.
+  return `https://product-images.tcgplayer.com/fit-in/874x874/${tcgplayerId}.jpg`;
 }
 
 /** Rewrite known low-resolution card image URLs to their high-resolution variants. */
 export function hiResImageUrl(url?: string | null): string | null {
   if (!url) return null;
   let out = url;
-  // TCGplayer CDN: any small render -> 1000x1000
-  out = out.replace(/_in_\d+x\d+\.jpg/i, '_in_1000x1000.jpg');
-  out = out.replace(/_\d+w\.jpg/i, '_in_1000x1000.jpg');
+  // TCGplayer: route every product render through the large fit-in variant.
+  const tcgId = out.match(/tcgplayer[^/]*\.com\/(?:product\/)?(?:fit-in\/\d+x\d+\/)?(\d+)(?:_in_\d+x\d+|_\d+w)?\.jpg/i);
+  if (tcgId) return `https://product-images.tcgplayer.com/fit-in/874x874/${tcgId[1]}.jpg`;
   // pokemontcg.io: /small.png or /<id>.png -> _hires.png
   if (/images\.pokemontcg\.io/i.test(out)) {
     out = out.replace(/\/small\.png$/i, '/high.png');
