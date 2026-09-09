@@ -1112,11 +1112,17 @@ export default function PullOrPass() {
           <MatchPulse event={matchPulse} />
           <AnimatePresence>
             {totPair && (
-              <ThisOrThatInterstitial
-                pair={totPair}
-                userId={userId}
-                onComplete={() => setTotPair(null)}
-              />
+                <ThisOrThatInterstitial
+                 pair={totPair}
+                 userId={userId}
+                 onComplete={() => {
+                   setTotPair(null);
+                   // Reset to the default swipe view so the full card + title are visible
+                   requestAnimationFrame(() => {
+                     try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }); } catch { window.scrollTo(0, 0); }
+                   });
+                 }}
+               />
             )}
           </AnimatePresence>
           {stage === 'intro' && (
@@ -1268,6 +1274,7 @@ export default function PullOrPass() {
                   </p>
                 </div>
 
+                {!totPair && (
                 <>
                   <div className="fixed sm:relative z-50 sm:z-30 left-0 right-0 bottom-16 sm:bottom-auto flex items-start justify-center gap-6 sm:gap-10 sm:mt-1 pt-0 pointer-events-none sm:pointer-events-auto">
                     <div className="contents pointer-events-auto">
