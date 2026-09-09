@@ -186,12 +186,12 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
               transition={{ delay: 0.25, duration: 0.45 }}
-              className="space-y-1"
+              className="space-y-1.5"
             >
-              <p className="text-sm text-foreground font-medium">
+              <p className="text-[15px] text-foreground font-semibold leading-snug">
                 We think this card is a great fit based on your profile.
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-foreground/65 leading-snug">
                 The more cards you review, the smarter your matches become.
               </p>
             </motion.div>
