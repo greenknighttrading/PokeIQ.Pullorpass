@@ -886,6 +886,13 @@ export default function PullOrPass() {
         seenPrev.push(rec.card.card_id);
         localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
       }
+      const keyStore = 'pop_seen_card_keys';
+      const keysPrev: string[] = JSON.parse(localStorage.getItem(keyStore) || '[]');
+      const k = cardDedupeKey(rec.card);
+      if (k && !keysPrev.includes(k)) {
+        keysPrev.push(k);
+        localStorage.setItem(keyStore, JSON.stringify(keysPrev.slice(-5000)));
+      }
     } catch {}
 
     const nextIndex = index + 1;
