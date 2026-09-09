@@ -788,7 +788,7 @@ export default function PullOrPass() {
     const productTypes = formatsToProductTypes(filters.formats).filter((t) => t === 'card');
     let query = supabase
       .from('market_snapshots')
-      .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
+      .select('card_id, tcgplayer_id, name, set_name, number, price, rarity, product_type, image_url')
       .eq('game', 'Pokemon')
       .in('product_type', productTypes.length ? productTypes : ['card'])
       .gte('price', filters.priceMin)
@@ -809,11 +809,16 @@ export default function PullOrPass() {
 
     const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
     const byId = new Map<string, any>();
+    const usedKeys = new Set<string>();
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (!isDisplayableSingleCard(c)) continue;
+      if (!isPokemonCharacterCard(c.name)) continue;
       if (seen.has(c.card_id)) continue;
+      const key = cardDedupeKey(c);
+      if (seenKeys.has(key) || usedKeys.has(key)) continue;
+      usedKeys.add(key);
       // Era + language filtered server-side via dedicated columns.
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
