@@ -778,6 +778,12 @@ export default function PullOrPass() {
       if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
     } catch {}
     cards.forEach((c) => seen.add(c.card_id));
+    const seenKeys = new Set<string>();
+    try {
+      const localKeys = JSON.parse(localStorage.getItem('pop_seen_card_keys') || '[]');
+      if (Array.isArray(localKeys)) localKeys.forEach((k: string) => k && seenKeys.add(k));
+    } catch {}
+    cards.forEach((c) => seenKeys.add(cardDedupeKey(c)));
 
     const productTypes = formatsToProductTypes(filters.formats).filter((t) => t === 'card');
     let query = supabase
