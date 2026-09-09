@@ -1320,14 +1320,14 @@ export default function PullOrPass() {
                       onClick={handleLove}
                       label="Love"
                       ariaLabel="Love"
-                      icon={<Star className="w-6 h-6 fill-current" />}
+                       icon={<Heart className="w-7 h-7 fill-current" />}
                       tone="love"
                     />
                     <ActionButton
                       onClick={handlePull}
                       label="Pull"
                       ariaLabel="Pull"
-                      icon={<Heart className="w-6 h-6 fill-current" />}
+                       icon={<Check className="w-7 h-7" strokeWidth={3.5} />}
                       tone="pull"
                     />
                   </div>
