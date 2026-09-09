@@ -674,7 +674,7 @@ export default function PullOrPass() {
       const offset = Math.floor(rand() * 400);
       const { data: chunk, error: e } = await supabase
         .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
+        .select('card_id, tcgplayer_id, name, set_name, number, price, rarity, product_type, image_url')
         .eq('game', 'Pokemon')
         .eq('product_type', 'card')
         .gte('price', lo)
