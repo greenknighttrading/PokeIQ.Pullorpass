@@ -1302,9 +1302,10 @@ export default function PullOrPass() {
                     </div>
                   </div>
                   <p className="hidden sm:block text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mt-2">
-                    Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
-                  </p>
-                </>
+                   Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
+                 </p>
+               </>
+               )}
               </div>
               </div>
             </div>
