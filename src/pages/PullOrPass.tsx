@@ -1800,26 +1800,26 @@ export function ResultsView({
         </motion.div>
         {!isAuthed ? (
           <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground tracking-tight">
               Your DNA Profile Is Taking Shape <span className="inline-block">✨</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-xl mx-auto">
               Every swipe teaches PokeIQ what you naturally love — not just what's valuable.
             </p>
           </>
         ) : (
           <>
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+            <h1 className="text-xl sm:text-4xl font-bold text-foreground tracking-tight">
               Round Results <span className="inline-block">✨</span>
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+            <p className="text-xs sm:text-base text-muted-foreground max-w-xl mx-auto">
               Here's how your taste sharpened this round.
               {(() => {
                 const roundSize = 15;
                 const remainingSwipes = Math.max(0, roundSize - records.length);
                 return remainingSwipes > 0 ? (
                   <>
-                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more time{remainingSwipes === 1 ? '' : 's'} to complete the round and add the cards permanently into your binder in Matches.
+                    {' '}Swipe <span className="text-primary font-semibold">{remainingSwipes}</span> more to complete the round.
                   </>
                 ) : null;
               })()}
@@ -1827,33 +1827,33 @@ export function ResultsView({
           </>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-5 pt-4 max-w-5xl mx-auto">
+        <div className="grid grid-cols-4 sm:grid-cols-4 gap-1.5 sm:gap-5 pt-1 sm:pt-4 max-w-5xl mx-auto">
           <StatGlowCard
-            icon={<Heart className="w-5 h-5 fill-primary text-primary" />}
+            icon={<Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-primary text-primary" />}
             tint="primary"
             value={String(a.pulls)}
             label="Liked"
             sub="Cards you connected with"
           />
           <StatGlowCard
-            icon={<X className="w-5 h-5 text-purple-400" />}
+            icon={<X className="w-4 h-4 sm:w-5 sm:h-5 text-purple-400" />}
             tint="purple"
             value={String(a.passes)}
             label="Passed"
             sub="Cards you didn't vibe with"
           />
           <StatGlowCard
-            icon={<DollarSign className="w-5 h-5 text-amber-400" />}
+            icon={<DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />}
             tint="amber"
             value={`$${a.avgPullPrice.toFixed(0)}`}
-            label="Avg Value Preference"
+            label="Avg Value"
             sub="Your sweet spot"
           />
           <StatGlowCard
-            icon={<Flame className="w-5 h-5 text-orange-400" />}
+            icon={<Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400" />}
             tint="flame"
             value={`${readSwipeStreak().streak}d`}
-            label="Daily Streak"
+            label="Streak"
             sub="Swipe every day to grow it"
           />
         </div>
