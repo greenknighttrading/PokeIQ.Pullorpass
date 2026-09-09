@@ -118,13 +118,13 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/30"
             >
-              <Sparkles className="w-5 h-5 text-primary" />
-              <span className="text-[11px] uppercase tracking-[0.3em] text-primary font-semibold">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span className="text-[11px] uppercase tracking-[0.3em] text-primary font-bold">
                 PokeIQ Match
               </span>
-              <Sparkles className="w-5 h-5 text-primary" />
+              <Sparkles className="w-4 h-4 text-primary" />
             </motion.div>
 
             <motion.h2
