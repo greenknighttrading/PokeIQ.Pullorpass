@@ -87,9 +87,15 @@ export function dedupeByCardId<T extends { card_id?: string | null; liked_at?: s
 
 export function compactImageSources(...sources: Array<string | null | undefined>): string[] {
   const seen = new Set<string>();
-  return sources.filter((src): src is string => {
-    if (!src || seen.has(src)) return false;
-    seen.add(src);
-    return true;
-  });
+  const out: string[] = [];
+  for (const raw of sources) {
+    if (!raw) continue;
+    const hi = hiResImageUrl(raw)!;
+    for (const src of [hi, raw]) {
+      if (!src || seen.has(src)) continue;
+      seen.add(src);
+      out.push(src);
+    }
+  }
+  return out;
 }
