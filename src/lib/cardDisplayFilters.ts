@@ -101,3 +101,30 @@ export function compactImageSources(...sources: Array<string | null | undefined>
   }
   return out;
 }
+/**
+ * True only when the card name contains a real Pokemon species name.
+ * Trainer/Supporter/Item/Stadium cards never do, so this is the strongest
+ * available filter given market_snapshots carries no supertype column.
+ */
+export function isPokemonCharacterCard(name?: string | null): boolean {
+  const n = String(name ?? '');
+  if (!n) return false;
+  return POKEMON_NAME_RE.test(n);
+}
+
+/**
+ * Stable identity for a printing: same card shown under different card_ids
+ * (condition/printing rows) collapses to one key so we never repeat it.
+ */
+export function cardDedupeKey(card: { name?: string | null; card_name?: string | null; set_name?: string | null; card_set?: string | null; number?: string | null }): string {
+  const norm = (v: unknown) =>
+    String(v ?? '')
+      .toLowerCase()
+      .replace(/\(.*?\)/g, ' ')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  const name = norm(card.name ?? card.card_name);
+  const set = norm(card.set_name ?? card.card_set);
+  const num = norm(card.number);
+  return `${name}|${set}|${num}`;
+}
