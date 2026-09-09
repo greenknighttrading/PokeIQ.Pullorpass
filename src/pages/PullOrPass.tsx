@@ -33,7 +33,7 @@ import {
   matchesEras,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
-import { isDisplayableSingleCard, tcgplayerImageUrl } from '@/lib/cardDisplayFilters';
+import { isDisplayableSingleCard, tcgplayerImageUrl , hiResImageUrl} from '@/lib/cardDisplayFilters';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -699,7 +699,7 @@ export default function PullOrPass() {
         card_id: c.card_id,
         name: c.name,
         set_name: c.set_name,
-        image_url: c.image_url ?? tcgImage(c.tcgplayer_id),
+        image_url: hiResImageUrl(c.image_url) ?? tcgImage(c.tcgplayer_id),
         price: Number(c.price),
         rarity: c.rarity,
       }));
@@ -797,7 +797,7 @@ export default function PullOrPass() {
       card_id: c.card_id,
       name: c.name,
       set_name: c.set_name,
-      image_url: c.image_url ?? tcgImage(c.tcgplayer_id),
+      image_url: hiResImageUrl(c.image_url) ?? tcgImage(c.tcgplayer_id),
       price: Number(c.price),
       rarity: c.rarity,
     }));
