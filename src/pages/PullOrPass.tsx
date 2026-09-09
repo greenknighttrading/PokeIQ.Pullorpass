@@ -1143,35 +1143,19 @@ export default function PullOrPass() {
 
           {stage === 'swiping' && current && (
             <div className="relative flex-1 min-h-0 flex flex-col">
-              <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
-              {/* Filter button — top right */}
+              {/* Filter button — pinned to the top bar, left of the profile icon (plain 3-line icon, no circle) */}
               {userId && (
-                <div className="flex justify-end mb-1">
-                   {premium ? (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      onClick={() => setFiltersOpen(true)}
-                      className="h-8 w-8 rounded-full text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
-                      title="Filters"
-                    >
-                      <SlidersHorizontal className="w-4 h-4" />
-                    </Button>
-                   ) : (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      type="button"
-                      onClick={() => setInviteOpen(true)}
-                      className="h-8 w-8 rounded-full text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
-                      title="Upgrade to Premium to unlock filters"
-                    >
-                      <SlidersHorizontal className="w-4 h-4" />
-                    </Button>
-                   )}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => (premium ? setFiltersOpen(true) : setInviteOpen(true))}
+                  className="fixed top-2.5 right-[3.75rem] z-40 flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  title={premium ? 'Filters' : 'Upgrade to Premium to unlock filters'}
+                  aria-label="Filters"
+                >
+                  <SlidersHorizontal className="w-5 h-5" />
+                </button>
               )}
+              <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
 
 
               {/* Card stack */}
