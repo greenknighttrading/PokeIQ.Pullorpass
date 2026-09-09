@@ -2318,13 +2318,13 @@ function StatGlowCard({
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className={`rounded-xl border ${ring} bg-card/60 p-3 sm:p-5 transition-all duration-300`}
+      className={`rounded-xl border ${ring} bg-card/60 p-2 sm:p-5 transition-all duration-300`}
     >
-      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-4">
-        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${iconBg} shrink-0`}>{icon}</div>
+      <div className="flex flex-col sm:flex-row items-center sm:items-center gap-1 sm:gap-4">
+        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${iconBg} shrink-0`}>{icon}</div>
         <div className="text-center sm:text-left">
-          <p className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums leading-none">{value}</p>
-          <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5 sm:mt-1">{label}</p>
+          <p className="text-lg sm:text-3xl font-bold text-foreground tabular-nums leading-none">{value}</p>
+          <p className="text-[9px] sm:text-[11px] uppercase tracking-wider text-muted-foreground mt-0.5 sm:mt-1">{label}</p>
         </div>
       </div>
       <p className="text-[10px] sm:text-xs text-muted-foreground/80 mt-2 sm:mt-3 hidden sm:block">{sub}</p>
