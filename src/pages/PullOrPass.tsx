@@ -650,6 +650,14 @@ export default function PullOrPass() {
       const local = JSON.parse(localStorage.getItem('pop_seen_card_ids') || '[]');
       if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
     } catch {}
+    // Printing-level identity guard: the same card can exist under multiple
+    // card_ids, so we also remember a normalized name|set|number key.
+    const seenKeys = new Set<string>();
+    try {
+      const localKeys = JSON.parse(localStorage.getItem('pop_seen_card_keys') || '[]');
+      if (Array.isArray(localKeys)) localKeys.forEach((k: string) => k && seenKeys.add(k));
+    } catch {}
+
 
     // Pool of value cards. We sample across multiple random price tiers so
     // every round draws from a different slice of the 10k+ unique card pool —
