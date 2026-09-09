@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { Sparkles, ImageOff, X } from 'lucide-react';
 import type { SwipeCard } from '@/lib/pullorpass';
 
-const CONFETTI_COUNT = 26;
+const CONFETTI_COUNT = 14;
 const CONFETTI_COLORS = [
   'hsl(var(--primary))',
   'hsl(var(--accent))',
