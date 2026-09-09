@@ -1105,9 +1105,9 @@ export default function PullOrPass() {
         title="Pull or Pass — Train Your DNA Profile | PokeIQ"
         description="React to Pokémon cards on instinct. Pull or Pass quietly learns what your eye gravitates toward — your evolving DNA Profile."
       />
-      <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-[calc(100dvh-7.75rem)] md:h-screen overflow-hidden'}`}>
+      <div className={`relative bg-background flex flex-col ${stage === 'results' && !outOfSwipes ? 'min-h-screen' : 'h-[calc(100dvh-3.75rem)] md:h-screen overflow-hidden'}`}>
 
-        <main className={`flex-1 min-h-0 w-full mx-auto py-1.5 sm:py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-4'}`}>
+        <main className={`flex-1 min-h-0 w-full mx-auto py-1 sm:py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-2 sm:px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
           <AnimatePresence>
@@ -1199,7 +1199,7 @@ export default function PullOrPass() {
 
               {/* Card stack */}
               {/* Branded game title */}
-              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-2 sm:mb-2 select-none">
+              <div className="relative flex flex-col items-center justify-center text-center mt-0 mb-1 sm:mb-2 select-none">
                 {/* Animated glow backdrop */}
                 <motion.div
                   aria-hidden
@@ -1246,11 +1246,11 @@ export default function PullOrPass() {
               </div>
 
               {/* Card stack */}
-              <div className="flex-1 min-h-0 flex flex-col items-center justify-start relative">
+              <div className="flex-1 min-h-0 flex flex-col items-center justify-start relative pb-20 sm:pb-0">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
-                  className="relative aspect-[2.5/3.5] w-auto max-w-full"
-                  style={{ touchAction: 'none', height: 'min(49dvh, 430px)' }}
+                  className="relative aspect-[2.5/3.5] w-auto max-w-full h-[min(calc(100dvh-10.25rem),calc((100vw-1rem)*1.4))] sm:h-[min(49dvh,430px)]"
+                  style={{ touchAction: 'none' }}
                 >
                   {/* Soft ambient glow behind the card */}
                   <div className="absolute -inset-5 rounded-[2rem] bg-primary/20 blur-3xl pointer-events-none -z-10" />
@@ -1308,7 +1308,8 @@ export default function PullOrPass() {
                 </div>
 
                 <>
-                  <div className="relative z-30 flex items-start justify-center gap-6 sm:gap-10 -mt-8 sm:mt-1 pt-0">
+                  <div className="fixed sm:relative z-50 sm:z-30 left-0 right-0 bottom-9 sm:bottom-auto flex items-start justify-center gap-6 sm:gap-10 sm:mt-1 pt-0 pointer-events-none sm:pointer-events-auto">
+                    <div className="contents pointer-events-auto">
                     <ActionButton
                       onClick={handlePass}
                       label="Pass"
@@ -1330,6 +1331,7 @@ export default function PullOrPass() {
                        icon={<Check className="w-7 h-7" strokeWidth={3.5} />}
                       tone="pull"
                     />
+                    </div>
                   </div>
                   <p className="hidden sm:block text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mt-2">
                     Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
@@ -1531,7 +1533,7 @@ function ActionButton({
 }) {
   const toneStyles = {
     pass: {
-      btn: 'bg-card border-destructive text-destructive shadow-[0_0_22px_hsl(var(--destructive)/0.22)] hover:bg-destructive/10 hover:shadow-[0_0_34px_hsl(var(--destructive)/0.35)]',
+      btn: 'bg-destructive border-destructive text-destructive-foreground shadow-[0_0_26px_hsl(var(--destructive)/0.5)] hover:bg-destructive/90 hover:shadow-[0_0_38px_hsl(var(--destructive)/0.7)]',
       label: 'text-destructive',
     },
     love: {
