@@ -286,6 +286,12 @@ export default function PullOrPass() {
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
   const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
+  // When the This-or-That popup closes, snap back to the default swipe view
+  // (full card + title at the top) regardless of any prior scroll offset.
+  useEffect(() => {
+    if (totPair) return;
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }); } catch { window.scrollTo(0, 0); }
+  }, [totPair]);
   const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
   // Pool of previously-liked cards used to power This-or-That matchups.
   // We pair from this 99% of the time so users rank their own binder.
