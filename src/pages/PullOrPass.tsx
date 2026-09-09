@@ -1144,58 +1144,35 @@ export default function PullOrPass() {
           {stage === 'swiping' && current && (
             <div className="relative flex-1 min-h-0 flex flex-col">
               <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
-              {/* Progress + quota */}
-              <div className="flex items-center justify-between mb-1 gap-3 px-0.5">
-                <span className="text-[10px] sm:text-sm font-semibold uppercase text-muted-foreground tabular-nums">
-                  Card <span className="text-foreground font-semibold">{index + 1}</span>
-                  <span className="text-muted-foreground/60"> / {cards.length}</span>
-                </span>
-                <div className="flex items-center gap-2">
-                   {userId && (
-                     <>
-                        {premium ? (
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           type="button"
-                           onClick={() => setFiltersOpen(true)}
-                           className="h-8 rounded-full gap-1.5 px-3 text-xs font-semibold text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
-                         >
-                           <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
-                         </Button>
-                       ) : (
-                         <Button
-                           variant="outline"
-                           size="sm"
-                           type="button"
-                           onClick={() => setInviteOpen(true)}
-                            className="h-8 rounded-full gap-1.5 px-3 text-xs font-semibold text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
-                            title="Upgrade to Premium to unlock filters"
-                         >
-                            <SlidersHorizontal className="w-3.5 h-3.5" /> Filter
-                          </Button>
-                       )}
-                     </>
+              {/* Filter button — top right */}
+              {userId && (
+                <div className="flex justify-end mb-1">
+                   {premium ? (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      onClick={() => setFiltersOpen(true)}
+                      className="h-8 w-8 rounded-full text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
+                      title="Filters"
+                    >
+                      <SlidersHorizontal className="w-4 h-4" />
+                    </Button>
+                   ) : (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      type="button"
+                      onClick={() => setInviteOpen(true)}
+                      className="h-8 w-8 rounded-full text-muted-foreground border-border/80 bg-card/60 hover:bg-card hover:text-foreground"
+                      title="Upgrade to Premium to unlock filters"
+                    >
+                      <SlidersHorizontal className="w-4 h-4" />
+                    </Button>
                    )}
-                    {premiumLoading ? null : premium ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-bold px-2 py-0.5 rounded bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 tabular-nums">
-                      <Crown className="w-3 h-3" /> {proBank} left
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/30 tabular-nums">
-                      {remaining} left
-                    </span>
-                  )}
                 </div>
-              </div>
-              <div className="h-[3px] sm:h-2 w-full bg-muted/60 rounded-full overflow-hidden mb-1.5 sm:mb-4 shadow-inner">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-primary via-primary to-purple-400 shadow-[0_0_12px_hsl(var(--primary)/0.7)]"
-                  initial={false}
-                  animate={{ width: `${(index / cards.length) * 100}%` }}
-                  transition={{ type: 'spring', stiffness: 120, damping: 22 }}
-                />
-              </div>
+              )}
+
 
               {/* Card stack */}
               {/* Branded game title */}
