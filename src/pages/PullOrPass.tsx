@@ -286,6 +286,12 @@ export default function PullOrPass() {
   const [matchPulse, setMatchPulse] = useState<MatchPulseEvent | null>(null);
   const [quota, setQuota] = useState(() => readQuota());
   const [totPair, setTotPair] = useState<[SwipeCard, SwipeCard] | null>(null);
+  // When the This-or-That popup closes, snap back to the default swipe view
+  // (full card + title at the top) regardless of any prior scroll offset.
+  useEffect(() => {
+    if (totPair) return;
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }); } catch { window.scrollTo(0, 0); }
+  }, [totPair]);
   const totCounterRef = useRef<number>(8 + Math.floor(Math.random() * 5));
   // Pool of previously-liked cards used to power This-or-That matchups.
   // We pair from this 99% of the time so users rank their own binder.
@@ -1112,11 +1118,17 @@ export default function PullOrPass() {
           <MatchPulse event={matchPulse} />
           <AnimatePresence>
             {totPair && (
-              <ThisOrThatInterstitial
-                pair={totPair}
-                userId={userId}
-                onComplete={() => setTotPair(null)}
-              />
+                <ThisOrThatInterstitial
+                 pair={totPair}
+                 userId={userId}
+                 onComplete={() => {
+                   setTotPair(null);
+                   // Reset to the default swipe view so the full card + title are visible
+                   requestAnimationFrame(() => {
+                     try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior }); } catch { window.scrollTo(0, 0); }
+                   });
+                 }}
+               />
             )}
           </AnimatePresence>
           {stage === 'intro' && (
@@ -1268,6 +1280,7 @@ export default function PullOrPass() {
                   </p>
                 </div>
 
+                {!totPair && (
                 <>
                   <div className="fixed sm:relative z-50 sm:z-30 left-0 right-0 bottom-16 sm:bottom-auto flex items-start justify-center gap-6 sm:gap-10 sm:mt-1 pt-0 pointer-events-none sm:pointer-events-auto">
                     <div className="contents pointer-events-auto">
@@ -1295,9 +1308,10 @@ export default function PullOrPass() {
                     </div>
                   </div>
                   <p className="hidden sm:block text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mt-2">
-                    Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
-                  </p>
-                </>
+                   Swipe left to pass <span className="mx-1.5 text-primary/60">•</span> Swipe right to pull
+                 </p>
+               </>
+               )}
               </div>
               </div>
             </div>
