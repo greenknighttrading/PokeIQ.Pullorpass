@@ -1308,7 +1308,7 @@ export default function PullOrPass() {
                 </div>
 
                 <>
-                  <div className="fixed sm:relative z-50 sm:z-30 left-0 right-0 bottom-9 sm:bottom-auto flex items-start justify-center gap-6 sm:gap-10 sm:mt-1 pt-0 pointer-events-none sm:pointer-events-auto">
+                  <div className="fixed sm:relative z-50 sm:z-30 left-0 right-0 bottom-16 sm:bottom-auto flex items-start justify-center gap-6 sm:gap-10 sm:mt-1 pt-0 pointer-events-none sm:pointer-events-auto">
                     <div className="contents pointer-events-auto">
                     <ActionButton
                       onClick={handlePass}
