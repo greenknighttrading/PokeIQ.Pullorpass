@@ -35,9 +35,9 @@ function Confetti() {
       {pieces.map((p, i) => (
         <motion.div
           key={i}
-          initial={{ opacity: 1, x: 0, y: 0, rotate: 0, scale: 0.4 }}
-          animate={{ opacity: [1, 1, 0], x: p.dx, y: p.dy, rotate: p.rot, scale: 1 }}
-          transition={{ duration: 1.8, delay: p.delay, ease: [0.2, 0.7, 0.3, 1] }}
+          initial={{ opacity: 0.9, x: 0, y: 0, rotate: 0, scale: 0.4 }}
+          animate={{ opacity: [0.9, 0.7, 0], x: p.dx, y: p.dy, rotate: p.rot, scale: 1 }}
+          transition={{ duration: 1.1, delay: p.delay, ease: [0.2, 0.7, 0.3, 1] }}
           style={{
             position: 'absolute',
             width: p.shape === 2 ? p.size * 0.4 : p.size,
