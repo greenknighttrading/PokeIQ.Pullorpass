@@ -32,6 +32,23 @@ export function tcgplayerImageUrl(tcgplayerId?: string | number | null): string 
   return `https://tcgplayer-cdn.tcgplayer.com/product/${tcgplayerId}_in_1000x1000.jpg`;
 }
 
+/** Rewrite known low-resolution card image URLs to their high-resolution variants. */
+export function hiResImageUrl(url?: string | null): string | null {
+  if (!url) return null;
+  let out = url;
+  // TCGplayer CDN: any small render -> 1000x1000
+  out = out.replace(/_in_\d+x\d+\.jpg/i, '_in_1000x1000.jpg');
+  out = out.replace(/_\d+w\.jpg/i, '_in_1000x1000.jpg');
+  // pokemontcg.io: /small.png or /<id>.png -> _hires.png
+  if (/images\.pokemontcg\.io/i.test(out)) {
+    out = out.replace(/\/small\.png$/i, '/high.png');
+    out = out.replace(/(\/[a-z0-9]+-\d+)\.png$/i, '$1_hires.png');
+  }
+  // Pokemon TCG API v2 style ".../low.png"
+  out = out.replace(/\/low\.(png|jpg|webp)$/i, '/high.$1');
+  return out;
+}
+
 export function isDisplayableSingleCard(card: CardDisplayCandidate): boolean {
   const product = String(card.product_category ?? card.product_type ?? '').toLowerCase();
   if (product && product !== 'card' && product !== 'single') return false;
