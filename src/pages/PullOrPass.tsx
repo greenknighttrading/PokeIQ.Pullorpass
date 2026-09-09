@@ -33,7 +33,7 @@ import {
   matchesEras,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
-import { isDisplayableSingleCard, tcgplayerImageUrl , hiResImageUrl} from '@/lib/cardDisplayFilters';
+import { isDisplayableSingleCard, tcgplayerImageUrl , hiResImageUrl, isPokemonCharacterCard, cardDedupeKey } from '@/lib/cardDisplayFilters';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
