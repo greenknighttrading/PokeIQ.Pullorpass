@@ -701,11 +701,16 @@ export default function PullOrPass() {
     // Dedup by card_id — market_snapshots has multiple rows per card (one per
     // condition/printing) and we only want to consider each card once.
     const byId = new Map<string, any>();
+    const usedKeys = new Set<string>();
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (!isDisplayableSingleCard(c)) continue;
+      if (!isPokemonCharacterCard(c.name)) continue;
       if (seen.has(c.card_id)) continue;
+      const key = cardDedupeKey(c);
+      if (seenKeys.has(key) || usedKeys.has(key)) continue;
+      usedKeys.add(key);
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
     const pool: SwipeCard[] = Array.from(byId.values())
