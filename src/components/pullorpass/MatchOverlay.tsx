@@ -206,8 +206,6 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
               Continue
             </motion.button>
           </div>
-
-          <Confetti />
         </motion.div>
       )}
     </AnimatePresence>
