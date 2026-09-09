@@ -33,7 +33,7 @@ import {
   matchesEras,
   formatsToProductTypes,
 } from '@/components/pullorpass/FeedFiltersDrawer';
-import { isDisplayableSingleCard, tcgplayerImageUrl , hiResImageUrl} from '@/lib/cardDisplayFilters';
+import { isDisplayableSingleCard, tcgplayerImageUrl , hiResImageUrl, isPokemonCharacterCard, cardDedupeKey } from '@/lib/cardDisplayFilters';
 
 type Stage = 'intro' | 'loading' | 'swiping' | 'results';
 
@@ -650,6 +650,14 @@ export default function PullOrPass() {
       const local = JSON.parse(localStorage.getItem('pop_seen_card_ids') || '[]');
       if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
     } catch {}
+    // Printing-level identity guard: the same card can exist under multiple
+    // card_ids, so we also remember a normalized name|set|number key.
+    const seenKeys = new Set<string>();
+    try {
+      const localKeys = JSON.parse(localStorage.getItem('pop_seen_card_keys') || '[]');
+      if (Array.isArray(localKeys)) localKeys.forEach((k: string) => k && seenKeys.add(k));
+    } catch {}
+
 
     // Pool of value cards. We sample across multiple random price tiers so
     // every round draws from a different slice of the 10k+ unique card pool —
@@ -666,7 +674,7 @@ export default function PullOrPass() {
       const offset = Math.floor(rand() * 400);
       const { data: chunk, error: e } = await supabase
         .from('market_snapshots')
-        .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
+        .select('card_id, tcgplayer_id, name, set_name, number, price, rarity, product_type, image_url')
         .eq('game', 'Pokemon')
         .eq('product_type', 'card')
         .gte('price', lo)
@@ -693,11 +701,16 @@ export default function PullOrPass() {
     // Dedup by card_id — market_snapshots has multiple rows per card (one per
     // condition/printing) and we only want to consider each card once.
     const byId = new Map<string, any>();
+    const usedKeys = new Set<string>();
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (!isDisplayableSingleCard(c)) continue;
+      if (!isPokemonCharacterCard(c.name)) continue;
       if (seen.has(c.card_id)) continue;
+      const key = cardDedupeKey(c);
+      if (seenKeys.has(key) || usedKeys.has(key)) continue;
+      usedKeys.add(key);
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
     const pool: SwipeCard[] = Array.from(byId.values())
@@ -765,11 +778,17 @@ export default function PullOrPass() {
       if (Array.isArray(local)) local.forEach((id: string) => id && seen.add(id));
     } catch {}
     cards.forEach((c) => seen.add(c.card_id));
+    const seenKeys = new Set<string>();
+    try {
+      const localKeys = JSON.parse(localStorage.getItem('pop_seen_card_keys') || '[]');
+      if (Array.isArray(localKeys)) localKeys.forEach((k: string) => k && seenKeys.add(k));
+    } catch {}
+    cards.forEach((c) => seenKeys.add(cardDedupeKey(c)));
 
     const productTypes = formatsToProductTypes(filters.formats).filter((t) => t === 'card');
     let query = supabase
       .from('market_snapshots')
-      .select('card_id, tcgplayer_id, name, set_name, price, rarity, product_type, image_url')
+      .select('card_id, tcgplayer_id, name, set_name, number, price, rarity, product_type, image_url')
       .eq('game', 'Pokemon')
       .in('product_type', productTypes.length ? productTypes : ['card'])
       .gte('price', filters.priceMin)
@@ -790,11 +809,16 @@ export default function PullOrPass() {
 
     const EXCLUDE = /reverse holo|1st edition|\bcode\b|energy|trainer/i;
     const byId = new Map<string, any>();
+    const usedKeys = new Set<string>();
     for (const c of rows) {
       if (!c.tcgplayer_id || !c.price) continue;
       if (EXCLUDE.test(c.name)) continue;
       if (!isDisplayableSingleCard(c)) continue;
+      if (!isPokemonCharacterCard(c.name)) continue;
       if (seen.has(c.card_id)) continue;
+      const key = cardDedupeKey(c);
+      if (seenKeys.has(key) || usedKeys.has(key)) continue;
+      usedKeys.add(key);
       // Era + language filtered server-side via dedicated columns.
       if (!byId.has(c.card_id)) byId.set(c.card_id, c);
     }
@@ -861,6 +885,13 @@ export default function PullOrPass() {
       if (!seenPrev.includes(rec.card.card_id)) {
         seenPrev.push(rec.card.card_id);
         localStorage.setItem(seenKey, JSON.stringify(seenPrev.slice(-5000)));
+      }
+      const keyStore = 'pop_seen_card_keys';
+      const keysPrev: string[] = JSON.parse(localStorage.getItem(keyStore) || '[]');
+      const k = cardDedupeKey(rec.card);
+      if (k && !keysPrev.includes(k)) {
+        keysPrev.push(k);
+        localStorage.setItem(keyStore, JSON.stringify(keysPrev.slice(-5000)));
       }
     } catch {}
 
