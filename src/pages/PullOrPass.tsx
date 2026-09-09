@@ -449,10 +449,6 @@ export default function PullOrPass() {
     } else {
       // Try to resume an in-progress round first, then fall back to last results
       const resume = storedResume;
-      const _dbgLast = readResults();
-      const _dbgQ = readQuota();
-      const _dbgRem = Math.max(0, (DAILY_BASE_LIMIT + (_dbgQ.bonus ?? 0)) - (_dbgQ.used ?? 0));
-      console.log('[POPDOUBG]', JSON.stringify({ wantsFresh, introSeen, hasResume: !!resume, hasResults: !!_dbgLast, resultsCount: _dbgLast?.records?.length, used: _dbgQ.used, bonus: _dbgQ.bonus, premium: isPremiumActive(), remaining: _dbgRem }));
       if (resume) {
       const safeRoundId = validRoundId(resume.roundId);
       setCards(resume.cards);
