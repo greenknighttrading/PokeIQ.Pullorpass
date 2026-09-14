@@ -414,16 +414,16 @@ export default function DailyBattle() {
                   <span className="w-8 h-px bg-primary/70" aria-hidden />
                 </div>
 
-                <div className="mt-2 w-full max-w-[560px] grid grid-cols-2 gap-2">
-                  <div className="h-10 rounded-lg border border-border/70 bg-card/60 flex items-center justify-center gap-2 px-2">
+                <div className="mt-auto pt-3 w-full max-w-[560px] grid grid-cols-1 gap-2">
+                  <div className="h-11 rounded-lg border border-border/70 bg-card/60 backdrop-blur-xl flex items-center justify-center gap-2 px-3">
                     <Users className="w-4 h-4 text-primary shrink-0" />
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {totalVoters > 0 ? <><strong className="text-foreground">{totalVoters.toLocaleString()}</strong> battling today</> : 'Collectors battling today'}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {totalVoters > 0 ? <><strong className="text-foreground">{totalVoters.toLocaleString()}</strong> collectors battling today</> : 'Collectors battling today'}
                     </p>
                   </div>
-                  <div className="h-10 rounded-lg border border-border/70 bg-card/60 flex items-center justify-center gap-2 px-2">
+                  <div className="h-11 rounded-lg border border-border/70 bg-card/60 backdrop-blur-xl flex items-center justify-center gap-2 px-3">
                     <Clock3 className="w-4 h-4 text-accent shrink-0" />
-                    <p className="text-[10px] text-muted-foreground truncate"><strong className="text-foreground">Resets</strong> {formatCountdown(countdownMs)}</p>
+                    <p className="text-xs text-muted-foreground truncate"><strong className="text-foreground">Next battle</strong> in {formatCountdown(countdownMs)}</p>
                   </div>
                 </div>
               </div>
