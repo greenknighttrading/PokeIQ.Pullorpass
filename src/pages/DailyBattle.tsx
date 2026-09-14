@@ -65,7 +65,7 @@ function CardFace({
   const showFallbackImg = !card.image_url || err;
   return (
     <motion.div
-      className="flex-1 flex flex-col items-center w-full"
+      className="flex flex-col items-center w-full min-w-0"
       animate={{
         scale: state === 'winner' ? 1.05 : state === 'loser' ? 0.95 : 1,
         opacity: state === 'loser' && !showPct ? 0.6 : 1,
@@ -75,7 +75,7 @@ function CardFace({
       <button
         type="button"
         onClick={state === 'idle' ? onPick : undefined}
-        className="relative h-[36vh] max-h-[340px] w-auto aspect-[2.5/3.5] md:h-auto md:max-h-[480px] md:w-full md:max-w-[300px] rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
+        className="relative w-full max-w-[300px] aspect-[2.5/3.5] rounded-xl sm:rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
         style={{
           boxShadow:
             state === 'winner'
@@ -306,9 +306,9 @@ export default function DailyBattle() {
         description="Vote on today's 5 shared card matchups. See live community results after every pick."
       />
       <main className="min-h-screen flex flex-col bg-background">
-        <div className="max-w-4xl mx-auto w-full px-4 pt-4 pb-6 flex-1 flex flex-col">
+        <div className="max-w-4xl mx-auto w-full px-2.5 sm:px-4 pt-3 sm:pt-4 pb-4 sm:pb-6 flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-3">
+          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
             <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="px-2">
               <ArrowLeft className="w-4 h-4" />
             </Button>
@@ -330,7 +330,7 @@ export default function DailyBattle() {
           </div>
 
           {/* Progress dots */}
-          <div className="mb-4 sm:mb-6 flex items-center justify-center gap-2">
+          <div className="mb-3 sm:mb-6 flex items-center justify-center gap-2">
             {Array.from({ length: 5 }).map((_, i) => {
               const done = i < picks.length;
               const active = i === index && !completed;
@@ -353,8 +353,8 @@ export default function DailyBattle() {
             </div>
           ) : (
             <>
-              <div className="flex-1 flex items-center justify-center">
-                <div className="relative flex flex-col md:flex-row items-center justify-center gap-1 md:gap-12 w-full">
+              <div className="flex-1 flex items-start sm:items-center justify-center pt-2 sm:pt-0">
+                <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)] md:grid-cols-[minmax(0,300px)_72px_minmax(0,300px)] items-center justify-center gap-1 md:gap-3 w-full max-w-[680px]">
                   <CardFace
                     card={currentPair.a}
                     state={
@@ -369,16 +369,13 @@ export default function DailyBattle() {
                     onPick={() => onPick(currentPair.a, currentPair.b)}
                   />
 
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 select-none"
-                  >
+                  <div aria-hidden className="pointer-events-none z-20 select-none flex justify-center">
                     <div
-                      className="relative flex items-center justify-center rounded-full px-4 py-1.5 sm:px-6 sm:py-2.5 border-2 border-primary/70 bg-background/85 backdrop-blur-md"
+                      className="relative flex items-center justify-center rounded-full w-6 h-6 md:w-auto md:h-auto md:px-6 md:py-2.5 border border-primary/70 md:border-2 bg-background"
                       style={{ boxShadow: '0 0 0 4px hsl(var(--background) / 0.5), 0 10px 40px hsl(var(--primary) / 0.45)' }}
                     >
                       <span
-                        className="font-black italic tracking-tighter text-3xl sm:text-5xl bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent"
+                        className="font-black italic text-[10px] md:text-5xl text-primary"
                       >
                         VS
                       </span>
@@ -401,7 +398,7 @@ export default function DailyBattle() {
                 </div>
               </div>
 
-              <div className="mt-4 text-center min-h-[24px]">
+              <div className="mt-3 sm:mt-4 text-center min-h-[24px]">
                 {locked ? (
                   <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-primary" />
