@@ -353,8 +353,8 @@ export default function DailyBattle() {
             </div>
           ) : (
             <>
-              <div className="flex-1 flex items-start sm:items-center justify-center pt-2 sm:pt-0">
-                <div className="grid grid-cols-[minmax(0,1fr)_24px_minmax(0,1fr)] md:grid-cols-[minmax(0,300px)_72px_minmax(0,300px)] items-center justify-center gap-1 md:gap-3 w-full max-w-[680px]">
+              <div className="flex-1 flex items-center justify-center pt-1 sm:pt-0">
+                <div className="relative flex items-stretch justify-center gap-2 md:gap-4 w-full max-w-[680px]">
                   <CardFace
                     card={currentPair.a}
                     state={
@@ -369,19 +369,6 @@ export default function DailyBattle() {
                     onPick={() => onPick(currentPair.a, currentPair.b)}
                   />
 
-                  <div aria-hidden className="pointer-events-none z-20 select-none flex justify-center">
-                    <div
-                      className="relative flex items-center justify-center rounded-full w-6 h-6 md:w-auto md:h-auto md:px-6 md:py-2.5 border border-primary/70 md:border-2 bg-background"
-                      style={{ boxShadow: '0 0 0 4px hsl(var(--background) / 0.5), 0 10px 40px hsl(var(--primary) / 0.45)' }}
-                    >
-                      <span
-                        className="font-black italic text-[10px] md:text-5xl text-primary"
-                      >
-                        VS
-                      </span>
-                    </div>
-                  </div>
-
                   <CardFace
                     card={currentPair.b}
                     state={
@@ -395,10 +382,22 @@ export default function DailyBattle() {
                     showPct={false}
                     onPick={() => onPick(currentPair.b, currentPair.a)}
                   />
+
+                  {/* VS badge — overlaps both cards, centered */}
+                  <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center select-none">
+                    <div
+                      className="flex items-center justify-center rounded-full w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 border-primary bg-background"
+                      style={{ boxShadow: '0 0 0 5px hsl(var(--background) / 0.85), 0 10px 40px hsl(var(--primary) / 0.5)' }}
+                    >
+                      <span className="font-black italic text-2xl sm:text-4xl md:text-5xl text-primary leading-none">
+                        VS
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-3 sm:mt-4 text-center min-h-[24px]">
+              <div className="mt-3 sm:mt-4 mb-20 sm:mb-0 text-center min-h-[24px]">
                 {locked ? (
                   <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
                     <Check className="w-3.5 h-3.5 text-primary" />
