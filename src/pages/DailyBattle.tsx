@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { hiResImageUrl } from '@/lib/cardDisplayFilters';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Check, ImageOff, Loader2, Sparkles, Trophy } from 'lucide-react';
+import { ArrowLeft, Check, Clock3, ImageOff, Loader2, Sparkles, Trophy, Users } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -59,10 +59,8 @@ function CardFace({
   onPick: () => void;
 }) {
   const [err, setErr] = useState(false);
-  const fallback = card.card_id
-    ? `https://product-images.tcgplayer.com/fit-in/874x874/${card.card_id.split('-').pop()}.jpg`
-    : null;
   const showFallbackImg = !card.image_url || err;
+  const imageSrc = hiResImageUrl(card.image_url);
   return (
     <motion.div
       className="flex flex-col items-center w-full min-w-0"
@@ -75,7 +73,7 @@ function CardFace({
       <button
         type="button"
         onClick={state === 'idle' ? onPick : undefined}
-        className="relative w-full max-w-[300px] aspect-[2.5/3.5] rounded-xl sm:rounded-2xl overflow-hidden bg-muted/30 border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.99] transition-transform"
+        className="relative w-full max-w-[300px] aspect-[2.5/3.5] rounded-lg sm:rounded-xl overflow-hidden bg-muted/30 border border-border/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary active:scale-[0.98] transition-transform"
         style={{
           boxShadow:
             state === 'winner'
@@ -83,9 +81,9 @@ function CardFace({
               : '0 6px 24px hsl(var(--background) / 0.6)',
         }}
       >
-        {!showFallbackImg ? (
+        {!showFallbackImg && imageSrc ? (
           <img
-            src={hiResImageUrl(card.image_url)!}
+            src={imageSrc}
             alt={card.name}
             className="w-full h-full object-contain bg-muted/30"
             onError={() => setErr(true)}
@@ -290,6 +288,13 @@ export default function DailyBattle() {
   };
 
   const countdownMs = useMemo(() => msUntilMidnightEST(), [now]);
+  const totalVoters = useMemo(
+    () => Object.values(results).reduce((max, tally) => {
+      const voters = Object.values(tally as Record<string, number>).reduce<number>((sum, count) => sum + count, 0);
+      return Math.max(max, voters);
+    }, 0 as number),
+    [results],
+  );
 
   // ── Results / completed view ─────────────────────────────
   if (!loading && completed) {
@@ -305,43 +310,41 @@ export default function DailyBattle() {
         title="Today's Battle — Daily This or That | PokeIQ"
         description="Vote on today's 5 shared card matchups. See live community results after every pick."
       />
-      <main className="min-h-screen flex flex-col bg-background">
-        <div className="max-w-4xl mx-auto w-full px-2.5 sm:px-4 pt-3 sm:pt-4 pb-4 sm:pb-6 flex-1 flex flex-col">
+      <main className="min-h-[calc(100vh-61px)] flex flex-col bg-background overflow-hidden">
+        <div className="max-w-4xl mx-auto w-full px-3 sm:px-5 pt-2.5 sm:pt-4 pb-24 md:pb-6 flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="px-2">
-              <ArrowLeft className="w-4 h-4" />
+          <div className="relative flex items-center gap-2 sm:gap-3 mb-1 sm:mb-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9 shrink-0 rounded-full" aria-label="Go back">
+              <ArrowLeft className="w-5 h-5" />
             </Button>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg sm:text-2xl font-bold tracking-tight truncate">Today's Battle</h1>
-                <span className="hidden sm:inline text-[11px] uppercase tracking-wider text-primary font-semibold bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
-                  Daily
-                </span>
+            <div className="flex-1 min-w-0 text-center pr-9 sm:pr-0">
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-extrabold uppercase truncate">Today's Battle</h1>
+                <span className="hidden sm:inline text-[11px] uppercase tracking-wider text-primary font-semibold bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">Daily</span>
               </div>
-              <p className="text-[11px] sm:text-sm text-muted-foreground truncate">
+              <p className="text-[10px] sm:text-sm text-muted-foreground truncate">
                 Everyone on PokeIQ is voting on the same 5 matchups today.
               </p>
             </div>
-            <div className="hidden sm:block text-right">
+            <div className="hidden md:block text-right">
               <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Resets in</div>
               <div className="tabular-nums text-sm font-semibold">{formatCountdown(countdownMs)}</div>
             </div>
           </div>
 
           {/* Progress dots */}
-          <div className="mb-3 sm:mb-6 flex items-center justify-center gap-2">
+          <div className="mb-2.5 sm:mb-5 flex items-center justify-center gap-2" aria-label={`${Math.min(picks.length, 5)} of 5 battles complete`}>
             {Array.from({ length: 5 }).map((_, i) => {
               const done = i < picks.length;
               const active = i === index && !completed;
               return (
                 <div
                   key={i}
-                  className={`h-2.5 rounded-full transition-all ${done ? 'w-8 bg-primary' : active ? 'w-8 bg-primary/40' : 'w-2.5 bg-muted'}`}
+                  className={`h-1.5 rounded-full transition-all ${done ? 'w-9 bg-primary shadow-[0_0_10px_hsl(var(--primary)/0.45)]' : active ? 'w-9 bg-primary/70' : 'w-9 bg-muted'}`}
                 />
               );
             })}
-            <span className="ml-2 text-xs text-muted-foreground tabular-nums">
+            <span className="ml-1 text-xs font-semibold text-foreground tabular-nums">
               {Math.min(picks.length, 5)} of 5
             </span>
           </div>
@@ -353,8 +356,8 @@ export default function DailyBattle() {
             </div>
           ) : (
             <>
-              <div className="flex-1 flex flex-col items-center justify-center pt-1 sm:pt-0 pb-24 sm:pb-0">
-                <div className="relative flex items-stretch justify-center gap-2 md:gap-4 w-full max-w-[680px]">
+              <div className="flex-1 flex flex-col items-center min-h-0">
+                <div className="relative flex items-stretch justify-center gap-2.5 md:gap-4 w-full max-w-[680px] before:absolute before:inset-[8%] before:rounded-full before:border before:border-primary/10 after:absolute after:inset-[20%] after:rounded-full after:border after:border-primary/10">
                   <CardFace
                     card={currentPair.a}
                     state={
@@ -386,7 +389,7 @@ export default function DailyBattle() {
                   {/* VS badge — overlaps both cards, centered */}
                   <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center select-none">
                     <div
-                      className="flex items-center justify-center rounded-full w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 border-primary bg-background"
+                      className="flex items-center justify-center rounded-full w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 border-primary bg-background shadow-[0_0_26px_hsl(var(--primary)/0.5)]"
                       style={{ boxShadow: '0 0 0 5px hsl(var(--background) / 0.85), 0 10px 40px hsl(var(--primary) / 0.5)' }}
                     >
                       <span className="font-black italic text-3xl sm:text-4xl md:text-5xl text-primary leading-none">
@@ -396,17 +399,32 @@ export default function DailyBattle() {
                   </div>
                 </div>
 
-                <div className="mt-4 sm:mt-5 text-center min-h-[24px]">
+                <div className="mt-2.5 sm:mt-5 text-center min-h-[22px] flex items-center gap-3 text-primary">
+                  <span className="w-8 h-px bg-primary/70" aria-hidden />
                   {locked ? (
-                    <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
+                    <p className="text-[11px] sm:text-sm text-primary inline-flex items-center gap-1.5 uppercase font-semibold tracking-wider">
                       <Check className="w-3.5 h-3.5 text-primary" />
                       Locked in — results at the end
                     </p>
                   ) : (
-                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                    <p className="text-[11px] uppercase tracking-wider text-primary font-semibold whitespace-nowrap">
                       Tap the card you like more
                     </p>
                   )}
+                  <span className="w-8 h-px bg-primary/70" aria-hidden />
+                </div>
+
+                <div className="mt-auto pt-3 w-full max-w-[560px] grid grid-cols-1 gap-2">
+                  <div className="h-11 rounded-lg border border-border/70 bg-card/60 backdrop-blur-xl flex items-center justify-center gap-2 px-3">
+                    <Users className="w-4 h-4 text-primary shrink-0" />
+                    <p className="text-xs text-muted-foreground truncate">
+                      {totalVoters > 0 ? <><strong className="text-foreground">{totalVoters.toLocaleString()}</strong> collectors battling today</> : 'Collectors battling today'}
+                    </p>
+                  </div>
+                  <div className="h-11 rounded-lg border border-border/70 bg-card/60 backdrop-blur-xl flex items-center justify-center gap-2 px-3">
+                    <Clock3 className="w-4 h-4 text-accent shrink-0" />
+                    <p className="text-xs text-muted-foreground truncate"><strong className="text-foreground">Next battle</strong> in {formatCountdown(countdownMs)}</p>
+                  </div>
                 </div>
               </div>
             </>
