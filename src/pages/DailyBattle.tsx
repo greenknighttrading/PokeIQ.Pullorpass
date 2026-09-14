@@ -290,9 +290,9 @@ export default function DailyBattle() {
   const countdownMs = useMemo(() => msUntilMidnightEST(), [now]);
   const totalVoters = useMemo(
     () => Object.values(results).reduce((max, tally) => {
-      const voters = Object.values(tally).reduce((sum, count) => sum + count, 0);
+      const voters = Object.values(tally as Record<string, number>).reduce<number>((sum, count) => sum + count, 0);
       return Math.max(max, voters);
-    }, 0),
+    }, 0 as number),
     [results],
   );
 
