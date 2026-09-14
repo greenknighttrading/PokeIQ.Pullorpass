@@ -353,7 +353,7 @@ export default function DailyBattle() {
             </div>
           ) : (
             <>
-              <div className="flex-1 flex items-center justify-center pt-1 sm:pt-0">
+              <div className="flex-1 flex flex-col items-center justify-center pt-1 sm:pt-0 pb-24 sm:pb-0">
                 <div className="relative flex items-stretch justify-center gap-2 md:gap-4 w-full max-w-[680px]">
                   <CardFace
                     card={currentPair.a}
@@ -386,28 +386,28 @@ export default function DailyBattle() {
                   {/* VS badge — overlaps both cards, centered */}
                   <div aria-hidden className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center select-none">
                     <div
-                      className="flex items-center justify-center rounded-full w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 border-primary bg-background"
+                      className="flex items-center justify-center rounded-full w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 border-2 border-primary bg-background"
                       style={{ boxShadow: '0 0 0 5px hsl(var(--background) / 0.85), 0 10px 40px hsl(var(--primary) / 0.5)' }}
                     >
-                      <span className="font-black italic text-2xl sm:text-4xl md:text-5xl text-primary leading-none">
+                      <span className="font-black italic text-3xl sm:text-4xl md:text-5xl text-primary leading-none">
                         VS
                       </span>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-3 sm:mt-4 mb-20 sm:mb-0 text-center min-h-[24px]">
-                {locked ? (
-                  <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
-                    <Check className="w-3.5 h-3.5 text-primary" />
-                    Locked in — results at the end
-                  </p>
-                ) : (
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
-                    Tap the card you like more
-                  </p>
-                )}
+                <div className="mt-4 sm:mt-5 text-center min-h-[24px]">
+                  {locked ? (
+                    <p className="text-xs sm:text-sm text-muted-foreground inline-flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-primary" />
+                      Locked in — results at the end
+                    </p>
+                  ) : (
+                    <p className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                      Tap the card you like more
+                    </p>
+                  )}
+                </div>
               </div>
             </>
           )}
