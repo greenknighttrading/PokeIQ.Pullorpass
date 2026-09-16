@@ -63,7 +63,7 @@ function CardFace({
   const imageSrc = hiResImageUrl(card.image_url);
   return (
     <motion.div
-      className="flex flex-col items-center w-full min-w-0"
+      className="relative z-10 flex flex-col items-center w-full min-w-0"
       animate={{
         scale: state === 'winner' ? 1.05 : state === 'loser' ? 0.95 : 1,
         opacity: state === 'loser' && !showPct ? 0.6 : 1,
@@ -275,7 +275,7 @@ export default function DailyBattle() {
       window.setTimeout(() => {
         setLocked(null);
         setIndex((i) => i + 1);
-      }, 700);
+      }, 420);
     },
     [currentPair, locked, userId, index, navigate, refreshResults],
   );
@@ -357,7 +357,7 @@ export default function DailyBattle() {
           ) : (
             <>
               <div className="flex-1 flex flex-col items-center min-h-0">
-                <div className="relative flex items-stretch justify-center gap-2.5 md:gap-4 w-full max-w-[680px] before:absolute before:inset-[8%] before:rounded-full before:border before:border-primary/10 after:absolute after:inset-[20%] after:rounded-full after:border after:border-primary/10">
+                <div className="relative flex items-stretch justify-center gap-2.5 md:gap-4 w-full max-w-[680px] before:pointer-events-none after:pointer-events-none before:absolute before:inset-[8%] before:rounded-full before:border before:border-primary/10 after:absolute after:inset-[20%] after:rounded-full after:border after:border-primary/10">
                   <CardFace
                     card={currentPair.a}
                     state={
