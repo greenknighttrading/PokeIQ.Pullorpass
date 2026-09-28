@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { TasteCountdown } from '@/components/pullorpass/TasteCountdown';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, SlidersHorizontal, Flame } from 'lucide-react';
 import { pickDailyGrail, isGrailCard } from '@/lib/dailyGrail';
@@ -316,6 +318,8 @@ export default function PullOrPass() {
   });
   const [outOfCreditsDismissed, setOutOfCreditsDismissed] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [headerSlot, setHeaderSlot] = useState<HTMLElement | null>(null);
+  useEffect(() => { setHeaderSlot(document.getElementById('header-actions')); }, []);
   const [feedFilters, setFeedFilters] = useState<FeedFilters>(DEFAULT_FILTERS);
   const [inviteOpen, setInviteOpen] = useState(false);
   const { hasAccess: hasFilterAccess, completedReferrals, refresh: refreshFilterAccess } =
@@ -1207,16 +1211,16 @@ export default function PullOrPass() {
           {stage === 'swiping' && current && (
             <div className="relative flex-1 min-h-0 flex flex-col">
               {/* Filter button — pinned to the top bar, left of the profile icon (plain 3-line icon, no circle) */}
-              {userId && (
+              {userId && headerSlot && createPortal(
                 <button
                   type="button"
                   onClick={() => (premium ? setFiltersOpen(true) : setInviteOpen(true))}
-                  className="fixed top-2.5 right-[3.75rem] z-40 flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                  className="flex h-9 w-9 items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                   title={premium ? 'Filters' : 'Upgrade to Premium to unlock filters'}
                   aria-label="Filters"
                 >
                   <SlidersHorizontal className="w-5 h-5" />
-                </button>
+                </button>, headerSlot
               )}
               <div className={(outOfSwipes && swipeBlocked) ? 'pointer-events-none select-none opacity-30 blur-[2px] flex-1 min-h-0 flex flex-col transition-all duration-300' : 'flex-1 min-h-0 flex flex-col'}>
 
@@ -1267,13 +1271,14 @@ export default function PullOrPass() {
                 <p className="hidden sm:block mt-1.5 text-xs uppercase tracking-[0.32em] text-muted-foreground/80">
                   A game by <span className="text-primary/90 font-semibold">PokeIQ</span>
                 </p>
+                <TasteCountdown />
               </div>
 
               {/* Card stack */}
               <div className="flex-1 min-h-0 flex flex-col items-center justify-start relative pb-20 sm:pb-0">
                 <SwipeAnimationLayer anim={flyAnim} />
                 <div
-                  className="relative aspect-[2.5/3.5] w-auto max-w-full h-[min(calc(100dvh-13.5rem),calc((100vw-3.5rem)*1.4))] sm:h-[min(49dvh,430px)]"
+                  className="relative aspect-[2.5/3.5] w-auto max-w-full h-[min(calc(100dvh-15.25rem),calc((100vw-3.5rem)*1.4))] sm:h-[min(49dvh,430px)]"
                   style={{ touchAction: 'none' }}
                 >
                   {/* Soft ambient glow behind the card */}

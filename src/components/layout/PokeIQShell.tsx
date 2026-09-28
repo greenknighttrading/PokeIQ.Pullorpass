@@ -32,13 +32,14 @@ const primaryNav: NavItem[] = [
   { label: 'Arena', href: '/arena', icon: Trophy },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Profile', href: '/profile', icon: User },
-  { label: 'Binder', href: '/binder', icon: BookOpen },
+  { label: 'Matches', href: '/binder', icon: BookOpen },
 ];
 
 // Mobile bottom bar order
 const mobileNav: NavItem[] = [
   { label: 'Swipe', href: '/swipe', icon: Layers },
   { label: 'Arena', href: '/arena', icon: Trophy },
+  { label: 'Matches', href: '/binder', icon: BookOpen },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Profile', href: '/profile', icon: User },
 ];
@@ -285,6 +286,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="flex-1" />
+          <div id="header-actions" className="flex items-center" />
           <StreakBadge />
 
           <DropdownMenu>
