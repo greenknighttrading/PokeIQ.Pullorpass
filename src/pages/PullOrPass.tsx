@@ -3254,7 +3254,7 @@ function __DeprecatedIntroScreen({ onStart }: { onStart: () => void }) {
 function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSignUp: () => void; onLogin?: () => void }) {
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 md:pl-64 lg:pl-[17rem]"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 md:pl-[16rem] lg:pl-[17rem]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
