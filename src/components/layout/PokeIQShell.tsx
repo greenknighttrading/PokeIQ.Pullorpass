@@ -26,23 +26,21 @@ interface NavItem {
   badge?: string;
 }
 
+// Core loop only: Swipe -> Arena -> Earn -> Profile. Legacy tools stay routable but unlisted.
 const primaryNav: NavItem[] = [
   { label: 'Pull or Pass', href: '/swipe', icon: Layers },
-  { label: 'Profile', href: '/profile', icon: User },
-  { label: 'Matches', href: '/binder', icon: BookOpen },
-  { label: 'Earn', href: '/pokeyelp', icon: Zap },
-  { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
   { label: 'Arena', href: '/arena', icon: Trophy },
+  { label: 'Earn', href: '/pokeyelp', icon: Zap },
+  { label: 'Profile', href: '/profile', icon: User },
+  { label: 'Binder', href: '/binder', icon: BookOpen },
 ];
 
 // Mobile bottom bar order
 const mobileNav: NavItem[] = [
   { label: 'Swipe', href: '/swipe', icon: Layers },
-  { label: 'Profile', href: '/profile', icon: User },
-  { label: 'Matches', href: '/binder', icon: BookOpen },
-  { label: 'Feed', href: '/pokeiq-daily', icon: Activity },
-  { label: 'Earn', href: '/pokeyelp', icon: Zap },
   { label: 'Arena', href: '/arena', icon: Trophy },
+  { label: 'Earn', href: '/pokeyelp', icon: Zap },
+  { label: 'Profile', href: '/profile', icon: User },
 ];
 
 const premiumCollect: NavItem[] = [

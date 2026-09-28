@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, SlidersHorizontal, Flame } from 'lucide-react';
+import { pickDailyGrail, isGrailCard } from '@/lib/dailyGrail';
+import { bumpRevealCounter } from '@/lib/tasteReveal';
+import { TasteRevealModal } from '@/components/pullorpass/TasteRevealModal';
 import { recordDailyActivity } from '@/lib/streak';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -267,7 +270,7 @@ async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecor
 
   const { error } = await supabase.from('pullorpass_swipes').insert(row);
   if (error) console.error('swipe insert', error);
-  else void recordDailyActivity();
+  else { void recordDailyActivity(); bumpRevealCounter(); }
 }
 
 export default function PullOrPass() {
@@ -731,6 +734,16 @@ export default function PullOrPass() {
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
+    // Daily Grail Pick: once per EST day, slot a high-affinity premium card at position 3.
+    try {
+      const grail = await pickDailyGrail(pool, picked);
+      if (grail) {
+        const withoutDup = picked.filter((c) => c.card_id !== grail.card_id);
+        withoutDup.splice(Math.min(2, withoutDup.length), 0, grail);
+        picked.length = 0;
+        picked.push(...withoutDup.slice(0, roundSize));
+      }
+    } catch (e) { console.warn('grail pick failed', e); }
     setCards(picked);
     const elapsed = Date.now() - loadStart;
     if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
@@ -853,6 +866,10 @@ export default function PullOrPass() {
   }, []);
 
   const current = cards[index];
+  const currentIsGrail = stage === 'swiping' && isGrailCard(current?.card_id);
+  useEffect(() => {
+    if (currentIsGrail) toast("Today's Grail Pick", { description: 'Chosen for your taste. One per day.', duration: 2600 });
+  }, [currentIsGrail]);
   const next = cards[index + 1];
   const after = cards[index + 2];
 
@@ -1149,6 +1166,7 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-1 sm:py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-2 sm:px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          <TasteRevealModal />
           <AnimatePresence>
             {totPair && (
                 <ThisOrThatInterstitial
@@ -3254,7 +3272,7 @@ function __DeprecatedIntroScreen({ onStart }: { onStart: () => void }) {
 function SignupNudge({ onClose, onSignUp, onLogin }: { onClose: () => void; onSignUp: () => void; onLogin?: () => void }) {
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 md:pl-[16rem] lg:pl-[17rem]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
