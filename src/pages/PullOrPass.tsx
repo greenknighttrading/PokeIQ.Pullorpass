@@ -270,7 +270,7 @@ async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecor
 
   const { error } = await supabase.from('pullorpass_swipes').insert(row);
   if (error) console.error('swipe insert', error);
-  else void recordDailyActivity();
+  else { void recordDailyActivity(); bumpRevealCounter(); }
 }
 
 export default function PullOrPass() {
@@ -1166,6 +1166,7 @@ export default function PullOrPass() {
         <main className={`flex-1 min-h-0 w-full mx-auto py-1 sm:py-3 flex-col select-none flex md:items-center md:justify-start ${stage === 'results' && !outOfSwipes ? 'overflow-y-auto max-w-none px-0' : 'max-w-2xl px-2 sm:px-4'}`}>
           <MatchOverlay card={matchCard} onDismiss={dismissMatch} />
           <MatchPulse event={matchPulse} />
+          <TasteRevealModal />
           <AnimatePresence>
             {totPair && (
                 <ThisOrThatInterstitial
