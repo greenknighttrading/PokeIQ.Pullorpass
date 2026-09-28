@@ -266,6 +266,7 @@ async function persistUserSwipe(userId: string, roundId: string, rec: SwipeRecor
 
   const { error } = await supabase.from('pullorpass_swipes').insert(row);
   if (error) console.error('swipe insert', error);
+  else void recordDailyActivity();
 }
 
 export default function PullOrPass() {
