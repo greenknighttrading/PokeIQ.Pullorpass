@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { recordDailyActivity } from '@/lib/streak';
 
 export interface DailyBattleCard {
   card_id: string;
@@ -89,6 +90,7 @@ export async function submitDailyVote(params: {
   if (error && !String(error.message || '').toLowerCase().includes('duplicate')) {
     console.warn('daily vote insert failed', error);
   }
+  void recordDailyActivity();
 }
 
 export function agreementScore(myPicks: UserPick[], results: DailyBattleResults): number {
