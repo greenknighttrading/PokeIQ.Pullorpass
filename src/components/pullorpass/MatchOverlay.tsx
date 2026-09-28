@@ -89,7 +89,7 @@ export function MatchOverlay({ card, onDismiss }: { card: SwipeCard | null; onDi
     <AnimatePresence>
       {card && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-50 flex items-center justify-center md:pl-60 lg:pl-64"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

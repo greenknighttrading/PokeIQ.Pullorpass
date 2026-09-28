@@ -123,7 +123,7 @@ export function ThisOrThatInterstitial({ pair, userId, onComplete }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.2 }}
-      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col"
+      className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col md:pl-60 lg:pl-64"
     >
       <div className="max-w-4xl mx-auto w-full px-4 pt-6 pb-6 flex-1 flex flex-col">
         <div className="text-center mb-4 sm:mb-6">

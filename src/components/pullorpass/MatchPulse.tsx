@@ -11,7 +11,7 @@ export interface MatchPulseEvent { key: number }
  */
 export function MatchPulse({ event }: { event: MatchPulseEvent | null }) {
   return (
-    <div className="pointer-events-none fixed inset-0 z-40 flex items-start justify-center">
+    <div className="pointer-events-none fixed inset-0 z-40 flex items-start justify-center md:pl-60 lg:pl-64">
       <AnimatePresence>
         {event && (
           <motion.div
