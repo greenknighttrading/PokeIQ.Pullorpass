@@ -863,6 +863,10 @@ export default function PullOrPass() {
   }, []);
 
   const current = cards[index];
+  const currentIsGrail = stage === 'swiping' && isGrailCard(current?.card_id);
+  useEffect(() => {
+    if (currentIsGrail) toast("Today's Grail Pick", { description: 'Chosen for your taste. One per day.', duration: 2600 });
+  }, [currentIsGrail]);
   const next = cards[index + 1];
   const after = cards[index + 2];
 
