@@ -1982,6 +1982,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_streaks: {
+        Row: {
+          current_streak: number
+          last_active_date: string | null
+          longest_streak: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          last_active_date?: string | null
+          longest_streak?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_watchlists: {
         Row: {
           created_at: string
@@ -2199,6 +2223,7 @@ export type Database = {
       }
       has_buylist_access: { Args: { _user_id: string }; Returns: boolean }
       is_admin_email: { Args: never; Returns: boolean }
+      record_daily_activity: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

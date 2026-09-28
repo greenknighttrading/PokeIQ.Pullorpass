@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import pokeiqLogo from '@/assets/pokeiq-logo.png';
+import { StreakBadge } from './StreakBadge';
 
 interface NavItem {
   label: string;
@@ -286,6 +287,7 @@ export function PokeIQShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="flex-1" />
+          <StreakBadge />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
