@@ -731,6 +731,16 @@ export default function PullOrPass() {
     if (picked.length === 0) {
       toast.error("You've swiped every card we have — new ones drop daily!");
     }
+    // Daily Grail Pick: once per EST day, slot a high-affinity premium card at position 3.
+    try {
+      const grail = await pickDailyGrail(pool, picked);
+      if (grail) {
+        const withoutDup = picked.filter((c) => c.card_id !== grail.card_id);
+        withoutDup.splice(Math.min(2, withoutDup.length), 0, grail);
+        picked.length = 0;
+        picked.push(...withoutDup.slice(0, roundSize));
+      }
+    } catch (e) { console.warn('grail pick failed', e); }
     setCards(picked);
     const elapsed = Date.now() - loadStart;
     if (elapsed < 3000) await new Promise(r => setTimeout(r, 3000 - elapsed));
