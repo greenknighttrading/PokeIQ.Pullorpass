@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
 import { Heart, X, ImageOff, Sparkles, RotateCw, Loader2, Trophy, Star, LogIn, Check, Lock, DollarSign, Apple, User as UserIcon, SlidersHorizontal, Flame } from 'lucide-react';
+import { pickDailyGrail, isGrailCard } from '@/lib/dailyGrail';
+import { bumpRevealCounter } from '@/lib/tasteReveal';
+import { TasteRevealModal } from '@/components/pullorpass/TasteRevealModal';
 import { recordDailyActivity } from '@/lib/streak';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
