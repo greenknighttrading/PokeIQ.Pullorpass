@@ -1,7 +1,9 @@
-# Roadmap — Retention & Simplification
+# Roadmap: Retention & Simplification
 
-- [x] Phase 1a: Global daily streak (swipe or battle, EST days) + header flame badge
-- [ ] Phase 1b: Daily swipe drop ("Today's 30") with guaranteed grail pick
-- [ ] Phase 2: Taste reveals every 25 swipes; show swipe-based archetype on Profile
-- [ ] Phase 3: Simplify nav/Arena, hide legacy market tools, merge Matches pages into Profile tabs
-- [ ] Phase 4: Friend taste-match % + daily streak reminders
+- [x] Desktop swipe popups centered on the card (offset for sidebar)
+- [x] Phase 1a: Global daily streak + header flame badge
+- [x] Phase 1b: Daily Grail Pick (one per EST day, taste-scored, slotted 3rd in round)
+- [x] Phase 2: Taste reveal popup every 25 swipes
+- [x] Phase 3: Nav trimmed to Swipe / Arena / Earn / Profile (Feed unlisted; Binder desktop only)
+- [ ] Phase 4a: Friend taste-match %. Blocked: needs a decision on how friends connect (follows vs. share link)
+- [ ] Phase 4b: Daily streak reminders. Blocked: needs an email sender domain set up
