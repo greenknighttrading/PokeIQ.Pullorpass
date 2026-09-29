@@ -282,7 +282,7 @@ function ProfileHeader({
           onClick={() => !readOnly && fileRef.current?.click()}
           disabled={readOnly || uploading}
           className={cn(
-            'group relative z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
+            'group relative z-10 w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-muted/40 flex items-center justify-center ring-[3px] ring-primary/40 shadow-[0_8px_32px_rgba(59,158,143,0.18)]',
             !readOnly && 'cursor-pointer hover:ring-primary/60 hover:shadow-[0_10px_40px_rgba(59,158,143,0.25)] transition-all',
           )}
           aria-label={readOnly ? 'Profile picture' : 'Change profile picture'}
@@ -391,62 +391,54 @@ export function ProgressionHero({
   const dnaLabels = useMemo(() => buildDnaLabels(taste, isPremium), [taste, isPremium]);
 
   return (
-    <section className="space-y-6 sm:space-y-8">
-      {/* Identity card — header + progress + DNA all together */}
+    <section className="space-y-5 sm:space-y-6">
+      {/* Collector Dashboard — header, stats, achievement, DNA in one card */}
       <div
-        className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/[0.06] p-4 sm:p-5 space-y-4"
-        style={{
-          boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.12), 0 12px 48px -14px hsl(var(--foreground) / 0.12)',
-        }}
+        className="relative overflow-hidden rounded-2xl border border-primary/25 bg-primary/[0.06]"
+        style={{ boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.12), 0 12px 48px -14px hsl(var(--foreground) / 0.12)' }}
       >
-        {/* Subtle background texture — barely visible constellation dots at 4% opacity */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)',
-            backgroundSize: '24px 24px',
-          }}
-          aria-hidden
-        />
+        {/* 1. Header */}
+        <div className="p-4 sm:p-5 space-y-3">
+          <ProfileHeader
+            readOnly={isPublicView}
+            staticName={viewedDisplayName}
+            level={lvl.current.level}
+            xp={xp}
+            personalityType={personalityType}
+          />
+          <ProgressInline xp={xp} lvl={lvl} />
+        </div>
 
-        <ProfileHeader
-          readOnly={isPublicView}
-          staticName={viewedDisplayName}
-          level={lvl.current.level}
-          xp={xp}
-          personalityType={personalityType}
-        />
+        {/* 2. Stats */}
+        <div className="border-t border-border/50 p-4 sm:p-5">
+          <StatsGrid avgPrice={avgPrice} totalLikes={totalLikes} cardsSwiped={cardsSwiped} matchRate={matchRate} />
+        </div>
 
-        <ProgressInline xp={xp} lvl={lvl} />
+        {/* 3. Next achievement */}
+        <div className="border-t border-border/50 p-4 sm:p-5">
+          <AchievementCompact swiped={cardsSwiped} goal={nextGoal} />
+        </div>
 
+        {/* 4. DNA */}
         {dnaLabels.length > 0 && (
-          <>
-            <div className="relative h-px w-full">
-              <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-border/90 to-transparent" />
+          <div className="border-t border-border/50 p-4 sm:p-5">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Collector DNA</h3>
+            <div className="flex flex-wrap gap-1.5">
+              {dnaLabels.map((label) => {
+                const s = dnaStyle(label);
+                return (
+                  <span
+                    key={label}
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+                    style={{ color: s.color, borderColor: `${s.color}40`, backgroundColor: `${s.color}14` }}
+                  >
+                    {s.icon}
+                    {label}
+                  </span>
+                );
+              })}
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-foreground mb-2">Your Collector DNA</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {dnaLabels.map((label) => {
-                  const dot = dnaDotColor(label);
-                  return (
-                    <span
-                      key={label}
-                      className="inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-xs font-medium"
-                      style={{ backgroundColor: '#1a1c1a', color: '#d1d5db' }}
-                    >
-                      <span
-                        aria-hidden
-                        className="inline-block rounded-full shrink-0"
-                        style={{ width: 6, height: 6, backgroundColor: dot }}
-                      />
-                      {label}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          </>
+          </div>
         )}
       </div>
 
@@ -487,17 +479,6 @@ export function ProgressionHero({
         </div>
       )}
 
-      {/* Swipe Milestones + Next Goal combined */}
-      <MilestonesTimeline swiped={cardsSwiped} goal={nextGoal} />
-
-
-      {/* Stats */}
-      <StatsGrid
-        avgPrice={avgPrice}
-        totalLikes={totalLikes}
-        cardsSwiped={cardsSwiped}
-        matchRate={matchRate}
-      />
     </section>
   );
 }
@@ -507,7 +488,7 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
   const remaining = lvl.next ? Math.max(0, lvl.nextXp - xp) : 0;
   return (
     <div>
-      <div className="relative rounded-full bg-muted/60 overflow-hidden" style={{ height: 3 }}>
+      <div className="relative rounded-full bg-muted/60 overflow-hidden" style={{ height: 4 }}>
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${lvl.pct}%` }}
@@ -515,9 +496,12 @@ function ProgressInline({ xp, lvl }: { xp: number; lvl: ReturnType<typeof levelF
           className="absolute inset-y-0 left-0 rounded-full bg-primary"
         />
       </div>
-      <p className="mt-1.5 text-xs text-muted-foreground">
+      <p className="mt-1.5 flex justify-between gap-2 text-xs text-muted-foreground">
         {lvl.next ? (
-          <><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to level {lvl.next.level}</>
+          <>
+            <span className="tabular-nums">{xp.toLocaleString()} / {lvl.nextXp.toLocaleString()} XP</span>
+            <span><span className="tabular-nums font-medium text-foreground">{remaining.toLocaleString()}</span> XP to Lv {lvl.next.level}</span>
+          </>
         ) : (
           <>You've reached the highest level.</>
         )}
@@ -652,77 +636,117 @@ function MilestonesTimeline({
 }
 
 
-// ── Stats grid ──────────────────────────────────────────
+// ── Stats grid (compact 2×2) ─────────────────────────────
 function StatsGrid({
   avgPrice, totalLikes, cardsSwiped, matchRate,
 }: {
   avgPrice: number; totalLikes: number; cardsSwiped: number; matchRate: number;
 }) {
   return (
-    <div>
-      <h3 className="text-base font-semibold text-foreground mb-3">Stats</h3>
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <StatCard
-          icon={<BookOpen className="w-4 h-4 text-success" />}
-          value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'}
-          label="Average Value"
-        />
-        <StatCard
-          icon={<HeartIcon className="w-4 h-4 text-destructive" />}
-          value={totalLikes.toLocaleString()}
-          label="Collection Likes"
-        />
-        <StatCard
-          icon={<Eye className="w-4 h-4 text-primary" />}
-          value={cardsSwiped.toLocaleString()}
-          label="Cards Swiped"
-        />
-        <StatCard
-          icon={<Target className="w-4 h-4 text-warning" />}
-          value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
-          label="Pull Rate"
-          info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
-        />
+    <div className="grid grid-cols-2 gap-2">
+      <StatCard icon={<Eye className="w-3.5 h-3.5 text-primary" />} value={cardsSwiped.toLocaleString()} label="Cards Swiped" />
+      <StatCard icon={<HeartIcon className="w-3.5 h-3.5 text-destructive" />} value={totalLikes.toLocaleString()} label="Collection Likes" />
+      <StatCard icon={<BookOpen className="w-3.5 h-3.5 text-success" />} value={avgPrice > 0 ? `$${avgPrice.toFixed(0)}` : '—'} label="Average Value" />
+      <StatCard
+        icon={<Target className="w-3.5 h-3.5 text-warning" />}
+        value={cardsSwiped > 0 ? `${matchRate}%` : '—'}
+        label="Pull Rate"
+        info={`Out of every 100 cards you swipe, you Pull about ${matchRate}. It's Pulls ÷ total swipes.`}
+      />
+    </div>
+  );
+}
+
+function StatCard({ icon, value, label, info }: { icon: React.ReactNode; value: string; label: string; info?: string }) {
+  return (
+    <div className="rounded-xl border border-border/50 bg-background/40 px-3 py-2.5 flex items-center gap-2.5 min-w-0">
+      <span className="w-7 h-7 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-lg font-semibold text-foreground tabular-nums leading-none tracking-tight">{value}</p>
+        <p className="text-[11px] text-muted-foreground mt-1 truncate flex items-center gap-1">
+          {label}
+          {info && (
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" aria-label={`What is ${label}?`} className="text-muted-foreground/70 hover:text-foreground">
+                    <HelpCircle className="w-3 h-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[240px] text-xs leading-snug">{info}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </p>
       </div>
     </div>
   );
 }
 
-function StatCard({
-  icon, value, label, info,
-}: {
-  icon: React.ReactNode;
-  value: string;
-  label: string;
-  info?: string;
-}) {
+// ── Next achievement (compact, expandable history) ───────
+function AchievementCompact({ swiped, goal }: { swiped: number; goal: (typeof SWIPE_MILESTONES)[number] | null }) {
+  const [showAll, setShowAll] = useState(false);
+  const N = SWIPE_MILESTONES.length;
+  const nextIdx = goal ? SWIPE_MILESTONES.indexOf(goal) : N - 1;
+  const start = Math.max(0, Math.min(nextIdx - 3, N - 4));
+  const windowed = SWIPE_MILESTONES.slice(start, start + 4);
+  const pct = goal ? Math.min(100, (swiped / goal.at) * 100) : 100;
+  const remaining = goal ? Math.max(0, goal.at - swiped) : 0;
+
+  const Dot = ({ m }: { m: (typeof SWIPE_MILESTONES)[number] }) => {
+    const done = swiped >= m.at;
+    const isNext = goal?.at === m.at;
+    return (
+      <div className="flex flex-col items-center gap-1 min-w-0">
+        <div className={cn(
+          'w-9 h-9 rounded-full border-2 flex items-center justify-center [&_svg]:w-4 [&_svg]:h-4',
+          done && 'border-primary bg-primary/15 text-primary',
+          isNext && 'border-primary bg-card text-foreground ring-4 ring-primary/15',
+          !done && !isNext && 'border-border/60 text-muted-foreground/70',
+        )}>
+          {done ? <CheckIcon className="w-4 h-4" /> : m.icon}
+        </div>
+        <p className={cn('text-[11px] font-medium truncate max-w-full', isNext ? 'text-primary' : done ? 'text-foreground/80' : 'text-muted-foreground')}>{m.title}</p>
+        <p className="text-[10px] text-muted-foreground/70 tabular-nums leading-none">{m.at >= 1000 ? `${m.at / 1000}K` : m.at}</p>
+      </div>
+    );
+  };
+
   return (
-    <div className="rounded-2xl border border-border/60 bg-card p-4 sm:p-5 flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        {icon}
-        {info && (
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button type="button" aria-label={`What is ${label}?`} className="text-muted-foreground/70 hover:text-foreground transition-colors">
-                  <HelpCircle className="w-3.5 h-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-[240px] text-xs leading-snug">
-                {info}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+    <div>
+      <div className="flex items-center gap-3">
+        {goal && (
+          <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">{goal.icon}</div>
         )}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next Achievement</p>
+          <h3 className="text-base font-semibold text-foreground leading-tight">{goal ? `${goal.title} Badge` : 'All Milestones Complete'}</h3>
+        </div>
+        {goal && <span className="text-[11px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5 shrink-0">{goal.reward}</span>}
       </div>
-      <div>
-        <p className="text-2xl sm:text-3xl font-semibold text-foreground tabular-nums leading-none tracking-tight">
-          {value}
-        </p>
-        <p className="text-xs text-muted-foreground mt-1.5">
-          {label}
-        </p>
+
+      {goal && (
+        <div className="mt-3">
+          <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: 'easeOut' }} className="absolute inset-y-0 left-0 rounded-full bg-primary" />
+          </div>
+          <div className="mt-1.5 flex justify-between text-xs text-muted-foreground tabular-nums">
+            <span><span className="font-semibold text-foreground">{swiped.toLocaleString()}</span> / {goal.at.toLocaleString()} swipes</span>
+            <span>{remaining.toLocaleString()} remaining</span>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 grid grid-cols-4 gap-1">
+        {(showAll ? SWIPE_MILESTONES : windowed).map((m) => <Dot key={m.at} m={m} />)}
       </div>
+      <button
+        type="button"
+        onClick={() => setShowAll((v) => !v)}
+        className="mt-2 w-full h-9 text-xs font-medium text-muted-foreground hover:text-primary transition-colors"
+      >
+        {showAll ? 'Show less' : 'View all achievements'}
+      </button>
     </div>
   );
 }
