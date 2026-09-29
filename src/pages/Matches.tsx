@@ -424,12 +424,20 @@ export default function Matches({
         cached.latestLikedAt === latestLikedAt;
 
       setLikes(effectiveLikes);
+      setLoading(false);
+      // Kick off swipe-count + DNA + passes queries in parallel.
+      const countP = supabase.from('pullorpass_swipes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
+      const dnaP = supabase.from('pullorpass_dna').select('pull_count, pass_count').eq('user_id', uid).maybeSingle();
+      const passesP = supabase
+        .from('pullorpass_swipes')
+        .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
+        .eq('user_id', uid)
+        .eq('decision', 'pass')
+        .order('created_at', { ascending: false })
+        .limit(40);
       // Total swipes for this user (likes + passes + supers across all time)
       try {
-        const { count } = await supabase
-          .from('pullorpass_swipes')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', uid);
+        const { count } = await countP;
         // Fall back to local + DNA totals so guest-era swipes (or any race
         // with the backfill) still show a non-zero count instead of "0".
         let localTotal = 0;
@@ -459,11 +467,7 @@ export default function Matches({
         } catch {}
         let dnaTotal = 0;
         try {
-          const { data: dna } = await supabase
-            .from('pullorpass_dna')
-            .select('pull_count, pass_count')
-            .eq('user_id', uid)
-            .maybeSingle();
+          const { data: dna } = await dnaP;
           if (dna) dnaTotal = (dna.pull_count ?? 0) + (dna.pass_count ?? 0);
         } catch {}
         setCardsSwiped(Math.max(count ?? 0, localTotal, localProfile.total, dnaTotal));
@@ -471,13 +475,7 @@ export default function Matches({
       // Fetch recent passes from pullorpass_swipes
       let mapped: LikedCard[] = cached?.passes ?? [];
       try {
-        const { data: passRows } = await supabase
-          .from('pullorpass_swipes')
-          .select('card_id, card_name, card_set, card_image, card_price, card_rarity, created_at')
-          .eq('user_id', uid)
-          .eq('decision', 'pass')
-          .order('created_at', { ascending: false })
-          .limit(40);
+        const { data: passRows } = await passesP;
         mapped = cleanLikedCards((passRows ?? []).map((r: any) => ({
           id: `pass-${r.card_id}-${r.created_at}`,
           user_id: uid,
