@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import squirtleAvatar from '@/assets/squirtle-default.png';
 import type { TasteProfile } from '@/lib/tasteProfile';
 import { PERSONALITY_INFO, PersonalityType } from '@/lib/personalityEngine';
@@ -158,6 +159,23 @@ function dnaStyle(label: string): { icon: React.ReactNode; color: string } {
   let h = 0;
   for (let i = 0; i < label.length; i++) h = (h * 31 + label.charCodeAt(i)) >>> 0;
   return mk(<Palette className="w-3.5 h-3.5" />, palette[h % palette.length]);
+}
+
+function dnaExplain(label: string, taste: TasteProfile, isPremium: boolean): string {
+  const l = label.toLowerCase();
+  const pct = (arr: { label: string; pct: number; count: number }[], match: (x: string) => boolean) => {
+    const f = arr.find((a) => match(a.label));
+    return f ? ` (${f.count} cards, ${f.pct}% of your likes)` : '';
+  };
+  if (l === 'premium' && isPremium) return 'You\'re a PokeIQ Pro member with bonus swipes and advanced insights.';
+  if (l === 'grails' || l === 'premium cards') return `A big share of the cards you like sit in the ${l === 'grails' ? 'grail' : 'premium'} price tier. You have an eye for high-end cards.`;
+  if (l.endsWith(' era')) return `Most of your likes come from the ${label}${pct(taste.topEras, (x) => x.startsWith(label.replace(/ Era$/, '')))}.`;
+  if (taste.topPokemonTypes[0]?.label === label) return `${label}-type Pokémon show up more than any other type in your likes${pct(taste.topPokemonTypes, (x) => x === label)}.`;
+  if (taste.topRarities[0]?.label === label) return `${label} is the rarity you like most often${pct(taste.topRarities, (x) => x === label)}.`;
+  if (taste.topArtists[0]?.label === label) return `${label} is the illustrator behind more of your liked cards than anyone else${pct(taste.topArtists, (x) => x === label)}.`;
+  if (taste.topPokemon[0]?.label === label) return `${label} is the Pokémon you've liked the most${pct(taste.topPokemon, (x) => x === label)}.`;
+  if (l === 'japanese') return 'You regularly like Japanese-language cards — at least 1 in 5 of your likes.';
+  return 'A pattern that stands out in the cards you like.';
 }
 
 // Category dot color for the redesigned flat DNA pills.
@@ -398,7 +416,7 @@ export function ProgressionHero({
         style={{ boxShadow: 'inset 0 1px 0 0 hsl(var(--primary) / 0.12), 0 12px 48px -14px hsl(var(--foreground) / 0.12)' }}
       >
         {/* 1. Header */}
-        <div className="p-4 sm:p-5 space-y-3">
+        <div className="p-4 sm:p-5 space-y-4">
           <ProfileHeader
             readOnly={isPublicView}
             staticName={viewedDisplayName}
@@ -406,17 +424,12 @@ export function ProgressionHero({
             xp={xp}
             personalityType={personalityType}
           />
-          <ProgressInline xp={xp} lvl={lvl} />
+          <AchievementCompact swiped={cardsSwiped} goal={nextGoal} />
         </div>
 
         {/* 2. Stats */}
         <div className="border-t border-border/50 p-4 sm:p-5">
           <StatsGrid avgPrice={avgPrice} totalLikes={totalLikes} cardsSwiped={cardsSwiped} matchRate={matchRate} />
-        </div>
-
-        {/* 3. Next achievement */}
-        <div className="border-t border-border/50 p-4 sm:p-5">
-          <AchievementCompact swiped={cardsSwiped} goal={nextGoal} />
         </div>
 
         {/* 4. DNA */}
@@ -427,14 +440,22 @@ export function ProgressionHero({
               {dnaLabels.map((label) => {
                 const s = dnaStyle(label);
                 return (
-                  <span
-                    key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
-                    style={{ color: s.color, borderColor: `${s.color}40`, backgroundColor: `${s.color}14` }}
-                  >
-                    {s.icon}
-                    {label}
-                  </span>
+                  <Popover key={label}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium hover:brightness-125 transition"
+                        style={{ color: s.color, borderColor: `${s.color}40`, backgroundColor: `${s.color}14` }}
+                      >
+                        {s.icon}
+                        {label}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent side="top" className="w-64 p-3">
+                      <p className="text-sm font-semibold mb-1 flex items-center gap-1.5" style={{ color: s.color }}>{s.icon}{label}</p>
+                      <p className="text-xs text-muted-foreground leading-snug">{dnaExplain(label, taste, isPremium)}</p>
+                    </PopoverContent>
+                  </Popover>
                 );
               })}
             </div>

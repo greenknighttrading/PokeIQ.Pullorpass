@@ -545,11 +545,6 @@ export default function Matches({
       <Seo title={isPublicView ? `${viewedDisplayName || 'Collector'}'s Collector DNA | PokeIQ` : 'Your Collector DNA | PokeIQ'} description={isPublicView ? `${viewedDisplayName || 'Collector'}'s public Pokémon collector identity.` : 'Your personal Pokémon collector identity — built from every card you\'ve liked.'} />
       <div className="min-h-screen bg-background flex flex-col gap-0">
         <main className="flex-1 w-full mx-auto px-5 sm:px-8 py-8 sm:py-10" style={{ maxWidth: '1380px' }}>
-          {!isPublicView && (
-            <Link to="/swipe" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-6">
-              <ArrowLeft className="w-3.5 h-3.5" /> Back to swiping
-            </Link>
-          )}
 
           {loading && <Card className="p-10 text-center text-muted-foreground text-sm">Loading your collection…</Card>}
 
@@ -650,12 +645,13 @@ function ProfileView({
         personalityType={personalityType}
       />
 
-      {/* 6. Top 10 rankings */}
+      {!isPublicView && <ThisOrThatCTA />}
+
+      {/* Top 10 rankings */}
       <ThisOrThatRankings userId={userId} onOpen={onOpen} />
 
       {/* Personality CTA + swipe-again controls */}
       {!isPublicView && <SwipeAgainOrLimit />}
-      {!isPublicView && <ThisOrThatCTA />}
       {!isPublicView && <DailyLimitWidget />}
       {isPublicView && !viewerIsOwner && <BuildYourOwnProfileCTA />}
     </div>
@@ -2364,21 +2360,19 @@ function ThisOrThatCTA() {
       <div className="relative flex flex-col sm:flex-row items-start sm:items-center gap-5 sm:gap-8">
         <div className="flex-1 min-w-0">
           <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight mb-2">
-            🔥 Try <span className="text-primary">This or That</span> — now live on PokeIQ
+            Find your <span className="text-primary">collector personality type</span>
           </h3>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-xl">
-            See 20 head-to-head Pokémon card matchups, choose your favorite each time, and help PokeIQ rank
-            your preferences and learn more about what makes you unique as a collector.
+            Take the quick personality test to discover what kind of collector you are and what makes your taste unique.
           </p>
         </div>
-        <Link to="/this-or-that" className="w-full sm:w-auto shrink-0">
+        <Link to="/test" className="w-full sm:w-auto shrink-0">
           <motion.button
             whileHover={{ y: -2, scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             className="w-full sm:w-auto h-12 px-7 rounded-xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold text-base inline-flex items-center justify-center gap-2 shadow-[0_0_28px_hsl(var(--primary)/0.55)]"
           >
-            <Zap className="w-4 h-4" />
-            Battle now
+            Take the test
             <ArrowRight className="w-4 h-4" />
           </motion.button>
         </Link>
