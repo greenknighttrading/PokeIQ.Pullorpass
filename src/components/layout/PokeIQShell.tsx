@@ -5,7 +5,7 @@ import {
   ChevronDown, ChevronRight, LayoutDashboard, Layers, Scale,
   Clock, FileText, Sparkles, Lightbulb, BarChart3, PieChart,
   Package, Calculator, Newspaper, ShoppingBag, LogIn, LogOut,
-  Menu, Check, Settings as SettingsIcon, BookOpen, Trophy,
+  Menu, Check, Settings as SettingsIcon, BookOpen, Trophy, GalleryHorizontalEnd,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -37,7 +37,7 @@ const primaryNav: NavItem[] = [
 
 // Mobile bottom bar order
 const mobileNav: NavItem[] = [
-  { label: 'Swipe', href: '/swipe', icon: Layers },
+  { label: 'Swipe', href: '/swipe', icon: GalleryHorizontalEnd },
   { label: 'Arena', href: '/arena', icon: Trophy },
   { label: 'Matches', href: '/binder', icon: BookOpen },
   { label: 'Earn', href: '/pokeyelp', icon: Zap },
