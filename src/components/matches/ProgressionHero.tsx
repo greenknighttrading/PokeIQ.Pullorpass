@@ -735,19 +735,8 @@ function AchievementCompact({ swiped, goal }: { swiped: number; goal: (typeof SW
 
   return (
     <div>
-      <div className="flex items-center gap-3">
-        {goal && (
-          <div className="w-10 h-10 rounded-xl bg-primary/15 text-primary flex items-center justify-center shrink-0">{goal.icon}</div>
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Next Achievement</p>
-          <h3 className="text-base font-semibold text-foreground leading-tight">{goal ? `${goal.title} Badge` : 'All Milestones Complete'}</h3>
-        </div>
-        {goal && <span className="text-[11px] font-semibold text-primary bg-primary/10 rounded-full px-2 py-0.5 shrink-0">{goal.reward}</span>}
-      </div>
-
       {goal && (
-        <div className="mt-3">
+        <div>
           <div className="relative h-1.5 rounded-full bg-muted/60 overflow-hidden">
             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8, ease: 'easeOut' }} className="absolute inset-y-0 left-0 rounded-full bg-primary" />
           </div>
