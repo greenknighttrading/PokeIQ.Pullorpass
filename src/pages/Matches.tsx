@@ -2259,36 +2259,55 @@ function ThisOrThatRankings({ userId, onOpen }: { userId: string; onOpen: (s: Ca
         .sort((a, b) => b.wins - a.wins || (b.wins / Math.max(1, b.wins + b.losses)) - (a.wins / Math.max(1, a.wins + a.losses)))
         .slice(0, 10);
 
-      // Enrich with images + missing meta from market_snapshots
-      const ids = ranked.map((r) => r.card_id);
-      if (ids.length) {
-        const { data: meta } = await supabase
-          .from('market_snapshots')
-          .select('card_id, tcgplayer_id, name, set_name, price, image_url')
-          .in('card_id', ids);
-        const byId = new Map<string, any>();
-        (meta ?? []).forEach((m: any) => byId.set(m.card_id, m));
-        for (const r of ranked) {
-          const m = byId.get(r.card_id);
-          if (m) {
-            r.image_url = m.image_url || totTcgImage(m.tcgplayer_id);
-            if (!r.name) r.name = m.name ?? r.name;
-            if (!r.set_name) r.set_name = m.set_name ?? r.set_name;
-            if (r.price == null && m.price != null) r.price = Number(m.price);
-            if (!r.tcgplayer_id) r.tcgplayer_id = m.tcgplayer_id ?? null;
-          }
-        }
-      }
-
+      // Show rankings immediately; enrich images in the background.
       if (cancelled) return;
       setItems(ranked);
       setTotalMatchups(data.length);
       setLoading(false);
-    })();
-    return () => { cancelled = true; };
+
+      const ids = ranked.map((r) => r.card_id);
+      if (ids.length) {
+        try {
+          const { data: meta } = await supabase
+            .from('market_snapshots')
+            .select('card_id, tcgplayer_id, name, set_name, price, image_url')
+            .in('card_id', ids)
+            .limit(200);
+          if (cancelled) return;
+          const byId = new Map<string, any>();
+          (meta ?? []).forEach((m: any) => { if (!byId.has(m.card_id)) byId.set(m.card_id, m); });
+          setItems(ranked.map((r) => {
+            const m = byId.get(r.card_id);
+            if (!m) return r;
+            return {
+              ...r,
+              image_url: m.image_url || totTcgImage(m.tcgplayer_id),
+              name: r.name || m.name || r.name,
+              set_name: r.set_name || m.set_name || null,
+              price: r.price ?? (m.price != null ? Number(m.price) : null),
+              tcgplayer_id: r.tcgplayer_id ?? m.tcgplayer_id ?? null,
+            };
+          }));
+        } catch (e) {
+          console.warn('Top 10 enrichment failed', e);
+        }
+      }
+    })().catch((e) => {
+      console.warn('Top 10 load failed', e);
+      if (!cancelled) { setItems([]); setLoading(false); }
+    });
+    const t = setTimeout(() => { if (!cancelled) setLoading(false); }, 6000);
+    return () => { cancelled = true; clearTimeout(t); };
   }, [userId]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <section>
+        <h2 className="text-lg sm:text-xl font-bold tracking-tight mb-3">Your Top 10</h2>
+        <Card className="p-6 text-center text-sm text-muted-foreground">Loading your top cards…</Card>
+      </section>
+    );
+  }
   if (items.length === 0) {
     return (
       <section>
