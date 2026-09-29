@@ -595,6 +595,14 @@ function SignInGate({ onSignIn, onBack }: { onSignIn: () => void; onBack: () => 
 }
 
 function ProUpsell() {
+  const { isPremium } = useIsPremium();
+  if (isPremium) {
+    return (
+      <Link to="/this-or-that" className="block">
+        <Button className="w-full h-12 text-base font-semibold">Enter Unlimited Arena</Button>
+      </Link>
+    );
+  }
   return (
     <Card className="p-4 border-primary/30 bg-gradient-to-br from-primary/[0.08] to-transparent">
       <div className="flex items-start gap-3">
