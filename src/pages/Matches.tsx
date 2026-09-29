@@ -369,10 +369,13 @@ export default function Matches({
       const uid = session.user.id;
       setUserId(uid);
       setViewerIsOwner(true);
+      // Render the profile shell immediately. Collection history can hydrate
+      // progressively instead of holding the entire page behind one request.
+      setLoading(false);
 
       // Brand-new users may have swiped before signing up. Migrate those
       // guest swipes into the account so Matches/Smart Profile reflect them.
-      try { await backfillGuestSwipes(uid); } catch (e) { console.warn('backfill failed', e); }
+      void backfillGuestSwipes(uid).catch((e) => console.warn('backfill failed', e));
 
       const localProfile = localSwipeRecordsForProfile(uid);
       const mergeLocal = (serverLikes: LikedCard[], serverPasses: LikedCard[] = []) => {
@@ -533,7 +536,10 @@ export default function Matches({
           })
           .catch(e => console.warn('backfillMissingTypes failed', e));
       }
-    })();
+    })().catch((e) => {
+      console.warn('profile bootstrap failed', e);
+      setLoading(false);
+    });
   }, [isPublicView, viewedUserId]);
 
   const taste = useMemo(() => buildTasteProfile(likes), [likes]);
