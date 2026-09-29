@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { hiResImageUrl } from '@/lib/cardDisplayFilters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, Clock3, ImageOff, Loader2, Sparkles, Trophy, Users } from 'lucide-react';
@@ -595,6 +596,14 @@ function SignInGate({ onSignIn, onBack }: { onSignIn: () => void; onBack: () => 
 }
 
 function ProUpsell() {
+  const { isPremium } = useIsPremium();
+  if (isPremium) {
+    return (
+      <Link to="/this-or-that" className="block">
+        <Button className="w-full h-12 text-base font-semibold">Enter Unlimited Arena</Button>
+      </Link>
+    );
+  }
   return (
     <Card className="p-4 border-primary/30 bg-gradient-to-br from-primary/[0.08] to-transparent">
       <div className="flex items-start gap-3">
