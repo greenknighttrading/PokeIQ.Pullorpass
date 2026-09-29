@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useIsPremium } from '@/hooks/useIsPremium';
 import { hiResImageUrl } from '@/lib/cardDisplayFilters';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Check, Clock3, ImageOff, Loader2, Sparkles, Trophy, Users } from 'lucide-react';
