@@ -303,6 +303,12 @@ export default function Matches({
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [likesReady, setLikesReady] = useState(false);
+  // Never leave the matches list spinning forever if a request stalls.
+  useEffect(() => {
+    const t = window.setTimeout(() => setLikesReady(true), 8000);
+    return () => window.clearTimeout(t);
+  }, []);
   const [likes, setLikes] = useState<LikedCard[]>([]);
   const [passes, setPasses] = useState<LikedCard[]>([]);
   const [cardsSwiped, setCardsSwiped] = useState<number>(0);
@@ -427,6 +433,7 @@ export default function Matches({
         cached.latestLikedAt === latestLikedAt;
 
       setLikes(effectiveLikes);
+      setLikesReady(true);
       setLoading(false);
       // Kick off swipe-count + DNA + passes queries in parallel.
       const countP = supabase.from('pullorpass_swipes').select('*', { count: 'exact', head: true }).eq('user_id', uid);
@@ -584,11 +591,17 @@ export default function Matches({
                   {!isPublicView && (
                     <Snapshot likes={likes} cardsSwiped={cardsSwiped} />
                   )}
-                  {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
-                  <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
-                  <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
-                  <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
-                  <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                  {!likesReady && likes.length === 0 ? (
+                    <Card className="p-8 text-center text-muted-foreground text-sm">Loading your matches…</Card>
+                  ) : (
+                    <>
+                      {recommendations.length > 0 && <RecommendedRow items={recommendations} onOpen={setOpenSeed} />}
+                      <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="liked" />
+                      <RecentlyLiked likes={likes} passes={passes} onOpen={setOpenSeed} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} userId={userId} kind="disliked" />
+                      <BinderView likes={likes} taste={taste} onOpen={setOpenSeed} userId={userId} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                      <DeepTasteInsights taste={taste} isPublicView={isPublicView} viewedDisplayName={viewedDisplayName} />
+                    </>
+                  )}
                 </div>
               )}
             </div>
