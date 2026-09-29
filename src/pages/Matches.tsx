@@ -366,12 +366,13 @@ export default function Matches({
         } catch (e) {
           console.warn('public profile fetch failed', e);
         }
+        setLikesReady(true);
         setLoading(false);
         return;
       }
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user || session.user.is_anonymous) { setLoading(false); return; }
+      if (!session?.user || session.user.is_anonymous) { setLikesReady(true); setLoading(false); return; }
       const uid = session.user.id;
       setUserId(uid);
       setViewerIsOwner(true);
@@ -545,6 +546,7 @@ export default function Matches({
       }
     })().catch((e) => {
       console.warn('profile bootstrap failed', e);
+      setLikesReady(true);
       setLoading(false);
     });
   }, [isPublicView, viewedUserId]);
